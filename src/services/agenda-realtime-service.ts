@@ -61,7 +61,10 @@ export function createAgendaRealtimeClient({
 
     try {
       await connection.start();
-      if (!stopped) onStatusChange("connected");
+
+      if (!stopped) {
+        onStatusChange("connected");
+      }
     } catch {
       if (!stopped) {
         onStatusChange("offline");
@@ -71,8 +74,15 @@ export function createAgendaRealtimeClient({
   };
 
   connection.on("AgendaAtualizada", onAgendaUpdated);
-  connection.onreconnecting(() => onStatusChange("reconnecting"));
-  connection.onreconnected(() => onStatusChange("connected"));
+
+  connection.onreconnecting(() => {
+    onStatusChange("reconnecting");
+  });
+
+  connection.onreconnected(() => {
+    onStatusChange("connected");
+  });
+
   connection.onclose(() => {
     if (!stopped) {
       onStatusChange("offline");
@@ -84,9 +94,14 @@ export function createAgendaRealtimeClient({
     start: () => {
       void startConnection();
     },
+
     stop: async () => {
       stopped = true;
-      if (retryTimer !== undefined) window.clearTimeout(retryTimer);
+
+      if (retryTimer !== undefined) {
+        window.clearTimeout(retryTimer);
+      }
+
       connection.off("AgendaAtualizada", onAgendaUpdated);
       await connection.stop();
     },
