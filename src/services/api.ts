@@ -4,7 +4,7 @@ import { clearClienteFinalSession } from "./cliente-final-auth-token";
 
 // Keep authenticated HTTP requests first-party. Vite and Vercel proxy these
 // paths to the backend, avoiding Safari's third-party cookie restrictions.
-export const API_ORIGIN = "";
+export const API_ORIGIN = "https://nexoelo.onrender.com";
 
 const api = axios.create({
   baseURL: "/api/",

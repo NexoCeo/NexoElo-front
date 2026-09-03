@@ -5,7 +5,7 @@ import styles from './style.module.css';
 import { EmailInput } from '@/components/auth/emailInput';
 import { PasswordInput } from '@/components/auth/passwordInput';
 import { useLoginForm } from '@/hooks/useLoginForm';
-import imgLogin from '@/assets/iconLogin.png';
+import logo from '@/assets/logo.png';
 
 export default function Login() {
   const { theme } = useTheme();
@@ -44,7 +44,7 @@ export default function Login() {
       <div className={styles.wrapper}>
         <div className={styles.headerWrapper}>
           <img 
-            src={imgLogin}
+            src={logo}
             className={styles.fotoPerfil} 
             style={{ color: theme.colors.error, borderColor: theme.colors.primary}}
           />
