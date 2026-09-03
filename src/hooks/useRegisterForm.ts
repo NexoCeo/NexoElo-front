@@ -64,7 +64,7 @@ export function useRegisterForm() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [TipoUsuario, setTipoUsuario] = useState("");
+  const [TipoUsuario, setTipoUsuario] = useState("autonomo");
 
   // Dados específicos de empresa
   const [nomeFantasia, setNomeFantasia] = useState("");
