@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://saas-g8h3.onrender.com/api/:path*"
+    },
+    {
+      "source": "/uploads/:path*",
+      "destination": "https://saas-g8h3.onrender.com/uploads/:path*"
+    },
+    {
+      "source": "/hubs/:path*",
+      "destination": "https://saas-g8h3.onrender.com/hubs/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

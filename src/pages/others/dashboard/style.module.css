@@ -1,0 +1,248 @@
+.container {
+  width: 100%;
+  min-height: 100dvh;
+  padding: 96px 40px 44px;
+  color: var(--theme-text);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.header,
+.agendaSection {
+  width: min(100%, 1320px);
+  margin-inline: auto;
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 34px;
+}
+
+.titleGroup {
+  min-width: 0;
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--theme-secondary-text);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.titleGroup h1 {
+  margin: 0;
+  color: var(--theme-text);
+  font-size: 2.1rem;
+  font-weight: 800;
+  line-height: 1.18;
+  overflow-wrap: anywhere;
+}
+
+.titleGroup p {
+  max-width: 620px;
+  margin: 9px 0 0;
+  color: var(--theme-text-muted);
+  font-size: 0.96rem;
+  line-height: 1.55;
+}
+
+.agendaSection {
+  min-width: 0;
+}
+
+.agendaHeader {
+  min-height: 86px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.agendaTitleGroup {
+  min-width: 0;
+}
+
+.agendaTitleGroup > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 6px;
+  color: var(--theme-secondary-text);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.agendaTitleGroup > span svg {
+  font-size: 0.86rem;
+}
+
+.agendaTitleGroup h2 {
+  margin: 0;
+  color: var(--theme-text);
+  font-size: 1.45rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.agendaTitleGroup p {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 0;
+  color: var(--theme-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.agendaTitleGroup p > span {
+  width: 4px;
+  height: 4px;
+  flex: 0 0 4px;
+  border-radius: 50%;
+  background: var(--theme-border-strong);
+}
+
+.agendaActions {
+  flex: 0 0 auto;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(110px, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--theme-bottom);
+  border-radius: 7px;
+  background: var(--theme-surface-muted);
+}
+
+.segmented button {
+  min-width: 0;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--theme-text-muted);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.segmented button:hover {
+  color: var(--theme-primary-text);
+}
+
+.segmented button.active {
+  background: var(--theme-primary);
+  color: var(--theme-on-primary);
+}
+
+.segmented button:focus-visible,
+.agendaLink:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: 2px;
+}
+
+.agendaLink {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 17px;
+  border: 1px solid var(--theme-primary);
+  border-radius: 6px;
+  background: var(--theme-primary);
+  color: var(--theme-on-primary);
+  font-size: 0.84rem;
+  font-weight: 750;
+  text-decoration: none;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.agendaLink:hover {
+  border-color: var(--theme-primary-hover);
+  background: var(--theme-primary-hover);
+}
+
+.agendaLink svg {
+  font-size: 0.78rem;
+}
+
+@media (max-width: 900px) {
+  .container {
+    padding-inline: 24px;
+  }
+
+  .header {
+    margin-bottom: 28px;
+  }
+
+  .agendaHeader {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .agendaActions,
+  .segmented {
+    width: 100%;
+  }
+
+  .agendaLink {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 82px 14px 28px;
+  }
+
+  .header {
+    margin-bottom: 24px;
+  }
+
+  .titleGroup h1 {
+    font-size: 1.7rem;
+  }
+
+  .titleGroup p {
+    font-size: 0.9rem;
+  }
+
+  .agendaHeader {
+    min-height: 0;
+    margin-bottom: 14px;
+  }
+
+  .agendaTitleGroup h2 {
+    font-size: 1.25rem;
+  }
+
+  .segmented {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .segmented button {
+    padding-inline: 8px;
+    font-size: 0.76rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segmented button,
+  .agendaLink {
+    transition: none;
+  }
+}

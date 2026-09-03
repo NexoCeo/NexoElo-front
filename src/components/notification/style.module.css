@@ -1,0 +1,189 @@
+.container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+
+  gap: 12px;
+
+  z-index: 9999;
+
+  pointer-events: none;
+}
+
+.notification {
+  position: relative;
+
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+
+  width: min(390px, calc(100vw - 48px));
+  min-height: 86px;
+
+  padding: 16px 48px 16px 16px;
+
+  border-radius: 10px;
+
+  box-shadow:
+    0 8px 24px var(--theme-shadow),
+    0 2px 8px var(--theme-shadow);
+
+  pointer-events: auto;
+
+  overflow: hidden;
+
+  animation:
+    notificationEnter 180ms ease-out
+    forwards;
+}
+
+.success {
+  background: var(--theme-success);
+  color: var(--theme-white);
+}
+
+.warning {
+  background: var(--theme-warning);
+  color: var(--theme-warning-text);
+}
+
+.error {
+  background: var(--theme-error);
+  color: var(--theme-white);
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  font-size: 28px;
+}
+
+.content {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.title {
+  display: block;
+
+  margin: 0;
+
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.message {
+  margin: 0;
+
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.45;
+
+  overflow-wrap: anywhere;
+}
+
+.closeButton {
+  position: absolute;
+
+  top: 10px;
+  right: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 28px;
+  height: 28px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 6px;
+
+  background: transparent;
+  color: inherit;
+
+  font-size: 17px;
+
+  cursor: pointer;
+
+  opacity: 0.8;
+
+  transition:
+    opacity 150ms ease,
+    background-color 150ms ease;
+}
+
+.closeButton:hover {
+  opacity: 1;
+
+  background: var(--theme-shadow);
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.leaving {
+  animation:
+    notificationExit 220ms ease-in
+    forwards;
+}
+
+@keyframes notificationEnter {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes notificationExit {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    top: 16px;
+    right: 16px;
+    left: 16px;
+
+    align-items: stretch;
+  }
+
+  .notification {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notification,
+  .leaving {
+    animation-duration: 1ms;
+  }
+}

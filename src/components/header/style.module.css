@@ -1,0 +1,227 @@
+.header {
+  width: 100%;
+  height: 60px;
+  padding: 0 24px;
+  border-bottom: 1px solid;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 1px 3px var(--theme-shadow);
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
+}
+
+.profileWrapper {
+  position: relative;
+}
+
+.profileButton {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.profileButton:hover {
+  background: var(--theme-primary-soft);
+}
+
+.profileButton:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: 2px;
+}
+
+.headerActions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.findMeButton {
+  border: 0;
+  background: transparent;
+  padding: 8px 6px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.findMeButton:hover {
+  color: var(--theme-primary) !important;
+}
+
+.findMeButton:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: 2px;
+}
+
+.profileMenu {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  gap: 3px;
+  min-width: 190px;
+  padding: 7px;
+  border: 1px solid var(--theme-bottom);
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px var(--theme-shadow);
+  display: flex;
+  flex-direction: column;
+  z-index: 2000;
+}
+
+.profileMenu a,
+.profileMenu button {
+  width: 100%;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--theme-text);
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.profileMenu svg {
+  width: 16px;
+  flex: 0 0 16px;
+  color: var(--theme-text-muted);
+}
+
+.profileMenu a:hover,
+.profileMenu button:hover {
+  background: var(--theme-glass-strong);
+  border-radius: 5px;
+}
+
+.profileMenu a:focus-visible,
+.profileMenu button:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: -2px;
+  border-radius: 5px;
+}
+
+.fotoPerfil {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid;
+  position: relative;
+}
+
+.placeholder {
+  width: 40px;
+  height: 40px;
+  background-color: var(--theme-text-muted);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--theme-on-primary);
+}
+
+.menuButton {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  font-size: 24px;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.menuButton:hover {
+  background: var(--theme-primary-soft);
+}
+
+.menuButton:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: 2px;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: var(--theme-overlay);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.findMeModal {
+  position: relative;
+  width: min(100%, 580px);
+  max-height: calc(100dvh - 32px);
+  padding: 28px;
+  border: 1px solid;
+  border-radius: 8px;
+  overflow-y: auto;
+  box-shadow: 0 18px 50px var(--theme-shadow);
+}
+
+.closeModalButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  font-size: 22px;
+}
+
+.closeModalButton:hover {
+  background: var(--theme-primary-soft);
+}
+
+.closeModalButton:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 0 12px;
+  }
+
+  .headerActions {
+    gap: 6px;
+  }
+
+  .findMeButton {
+    font-size: 14px;
+    padding-inline: 4px;
+  }
+
+  .findMeModal {
+    padding: 24px 16px 20px;
+  }
+}

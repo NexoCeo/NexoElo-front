@@ -1,0 +1,120 @@
+.wrapper {
+    display: grid;
+    gap: 16px;
+    width: min(100%, 520px);
+    margin: 0 auto;
+}
+
+.header {
+    display: grid;
+    gap: 6px;
+    text-align: center;
+}
+
+.header h3,
+.header p {
+    margin: 0;
+}
+
+.header p {
+    font-size: 14px;
+}
+
+.content {
+    display: grid;
+    gap: 16px;
+    justify-items: center;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    background-color: var(--theme-white);
+    padding: 10px;         
+    border-radius: 12px;   
+    box-shadow: 0 4px 8px var(--theme-shadow);
+    width: 220px;          
+    height: 220px;
+}
+
+.qrCode {
+    display: block;
+    width: 200px;
+    height: 200px;
+    border-radius: 8px;
+}
+
+.linkBox {
+    width: 100%;
+    display: grid;
+    gap: 8px;
+}
+
+.copyLinkButton {
+    width: 100%;
+    min-height: 58px;
+    padding: 0 16px;
+    border: 1px solid var(--theme-border-strong);
+    border-radius: 8px;
+    background: var(--theme-surface);
+    color: var(--theme-text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    text-align: left;
+    transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.copyLinkButton span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.copyLinkButton svg {
+    flex: 0 0 auto;
+    color: var(--theme-primary-text);
+    font-size: 18px;
+}
+
+.copyLinkButton:hover {
+    border-color: var(--theme-primary);
+    background: var(--theme-primary-soft);
+}
+
+.copyLinkButton:focus-visible {
+    outline: 2px solid var(--theme-primary-text);
+    outline-offset: 2px;
+}
+
+.copyLinkButtonSuccess {
+    border-color: var(--theme-success);
+    background: var(--theme-success-soft);
+    color: var(--theme-success-text);
+}
+
+.copyLinkButtonSuccess svg {
+    color: var(--theme-success-text);
+}
+
+.copyError {
+    margin: 0;
+    color: var(--theme-error-text);
+    font-size: 13px;
+    text-align: left;
+}
+
+.feedback,
+.error {
+    margin: 0;
+    font-size: 14px;
+    text-align: center;
+}
+
+.error {
+    color: var(--theme-error-text);
+}

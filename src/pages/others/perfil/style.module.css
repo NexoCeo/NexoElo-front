@@ -1,0 +1,375 @@
+.container {
+  min-height: 100dvh;
+  padding: 96px 24px 32px;
+}
+
+.header,
+.profilePanel,
+.success,
+.error {
+  width: min(100%, 920px);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.header {
+  margin-bottom: 24px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.header h1,
+.header p,
+.modalHeader h2,
+.modalHeader p {
+  margin: 0;
+}
+
+.header h1 {
+  margin-bottom: 6px;
+  font-size: 28px;
+}
+
+.header p {
+  font-size: 15px;
+}
+
+.editButton,
+.saveButton,
+.cancelButton {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.editButton,
+.saveButton {
+  border: 0;
+}
+
+.editButton:disabled,
+.saveButton:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+.profilePanel {
+  padding: 28px;
+  border: 1px solid var(--theme-border);
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  align-items: center;
+  gap: 32px;
+}
+
+.identity {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.identity > img {
+  width: 104px;
+  height: 104px;
+  flex: 0 0 104px;
+  border: 3px solid var(--theme-primary);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.identity h2 {
+  margin: 7px 0 0;
+  overflow-wrap: anywhere;
+  font-size: 24px;
+}
+
+.role {
+  color: var(--theme-secondary);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.details {
+  margin: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.details > div {
+  min-width: 0;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--theme-border);
+}
+
+.details > div:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.details dt {
+  margin-bottom: 5px;
+  color: var(--theme-text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.details dd {
+  margin: 0;
+  color: var(--theme-text);
+  overflow-wrap: anywhere;
+  font-size: 15px;
+}
+
+.success,
+.error {
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.success {
+  color: var(--theme-success);
+}
+
+.error,
+.formError {
+  color: var(--theme-error);
+}
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  padding: 24px;
+  background: var(--theme-overlay);
+  backdrop-filter: blur(5px);
+  display: grid;
+  place-items: center;
+}
+
+.modal {
+  width: min(100%, 570px);
+  max-height: min(92dvh, 800px);
+  padding: 22px;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 8px;
+  overflow-y: auto;
+  box-shadow: 0 24px 70px var(--theme-shadow);
+}
+
+.modalHeader {
+  margin-bottom: 18px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.modalHeader h2 {
+  margin-bottom: 5px;
+  font-size: 22px;
+}
+
+.modalHeader button {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--theme-glass-strong);
+  color: var(--theme-text);
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+}
+
+.form {
+  display: grid;
+  gap: 15px;
+}
+
+.form label {
+  color: var(--theme-text);
+  font-size: 14px;
+  font-weight: 700;
+  display: grid;
+  gap: 8px;
+}
+
+.photoControl {
+  position: relative;
+  min-height: 72px;
+  padding: 10px 46px 10px 10px;
+  border: 1px dashed var(--theme-border-strong);
+  border-radius: 8px;
+  background: var(--theme-surface-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.photoPreview {
+  width: 50px;
+  height: 50px;
+  flex: 0 0 50px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.photoPreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoControl > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.photoControl strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.photoControl small {
+  color: var(--theme-text-muted);
+  font-weight: 400;
+}
+
+.photoControl > svg {
+  position: absolute;
+  right: 16px;
+  color: var(--theme-primary-text);
+}
+
+.photoControl input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.inputWrap {
+  position: relative;
+}
+
+.inputWrap input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 42px 0 12px;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 6px;
+  background: var(--theme-surface-muted);
+  color: var(--theme-text);
+  font: inherit;
+}
+
+.inputWrap svg {
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  transform: translateY(-50%);
+  color: var(--theme-text-muted);
+}
+
+.photoControl:focus-within,
+.inputWrap input:focus-visible {
+  border-color: var(--theme-primary-text);
+  outline: 2px solid var(--theme-focus);
+  outline-offset: 1px;
+}
+
+.formError {
+  margin: 0;
+  font-size: 14px;
+}
+
+.modalActions {
+  margin-top: 3px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.cancelButton {
+  border: 1px solid var(--theme-border-strong);
+  background: transparent;
+  color: var(--theme-text);
+}
+
+.editButton:focus-visible,
+.modalHeader button:focus-visible,
+.saveButton:focus-visible,
+.cancelButton:focus-visible {
+  outline: 2px solid var(--theme-primary-text);
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .container {
+    padding: 84px 12px 24px;
+  }
+
+  .header {
+    flex-direction: column;
+  }
+
+  .editButton {
+    width: 100%;
+  }
+
+  .profilePanel {
+    padding: 20px;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .modalBackdrop {
+    padding: 12px;
+    place-items: center;
+  }
+
+  .modal {
+    max-height: calc(100dvh - 24px);
+  }
+}
+
+@media (max-width: 430px) {
+  .identity {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .identity > img {
+    width: 88px;
+    height: 88px;
+    flex-basis: 88px;
+  }
+
+  .modalActions {
+    flex-direction: column-reverse;
+  }
+
+  .saveButton,
+  .cancelButton {
+    width: 100%;
+  }
+}

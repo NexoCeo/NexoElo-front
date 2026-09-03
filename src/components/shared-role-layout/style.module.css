@@ -1,0 +1,37 @@
+.shell {
+  --sidebar-width: 260px;
+  min-height: 100dvh;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.content {
+  width: 100%;
+  min-width: 0;
+  min-height: 100dvh;
+  margin-left: 0;
+  transition: margin-left 220ms ease, width 220ms ease;
+}
+
+.content > * {
+  width: 100%;
+  max-width: 100%;
+}
+
+.contentShifted {
+  width: calc(100% - var(--sidebar-width));
+  margin-left: var(--sidebar-width);
+}
+
+@media (max-width: 480px) {
+  .contentShifted {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content {
+    transition: none;
+  }
+}

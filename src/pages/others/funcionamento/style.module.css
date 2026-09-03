@@ -1,0 +1,579 @@
+.container {
+  min-height: 100dvh;
+  padding: 96px 24px 40px;
+}
+
+.header {
+  width: min(100%, 1180px);
+  margin: 0 auto 24px;
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.header h1 {
+  margin: 0 0 6px;
+  font-size: 30px;
+  line-height: 1.15;
+}
+
+.header p {
+  margin: 0;
+  font-size: 15px;
+}
+
+.content {
+  width: min(100%, 1180px);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.editor {
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.card,
+.summary {
+  border: 1px solid;
+  border-radius: 8px;
+}
+
+.card {
+  min-width: 0;
+  padding: 20px;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.titleGroup {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.step {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border-radius: 50%;
+  color: var(--theme-on-primary);
+  display: inline-grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.titleGroup h2,
+.titleGroup p {
+  margin: 0;
+}
+
+.titleGroup h2 {
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.titleGroup p {
+  margin-top: 3px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.presets button {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--theme-focus);
+  border-radius: 6px;
+  background: var(--theme-primary-soft);
+  color: var(--theme-primary-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.daysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(72px, 1fr));
+  gap: 8px;
+}
+
+.dayButton {
+  position: relative;
+  min-width: 0;
+  min-height: 76px;
+  padding: 12px 6px 9px;
+  border: 1px solid;
+  border-radius: 8px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 4px;
+  transition: border-color 0.18s, background-color 0.18s, box-shadow 0.18s;
+}
+
+.dayButton:hover {
+  border-color: var(--theme-primary) !important;
+}
+
+.dayButtonActive {
+  box-shadow: 0 8px 20px var(--theme-primary-soft);
+}
+
+.dayButton strong {
+  font-size: 14px;
+}
+
+.dayFullName {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 11px;
+}
+
+.dayCheck {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 15px;
+  height: 15px;
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+}
+
+.duration {
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 6px;
+  background: var(--theme-primary-soft);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.timeRange {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr);
+  gap: 14px;
+  align-items: end;
+}
+
+.timeRange label,
+.intervalRow label {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.timeRange input,
+.intervalRow input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  padding: 0 12px;
+  border: 1px solid var(--theme-glass-strong);
+  border-radius: 6px;
+  background: var(--theme-background-color);
+  color: var(--theme-text-color);
+  color-scheme: dark light;
+  font: inherit;
+  font-weight: 700;
+}
+
+.timeArrow {
+  margin-bottom: 15px;
+  color: var(--theme-text-muted);
+  justify-self: center;
+}
+
+.addButton,
+.removeButton,
+.saveButton {
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  font-weight: 800;
+}
+
+.addButton {
+  min-height: 40px;
+  padding: 0 13px;
+  gap: 8px;
+  background: var(--theme-primary-soft);
+  color: var(--theme-primary-text);
+  white-space: nowrap;
+}
+
+.emptyState {
+  min-height: 78px;
+  padding: 14px 16px;
+  border: 1px dashed;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  color: var(--theme-text-muted);
+}
+
+.emptyState > svg {
+  flex: 0 0 auto;
+  font-size: 20px;
+}
+
+.emptyState div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.emptyState span {
+  font-size: 13px;
+}
+
+.intervalList {
+  display: grid;
+}
+
+.intervalRow {
+  min-width: 0;
+  padding: 14px 0;
+  border-top: 1px solid;
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr) minmax(0, 1fr) auto 42px;
+  gap: 12px;
+  align-items: end;
+}
+
+.intervalRow:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.intervalRow:last-child {
+  padding-bottom: 0;
+}
+
+.intervalName {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.intervalName svg {
+  color: var(--theme-warning);
+}
+
+.intervalDuration {
+  min-width: 54px;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.removeButton {
+  width: 42px;
+  height: 42px;
+  margin-bottom: 2px;
+  background: var(--theme-error-soft);
+  color: var(--theme-error-text);
+}
+
+.actions {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.messages {
+  min-width: 0;
+  flex: 1;
+}
+
+.feedback,
+.error,
+.success {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.error {
+  color: var(--theme-error);
+}
+
+.success {
+  color: var(--theme-success);
+}
+
+.saveButton {
+  min-width: 218px;
+  min-height: 48px;
+  padding: 0 18px;
+  gap: 9px;
+}
+
+.saveButton:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.summary {
+  position: sticky;
+  top: 88px;
+  padding: 20px;
+  display: grid;
+  gap: 0;
+}
+
+.summaryTitle {
+  padding-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.summaryTitle h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.summaryBlock {
+  padding: 16px 0;
+  border-top: 1px solid var(--theme-glass-strong);
+  display: grid;
+  gap: 7px;
+}
+
+.summaryBlock > span {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.summaryBlock > strong {
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.summaryHours {
+  font-size: 22px !important;
+}
+
+.summaryBlock small {
+  font-size: 12px;
+}
+
+.summaryIntervals {
+  display: grid;
+  gap: 8px;
+}
+
+.summaryIntervals small {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 980px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .summary {
+    position: static;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .summaryTitle {
+    grid-column: 1 / -1;
+    padding-bottom: 0;
+  }
+
+  .summaryBlock {
+    padding: 14px 0 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .daysGrid {
+    grid-template-columns: repeat(4, minmax(58px, 1fr));
+  }
+
+  .intervalRow {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 42px;
+  }
+
+  .intervalName {
+    grid-column: 1 / -1;
+    min-height: 28px;
+  }
+
+  .intervalDuration {
+    grid-column: 1 / 3;
+    grid-row: 3;
+    min-height: 32px;
+    justify-content: flex-start;
+  }
+
+  .removeButton {
+    grid-column: 3;
+    grid-row: 3;
+  }
+
+  .summary {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .summaryTitle {
+    padding-bottom: 12px;
+  }
+
+  .summaryBlock {
+    padding: 14px 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .container {
+    padding: 84px 12px 28px;
+  }
+
+  .header {
+    margin-bottom: 18px;
+  }
+
+  .header h1 {
+    font-size: 26px;
+  }
+
+  .content,
+  .editor {
+    gap: 12px;
+  }
+
+  .card,
+  .summary {
+    padding: 16px;
+  }
+
+  .cardHeader {
+    display: grid;
+    gap: 12px;
+  }
+
+  .presets {
+    justify-content: flex-start;
+  }
+
+  .addButton {
+    width: 100%;
+  }
+
+  .dayButton {
+    min-height: 68px;
+  }
+
+  .dayFullName {
+    display: none;
+  }
+
+  .actions {
+    display: grid;
+  }
+
+  .messages:empty {
+    display: none;
+  }
+
+  .saveButton {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 400px) {
+  .daysGrid {
+    grid-template-columns: repeat(4, minmax(50px, 1fr));
+    gap: 6px;
+  }
+
+  .timeRange {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .timeArrow {
+    margin: 0;
+    transform: rotate(90deg);
+  }
+
+  .intervalRow {
+    grid-template-columns: minmax(0, 1fr) 42px;
+  }
+
+  .intervalRow label {
+    grid-column: 1 / -1;
+  }
+
+  .intervalDuration {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .removeButton {
+    grid-column: 2;
+    grid-row: auto;
+  }
+}

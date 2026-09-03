@@ -1,0 +1,122 @@
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100dvh;
+  padding: 70px 12px 16px;
+  border-right: 1px solid;
+  transform: translateX(-100%);
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 220ms ease, visibility 220ms;
+  z-index: 1100;
+  overflow-y: auto;
+}
+
+.nav.open {
+  transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.closeMenuIcon {
+  position: absolute;
+  top: 9px;
+  right: 8px;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  font-size: 24px;
+  transition: background-color 160ms ease;
+}
+
+.closeMenuIcon:hover {
+  background: var(--theme-primary-soft);
+}
+
+.closeMenuIcon:focus-visible {
+  outline: 2px solid var(--sidebar-primary);
+  outline-offset: 2px;
+}
+
+.navList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.navItem {
+  min-width: 0;
+}
+
+.navLink {
+  position: relative;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 12px;
+  border-radius: 6px;
+  color: var(--sidebar-inactive);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  font-weight: 700;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.navLink:hover {
+  background: var(--theme-primary-soft);
+  color: var(--sidebar-text);
+}
+
+.navLink.active {
+  background: var(--theme-primary-soft);
+  color: var(--sidebar-primary);
+  box-shadow: inset 3px 0 var(--sidebar-primary);
+  transform: translateX(2px);
+}
+
+.navLink.active .navIcon {
+  transform: scale(1.06);
+}
+
+.navLink:focus-visible {
+  outline: 2px solid var(--sidebar-primary);
+  outline-offset: 2px;
+}
+
+.navIcon {
+  width: 24px;
+  flex: 0 0 24px;
+  font-size: 22px;
+  color: inherit;
+  transition: transform 160ms ease;
+}
+
+.navLink span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  .nav {
+    width: min(260px, calc(100vw - 48px));
+    box-shadow: 14px 0 32px var(--theme-shadow);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav,
+  .navLink,
+  .navIcon {
+    transition: none;
+  }
+}

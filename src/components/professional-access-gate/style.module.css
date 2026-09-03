@@ -1,0 +1,151 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+
+  z-index: 99999;
+
+  display: grid;
+  place-items: center;
+
+  padding: 24px;
+
+  background: var(--theme-shadow);
+
+  pointer-events: all;
+}
+
+.modal {
+  width: min(100%, 480px);
+
+  padding: 32px 28px;
+
+  border: 1px solid
+    var(--theme-glass-strong);
+
+  border-radius: 14px;
+
+  background:
+    var(--theme-surface);
+
+  box-shadow:
+    0 24px 80px
+    var(--theme-overlay);
+
+  text-align: center;
+
+  color: var(--theme-text);
+}
+
+.icon {
+  width: 64px;
+  height: 64px;
+
+  margin: 0 auto 18px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    var(--theme-primary-soft);
+
+  color: var(--theme-primary-text);
+
+  font-size: 28px;
+}
+
+.modal h1 {
+  margin: 0 0 12px;
+
+  font-size: 24px;
+}
+
+.modal p {
+  margin: 0;
+
+  line-height: 1.6;
+
+  color: var(--theme-text-muted);
+}
+
+.statusBox {
+  margin-top: 22px;
+
+  padding: 14px 16px;
+
+  border-radius: 8px;
+
+  background:
+    var(--theme-glass-subtle);
+
+  display: grid;
+
+  gap: 5px;
+}
+
+.statusBox span {
+  color: var(--theme-text-muted);
+
+  font-size: 12px;
+
+  text-transform: uppercase;
+}
+
+.statusBox strong {
+  color: var(--theme-primary-text);
+
+  font-size: 15px;
+}
+
+.statusBox small {
+  color: var(--theme-text-muted);
+}
+
+.helpText {
+  display: block;
+
+  margin-top: 18px;
+
+  color: var(--theme-text-muted);
+
+  line-height: 1.5;
+}
+
+.retryButton {
+  margin-top: 22px;
+
+  min-height: 42px;
+
+  padding: 0 18px;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: var(--theme-primary);
+
+  color: var(--theme-on-primary);
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.retryButton:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 560px) {
+  .backdrop {
+    padding: 16px;
+  }
+
+  .modal {
+    padding: 26px 20px;
+  }
+
+  .modal h1 {
+    font-size: 21px;
+  }
+}

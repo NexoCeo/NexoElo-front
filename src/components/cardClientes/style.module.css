@@ -1,0 +1,363 @@
+.listSection {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--theme-bottom);
+  border-radius: 8px;
+  background: var(--theme-surface);
+  color: var(--theme-text);
+  box-shadow: 0 8px 24px var(--theme-shadow);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.listHeader,
+.listItem {
+  display: grid;
+  grid-template-columns: minmax(145px, 1.6fr) minmax(125px, 1.3fr) minmax(135px, 1.25fr) 74px 104px minmax(84px, 0.75fr) 84px;
+  align-items: center;
+  gap: 14px;
+}
+
+.listHeader {
+  min-height: 50px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--theme-bottom);
+  background: var(--theme-surface-muted);
+  color: var(--theme-text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.listBody {
+  width: 100%;
+}
+
+.listItem {
+  min-height: 70px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--theme-grey21);
+  font-size: 0.88rem;
+  transition: background-color 150ms ease;
+}
+
+.listItem:last-child {
+  border-bottom: 0;
+}
+
+.listItem:hover {
+  background: var(--theme-surface-hover);
+}
+
+.listItem > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.patient {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.patient strong {
+  font-weight: 750;
+}
+
+.statusDot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+  border-radius: 50%;
+  background: var(--theme-secondary);
+}
+
+.time,
+.value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+}
+
+.value {
+  text-align: right;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.actionButton {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid;
+  border-radius: 6px;
+  background: transparent;
+  font-size: 0.86rem;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.actionButton:disabled {
+  opacity: 0.48;
+  cursor: wait;
+}
+
+.cancelAction {
+  border-color: var(--theme-error);
+  color: var(--theme-error);
+}
+
+.cancelAction:hover:not(:disabled) {
+  background: var(--theme-error-soft);
+}
+
+.completeAction {
+  border-color: var(--theme-success);
+  color: var(--theme-success);
+}
+
+.completeAction:hover:not(:disabled) {
+  background: var(--theme-success-soft);
+}
+
+.noActions {
+  color: var(--theme-text-muted);
+}
+
+.statusBadge {
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.67rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.scheduled {
+  background: var(--theme-primary-soft);
+  color: var(--theme-primary-text);
+}
+
+.completed {
+  background: var(--theme-success-soft);
+  color: var(--theme-success);
+}
+
+.cancelled {
+  background: var(--theme-error-soft);
+  color: var(--theme-error);
+}
+
+.feedback,
+.error,
+.emptyState {
+  min-height: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 20px;
+  text-align: center;
+}
+
+.feedback {
+  gap: 10px;
+  color: var(--theme-text-muted);
+}
+
+.loader {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--theme-border-strong);
+  border-top-color: var(--theme-primary);
+  border-radius: 50%;
+  animation: rotate 800ms linear infinite;
+}
+
+.error {
+  color: var(--theme-error);
+}
+
+.emptyState {
+  flex-direction: column;
+  gap: 7px;
+  color: var(--theme-text-muted);
+}
+
+.emptyState svg {
+  margin-bottom: 4px;
+  color: var(--theme-text-muted);
+  font-size: 1.6rem;
+}
+
+.emptyState strong {
+  color: var(--theme-text);
+  font-size: 1rem;
+}
+
+.emptyState span {
+  font-size: 0.82rem;
+}
+
+:global(.dark) .listSection {
+  border-color: var(--theme-bottom);
+  background: var(--theme-surface);
+  color: var(--theme-text);
+  box-shadow: 0 8px 24px var(--theme-shadow);
+}
+
+:global(.dark) .listHeader {
+  border-color: var(--theme-bottom);
+  background: var(--theme-surface-hover);
+  color: var(--theme-text-muted);
+}
+
+:global(.dark) .listItem {
+  border-color: var(--theme-surface-hover);
+}
+
+:global(.dark) .listItem:hover {
+  background: var(--theme-surface-hover);
+}
+
+:global(.dark) .cancelAction:hover:not(:disabled) {
+  background: var(--theme-error-soft);
+}
+
+:global(.dark) .completeAction:hover:not(:disabled) {
+  background: var(--theme-success-soft);
+}
+
+:global(.dark) .feedback,
+:global(.dark) .emptyState {
+  color: var(--theme-text-muted);
+}
+
+:global(.dark) .emptyState strong {
+  color: var(--theme-text);
+}
+
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1450px) and (min-width: 761px) {
+  .listSection {
+    overflow-x: auto;
+  }
+
+  .listHeader,
+  .listItem {
+    min-width: 1010px;
+  }
+}
+
+@media (max-width: 760px) {
+  .listSection {
+    border-radius: 7px;
+  }
+
+  .listHeader {
+    display: none;
+  }
+
+  .listBody {
+    padding: 0 14px;
+  }
+
+  .listItem {
+    grid-template-columns: minmax(0, 1fr) minmax(112px, auto);
+    gap: 10px 18px;
+    min-height: 0;
+    padding: 16px 0;
+  }
+
+  .listItem > div {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+  }
+
+  .listItem > div::before {
+    content: attr(data-label);
+    color: var(--theme-text-muted);
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .patient {
+    grid-column: 1 / -1;
+    grid-template-columns: 92px minmax(0, 1fr) !important;
+  }
+
+  .patient .statusDot {
+    display: none;
+  }
+
+  .patient strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .listItem > div:nth-child(2),
+  .listItem > div:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  .time,
+  .value {
+    text-align: left;
+  }
+
+  .listItem > div.actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .actions::before {
+    width: 92px;
+    flex: 0 0 92px;
+  }
+}
+
+@media (max-width: 480px) {
+  .listBody {
+    padding-inline: 12px;
+  }
+
+  .listItem {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .listItem > div,
+  .patient {
+    grid-column: 1;
+    grid-template-columns: 84px minmax(0, 1fr) !important;
+  }
+
+  .actions::before {
+    width: 84px;
+    flex-basis: 84px;
+  }
+
+  .feedback,
+  .error,
+  .emptyState {
+    min-height: 150px;
+    padding-inline: 14px;
+  }
+}

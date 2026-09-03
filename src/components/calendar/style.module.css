@@ -1,0 +1,230 @@
+.container {
+  width: 100%;
+  border: 1px solid var(--theme-bottom);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--theme-surface);
+  color: var(--theme-text);
+  box-shadow: 0 8px 24px var(--theme-shadow);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.header {
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  background: var(--theme-primary);
+  color: var(--theme-on-primary);
+  padding: 7px;
+  border-radius: 6px;
+}
+
+.header button {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--theme-on-primary);
+  font-size: 0.86rem;
+  cursor: pointer;
+}
+
+.header button:hover {
+  background: var(--theme-glass-strong);
+}
+
+.header button:focus-visible,
+.day:focus-visible {
+  outline: 3px solid var(--theme-warning);
+  outline-offset: 2px;
+}
+
+.monthYear {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.25;
+}
+
+.month {
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.year {
+  font-size: 0.72rem;
+  opacity: 0.82;
+}
+
+.weekdays,
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  text-align: center;
+}
+
+.weekdays {
+  margin-top: 10px;
+  color: var(--theme-text-muted);
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+.weekdays span {
+  min-width: 0;
+}
+
+.days {
+  gap: 2px 0;
+  margin-top: 4px;
+}
+
+.day,
+.emptyDay {
+  width: 36px;
+  height: 36px;
+  margin: auto;
+}
+
+.day {
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.day:hover {
+  background: var(--theme-primary-soft);
+}
+
+.today {
+  border-color: var(--theme-primary);
+  color: var(--theme-primary);
+  font-weight: 800;
+}
+
+.selected {
+  border-color: var(--theme-primary);
+  background: var(--theme-primary);
+  color: var(--theme-on-primary);
+  font-weight: 800;
+}
+
+.selected:hover {
+  background: var(--theme-primary-hover);
+}
+
+.weekContainer {
+  display: grid;
+  gap: 10px;
+}
+
+.weekDays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.weekDay {
+  min-width: 0;
+  min-height: 62px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 5px;
+  padding: 6px 2px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.weekDay span {
+  color: var(--theme-text-muted);
+  font-size: 0.6rem;
+  font-weight: 800;
+}
+
+.weekDay strong {
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.weekDay:hover {
+  background: var(--theme-primary-soft);
+}
+
+.currentWeekDay {
+  border-color: var(--theme-primary);
+}
+
+.selectedWeekDay {
+  border-color: var(--theme-primary);
+  background: var(--theme-primary);
+  color: var(--theme-on-primary);
+}
+
+.selectedWeekDay span {
+  color: var(--theme-primary-text);
+}
+
+.selectedWeekDay:hover {
+  background: var(--theme-primary-hover);
+}
+
+:global(.dark) .container {
+  border-color: var(--theme-bottom);
+  background: var(--theme-surface);
+  color: var(--theme-text);
+  box-shadow: 0 8px 24px var(--theme-shadow);
+}
+
+:global(.dark) .weekdays {
+  color: var(--theme-primary-text);
+}
+
+:global(.dark) .day:hover {
+  background: var(--theme-surface-hover);
+}
+
+:global(.dark) .today {
+  color: var(--theme-primary-text);
+}
+
+:global(.dark) .weekDay span {
+  color: var(--theme-primary-text);
+}
+
+:global(.dark) .weekDay:hover {
+  background: var(--theme-surface-hover);
+}
+
+:global(.dark) .selectedWeekDay {
+  background: var(--theme-primary);
+}
+
+@media (max-width: 360px) {
+  .container {
+    padding: 8px 6px;
+  }
+
+  .day,
+  .emptyDay {
+    width: 34px;
+    height: 34px;
+  }
+}

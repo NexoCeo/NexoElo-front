@@ -1,0 +1,501 @@
+.container {
+  min-height: 100dvh;
+  padding: 32px;
+  background: var(--theme-background);
+  color: var(--theme-text);
+}
+
+.header {
+  width: min(100%, 1160px);
+  margin: 0 auto 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.header span {
+  color: var(--theme-primary-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.header h1 {
+  margin: 6px 0 0;
+  font-size: 30px;
+}
+
+.header a {
+  display: inline-grid;
+  place-items: center;
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 8px;
+  background: var(--theme-primary);
+  color: var(--theme-on-primary);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.content {
+  width: min(100%, 1160px);
+  margin: 0 auto;
+}
+
+.form {
+  min-width: 0;
+  display: grid;
+  gap: 24px;
+}
+
+.selectionGroup {
+  min-width: 0;
+  margin: 0;
+  padding: 0 0 24px;
+  border: 0;
+  border-bottom: 1px solid var(--theme-border);
+  transition: padding 160ms ease;
+}
+
+.selectionGroup > legend {
+  width: 100%;
+  margin: 0 0 16px;
+  padding: 0;
+  color: var(--theme-text);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.selectionGroupCollapsed {
+  padding-bottom: 12px;
+}
+
+.selectionGroupCollapsed > legend {
+  margin-bottom: 0;
+}
+
+.selectionGroup:disabled {
+  opacity: 0.68;
+}
+
+.stepToggle {
+  width: 100%;
+  min-height: 38px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: inherit;
+  text-align: left;
+}
+
+.stepToggle:disabled {
+  cursor: not-allowed;
+}
+
+.stepToggle:focus-visible {
+  border-radius: 6px;
+  outline: 2px solid var(--theme-primary-text);
+  outline-offset: 3px;
+}
+
+.stepTitle {
+  min-width: 0;
+  flex: 0 1 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stepSummary {
+  min-width: 0;
+  margin-left: auto;
+  overflow: hidden;
+  color: var(--theme-primary-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.stepChevron {
+  flex: 0 0 auto;
+  color: var(--theme-text-muted);
+  font-size: 15px;
+  transition: transform 160ms ease, color 160ms ease;
+}
+
+.stepChevronOpen {
+  color: var(--theme-primary-text);
+  transform: rotate(180deg);
+}
+
+.stepNumber {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  border-radius: 50%;
+  background: var(--theme-primary);
+  color: var(--theme-on-primary);
+  display: inline-grid;
+  place-items: center;
+  font-size: 13px;
+}
+
+.optionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.serviceGrid {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.identityOption,
+.serviceOption {
+  position: relative;
+  min-width: 0;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 8px;
+  background: var(--theme-surface);
+  color: var(--theme-text);
+  cursor: pointer;
+  display: grid;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.identityOption {
+  min-height: 86px;
+  padding: 12px 44px 12px 12px;
+  grid-template-columns: 60px minmax(0, 1fr);
+}
+
+.serviceOption {
+  min-height: 116px;
+  padding: 10px 44px 10px 10px;
+  grid-template-columns: 118px minmax(0, 1fr);
+}
+
+.identityOption:hover,
+.serviceOption:hover {
+  border-color: var(--theme-primary);
+  background: var(--theme-surface-hover);
+}
+
+.identityOption:focus-visible,
+.serviceOption:focus-visible,
+.timeButton:focus-visible,
+.dateField input:focus-visible,
+.submitButton:focus-visible,
+.header a:focus-visible {
+  outline: 2px solid var(--theme-primary-text);
+  outline-offset: 2px;
+}
+
+.optionSelected {
+  border-color: var(--theme-primary);
+  background: var(--theme-primary-soft);
+  box-shadow: inset 4px 0 var(--theme-primary);
+}
+
+.profilePhoto {
+  width: 60px;
+  height: 60px;
+  overflow: hidden;
+  border: 2px solid var(--theme-border-strong);
+  border-radius: 50%;
+  background: var(--theme-surface-muted);
+}
+
+.profilePhoto img,
+.servicePhoto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.servicePhoto {
+  position: relative;
+  width: 118px;
+  height: 92px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--theme-primary-soft);
+  color: var(--theme-primary-text);
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+}
+
+.servicePhoto img {
+  position: absolute;
+  inset: 0;
+}
+
+.optionText {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.optionText strong,
+.optionText b {
+  overflow-wrap: anywhere;
+}
+
+.optionText strong {
+  font-size: 15px;
+}
+
+.optionText small {
+  color: var(--theme-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.optionText b {
+  color: var(--theme-primary-text);
+  font-size: 15px;
+}
+
+.selectedIcon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: var(--theme-primary-text);
+  font-size: 16px;
+}
+
+.optionFeedback,
+.scheduleFeedback {
+  margin: 0;
+  padding: 16px;
+  border: 1px dashed var(--theme-border-strong);
+  border-radius: 8px;
+  color: var(--theme-text-muted);
+  background: var(--theme-surface-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.scheduleGroup {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.scheduleLayout {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+  align-items: start;
+  gap: 18px;
+}
+
+.dateField {
+  display: grid;
+  gap: 8px;
+  color: var(--theme-text);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.dateField > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.dateField > span svg {
+  color: var(--theme-secondary);
+}
+
+.dateField input {
+  min-width: 0;
+  width: 100%;
+  min-height: 48px;
+  box-sizing: border-box;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 8px;
+  background: var(--theme-surface);
+  color: var(--theme-text);
+  padding: 0 12px;
+  font: inherit;
+}
+
+.scheduleFieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.scheduleFieldset legend {
+  margin-bottom: 8px;
+  color: var(--theme-text);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.timeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
+  gap: 10px;
+}
+
+.timeButton {
+  min-height: 46px;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 8px;
+  background: var(--theme-surface);
+  color: var(--theme-text);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
+}
+
+.timeButton:hover {
+  border-color: var(--theme-primary-text);
+  background: var(--theme-primary-soft);
+}
+
+.timeButtonSelected {
+  border-color: var(--theme-primary-text);
+  background: var(--theme-primary);
+  color: var(--theme-on-primary);
+}
+
+.submitButton {
+  width: 100%;
+  min-height: 52px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--theme-primary);
+  color: var(--theme-on-primary);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.submitButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.error,
+.success {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.error {
+  background: var(--theme-error-soft);
+  color: var(--theme-error-text);
+}
+
+.success {
+  background: var(--theme-success-soft);
+  color: var(--theme-success-text);
+}
+
+@media (max-width: 760px) {
+  .container {
+    padding: 20px 12px 28px;
+  }
+
+  .header {
+    align-items: stretch;
+    flex-direction: column;
+    margin-bottom: 24px;
+  }
+
+  .header a {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .header h1 {
+    font-size: 26px;
+  }
+
+  .form {
+    gap: 20px;
+  }
+
+  .selectionGroup {
+    padding-bottom: 20px;
+  }
+
+  .selectionGroupCollapsed {
+    padding-bottom: 10px;
+  }
+
+  .stepToggle {
+    gap: 8px;
+  }
+
+  .stepTitle {
+    gap: 8px;
+  }
+
+  .stepSummary {
+    max-width: 34%;
+    font-size: 12px;
+  }
+
+  .optionGrid,
+  .scheduleLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .serviceOption {
+    min-height: 104px;
+    grid-template-columns: 92px minmax(0, 1fr);
+  }
+
+  .servicePhoto {
+    width: 92px;
+    height: 78px;
+  }
+
+  .timeGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 380px) {
+  .identityOption {
+    grid-template-columns: 52px minmax(0, 1fr);
+  }
+
+  .profilePhoto {
+    width: 52px;
+    height: 52px;
+  }
+
+  .serviceOption {
+    grid-template-columns: 76px minmax(0, 1fr);
+  }
+
+  .servicePhoto {
+    width: 76px;
+    height: 68px;
+  }
+
+  .timeGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
