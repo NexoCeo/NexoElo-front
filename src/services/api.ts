@@ -2,12 +2,19 @@ import axios from "axios";
 import { clearAuthSession } from "./auth-token";
 import { clearClienteFinalSession } from "./cliente-final-auth-token";
 
-export const API_ORIGIN = (
-  import.meta.env.VITE_API_ORIGIN || "https://nexoelo.onrender.com"
-).replace(/\/$/, "");
+/*
+ * As chamadas do navegador usam o mesmo domínio do frontend.
+ *
+ * Produção:
+ * https://nexoelo.nexoceo.com.br/api/...
+ *
+ * A Vercel encaminha internamente para:
+ * https://nexoelo.onrender.com/api/...
+ */
+export const API_ORIGIN = "";
 
 const api = axios.create({
-  baseURL: `${API_ORIGIN}/api/`,
+  baseURL: "/api/",
   timeout: 20_000,
   withCredentials: true,
 });
