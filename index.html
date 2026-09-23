@@ -1,9 +1,33 @@
 <!doctype html>
-<html lang="pt-br">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
+
+    <!-- Ícones -->
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/apple-touch-icon.png"
+    />
+
+    <!-- Mobile / PWA -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+
+    <meta name="theme-color" content="#03131f" />
+
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="NexoElo" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black"
+    />
+
+    <!-- Site -->
     <title>NexoElo</title>
 
     <meta
@@ -11,10 +35,8 @@
       content="Tecnologia que conecta, automatiza e impulsiona seu negócio."
     />
 
-    <meta
-      property="og:type"
-      content="website"
-    />
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
 
     <meta
       property="og:title"
@@ -36,6 +58,7 @@
       content="NexoElo"
     />
 
+    <!-- Twitter -->
     <meta
       name="twitter:card"
       content="summary"
@@ -50,12 +73,8 @@
       name="twitter:description"
       content="Tecnologia que conecta, automatiza e impulsiona seu negócio."
     />
-
-    <meta
-      name="theme-color"
-      content="#03131f"
-    />
   </head>
+
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
