@@ -22,6 +22,7 @@ import Servicos from "@/pages/others/servicos";
 import Funcionamento from "@/pages/others/funcionamento";
 import Relatorios from "@/pages/others/relatorios";
 import MinhaAssinatura from "@/pages/others/assinatura";
+import AssinaturaGate from "@/components/assinatura-gate";
 
 type SharedRoleRoutesProps = {
   allowRegister?: boolean;
@@ -88,7 +89,7 @@ export default function SharedRoleRoutes({
         path="home"
         element={
           <ProtectedRoute>
-            <Home />
+            {requireApprovedProfessional ? <Home /> : <AssinaturaGate><Home /></AssinaturaGate>}
           </ProtectedRoute>
         }
       />
@@ -97,7 +98,7 @@ export default function SharedRoleRoutes({
         path="dashboard"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            {requireApprovedProfessional ? <Dashboard /> : <AssinaturaGate><Dashboard /></AssinaturaGate>}
           </ProtectedRoute>
         }
       />
@@ -106,7 +107,7 @@ export default function SharedRoleRoutes({
         path="agenda"
         element={
           <ProtectedRoute>
-            <Agenda />
+            {requireApprovedProfessional ? <Agenda /> : <AssinaturaGate><Agenda /></AssinaturaGate>}
           </ProtectedRoute>
         }
       />
@@ -116,7 +117,7 @@ export default function SharedRoleRoutes({
           path="servicos"
           element={
             <ProtectedRoute>
-              <Servicos />
+              {requireApprovedProfessional ? <Servicos /> : <AssinaturaGate><Servicos /></AssinaturaGate>}
             </ProtectedRoute>
           }
         />
@@ -127,7 +128,7 @@ export default function SharedRoleRoutes({
           path="funcionamento"
           element={
             <ProtectedRoute>
-              <Funcionamento />
+              {requireApprovedProfessional ? <Funcionamento /> : <AssinaturaGate><Funcionamento /></AssinaturaGate>}
             </ProtectedRoute>
           }
         />
@@ -138,7 +139,7 @@ export default function SharedRoleRoutes({
           path="relatorios"
           element={
             <ProtectedRoute>
-              <Relatorios />
+              {requireApprovedProfessional ? <Relatorios /> : <AssinaturaGate relatorios><Relatorios /></AssinaturaGate>}
             </ProtectedRoute>
           }
         />
@@ -163,7 +164,7 @@ export default function SharedRoleRoutes({
           path="profissionais"
           element={
             <ProtectedRoute>
-              <Profissionais />
+              {requireApprovedProfessional ? <Profissionais /> : <AssinaturaGate><Profissionais /></AssinaturaGate>}
             </ProtectedRoute>
           }
         />
