@@ -7,9 +7,10 @@ interface PasswordInputProps {
   onChange: (value: string) => void;
   showPassword: boolean;
   togglePassword: () => void;
+  autoComplete?: 'current-password' | 'new-password';
 }
 
-export function PasswordInput({ value, onChange, showPassword, togglePassword }: PasswordInputProps) {
+export function PasswordInput({ value, onChange, showPassword, togglePassword, autoComplete = 'current-password' }: PasswordInputProps) {
   const { theme } = useTheme();
   
   return (
@@ -17,7 +18,7 @@ export function PasswordInput({ value, onChange, showPassword, togglePassword }:
         <input
           type={showPassword ? 'text' : 'password'}
           name="password"
-          autoComplete="current-password"
+          autoComplete={autoComplete}
           className={styles.input}
           style={{ color: theme.colors.text}}
           value={value}
