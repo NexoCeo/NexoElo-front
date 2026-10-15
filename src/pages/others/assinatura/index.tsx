@@ -126,13 +126,6 @@ export default function MinhaAssinatura() {
   const limite = (valor: number) => valor === 2147483647 ? "Ilimitados" : String(valor);
   return (
     <main className={styles.page}>
-      <div className={styles.heading}>
-        <div>
-          <h1 className={styles.title}>Minha assinatura</h1>
-          <p className={styles.subtitle}>Gerencie seu plano e escolha os recursos ideais para seu negócio.</p>
-        </div>
-      </div>
-
       {loading ? <section className={styles.status}>Carregando assinatura...</section> : assinatura && (
         <section className={styles.status} aria-label="Plano atual">
           <div>
