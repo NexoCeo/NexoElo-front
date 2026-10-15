@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { FaCheck, FaTimes } from "react-icons/fa";
 import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
-import { consultarAssinatura, iniciarCheckout, alterarPlano, abrirPortal, planos, type AssinaturaAtual } from "@/services/assinatura-service";
+import { consultarAssinatura, iniciarCheckout, alterarPlano, listarRecursosPlano, abrirPortal, planos, type AssinaturaAtual, type RecursoPlano } from "@/services/assinatura-service";
 import styles from "./style.module.css";
 
 const reais = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
@@ -15,6 +15,10 @@ export default function MinhaAssinatura() {
   const [assinatura, setAssinatura] = useState<AssinaturaAtual | null>(null);
   const [loading, setLoading] = useState(true);
   const [pending, setPending] = useState("");
+  const [destino, setDestino] = useState<"BASICO" | "INTERMEDIARIO" | "AVANCADO" | null>(null);
+  const [recursos, setRecursos] = useState<RecursoPlano[]>([]);
+  const [selecionados, setSelecionados] = useState<number[]>([]);
+  const [carregandoRecursos, setCarregandoRecursos] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -45,21 +49,47 @@ export default function MinhaAssinatura() {
       await executar(plano, () => iniciarCheckout(usuario.Id, plano));
       return;
     }
+    setCarregandoRecursos(true);
+    try {
+      const itens = await listarRecursosPlano();
+      const limites = plano === "BASICO" ? [4, 2] : plano === "INTERMEDIARIO" ? [8, 4] : [Infinity, Infinity];
+      const servicos = itens.filter(i => i.Tipo === "SERVICO");
+      const profissionais = itens.filter(i => i.Tipo === "PROFISSIONAL");
+      const excede = servicos.length > limites[0] || profissionais.length > limites[1];
+      if (excede) {
+        setRecursos(itens);
+        setSelecionados([
+          ...servicos.slice(0, limites[0]).map(x=>x.Id),
+          ...profissionais.slice(0, limites[1]).map(x=>x.Id)
+        ]);
+        setDestino(plano);
+      } else {
+        await confirmarTroca(plano, undefined, undefined);
+      }
+    } catch {
+      showNotification({ type: "error", title: "Assinatura", message: "Não foi possível carregar os serviços e profissionais." });
+    } finally { setCarregandoRecursos(false); }
+  }
 
+  async function confirmarTroca(plano: "BASICO" | "INTERMEDIARIO" | "AVANCADO", servicos?: number[], profissionais?: number[]) {
+    if (!usuario?.Id) return;
     const escolhido = planos.find(item => item.id === plano);
     if (!escolhido) return;
     const confirmar = window.confirm(
-      `Confirmar alteração para ${escolhido.nome} (${reais.format(escolhido.valor)}/mês)?\\n\\n` +
-      "Os recursos do novo plano serão aplicados agora. O novo preço será cobrado na próxima renovação, sem cobrança proporcional imediata. Dados existentes serão preservados."
+      `Confirmar alteração para ${escolhido.nome} (${reais.format(escolhido.valor)}/mês)?\n\n` +
+      "O novo preço será cobrado na próxima renovação. Os recursos não selecionados ficarão indisponíveis para novos agendamentos; seus dados não serão excluídos."
     );
     if (!confirmar) return;
-
     await executar(plano, async () => {
-      await alterarPlano(usuario.Id, plano);
-      const atualizada = await consultarAssinatura();
-      setAssinatura(atualizada);
-      showNotification({ type: "success", title: "Plano alterado", message: "Seu plano foi atualizado. O novo preço valerá na próxima renovação." });
+      await alterarPlano(usuario.Id, plano, servicos, profissionais);
+      setAssinatura(await consultarAssinatura());
+      setDestino(null);
+      showNotification({ type: "success", title: "Plano alterado", message: "Recursos atualizados. Próxima renovação com o novo preço." });
     });
+  }
+
+  function alternarRecurso(id: number) {
+    setSelecionados(prev=>prev.includes(id)?prev.filter(i=>i!==id):[...prev,id]);
   }
 
   const limite = (valor: number) => valor === 2147483647 ? "Ilimitados" : String(valor);
@@ -122,7 +152,7 @@ export default function MinhaAssinatura() {
                 <li className={styles.feature}><FaCheck className={styles.featureIcon} aria-hidden="true" /> Agenda e gestão de serviços</li>
               </ul>
               <button className={styles.button} type="button"
-                disabled={loading || Boolean(pending) || !usuario?.Id || atual || !assinatura}
+                disabled={loading || carregandoRecursos || Boolean(pending) || !usuario?.Id || atual || !assinatura}
                 onClick={() => void selecionarPlano(plano.id)}>
                 {atual ? "Seu plano atual" : pending === plano.id ? "Processando..." :
                  assinatura?.AcessoAtivo && assinatura.Plano !== "GRATIS" && assinatura.Plano !== "SEM_PLANO" ? "Alterar plano" : "Selecionar plano"}
@@ -131,6 +161,37 @@ export default function MinhaAssinatura() {
           );
         })}
       </section>
+      {destino && (() => {
+        const limiteServicos = destino === "BASICO" ? 4 : destino === "INTERMEDIARIO" ? 8 : Infinity;
+        const limiteProfissionais = destino === "BASICO" ? 2 : destino === "INTERMEDIARIO" ? 4 : Infinity;
+        const servicos = recursos.filter(item => item.Tipo === "SERVICO");
+        const profissionais = recursos.filter(item => item.Tipo === "PROFISSIONAL");
+        const validos = (servicos.length <= limiteServicos || servicos.filter(x=>selecionados.includes(x.Id)).length === limiteServicos) &&
+          (profissionais.length <= limiteProfissionais || profissionais.filter(x=>selecionados.includes(x.Id)).length === limiteProfissionais);
+        return <div className={styles.modalBackdrop} role="presentation">
+          <section className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="tituloDowngrade">
+            <h2 id="tituloDowngrade">Escolha os recursos que continuarão ativos</h2>
+            <p>Os demais ficarão indisponíveis para novos agendamentos, sem exclusão de dados ou histórico.</p>
+            {([["SERVICO",servicos,limiteServicos],["PROFISSIONAL",profissionais,limiteProfissionais]] as const).map(([tipo,itens,limite]) =>
+              itens.length > limite && <fieldset key={tipo} className={styles.selectionGroup}>
+                <legend>{tipo === "SERVICO" ? "Serviços" : "Profissionais"} — selecione {limite} de {itens.length}</legend>
+                {itens.map(item=><label key={item.Id} className={styles.resource}>
+                  <input type="checkbox" checked={selecionados.includes(item.Id)} onChange={()=>alternarRecurso(item.Id)} />
+                  {item.Nome}
+                </label>)}
+              </fieldset>)}
+            <div className={styles.modalActions}>
+              <button type="button" className={styles.secondaryButton} onClick={()=>setDestino(null)} disabled={Boolean(pending)}>Cancelar</button>
+              <button type="button" className={styles.button} disabled={!validos || Boolean(pending)}
+                onClick={()=>void confirmarTroca(destino,
+                  servicos.length > limiteServicos ? servicos.filter(x=>selecionados.includes(x.Id)).map(x=>x.Id) : undefined,
+                  profissionais.length > limiteProfissionais ? profissionais.filter(x=>selecionados.includes(x.Id)).map(x=>x.Id) : undefined)}>
+                Confirmar seleção e alterar plano
+              </button>
+            </div>
+          </section>
+        </div>;
+      })()}
       <p className={styles.note}>O plano Grátis oferece 30 dias com acesso completo. Em mudanças de plano, seus dados são preservados; recursos excedentes precisam ser regularizados.</p>
     </main>
   );
