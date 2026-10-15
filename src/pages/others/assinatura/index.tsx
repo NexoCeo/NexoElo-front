@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { FaCheck, FaTimes } from "react-icons/fa";
 import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
-import { consultarAssinatura, iniciarCheckout, abrirPortal, planos, type AssinaturaAtual } from "@/services/assinatura-service";
+import { consultarAssinatura, iniciarCheckout, alterarPlano, abrirPortal, planos, type AssinaturaAtual } from "@/services/assinatura-service";
 import styles from "./style.module.css";
 
 const reais = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
@@ -35,6 +35,31 @@ export default function MinhaAssinatura() {
         "Não foi possível abrir a cobrança. Tente novamente.";
       showNotification({ type: "error", title: "Assinatura", message });
     } finally { setPending(""); }
+  }
+
+  async function selecionarPlano(plano: "BASICO" | "INTERMEDIARIO" | "AVANCADO") {
+    if (!usuario?.Id || !assinatura) return;
+    const jaAssinante = assinatura.AcessoAtivo &&
+      (assinatura.Plano === "BASICO" || assinatura.Plano === "INTERMEDIARIO" || assinatura.Plano === "AVANCADO");
+    if (!jaAssinante) {
+      await executar(plano, () => iniciarCheckout(usuario.Id, plano));
+      return;
+    }
+
+    const escolhido = planos.find(item => item.id === plano);
+    if (!escolhido) return;
+    const confirmar = window.confirm(
+      `Confirmar alteração para ${escolhido.nome} (${reais.format(escolhido.valor)}/mês)?\\n\\n` +
+      "Os recursos do novo plano serão aplicados agora. O novo preço será cobrado na próxima renovação, sem cobrança proporcional imediata. Dados existentes serão preservados."
+    );
+    if (!confirmar) return;
+
+    await executar(plano, async () => {
+      await alterarPlano(usuario.Id, plano);
+      const atualizada = await consultarAssinatura();
+      setAssinatura(atualizada);
+      showNotification({ type: "success", title: "Plano alterado", message: "Seu plano foi atualizado. O novo preço valerá na próxima renovação." });
+    });
   }
 
   const limite = (valor: number) => valor === 2147483647 ? "Ilimitados" : String(valor);
@@ -97,11 +122,10 @@ export default function MinhaAssinatura() {
                 <li className={styles.feature}><FaCheck className={styles.featureIcon} aria-hidden="true" /> Agenda e gestão de serviços</li>
               </ul>
               <button className={styles.button} type="button"
-                disabled={loading || Boolean(pending) || !usuario?.Id || atual ||
-                  (assinatura?.AcessoAtivo && assinatura.Plano !== "GRATIS" && assinatura.Plano !== "SEM_PLANO")}
-                onClick={() => usuario?.Id && executar(plano.id, () => iniciarCheckout(usuario.Id, plano.id))}>
-                {atual ? "Seu plano atual" : pending === plano.id ? "Redirecionando..." :
-                 assinatura?.AcessoAtivo && assinatura.Plano !== "GRATIS" && assinatura.Plano !== "SEM_PLANO" ? "Altere pelo portal" : "Selecionar plano"}
+                disabled={loading || Boolean(pending) || !usuario?.Id || atual || !assinatura}
+                onClick={() => void selecionarPlano(plano.id)}>
+                {atual ? "Seu plano atual" : pending === plano.id ? "Processando..." :
+                 assinatura?.AcessoAtivo && assinatura.Plano !== "GRATIS" && assinatura.Plano !== "SEM_PLANO" ? "Alterar plano" : "Selecionar plano"}
               </button>
             </article>
           );
