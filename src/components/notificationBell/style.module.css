@@ -1,7 +1,7 @@
 .wrapper{position:relative;display:inline-flex;align-items:center}
 .bellButton{position:relative;display:grid;place-items:center;width:36px;height:36px;border-radius:9px;border:0;background:transparent;color:var(--theme-text);cursor:pointer;font-size:16px}
 .bellButton:hover{color:var(--theme-primary)}.bellButton:focus-visible{outline:2px solid var(--theme-primary);outline-offset:2px}
-.badge{position:absolute;top:-7px;right:-7px;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:#ef4444;color:white;font:700 10px/18px system-ui,sans-serif;text-align:center}
+.badge{position:absolute;top:1px;right:1px;min-width:14px;height:14px;padding:0 3px;border-radius:999px;background:#ef4444;color:white;font:700 9px/14px system-ui,sans-serif;text-align:center;transform:translate(18%,-12%)}
 .panel{position:absolute;z-index:2200;right:-110px;top:48px;width:min(410px,calc(100vw - 24px));max-height:min(580px,calc(100dvh - 86px));display:flex;flex-direction:column;overflow:hidden;background:var(--theme-background2);color:var(--theme-text);border:1px solid var(--theme-bottom);border-radius:12px;box-shadow:0 18px 46px var(--theme-shadow);font-family:Inter,system-ui,sans-serif}
 .heading{display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid var(--theme-bottom);font-size:15px}
 .heading button{display:grid;place-items:center;border:0;background:transparent;color:var(--theme-text);cursor:pointer}
