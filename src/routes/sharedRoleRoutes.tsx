@@ -21,6 +21,7 @@ import Profissionais from "@/pages/others/profissionais";
 import Servicos from "@/pages/others/servicos";
 import Funcionamento from "@/pages/others/funcionamento";
 import Relatorios from "@/pages/others/relatorios";
+import MinhaAssinatura from "@/pages/others/assinatura";
 
 type SharedRoleRoutesProps = {
   allowRegister?: boolean;
@@ -142,6 +143,11 @@ export default function SharedRoleRoutes({
           }
         />
       )}
+
+      <Route
+        path="assinatura"
+        element={<ProtectedRoute><MinhaAssinatura /></ProtectedRoute>}
+      />
 
       <Route
         path="perfil"
