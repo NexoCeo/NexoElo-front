@@ -71,7 +71,7 @@
   overflow: hidden;
   border: 2px dashed var(--theme-text-muted);
   position: relative;
-  transition: border-color 0.3s;
+  transition: border-color 0.2s;
 }
 
 .imageCircle:hover {
@@ -93,8 +93,8 @@
   width: 100%;
   min-height: 40px;
   padding: 9px 36px 9px 12px;
-  border: 1px solid var(--theme-text-muted);
-  border-radius: 8px;
+  border: 2px solid var(--theme-background2);
+  border-radius: 5px;
   outline: none;
   font-size: 14px;
   transition: border-color 0.3s;
@@ -229,4 +229,29 @@ select.input {
   .locationGrid {
     grid-template-columns: 1fr;
   }
+}
+
+/* O select segue as mesmas bordas e cores dos inputs compartilhados do login. */
+select.input {
+  height: 40px;
+  min-height: 40px;
+  padding: 0 10px;
+  background-color: var(--theme-background-color);
+  border: 2px solid var(--theme-background2);
+  border-radius: 5px;
+  color: var(--theme-text-color);
+  font-size: 14px;
+}
+select.input:focus-visible { outline: 2px solid var(--theme-primary); outline-offset: 0; }
+
+/* Empresa possui campos extras: compactar sem alterar a largura geral do card. */
+.compactCard { padding-block: 19px; }
+.compactCard .form { gap: 8px; }
+.compactCard .label { margin-bottom: 3px; font-size: 12px; }
+.compactCard .imageCircle { width: 66px; height: 66px; }
+.compactCard .imageUploadContainer { margin-bottom: 0; }
+.compactCard .linksRow { margin-bottom: 2px; }
+@media (max-height: 690px) {
+  .compactCard { padding-block: 14px; }
+  .compactCard .form { gap: 6px; }
 }
