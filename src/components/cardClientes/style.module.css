@@ -13,14 +13,14 @@
 .listHeader,
 .listItem {
   display: grid;
-  grid-template-columns: minmax(145px, 1.6fr) minmax(125px, 1.3fr) minmax(135px, 1.25fr) 74px 104px minmax(84px, 0.75fr) 84px;
+  grid-template-columns: var(--agenda-columns, minmax(0, 20fr) minmax(0, 18fr) minmax(0, 18fr) minmax(0, 10fr) minmax(0, 12fr) minmax(0, 11fr) minmax(0, 11fr));
   align-items: center;
-  gap: 14px;
+  gap: 0;
 }
 
 .listHeader {
   min-height: 50px;
-  padding: 0 18px;
+  padding: 0 12px;
   border-bottom: 1px solid var(--theme-bottom);
   background: var(--theme-surface-muted);
   color: var(--theme-text-muted);
@@ -35,7 +35,7 @@
 
 .listItem {
   min-height: 70px;
-  padding: 12px 18px;
+  padding: 12px 12px;
   border-bottom: 1px solid var(--theme-grey21);
   font-size: 0.88rem;
   transition: background-color 150ms ease;
@@ -50,6 +50,7 @@
 }
 
 .listItem > div {
+  padding-inline: 6px;
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -251,25 +252,24 @@
   }
 }
 
-@media (max-width: 1450px) and (min-width: 761px) {
-  .listSection {
-    overflow-x: auto;
-  }
-
-  .listHeader,
-  .listItem {
-    min-width: 1010px;
-  }
-}
-
+.columnTitle{position:relative;display:flex;align-items:center;min-width:0;height:100%;padding:0 6px;overflow:visible}
+.columnTitle>span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.resizeHandle{position:absolute;z-index:2;right:-5px;top:0;width:10px;height:100%;touch-action:none;cursor:col-resize}
+.resizeHandle::after{content:"";position:absolute;left:4px;top:18%;height:64%;width:2px;background:transparent;border-radius:2px}
+.resizeHandle:hover::after,.resizeHandle:focus-visible::after{background:var(--theme-primary)}
+.resizeHandle:focus-visible{outline:2px solid var(--theme-primary);outline-offset:-2px}
+.listItem{font-size:clamp(.7rem,.85vw,.88rem)}
+.listItem .actions{gap:3px;justify-content:center}
+.listItem .actionButton{width:28px;height:28px;font-size:.78rem}
+@media(min-width:761px){.listSection{overflow:hidden}.listHeader,.listItem{width:100%;min-width:0}}
 @media (max-width: 760px) {
   .listSection {
     border-radius: 7px;
   }
 
-  .listHeader {
-    display: none;
-  }
+  .listHeader { display: none; }
+  .listItem { gap: 10px 18px; }
+  .listItem > div { padding-inline: 0; }
 
   .listBody {
     padding: 0 14px;
