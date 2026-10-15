@@ -72,8 +72,10 @@ export default function NotificationBell() {
       onClick={() => setOpen(value => !value)}
       aria-label={unread.length ? `Notificações: ${unread.length} não lidas` : "Abrir notificações"}
       aria-expanded={open} aria-haspopup="dialog">
-      <FaBell aria-hidden="true" />
-      {unread.length > 0 && <span className={styles.badge}>{unread.length > 99 ? "99+" : unread.length}</span>}
+      <span className={styles.bellIconWrap}>
+        <FaBell aria-hidden="true" />
+        {unread.length > 0 && <span className={styles.badge}>{unread.length > 99 ? "99+" : unread.length}</span>}
+      </span>
     </button>
     {open && <section className={styles.panel} role="dialog" aria-label="Notificações">
       <div className={styles.heading}>
