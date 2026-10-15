@@ -23,22 +23,19 @@ export default function ProfileOverview({ name, role, email, phone, avatarUrl, c
   const initial = name.trim().charAt(0).toUpperCase() || "?";
   return (
     <section className={`${styles.profile} ${className || ""}`} aria-label="Informações do perfil">
-      <div className={styles.cover} aria-hidden="true"><div className={styles.coverGlow} /></div>
-      <div className={styles.identity}>
-        <div className={styles.avatar} aria-label="Foto do perfil">
-          {avatarUrl ? <img src={avatarUrl} alt={`Foto de ${name}`} /> : <span aria-hidden="true">{initial}</span>}
-        </div>
-        <div className={styles.heading}>
-          <span className={styles.role}>{role}</span>
-          <h2>{name}</h2>
-          {subtitle && <p>{subtitle}</p>}
-        </div>
-        {action && <div className={styles.action}>{action}</div>}
+      <div className={styles.avatar}>
+        {avatarUrl ? <img src={avatarUrl} alt={`Foto de ${name}`} /> : <span aria-hidden="true">{initial}</span>}
+      </div>
+      <div className={styles.heading}>
+        <h2>{name}</h2>
+        <span className={styles.role}>{role}</span>
+        {subtitle && <p>{subtitle}</p>}
       </div>
       <dl className={styles.details}>
         <div><dt><FaEnvelope aria-hidden="true" /> E-mail</dt><dd>{email || "Não informado"}</dd></div>
         <div><dt><FaPhoneAlt aria-hidden="true" /> Telefone</dt><dd>{formatPhone(phone)}</dd></div>
       </dl>
+      {action && <div className={styles.action}>{action}</div>}
     </section>
   );
 }
