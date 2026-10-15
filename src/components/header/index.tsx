@@ -8,6 +8,7 @@ import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
 import { getRoleBasePath } from "@/routes/role-paths";
 import QrCode from "@/components/qrCode";
+import NotificationBell from "@/components/notificationBell";
 import { logout as endSession } from "@/services/logout-service";
 import { defaultProfileImg, getProfileImageUrl } from "./profile-image";
 
@@ -95,6 +96,7 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
         </button>
 
         <div className={styles.headerActions}>
+          <NotificationBell />
           {canShowFindMe && (
             <button
               type="button"
