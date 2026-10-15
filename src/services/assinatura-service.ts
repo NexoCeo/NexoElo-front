@@ -41,8 +41,12 @@ export async function alterarPlano(usuarioId: number, plano: "BASICO" | "INTERME
   await api.post("Assinatura/alterar-plano", { UsuarioId: usuarioId, Plano: plano, ServicosAtivos: servicosAtivos, ProfissionaisAtivos: profissionaisAtivos });
 }
 
-export interface RecursoPlano { Tipo: "SERVICO" | "PROFISSIONAL"; Id: number; Nome: string; }
+export interface RecursoPlano { Tipo: "SERVICO" | "PROFISSIONAL"; Id: number; Nome: string; Ativo: boolean; }
 export async function listarRecursosPlano() {
   const { data } = await api.get<RecursoPlano[]>("Assinatura/recursos");
   return data;
+}
+
+export async function atualizarRecursosAtivos(usuarioId: number, plano: "BASICO" | "INTERMEDIARIO" | "AVANCADO", servicosAtivos?: number[], profissionaisAtivos?: number[]) {
+  await api.put("Assinatura/recursos", { UsuarioId: usuarioId, Plano: plano, ServicosAtivos: servicosAtivos, ProfissionaisAtivos: profissionaisAtivos });
 }
