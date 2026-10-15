@@ -174,7 +174,6 @@ export default function Funcionamento() {
   const expedienteTotal = config
     ? timeToMinutes(config.HorarioFechamento) - timeToMinutes(config.HorarioAbertura)
     : 0;
-  const atendimentoTotal = Math.max(0, expedienteTotal - pausaTotal);
   const horariosPorDia = config?.HorariosPorDia ?? {};
 
   useEffect(() => {
