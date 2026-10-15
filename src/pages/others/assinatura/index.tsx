@@ -17,7 +17,7 @@ export default function MinhaAssinatura() {
   const [pending, setPending] = useState("");
   const [destino, setDestino] = useState<"BASICO" | "INTERMEDIARIO" | "AVANCADO" | null>(null);
   const [recursos, setRecursos] = useState<RecursoPlano[]>([]);
-  const [selecionados, setSelecionados] = useState<number[]>([]);
+  const [selecionados, setSelecionados] = useState<string[]>([]);
   const [carregandoRecursos, setCarregandoRecursos] = useState(false);
 
   useEffect(() => {
@@ -59,8 +59,8 @@ export default function MinhaAssinatura() {
       if (excede) {
         setRecursos(itens);
         setSelecionados([
-          ...servicos.slice(0, limites[0]).map(x=>x.Id),
-          ...profissionais.slice(0, limites[1]).map(x=>x.Id)
+          ...servicos.slice(0, limites[0]).map(x=>`${x.Tipo}:${x.Id}`),
+          ...profissionais.slice(0, limites[1]).map(x=>`${x.Tipo}:${x.Id}`)
         ]);
         setDestino(plano);
       } else {
@@ -88,7 +88,7 @@ export default function MinhaAssinatura() {
     });
   }
 
-  function alternarRecurso(id: number) {
+  function alternarRecurso(id: string) {
     setSelecionados(prev=>prev.includes(id)?prev.filter(i=>i!==id):[...prev,id]);
   }
 
@@ -166,7 +166,7 @@ export default function MinhaAssinatura() {
         const limiteProfissionais = destino === "BASICO" ? 2 : destino === "INTERMEDIARIO" ? 4 : Infinity;
         const servicos = recursos.filter(item => item.Tipo === "SERVICO");
         const profissionais = recursos.filter(item => item.Tipo === "PROFISSIONAL");
-        const validos = (servicos.length <= limiteServicos || servicos.filter(x=>selecionados.includes(x.Id)).length === limiteServicos) &&
+        const validos = (servicos.length <= limiteServicos || servicos.filter(x=>selecionados.includes(`${x.Tipo}:${x.Id}`)).length === limiteServicos) &&
           (profissionais.length <= limiteProfissionais || profissionais.filter(x=>selecionados.includes(x.Id)).length === limiteProfissionais);
         return <div className={styles.modalBackdrop} role="presentation">
           <section className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="tituloDowngrade">
@@ -176,7 +176,7 @@ export default function MinhaAssinatura() {
               itens.length > limite && <fieldset key={tipo} className={styles.selectionGroup}>
                 <legend>{tipo === "SERVICO" ? "Serviços" : "Profissionais"} — selecione {limite} de {itens.length}</legend>
                 {itens.map(item=><label key={item.Id} className={styles.resource}>
-                  <input type="checkbox" checked={selecionados.includes(item.Id)} onChange={()=>alternarRecurso(item.Id)} />
+                  <input type="checkbox" checked={selecionados.includes(`${item.Tipo}:${item.Id}`)} onChange={()=>alternarRecurso(`${item.Tipo}:${item.Id}`)} />
                   {item.Nome}
                 </label>)}
               </fieldset>)}
