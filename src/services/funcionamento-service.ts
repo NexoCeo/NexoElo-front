@@ -278,6 +278,7 @@ export function criarFuncionamentoPadrao(usuarioId: number): FuncionamentoConfig
     IntervaloInicio: null,
     IntervaloFim: null,
     Intervalos: [],
+    HorariosPorDia: {},
   };
 }
 
@@ -300,6 +301,21 @@ export function normalizeFuncionamento(data: ApiRecord, usuarioId: number): Func
   const expediente = reconstruirExpediente(data, blocosDisponiveis, diasSelecionados);
   const primeiraPausa = expediente.pausas[0];
 
+  const horariosPorDia: FuncionamentoConfig["HorariosPorDia"] = {};
+  for (const dia of DIAS) {
+    if (!normalizedDays[dia]) continue;
+    const blocosDoDia = consolidarBlocos(blocosDisponiveis.filter(bloco => bloco.Dia === dia));
+    if (!blocosDoDia.length) continue;
+    const inicio = blocosDoDia[0].Inicio;
+    const fim = blocosDoDia[blocosDoDia.length - 1].Fim;
+    const pausas = blocosDoDia.slice(0, -1).map((bloco, index) => ({
+      Inicio: bloco.Fim,
+      Fim: blocosDoDia[index + 1].Inicio,
+    }));
+    const iguaisAoPadrao = inicio === expediente.abertura && fim === expediente.fechamento &&
+      JSON.stringify(pausas) === JSON.stringify(expediente.pausas);
+    if (!iguaisAoPadrao) horariosPorDia[dia] = { Inicio: inicio, Fim: fim, Intervalos: pausas };
+  }
   return {
     UsuarioFk: pickNumber(data, ["UsuarioFk", "usuarioFk", "UsuarioId", "usuarioId"]) || usuarioId,
     ...normalizedDays,
@@ -308,6 +324,7 @@ export function normalizeFuncionamento(data: ApiRecord, usuarioId: number): Func
     IntervaloInicio: primeiraPausa?.Inicio ?? null,
     IntervaloFim: primeiraPausa?.Fim ?? null,
     Intervalos: expediente.pausas,
+    HorariosPorDia: horariosPorDia,
   };
 }
 
@@ -317,18 +334,19 @@ export function buildFuncionamentoPayload(config: FuncionamentoConfig): Funciona
     .map((dia) => DIA_API_POR_UI[dia]);
   const horarioAbertura = toApiTime(config.HorarioAbertura) ?? "08:00";
   const horarioFechamento = toApiTime(config.HorarioFechamento) ?? "18:00";
-  const pausas = config.Intervalos
-    .filter((intervalo) => intervalo.Inicio && intervalo.Fim)
-    .map((intervalo) => ({
-      Inicio: toApiTime(intervalo.Inicio) ?? "00:00",
-      Fim: toApiTime(intervalo.Fim) ?? "00:00",
-    }))
-    .sort((a, b) => timeToMinutes(a.Inicio) - timeToMinutes(b.Inicio));
   const intervalos = diasFuncionamento.flatMap((dia) => {
+    const chave = DIAS.find(key => DIA_API_POR_UI[key] === dia);
+    const personalizado = chave ? config.HorariosPorDia?.[chave] : undefined;
+    const aberturaDia = personalizado?.Inicio ?? horarioAbertura;
+    const fechamentoDia = personalizado?.Fim ?? horarioFechamento;
+    const pausasDia = (personalizado?.Intervalos ?? config.Intervalos)
+      .filter(intervalo => intervalo.Inicio && intervalo.Fim)
+      .map(intervalo => ({ Inicio: intervalo.Inicio, Fim: intervalo.Fim }))
+      .sort((x, y) => timeToMinutes(x.Inicio) - timeToMinutes(y.Inicio));
     const blocos: FuncionamentoPayload["Intervalos"] = [];
-    let cursor = timeToMinutes(horarioAbertura);
+    let cursor = timeToMinutes(aberturaDia);
 
-    for (const pausa of pausas) {
+    for (const pausa of pausasDia) {
       const inicioPausa = timeToMinutes(pausa.Inicio);
       const fimPausa = timeToMinutes(pausa.Fim);
 
@@ -343,7 +361,7 @@ export function buildFuncionamentoPayload(config: FuncionamentoConfig): Funciona
       cursor = Math.max(cursor, fimPausa);
     }
 
-    const fechamento = timeToMinutes(horarioFechamento);
+    const fechamento = timeToMinutes(fechamentoDia);
     if (cursor < fechamento) {
       blocos.push({
         DiaFuncionamento: dia,
