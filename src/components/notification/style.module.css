@@ -1,6 +1,6 @@
 .container {
   position: fixed;
-  top: 24px;
+  top: 48px;
   right: 24px;
 
   display: flex;
@@ -168,7 +168,7 @@
 
 @media (max-width: 600px) {
   .container {
-    top: 16px;
+    top: 32px;
     right: 16px;
     left: 16px;
 
