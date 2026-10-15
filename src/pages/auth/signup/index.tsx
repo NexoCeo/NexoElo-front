@@ -79,14 +79,6 @@ function Register() {
       URL.revokeObjectURL(nextPreviewUrl);
   }, [fotoPerfil]);
 
-  /*
-   * Tema dos inputs
-   */
-  const inputTheme = {
-    backgroundColor: theme.colors.bottom,
-    color: theme.colors.inactive,
-  };
-
   return (
     <div
       className={styles.container}
@@ -96,7 +88,7 @@ function Register() {
       }}
     >
       <div
-        className={styles.card}
+        className={`${styles.card} ${TipoUsuario === "empresa" ? styles.compactCard : ""}`}
         style={{
           backgroundColor:
             theme.colors.surface,
@@ -219,7 +211,6 @@ function Register() {
             >
               <select
                 className={styles.input}
-                style={inputTheme}
                 value={TipoUsuario}
                 onChange={(event) =>
                   setTipoUsuario(
@@ -266,7 +257,6 @@ function Register() {
               >
                 <select
                   className={styles.input}
-                  style={inputTheme}
                   value={empresaId}
                   onChange={(event) =>
                     setEmpresaId(
@@ -343,7 +333,7 @@ function Register() {
                   Nome Fantasia
                 </label>
 
-                <InputGeneric type="text" name="nomeFantasia" value={nomeFantasia} onChange={setNomeFantasia} placeholder="Digite o nome fantasia" icon={<FaUser size={15} />}                />
+                <InputGeneric type="text" name="nomeFantasia" value={nomeFantasia} onChange={setNomeFantasia} placeholder="Digite o nome fantasia" icon={<FaUser size={15} />} />
               </div>
 
               {/* CNPJ */}
