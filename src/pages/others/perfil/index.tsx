@@ -17,6 +17,7 @@ import {
   obterPerfilUsuario,
 } from "@/services/usuario-service";
 import styles from "./style.module.css";
+import ProfileOverview from "@/components/profile-overview";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -195,31 +196,15 @@ export default function Perfil() {
       {success && <p className={styles.success}>{success}</p>}
       {error && !modalOpen && <p className={styles.error}>{error}</p>}
 
-      <section className={styles.profilePanel} style={{ backgroundColor: theme.colors.background2 }}>
-        <div className={styles.identity}>
-          <img
-            src={getProfileImageUrl(usuario?.FotoPerfil)}
-            alt={`Foto de ${usuario?.Nome || "perfil"}`}
-          />
-          <div>
-            <span className={styles.role}>{formatRole(usuario?.Papel)}</span>
-            <h2 style={{ color: theme.colors.text }}>
-              {loading ? "Carregando..." : usuario?.Nome || "Nome nao informado"}
-            </h2>
-          </div>
-        </div>
-
-        <dl className={styles.details}>
-          <div>
-            <dt><FaEnvelope aria-hidden="true" /> E-mail</dt>
-            <dd>{usuario?.Email || "Nao informado"}</dd>
-          </div>
-          <div>
-            <dt><FaPhone aria-hidden="true" /> Telefone</dt>
-            <dd>{usuario?.Telefone || "Nao informado"}</dd>
-          </div>
-        </dl>
-      </section>
+      <div className={styles.profileShell}>
+        <ProfileOverview
+          role={formatRole(usuario?.Papel)}
+          name={loading ? "Carregando..." : usuario?.Nome || "Nome não informado"}
+          email={usuario?.Email}
+          phone={usuario?.Telefone}
+          avatarUrl={getProfileImageUrl(usuario?.FotoPerfil)}
+        />
+      </div>
 
       {modalOpen && (
         <div className={styles.modalBackdrop} role="presentation">
