@@ -26,6 +26,7 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
   const [isFindMeOpen, setIsFindMeOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const fotoUrl = getProfileImageUrl(usuario?.FotoPerfil);
+  const primeiroNome = usuario?.Nome?.trim().split(/\s+/)[0] || "Conta";
   const papel = usuario?.Papel?.toUpperCase();
   const canShowFindMe = papel === "EMPRESA" || papel === "AUTONOMO";
 
@@ -114,6 +115,7 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
               aria-expanded={isProfileMenuOpen}
               aria-haspopup="menu"
             >
+              <span className={styles.profileName}>{primeiroNome}</span>
               <img
                 src={fotoUrl}
                 className={styles.fotoPerfil}
