@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { NavLink } from "react-router-dom";
 import { FaCalendarAlt, FaChartBar, FaClock, FaHome, FaTimes, FaTools, FaCreditCard } from "react-icons/fa";
 import { FaPerson } from "react-icons/fa6";
@@ -6,6 +6,7 @@ import styles from "./style.module.css";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
 import { getRoleBasePath } from "@/routes/role-paths";
+import { consultarAssinatura } from "@/services/assinatura-service";
 
 interface SidebarProps {
   isMenuOpen: boolean;
@@ -16,6 +17,15 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
   const { theme } = useTheme();
   const { usuario } = useUser();
   const navRef = useRef<HTMLElement>(null);
+  const [relatoriosLiberados, setRelatoriosLiberados] = useState(false);
+  useEffect(() => {
+    if (usuario?.Papel !== "EMPRESA" && usuario?.Papel !== "AUTONOMO") return;
+    let active = true;
+    consultarAssinatura().then(acesso => {
+      if (active) setRelatoriosLiberados(acesso.AcessoAtivo && acesso.RelatoriosLiberados);
+    }).catch(() => { if (active) setRelatoriosLiberados(false); });
+    return () => { active = false; };
+  }, [usuario?.Papel, usuario?.Id]);
   const basePath = getRoleBasePath(usuario?.Papel);
   const canManageSharedSettings = usuario?.Papel === "EMPRESA" || usuario?.Papel === "AUTONOMO";
   const sidebarStyle = {
@@ -109,7 +119,7 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
           </li>
         )}
 
-        {canManageSharedSettings && (
+        {canManageSharedSettings && relatoriosLiberados && (
           <li className={styles.navItem}>
             <NavLink to={`${basePath}/relatorios`} end className={linkClassName} onClick={closeMenu}>
               <FaChartBar className={styles.navIcon} aria-hidden="true" />
