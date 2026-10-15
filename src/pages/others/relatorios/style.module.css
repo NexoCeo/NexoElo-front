@@ -191,7 +191,7 @@
   border: 0;
   padding: 0 14px;
   background: var(--reports-primary);
-  color: var(--theme-text);
+  color: var(--theme-white);
 }
 
 .downloadButton {
