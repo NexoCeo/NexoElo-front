@@ -1,3 +1,4 @@
+import { isAxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
@@ -24,7 +25,15 @@ export default function MinhaAssinatura() {
   async function executar(chave: string, acao: () => Promise<void>) {
     setPending(chave);
     try { await acao(); }
-    catch { showNotification({ type: "error", title: "Assinatura", message: "Nao foi possivel abrir a cobranca. Tente novamente." }); }
+    catch (error) {
+      const response = isAxiosError<{ Erro?: string; erro?: string; message?: string }>(error)
+        ? error.response?.data : undefined;
+      const message = response?.Erro || response?.erro || response?.message ||
+        (isAxiosError(error) && error.response?.status === 400
+          ? "Nao foi possivel iniciar o pagamento. Confira a configuracao Stripe."
+          : "Nao foi possivel abrir a cobranca. Tente novamente.");
+      showNotification({ type: "error", title: "Assinatura", message });
+    }
     finally { setPending(""); }
   }
 
