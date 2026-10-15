@@ -20,19 +20,35 @@
 }
 
 .profileButton {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
+  min-height: 36px;
+  max-width: 180px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 3px 5px 3px 13px;
+  border: 1px solid var(--theme-bottom);
+  border-radius: 999px;
+  background: var(--theme-background2);
+  color: var(--theme-text);
   cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.profileName {
+  min-width: 0;
+  max-width: 112px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1;
 }
 
 .profileButton:hover {
   background: var(--theme-primary-soft);
+  border-color: var(--theme-primary);
 }
 
 .profileButton:focus-visible {
@@ -52,8 +68,8 @@
   background: transparent;
   padding: 8px 6px;
   cursor: pointer;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .findMeButton:hover {
@@ -93,7 +109,8 @@
   border: none;
   color: var(--theme-text);
   text-decoration: none;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
 }
 
@@ -117,8 +134,9 @@
 }
 
 .fotoPerfil {
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid;
@@ -146,7 +164,7 @@
   cursor: pointer;
   display: inline-grid;
   place-items: center;
-  font-size: 24px;
+  font-size: 20px;
   transition: background-color 160ms ease, color 160ms ease;
 }
 
@@ -217,8 +235,19 @@
   }
 
   .findMeButton {
-    font-size: 14px;
+    font-size: 12px;
     padding-inline: 4px;
+  }
+
+  .profileButton {
+    max-width: 135px;
+    padding-left: 9px;
+    gap: 6px;
+  }
+
+  .profileName {
+    max-width: 76px;
+    font-size: 12px;
   }
 
   .findMeModal {
