@@ -289,3 +289,11 @@
   outline: 2px solid #ef4444;
   outline-offset: -2px;
 }
+
+/* Cores semanticas dos icones do menu de usuario. */
+.profileMenu a[href$="/perfil"] svg { color: #60a5fa; }
+.profileMenu a[href$="/assinatura"] svg { color: #2dd4bf; }
+.profileMenu .themeAction .sunIcon { color: #facc15; }
+.profileMenu .themeAction .moonIcon { color: #a78bfa; }
+.profileMenu .logoutAction svg { color: #f87171; }
+.profileMenu a:hover svg, .profileMenu button:hover svg { filter: brightness(1.12); }
