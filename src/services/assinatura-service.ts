@@ -36,3 +36,7 @@ export async function abrirPortal(usuarioId: number) {
   if (!response.data.Url) throw new Error("O portal de cobranca nao retornou uma URL.");
   window.location.assign(response.data.Url);
 }
+
+export async function alterarPlano(usuarioId: number, plano: "BASICO" | "INTERMEDIARIO" | "AVANCADO") {
+  await api.post("Assinatura/alterar-plano", { UsuarioId: usuarioId, Plano: plano });
+}
