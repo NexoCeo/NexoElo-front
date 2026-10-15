@@ -37,6 +37,7 @@ export type FuncionamentoConfig = {
   IntervaloInicio?: string | null;
   IntervaloFim?: string | null;
   Intervalos: FuncionamentoIntervalo[];
+  HorariosPorDia?: Partial<Record<DiaFuncionamentoKey, { Inicio: string; Fim: string; Intervalos: FuncionamentoIntervalo[] }>>;
 };
 
 export type FuncionamentoPayload = {
