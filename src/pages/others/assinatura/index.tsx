@@ -203,7 +203,7 @@ export default function MinhaAssinatura() {
         const servicos = recursos.filter(item => item.Tipo === "SERVICO");
         const profissionais = recursos.filter(item => item.Tipo === "PROFISSIONAL");
         const validos = (servicos.length <= limiteServicos || servicos.filter(x=>selecionados.includes(`${x.Tipo}:${x.Id}`)).length === limiteServicos) &&
-          (profissionais.length <= limiteProfissionais || profissionais.filter(x=>selecionados.includes(x.Id)).length === limiteProfissionais);
+          (profissionais.length <= limiteProfissionais || profissionais.filter(x=>selecionados.includes(`${x.Tipo}:${x.Id}`)).length === limiteProfissionais);
         return <div className={styles.modalBackdrop} role="presentation">
           <section className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="tituloDowngrade">
             <h2 id="tituloDowngrade">Escolha os recursos que continuarão ativos</h2>
@@ -220,8 +220,8 @@ export default function MinhaAssinatura() {
               <button type="button" className={styles.secondaryButton} onClick={()=>{setDestino(null);setEditandoRecursos(false);}} disabled={Boolean(pending)}>Cancelar</button>
               <button type="button" className={styles.button} disabled={!validos || Boolean(pending)}
                 onClick={()=>void confirmarTroca(destino,
-                  servicos.length > limiteServicos ? servicos.filter(x=>selecionados.includes(x.Id)).map(x=>x.Id) : undefined,
-                  profissionais.length > limiteProfissionais ? profissionais.filter(x=>selecionados.includes(x.Id)).map(x=>x.Id) : undefined)}>
+                  servicos.length > limiteServicos ? servicos.filter(x=>selecionados.includes(`${x.Tipo}:${x.Id}`)).map(x=>x.Id) : undefined,
+                  profissionais.length > limiteProfissionais ? profissionais.filter(x=>selecionados.includes(`${x.Tipo}:${x.Id}`)).map(x=>x.Id) : undefined)}>
                 {editandoRecursos ? "Salvar recursos ativos" : "Confirmar seleção e alterar plano"}
               </button>
             </div>
