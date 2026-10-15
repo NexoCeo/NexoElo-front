@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  FaEnvelope,
-  FaEye,
-  FaEyeSlash,
   FaPlus,
   FaUser,
 } from "react-icons/fa";
 
 import styles from "./style.module.css";
+import { EmailInput } from "@/components/auth/emailInput";
+import { PasswordInput } from "@/components/auth/passwordInput";
+import { InputGeneric } from "@/components/inputGeneric";
+import { SubmitButton } from "@/components/auth/submitButton";
 
 import { useTheme } from "@/context/ThemeContext";
 import { useRegisterForm } from "@/hooks/useRegisterForm";
@@ -163,29 +164,7 @@ function Register() {
               Nome
             </label>
 
-            <div
-              className={
-                styles.labelWrapper
-              }
-            >
-              <input
-                type="text"
-                className={styles.input}
-                style={inputTheme}
-                value={nome}
-                onChange={(event) =>
-                  setNome(event.target.value)
-                }
-                placeholder="Digite seu nome"
-                required
-              />
-
-              <span
-                className={styles.icon}
-              >
-                <FaUser size={15} />
-              </span>
-            </div>
+            <InputGeneric value={nome} onChange={setNome} name="name" type="text" placeholder="Digite seu nome" icon={<FaUser size={15} />} />
           </div>
 
           {/* Email */}
@@ -199,29 +178,7 @@ function Register() {
               Email
             </label>
 
-            <div
-              className={
-                styles.labelWrapper
-              }
-            >
-              <input
-                type="email"
-                className={styles.input}
-                style={inputTheme}
-                value={email}
-                onChange={(event) =>
-                  setEmail(event.target.value)
-                }
-                placeholder="Digite seu e-mail"
-                required
-              />
-
-              <span
-                className={styles.icon}
-              >
-                <FaEnvelope size={15} />
-              </span>
-            </div>
+            <EmailInput value={email} onChange={setEmail} />
 
             {emailError && (
               <p className={styles.error}>
@@ -241,46 +198,7 @@ function Register() {
               Senha
             </label>
 
-            <div
-              className={
-                styles.labelWrapper
-              }
-            >
-              <input
-                type={
-                  showPassword
-                    ? "text"
-                    : "password"
-                }
-                className={styles.input}
-                style={inputTheme}
-                value={senha}
-                onChange={(event) =>
-                  setSenha(event.target.value)
-                }
-                placeholder="Digite sua senha"
-                required
-              />
-
-              <button
-                type="button"
-                className={
-                  styles.iconButton
-                }
-                onClick={() =>
-                  setShowPassword(
-                    !showPassword
-                  )
-                }
-                aria-label="Alternar visibilidade da senha"
-              >
-                {showPassword ? (
-                  <FaEyeSlash size={15} />
-                ) : (
-                  <FaEye size={15} />
-                )}
-              </button>
-            </div>
+            <PasswordInput value={senha} onChange={setSenha} showPassword={showPassword} togglePassword={() => setShowPassword(!showPassword)} autoComplete="new-password" />
           </div>
 
           {/* Tipo de usuário */}
@@ -425,21 +343,7 @@ function Register() {
                   Nome Fantasia
                 </label>
 
-                <input
-                  type="text"
-                  className={
-                    styles.input
-                  }
-                  style={inputTheme}
-                  value={nomeFantasia}
-                  onChange={(event) =>
-                    setNomeFantasia(
-                      event.target.value
-                    )
-                  }
-                  placeholder="Digite o nome fantasia"
-                  required
-                />
+                <InputGeneric type="text" name="nomeFantasia" value={nomeFantasia} onChange={setNomeFantasia} placeholder="Digite o nome fantasia" icon={<FaUser size={15} />}                />
               </div>
 
               {/* CNPJ */}
@@ -460,21 +364,7 @@ function Register() {
                   CNPJ
                 </label>
 
-                <input
-                  type="text"
-                  className={
-                    styles.input
-                  }
-                  style={inputTheme}
-                  value={cnpj}
-                  onChange={(event) =>
-                    setCnpj(
-                      event.target.value
-                    )
-                  }
-                  placeholder="Digite o CNPJ"
-                  required
-                />
+                <InputGeneric type="text" name="cnpj" value={cnpj} onChange={setCnpj} placeholder="Digite o CNPJ" icon={<FaUser size={15} />}                />
               </div>
             </>
           )}
@@ -503,37 +393,7 @@ function Register() {
           </div>
 
           {/* Botão cadastrar */}
-          <button
-            type="submit"
-            className={
-              isFormValid() && !loading
-                ? styles.button
-                : styles.buttonDisabled
-            }
-            style={{
-              backgroundColor:
-                isFormValid() && !loading
-                  ? theme.colors.primary
-                  : theme.colors.inactive,
-
-              color: theme.colors.onPrimary,
-            }}
-            disabled={
-              !isFormValid() ||
-              loading ||
-              loadingEmpresas
-            }
-          >
-            {loading ? (
-              <span
-                className={
-                  styles.spinner
-                }
-              />
-            ) : (
-              "Cadastrar"
-            )}
-          </button>
+          <SubmitButton disabled={!isFormValid() || loadingEmpresas} loading={loading}>Cadastrar</SubmitButton>
         </form>
       </div>
     </div>
