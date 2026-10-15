@@ -373,3 +373,6 @@
     width: 100%;
   }
 }
+
+/* Mesmo cartao visual compartilhado entre perfis, sem alterar formulario de edicao. */
+.profileShell{width:min(100%,920px);margin:0 auto;}
