@@ -54,16 +54,6 @@ export default function Dashboard() {
   const role = usuario?.Papel?.toUpperCase();
   const isProfessional = role === "PROFISSIONAL";
   const canOpenAgenda = role === "EMPRESA" || role === "AUTONOMO";
-  const dashboardTitle = role === "EMPRESA"
-    ? "Dashboard da Empresa"
-    : role === "AUTONOMO"
-      ? "Dashboard do Autônomo"
-      : "Dashboard Profissional";
-  const dashboardEyebrow = role === "EMPRESA"
-    ? "Visão da empresa"
-    : role === "AUTONOMO"
-      ? "Visão do negócio"
-      : "Seu painel";
   const [range, setRange] = useState<DashboardRange>("today");
   const [appointments, setAppointments] = useState<Agendamento[]>([]);
   const [loading, setLoading] = useState(false);
@@ -134,16 +124,6 @@ export default function Dashboard() {
 
   return (
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
-      <header className={styles.header}>
-        <div className={styles.titleGroup}>
-          <span className={styles.eyebrow}>{dashboardEyebrow}</span>
-          <h1 style={{ color: theme.colors.text }}>{dashboardTitle}</h1>
-          <p style={{ color: theme.colors.inactive }}>
-            Acompanhe seus compromissos e mantenha o dia organizado.
-          </p>
-        </div>
-      </header>
-
       <section className={styles.agendaSection} aria-labelledby="dashboard-agenda-title">
         <div className={styles.agendaHeader}>
           <div className={styles.agendaTitleGroup}>
