@@ -225,3 +225,38 @@
     padding: 24px 16px 20px;
   }
 }
+
+/* Acoes semanticas do menu do perfil. Classes locais evitam afetar outros botoes. */
+.profileMenu .themeAction {
+  border-radius: 6px;
+  transition: background-color 160ms ease;
+}
+.profileMenu .themeAction:hover,
+.profileMenu .themeAction:focus-visible {
+  background: var(--theme-primary-soft, rgba(59,130,246,.13));
+}
+.profileMenu .themeAction .sunIcon {
+  color: #facc15;
+  filter: drop-shadow(0 0 3px rgba(250,204,21,.23));
+}
+.profileMenu .themeAction .moonIcon {
+  color: #818cf8;
+  filter: drop-shadow(0 0 3px rgba(129,140,248,.20));
+}
+.profileMenu .logoutAction {
+  border-radius: 6px;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.profileMenu .logoutAction:hover,
+.profileMenu .logoutAction:focus-visible {
+  background: rgba(220,38,38,.22);
+  color: #fca5a5 !important;
+}
+.profileMenu .logoutAction:hover svg,
+.profileMenu .logoutAction:focus-visible svg {
+  color: #f87171;
+}
+.profileMenu .logoutAction:focus-visible {
+  outline: 2px solid #ef4444;
+  outline-offset: -2px;
+}
