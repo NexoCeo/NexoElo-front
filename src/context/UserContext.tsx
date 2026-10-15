@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useState, useEffect } from "react";
+import React, { createContext, useCallback, useContext, useState } from "react";
 
 export type Usuario = {
   Id: number;
@@ -32,18 +32,16 @@ const capitalizeName = (nome: string) => {
 };
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const [usuario, setUsuarioState] = useState<Usuario | null>(null);
-
-  useEffect(() => {
-    const usuarioStr = sessionStorage.getItem("usuario");
-    if (!usuarioStr) return;
-
+  const [usuario, setUsuarioState] = useState<Usuario | null>(() => {
+    if (typeof window === "undefined") return null;
     try {
-      setUsuarioState(JSON.parse(usuarioStr));
+      const stored = window.sessionStorage.getItem("usuario");
+      return stored ? JSON.parse(stored) as Usuario : null;
     } catch {
-      sessionStorage.removeItem("usuario");
+      window.sessionStorage.removeItem("usuario");
+      return null;
     }
-  }, []);
+  });
 
   const setUsuario = useCallback((novoUsuario: Usuario | null) => {
     if (novoUsuario) {
