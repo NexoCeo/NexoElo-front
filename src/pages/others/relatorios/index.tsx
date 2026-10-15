@@ -201,7 +201,6 @@ export default function Relatorios() {
     return (
       <main className={styles.container} style={pageStyle}>
         <section className={styles.pageHeader}>
-          <h1>Relatorios</h1>
           <p>Esta area esta disponivel apenas para empresas e autonomos.</p>
         </section>
       </main>
@@ -211,12 +210,6 @@ export default function Relatorios() {
   return (
     <main className={styles.container} style={pageStyle}>
       <section className={styles.pageHeader}>
-        <div>
-          <span className={styles.eyebrow}>Analise do negocio</span>
-          <h1>Relatorios</h1>
-          <p>Acompanhe os resultados consolidados dos seus atendimentos.</p>
-        </div>
-
         <label className={styles.periodField}>
           <span>Mes de referencia</span>
           <span className={styles.periodControl}>
