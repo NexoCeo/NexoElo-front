@@ -468,7 +468,7 @@ export default function Funcionamento() {
                     <span className={styles.step} style={{ backgroundColor: theme.colors.primary }}>2</span>
                     <div>
                       <h2 style={{ color: theme.colors.text }}>Que horas você começa e termina?</h2>
-                      <p style={{ color: theme.colors.inactive }}>Esse horário vale para todos os dias selecionados acima.</p>
+                      <p style={{ color: theme.colors.inactive }}>Horário padrão. Se algum dia for diferente, personalize no card seguinte.</p>
                     </div>
                   </div>
                   <span className={styles.duration} style={{ color: theme.colors.primary }}>
@@ -669,19 +669,22 @@ export default function Funcionamento() {
           </div>
 
           <div className={styles.summaryBlock}>
-            <span style={{ color: theme.colors.inactive }}>Horário para agendamentos</span>
-            <strong className={styles.summaryHours} style={{ color: theme.colors.primary }}>
-              {config ? `${config.HorarioAbertura} - ${config.HorarioFechamento}` : "--:-- - --:--"}
-            </strong>
-            <small style={{ color: theme.colors.inactive }}>
-              {formatDuration(atendimentoTotal)} livres para atendimento por dia
-            </small>
+            <span style={{ color: theme.colors.inactive }}>Horários por dia</span>
+            <div className={styles.summaryIntervals}>
+              {diasSelecionados.map(dia => {
+                const horario = horariosPorDia[dia.key];
+                const inicio = horario?.Inicio ?? config?.HorarioAbertura ?? "--:--";
+                const fim = horario?.Fim ?? config?.HorarioFechamento ?? "--:--";
+                return <small key={dia.key} style={{ color: theme.colors.text }}>
+                  {dia.short}<span style={{ color: theme.colors.inactive }}>{inicio} – {fim}</span>
+                </small>;
+              })}
+              {!diasSelecionados.length && <small>Escolha os dias de atendimento.</small>}
+            </div>
           </div>
 
           <div className={styles.summaryBlock}>
-            <span style={{ color: theme.colors.inactive }}>
-              {config?.Intervalos.length ?? 0} pausa{config?.Intervalos.length === 1 ? "" : "s"}
-            </span>
+            <span style={{ color: theme.colors.inactive }}>Pausas do horário padrão</span>
             {config?.Intervalos.length ? (
               <div className={styles.summaryIntervals}>
                 {config.Intervalos.map((intervalo, index) => (
