@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { NavLink } from "react-router-dom";
-import { FaCalendarAlt, FaChartBar, FaClock, FaHome, FaTimes, FaTools, FaCreditCard } from "react-icons/fa";
+import { FaCalendarAlt, FaChartBar, FaClock, FaHome, FaTimes, FaTools } from "react-icons/fa";
 import { FaPerson } from "react-icons/fa6";
 import styles from "./style.module.css";
 import { useTheme } from "@/context/ThemeContext";
@@ -106,15 +106,6 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
             >
               <FaClock className={styles.navIcon} aria-hidden="true" />
               <span>Funcionamento</span>
-            </NavLink>
-          </li>
-        )}
-
-        {canManageSharedSettings && (
-          <li className={styles.navItem}>
-            <NavLink to={`${basePath}/assinatura`} end className={linkClassName} onClick={closeMenu}>
-              <FaCreditCard className={styles.navIcon} aria-hidden="true" />
-              <span>Minha assinatura</span>
             </NavLink>
           </li>
         )}
