@@ -2,10 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   FaCalendarAlt,
   FaCheck,
-  FaEnvelope,
   FaHistory,
   FaHome,
-  FaPhoneAlt,
   FaPlus,
   FaSignOutAlt,
   FaSyncAlt,
@@ -74,12 +72,6 @@ function formatAppointmentTime(value: string) {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));
-}
-
-function formatPhone(value?: string) {
-  const digits = value?.replace(/\D/g, "") ?? "";
-  if (digits.length !== 11) return value || "Não informado";
-  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
 
 function statusLabel(value: string) {
