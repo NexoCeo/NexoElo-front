@@ -24,6 +24,7 @@ import { logout } from "@/services/logout-service";
 import { useNotification } from "@/context/NotificationContext";
 import type { Agendamento } from "@/types/agendamento";
 import styles from "./style.module.css";
+import ProfileOverview from "@/components/profile-overview";
 
 type HomeSection = "home" | "historico" | "perfil";
 
@@ -513,28 +514,12 @@ export default function ClienteFinalHome() {
               </div>
             </header>
 
-            <section className={styles.profilePanel} aria-labelledby="profile-name">
-              <div className={styles.profileIdentity}>
-                <span className={styles.avatar} aria-hidden="true">
-                  {(cliente?.Nome || "C").trim().charAt(0).toUpperCase()}
-                </span>
-                <div>
-                  <span>Cliente</span>
-                  <h2 id="profile-name">{cliente?.Nome || "Cliente"}</h2>
-                </div>
-              </div>
-
-              <dl className={styles.profileDetails}>
-                <div>
-                  <dt><FaEnvelope aria-hidden="true" /> E-mail</dt>
-                  <dd>{cliente?.Email?.toLowerCase() || "Não informado"}</dd>
-                </div>
-                <div>
-                  <dt><FaPhoneAlt aria-hidden="true" /> Telefone</dt>
-                  <dd>{formatPhone(cliente?.Telefone)}</dd>
-                </div>
-              </dl>
-            </section>
+            <ProfileOverview
+              name={cliente?.Nome || "Cliente"}
+              role="Cliente"
+              email={cliente?.Email}
+              phone={cliente?.Telefone}
+            />
           </section>
         )}
       </main>
