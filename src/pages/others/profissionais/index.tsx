@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { isAxiosError } from "axios";
 import {
   FaEnvelope,
@@ -110,6 +111,7 @@ type WhatsAppShare = {
 export default function Profissionais() {
   const { theme } = useTheme();
   const { usuario } = useUser();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { showNotification } = useNotification();
   const localizacao = useCadastroLocalizacao();
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
@@ -367,6 +369,18 @@ export default function Profissionais() {
       setLoadingSolicitacoes(false);
     }
   }
+
+  useEffect(() => {
+    if (searchParams.get("solicitacoes") !== "1" || !empresaId || !isEmpresa) return;
+    void openSolicitacoesModal();
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      next.delete("solicitacoes");
+      return next;
+    }, { replace: true });
+    // Abertura acontece uma vez por navegacao com o parametro.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, empresaId, isEmpresa]);
 
   async function responderSolicitacao(
     solicitacao: SolicitacaoVinculo,
