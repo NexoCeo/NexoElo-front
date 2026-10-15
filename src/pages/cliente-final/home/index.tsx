@@ -499,13 +499,6 @@ export default function ClienteFinalHome() {
             aria-labelledby="tab-perfil"
             className={styles.view}
           >
-            <header className={styles.pageHeader}>
-              <div>
-                <span>Sua conta</span>
-                <h1>Perfil</h1>
-              </div>
-            </header>
-
             <ProfileOverview
               name={cliente?.Nome || "Cliente"}
               role="Cliente"
