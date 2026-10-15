@@ -9,6 +9,7 @@ import {
   FaPlus,
   FaSave,
   FaTrash,
+  FaPencilAlt,
 } from "react-icons/fa";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
@@ -174,6 +175,7 @@ export default function Funcionamento() {
     ? timeToMinutes(config.HorarioFechamento) - timeToMinutes(config.HorarioAbertura)
     : 0;
   const atendimentoTotal = Math.max(0, expedienteTotal - pausaTotal);
+  const horariosPorDia = config?.HorariosPorDia ?? {};
 
   useEffect(() => {
     async function loadFuncionamento() {
@@ -220,6 +222,64 @@ export default function Funcionamento() {
         return result;
       }, {} as Record<DiaFuncionamentoKey, boolean>),
     );
+  }
+
+  function personalizarDia(dia: DiaFuncionamentoKey) {
+    if (!config) return;
+    const next = { ...config.HorariosPorDia };
+    if (next[dia]) {
+      delete next[dia];
+    } else {
+      next[dia] = {
+        Inicio: config.HorarioAbertura,
+        Fim: config.HorarioFechamento,
+        Intervalos: config.Intervalos.map(item => ({ ...item })),
+      };
+    }
+    updateConfig({ HorariosPorDia: next });
+  }
+
+  function alterarHorarioDia(dia: DiaFuncionamentoKey, campo: "Inicio" | "Fim", valor: string) {
+    const current = config?.HorariosPorDia?.[dia];
+    if (!current) return;
+    updateConfig({
+      HorariosPorDia: { ...config?.HorariosPorDia, [dia]: { ...current, [campo]: valor } },
+    });
+  }
+
+  function removerPausaDia(dia: DiaFuncionamentoKey, index: number) {
+    const current = config?.HorariosPorDia?.[dia];
+    if (!current) return;
+    updateConfig({
+      HorariosPorDia: { ...config?.HorariosPorDia, [dia]: { ...current,
+        Intervalos: current.Intervalos.filter((_, i) => i !== index) } },
+    });
+  }
+
+  function adicionarPausaDia(dia: DiaFuncionamentoKey) {
+    const current = config?.HorariosPorDia?.[dia];
+    if (!current) return;
+    const nova = getNovoIntervalo({
+      ...config!, HorarioAbertura: current.Inicio, HorarioFechamento: current.Fim,
+      Intervalos: current.Intervalos,
+    });
+    if (!nova) {
+      showNotification({ type: "warning", title: "Sem espaço para pausa",
+        message: "O horário deste dia não comporta outra pausa." });
+      return;
+    }
+    updateConfig({ HorariosPorDia: { ...config?.HorariosPorDia, [dia]: {
+      ...current, Intervalos: [...current.Intervalos, nova],
+    } } });
+  }
+
+  function alterarPausaDia(dia: DiaFuncionamentoKey, index: number, campo: "Inicio" | "Fim", valor: string) {
+    const current = config?.HorariosPorDia?.[dia];
+    if (!current) return;
+    updateConfig({ HorariosPorDia: { ...config?.HorariosPorDia, [dia]: {
+      ...current, Intervalos: current.Intervalos.map((pausa, i) =>
+        i === index ? { ...pausa, [campo]: valor } : pausa),
+    } } });
   }
 
   function addIntervalo() {
@@ -304,6 +364,23 @@ export default function Funcionamento() {
       setError(message);
       showNotification({ type: "warning", title: "Agenda sem disponibilidade", message });
       return;
+    }
+
+    for (const dia of diasSelecionados) {
+      const especial = config.HorariosPorDia?.[dia.key];
+      if (!especial) continue;
+      const abertura = timeToMinutes(especial.Inicio);
+      const fechamento = timeToMinutes(especial.Fim);
+      const diario = { ...config, HorarioAbertura: especial.Inicio,
+        HorarioFechamento: especial.Fim, Intervalos: especial.Intervalos };
+      if (!especial.Inicio || !especial.Fim || abertura >= fechamento ||
+          hasIntervaloInvalido(diario) || hasIntervaloSobreposto(diario) ||
+          getPausaTotal(diario) >= fechamento - abertura) {
+        const message = `Revise o horário e as pausas de ${dia.label}.`;
+        setError(message);
+        showNotification({ type: "warning", title: "Horário específico inválido", message });
+        return;
+      }
     }
 
     try {
@@ -421,6 +498,67 @@ export default function Funcionamento() {
                       required
                     />
                   </label>
+                </div>
+              </section>
+
+              <section className={styles.card} style={cardStyle}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.titleGroup}>
+                    <FaPencilAlt className={styles.editSymbol} aria-hidden="true" />
+                    <div>
+                      <h2 style={{ color: theme.colors.text }}>Algum dia tem um horário diferente?</h2>
+                      <p style={{ color: theme.colors.inactive }}>Por exemplo: segunda a sexta das 08h às 17h e sábado das 08h às 12h.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className={styles.dayHoursList}>
+                  {diasSelecionados.map(dia => {
+                    const horario = horariosPorDia[dia.key];
+                    const inicio = horario?.Inicio ?? config.HorarioAbertura;
+                    const fim = horario?.Fim ?? config.HorarioFechamento;
+                    return <div key={dia.key} className={styles.dayHoursRow}>
+                      <div className={styles.dayHoursIdentity}>
+                        <strong>{dia.label}</strong>
+                        <span>{inicio} – {fim}{horario ? " · Personalizado" : " · Padrão"}</span>
+                      </div>
+                      <button type="button" className={styles.customizeButton}
+                        onClick={() => personalizarDia(dia.key)}
+                        aria-expanded={Boolean(horario)}>
+                        {horario ? "Usar padrão" : "Personalizar"}
+                      </button>
+                      {horario && <div className={styles.dayHoursEditor}>
+                        <label>Abre às
+                          <input type="time" value={horario.Inicio} step="900"
+                            onChange={event => alterarHorarioDia(dia.key, "Inicio", event.target.value)} />
+                        </label>
+                        <label>Fecha às
+                          <input type="time" value={horario.Fim} step="900"
+                            onChange={event => alterarHorarioDia(dia.key, "Fim", event.target.value)} />
+                        </label>
+                        <div className={styles.dayPauses}>
+                          <div className={styles.dayPausesHeader}>
+                            <span>Pausas neste dia (opcional)</span>
+                            <button type="button" onClick={() => adicionarPausaDia(dia.key)}>+ Adicionar pausa</button>
+                          </div>
+                          {horario.Intervalos.map((pausa, index) =>
+                            <div className={styles.dayPauseRow} key={index}>
+                              <input aria-label={`Início da pausa ${index + 1} de ${dia.label}`}
+                                type="time" value={pausa.Inicio} step="900"
+                                onChange={event => alterarPausaDia(dia.key, index, "Inicio", event.target.value)} />
+                              <span>até</span>
+                              <input aria-label={`Fim da pausa ${index + 1} de ${dia.label}`}
+                                type="time" value={pausa.Fim} step="900"
+                                onChange={event => alterarPausaDia(dia.key, index, "Fim", event.target.value)} />
+                              <button type="button" onClick={() => removerPausaDia(dia.key, index)}
+                                aria-label={`Remover pausa ${index + 1} de ${dia.label}`}><FaTrash aria-hidden="true" /></button>
+                            </div>
+                          )}
+                          {!horario.Intervalos.length && <small>Sem pausas neste dia.</small>}
+                        </div>
+                      </div>}
+                    </div>;
+                  })}
+                  {!diasSelecionados.length && <p>Selecione os dias de atendimento no primeiro card.</p>}
                 </div>
               </section>
 
