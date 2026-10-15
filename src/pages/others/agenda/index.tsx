@@ -632,14 +632,6 @@ export default function Agenda() {
               styles.titleGroup
             }
           >
-            <p
-              className={
-                styles.eyebrow
-              }
-            >
-              Agenda
-            </p>
-
             <h1 id="agenda-title">
               {selectedPeriodLabel}
             </h1>
