@@ -514,7 +514,6 @@ export default function Profissionais() {
     return (
       <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
         <section className={styles.header}>
-          <h1 style={{ color: theme.colors.text }}>Profissionais</h1>
           <p style={{ color: theme.colors.inactive }}>
             Apenas empresas podem gerenciar profissionais vinculados.
           </p>
@@ -526,12 +525,6 @@ export default function Profissionais() {
   return (
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
       <section className={styles.header}>
-        <div>
-          <h1 style={{ color: theme.colors.text }}>Profissionais</h1>
-          <p style={{ color: theme.colors.inactive }}>
-            Gerencie os profissionais vinculados a esta empresa.
-          </p>
-        </div>
         <div className={styles.headerActions}>
           <button
             type="button"
