@@ -92,7 +92,7 @@ export default function MinhaAssinatura() {
     if (!confirmacao || !usuario?.Id) return;
     const { plano, servicos, profissionais } = confirmacao;
     await executar(plano, async () => {
-      await alterarPlano(usuario.Id, plano, servicos, profissionais);
+      await alterarPlano(usuario.Id, plano, servicos, profissionais, assinatura?.Status === "CANCELAMENTO_PENDENTE");
       setAssinatura(await consultarAssinatura());
       setDestino(null);
       setConfirmacao(null);
@@ -240,6 +240,7 @@ export default function MinhaAssinatura() {
           </button>
         </>}>
         <p>Alterar para <strong>{planos.find(item=>item.id===confirmacao?.plano)?.nome}</strong> por <strong>{reais.format(planos.find(item=>item.id===confirmacao?.plano)?.valor ?? 0)}/mês</strong>?</p>
+        {assinatura?.Status === "CANCELAMENTO_PENDENTE" && <p><strong>Renovação:</strong> esta confirmação também desfaz o cancelamento programado e reativa a cobrança recorrente do novo plano.</p>}
         <p>O novo valor será cobrado na próxima renovação. Os recursos não selecionados ficarão indisponíveis para novos agendamentos, mas os dados e o histórico serão preservados.</p>
       </Modal>
       <p className={styles.note}>O plano Grátis oferece 30 dias com acesso completo. Em mudanças de plano, seus dados são preservados; recursos excedentes precisam ser regularizados.</p>
