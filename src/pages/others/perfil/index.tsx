@@ -228,7 +228,7 @@ export default function Perfil() {
           <FaPen aria-hidden="true" />
           Editar perfil
         </button>}
-        />
+        />}
       </div>
 
       {modalOpen && (
