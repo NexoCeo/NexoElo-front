@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '@/context/ThemeContext';
 import styles from './style.module.css';
+import { SubmitButton } from '@/components/auth/submitButton';
 import { EmailInput } from '@/components/auth/emailInput';
 import { PasswordInput } from '@/components/auth/passwordInput';
 import { useLoginForm } from '@/hooks/useLoginForm';
@@ -77,17 +78,7 @@ export default function Login() {
           
           <div className={styles.footerWrapper}>
             {/* Botão */}
-            <button
-              type="submit"
-              disabled={!(isFormValid() || didSyncAutofill) || loading}
-              className={isFormValid() && !loading ? styles.button : styles.buttonDisabled}
-              style={{
-                backgroundColor: isFormValid() && !loading ? theme.colors.primary : theme.colors.inactive,
-                color: theme.colors.onPrimary
-              }}
-            >
-              {loading ? <span className={styles.spinner}></span> : 'Entrar'}
-            </button>
+            <SubmitButton disabled={!(isFormValid() || didSyncAutofill)} loading={loading}>Entrar</SubmitButton>
 
             {/* Links */}
             <div className={styles.forgot}>
