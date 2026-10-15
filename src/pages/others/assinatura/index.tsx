@@ -40,6 +40,10 @@ export default function MinhaAssinatura() {
             <p>{assinatura.AcessoAtivo ? "Acesso ativo" : "Acesso suspenso: escolha um plano para continuar."}</p>
             {assinatura.DataFim && <p>Data de término: {new Date(assinatura.DataFim).toLocaleDateString("pt-BR")}</p>}
             {assinatura.Plano === "GRATIS" && <p>Durante o período gratuito, todas as funcionalidades ficam liberadas.</p>}
+            <p>Serviços cadastrados: {assinatura.ServicosCadastrados} / {assinatura.LimiteServicos === 2147483647 ? "ilimitados" : assinatura.LimiteServicos}</p>
+            {usuario?.Papel === "EMPRESA" && <p>Profissionais vinculados: {assinatura.ProfissionaisVinculados} / {assinatura.LimiteProfissionais === 2147483647 ? "ilimitados" : assinatura.LimiteProfissionais}</p>}
+            {assinatura.ServicosCadastrados > assinatura.LimiteServicos && <p>Você tem serviços acima do limite do plano atual. Regularize os recursos excedentes.</p>}
+            {assinatura.ProfissionaisVinculados > assinatura.LimiteProfissionais && <p>Você tem profissionais acima do limite do plano atual. Regularize os vínculos excedentes.</p>}
             {assinatura.Plano !== "GRATIS" && assinatura.Plano !== "SEM_PLANO" && (
               <button type="button" disabled={Boolean(pending)} onClick={() => usuario?.Id && executar("portal", () => abrirPortal(usuario.Id))}>
                 Gerenciar assinatura e pagamentos
