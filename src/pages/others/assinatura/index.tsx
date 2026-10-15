@@ -5,6 +5,7 @@ import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
 import { consultarAssinatura, iniciarCheckout, alterarPlano, atualizarRecursosAtivos, listarRecursosPlano, abrirPortal, planos, type AssinaturaAtual, type RecursoPlano } from "@/services/assinatura-service";
 import styles from "./style.module.css";
+import Modal from "@/components/modal";
 
 const reais = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const nomes: Record<string,string> = { GRATIS: "Grátis", BASICO: "Básico", INTERMEDIARIO: "Intermediário", AVANCADO: "Avançado", SEM_PLANO: "Sem plano" };
@@ -20,6 +21,7 @@ export default function MinhaAssinatura() {
   const [selecionados, setSelecionados] = useState<string[]>([]);
   const [carregandoRecursos, setCarregandoRecursos] = useState(false);
   const [editandoRecursos, setEditandoRecursos] = useState(false);
+  const [confirmacao, setConfirmacao] = useState<{ plano: "BASICO" | "INTERMEDIARIO" | "AVANCADO"; servicos?: number[]; profissionais?: number[] } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -83,17 +85,17 @@ export default function MinhaAssinatura() {
       });
       return;
     }
-    const escolhido = planos.find(item => item.id === plano);
-    if (!escolhido) return;
-    const confirmar = window.confirm(
-      `Confirmar alteração para ${escolhido.nome} (${reais.format(escolhido.valor)}/mês)?\n\n` +
-      "O novo preço será cobrado na próxima renovação. Os recursos não selecionados ficarão indisponíveis para novos agendamentos; seus dados não serão excluídos."
-    );
-    if (!confirmar) return;
+    setConfirmacao({ plano, servicos, profissionais });
+  }
+
+  async function aplicarTroca() {
+    if (!confirmacao || !usuario?.Id) return;
+    const { plano, servicos, profissionais } = confirmacao;
     await executar(plano, async () => {
       await alterarPlano(usuario.Id, plano, servicos, profissionais);
       setAssinatura(await consultarAssinatura());
       setDestino(null);
+      setConfirmacao(null);
       setEditandoRecursos(false);
       showNotification({ type: "success", title: "Plano alterado", message: "Recursos atualizados. Próxima renovação com o novo preço." });
     });
@@ -202,32 +204,44 @@ export default function MinhaAssinatura() {
         const limiteProfissionais = destino === "BASICO" ? 2 : destino === "INTERMEDIARIO" ? 4 : Infinity;
         const servicos = recursos.filter(item => item.Tipo === "SERVICO");
         const profissionais = recursos.filter(item => item.Tipo === "PROFISSIONAL");
-        const validos = (servicos.length <= limiteServicos || servicos.filter(x=>selecionados.includes(`${x.Tipo}:${x.Id}`)).length === limiteServicos) &&
-          (profissionais.length <= limiteProfissionais || profissionais.filter(x=>selecionados.includes(`${x.Tipo}:${x.Id}`)).length === limiteProfissionais);
-        return <div className={styles.modalBackdrop} role="presentation">
-          <section className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="tituloDowngrade">
-            <h2 id="tituloDowngrade">Escolha os recursos que continuarão ativos</h2>
-            <p>Os demais ficarão indisponíveis para novos agendamentos, sem exclusão de dados ou histórico.</p>
-            {([["SERVICO",servicos,limiteServicos],["PROFISSIONAL",profissionais,limiteProfissionais]] as const).map(([tipo,itens,limite]) =>
-              itens.length > limite && <fieldset key={tipo} className={styles.selectionGroup}>
-                <legend>{tipo === "SERVICO" ? "Serviços" : "Profissionais"} — selecione {limite} de {itens.length}</legend>
-                {itens.map(item=><label key={item.Id} className={styles.resource}>
-                  <input type="checkbox" checked={selecionados.includes(`${item.Tipo}:${item.Id}`)} onChange={()=>alternarRecurso(`${item.Tipo}:${item.Id}`)} />
-                  {item.Nome}
-                </label>)}
-              </fieldset>)}
-            <div className={styles.modalActions}>
-              <button type="button" className={styles.secondaryButton} onClick={()=>{setDestino(null);setEditandoRecursos(false);}} disabled={Boolean(pending)}>Cancelar</button>
-              <button type="button" className={styles.button} disabled={!validos || Boolean(pending)}
-                onClick={()=>void confirmarTroca(destino,
-                  servicos.length > limiteServicos ? servicos.filter(x=>selecionados.includes(`${x.Tipo}:${x.Id}`)).map(x=>x.Id) : undefined,
-                  profissionais.length > limiteProfissionais ? profissionais.filter(x=>selecionados.includes(`${x.Tipo}:${x.Id}`)).map(x=>x.Id) : undefined)}>
-                {editandoRecursos ? "Salvar recursos ativos" : "Confirmar seleção e alterar plano"}
-              </button>
-            </div>
-          </section>
-        </div>;
+        const ids = (itens: RecursoPlano[]) => itens.filter(x=>selecionados.includes(`${x.Tipo}:${x.Id}`)).map(x=>x.Id);
+        const validos = (servicos.length <= limiteServicos || ids(servicos).length === limiteServicos) &&
+          (profissionais.length <= limiteProfissionais || ids(profissionais).length === limiteProfissionais);
+        return <Modal open title="Escolha os recursos que continuarão ativos"
+          onClose={()=>{setDestino(null);setEditandoRecursos(false);}} busy={Boolean(pending)}
+          actions={<>
+            <button type="button" className={styles.secondaryButton} disabled={Boolean(pending)}
+              onClick={()=>{setDestino(null);setEditandoRecursos(false);}}>Cancelar</button>
+            <button type="button" className={styles.button} disabled={!validos || Boolean(pending)}
+              onClick={()=>void confirmarTroca(destino,
+                servicos.length > limiteServicos ? ids(servicos) : undefined,
+                profissionais.length > limiteProfissionais ? ids(profissionais) : undefined)}>
+              {editandoRecursos ? "Salvar recursos ativos" : "Continuar"}
+            </button>
+          </>}>
+          <p>Os recursos não selecionados ficarão indisponíveis para novos agendamentos. Dados e histórico serão preservados.</p>
+          {([["SERVICO",servicos,limiteServicos],["PROFISSIONAL",profissionais,limiteProfissionais]] as const).map(([tipo,itens,limite]) =>
+            itens.length > limite && <fieldset key={tipo} className={styles.selectionGroup}>
+              <legend>{tipo === "SERVICO" ? "Serviços" : "Profissionais"} — selecione {limite} de {itens.length}</legend>
+              {itens.map(item=><label key={item.Id} className={styles.resource}>
+                <input type="checkbox" checked={selecionados.includes(`${item.Tipo}:${item.Id}`)}
+                  onChange={()=>alternarRecurso(`${item.Tipo}:${item.Id}`)} />
+                {item.Nome}
+              </label>)}
+            </fieldset>)}
+        </Modal>;
       })()}
+      <Modal open={Boolean(confirmacao)} title="Confirmar alteração do plano"
+        onClose={()=>setConfirmacao(null)} busy={Boolean(pending)}
+        actions={<>
+          <button type="button" className={styles.secondaryButton} disabled={Boolean(pending)} onClick={()=>setConfirmacao(null)}>Cancelar</button>
+          <button type="button" className={styles.button} disabled={Boolean(pending)} onClick={()=>void aplicarTroca()}>
+            {pending ? "Alterando..." : "Confirmar alteração"}
+          </button>
+        </>}>
+        <p>Alterar para <strong>{planos.find(item=>item.id===confirmacao?.plano)?.nome}</strong> por <strong>{reais.format(planos.find(item=>item.id===confirmacao?.plano)?.valor ?? 0)}/mês</strong>?</p>
+        <p>O novo valor será cobrado na próxima renovação. Os recursos não selecionados ficarão indisponíveis para novos agendamentos, mas os dados e o histórico serão preservados.</p>
+      </Modal>
       <p className={styles.note}>O plano Grátis oferece 30 dias com acesso completo. Em mudanças de plano, seus dados são preservados; recursos excedentes precisam ser regularizados.</p>
     </main>
   );
