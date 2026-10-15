@@ -333,14 +333,6 @@ export default function Funcionamento() {
 
   return (
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
-      <header className={styles.header}>
-        <div>
-          <span className={styles.eyebrow} style={{ color: theme.colors.primary }}>Agenda semanal</span>
-          <h1 style={{ color: theme.colors.text }}>Funcionamento</h1>
-          <p style={{ color: theme.colors.inactive }}>Defina quando sua agenda pode receber atendimentos.</p>
-        </div>
-      </header>
-
       <div className={styles.content}>
         <form className={styles.editor} onSubmit={handleSubmit} noValidate>
           {loading || !config ? (
