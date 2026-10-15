@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
+import LoadingState from "@/components/loading-state";
 import { consultarAssinatura, type AssinaturaAtual } from "@/services/assinatura-service";
 
 export default function AssinaturaGate({ children, relatorios = false }: { children: ReactNode; relatorios?: boolean }) {
@@ -13,7 +14,7 @@ export default function AssinaturaGate({ children, relatorios = false }: { child
       .catch(() => { if (active) setErro(true); });
     return () => { active = false; };
   }, []);
-  if (!state && !erro) return <p style={{ padding: 24 }}>Verificando assinatura...</p>;
+  if (!state && !erro) return <LoadingState label="Verificando assinatura" />;
   if (erro || !state) return <p style={{ padding: 24 }}>Não foi possível validar sua assinatura. Tente atualizar a página.</p>;
   if (!state.AcessoAtivo || (relatorios && !state.RelatoriosLiberados))
     return <main style={{ padding: 32 }}>
