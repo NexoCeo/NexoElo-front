@@ -43,6 +43,7 @@ export default function Perfil() {
   const [fotoPreview, setFotoPreview] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [photoSaving, setPhotoSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -128,6 +129,36 @@ export default function Perfil() {
     setError("");
   }
 
+  async function handlePhotoChange(file: File) {
+    if (!usuario || photoSaving) return;
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowed.includes(file.type) || file.size > 5 * 1024 * 1024) {
+      showNotification({ type: "warning", title: "Foto inválida", message: "Use JPG, PNG ou WEBP com até 5 MB." });
+      return;
+    }
+    try {
+      setPhotoSaving(true);
+      const updated = await atualizarPerfilUsuario(usuario.Id, {
+        Nome: usuario.Nome,
+        Email: usuario.Email,
+        Telefone: usuario.Telefone,
+        FotoPerfil: file,
+      });
+      setUsuario({
+        ...usuario,
+        ...updated,
+        Papel: updated.Papel || usuario.Papel,
+        Slug: updated.Slug || usuario.Slug,
+        UrlPublica: updated.UrlPublica || usuario.UrlPublica,
+      });
+      showNotification({ type: "success", title: "Foto atualizada", message: "Sua foto de perfil foi alterada." });
+    } catch {
+      showNotification({ type: "error", title: "Falha no envio", message: "Não foi possível atualizar sua foto. Tente novamente." });
+    } finally {
+      setPhotoSaving(false);
+    }
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
@@ -184,6 +215,8 @@ export default function Perfil() {
           email={usuario?.Email}
           phone={usuario?.Telefone}
           avatarUrl={getProfileImageUrl(usuario?.FotoPerfil)}
+          onPhotoChange={usuario && !loading ? (file) => void handlePhotoChange(file) : undefined}
+          photoSaving={photoSaving}
           action={<button
           type="button"
           className={styles.editButton}
