@@ -10,6 +10,8 @@ export interface AssinaturaAtual {
   LimiteProfissionais: number;
   DataFim: string | null;
   Status: string;
+  ServicosCadastrados: number;
+  ProfissionaisVinculados: number;
 }
 
 export const planos = [
