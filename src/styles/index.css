@@ -50,3 +50,26 @@ canvas {
     font-size: 16px !important;
   }
 }
+
+/* Botoes com fundo azul primario aplicado por style inline (React).
+   A cor e mantida branca nos temas claro e escuro, incluindo SVGs. */
+button:is(
+  [style*="background-color: rgb(37, 99, 235)"],
+  [style*="background-color: #2563eb"],
+  [style*="background-color: #2563EB"],
+  [style*="background: rgb(37, 99, 235)"],
+  [style*="background: #2563eb"],
+  [style*="background: #2563EB"]
+) {
+  color: var(--theme-white, #fff) !important;
+}
+button:is(
+  [style*="background-color: rgb(37, 99, 235)"],
+  [style*="background-color: #2563eb"],
+  [style*="background-color: #2563EB"],
+  [style*="background: rgb(37, 99, 235)"],
+  [style*="background: #2563eb"],
+  [style*="background: #2563EB"]
+) svg {
+  color: inherit !important;
+}
