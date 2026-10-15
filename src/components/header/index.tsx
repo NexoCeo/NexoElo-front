@@ -154,20 +154,22 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
                 <button
                   type="button"
                   onClick={toggleTheme}
+                  className={styles.themeAction}
                   style={{ color: theme.colors.text }}
                   role="menuitem"
                   aria-label={themeName === "dark" ? "Usar tema claro" : "Usar tema escuro"}
                 >
                   {themeName === "dark" ? (
-                    <FaSun aria-hidden="true" />
+                    <FaSun className={styles.sunIcon} aria-hidden="true" />
                   ) : (
-                    <FaMoon aria-hidden="true" />
+                    <FaMoon className={styles.moonIcon} aria-hidden="true" />
                   )}
                   <span>{themeName === "dark" ? "Tema claro" : "Tema escuro"}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => void handleLogout()}
+                  className={styles.logoutAction}
                   style={{ color: theme.colors.text }}
                   role="menuitem"
                 >
