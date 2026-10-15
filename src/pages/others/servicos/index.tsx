@@ -235,13 +235,6 @@ export default function Servicos() {
   return (
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
       <section className={styles.header}>
-        <div>
-          <h1 style={{ color: theme.colors.text }}>Servicos</h1>
-          <p style={{ color: theme.colors.inactive }}>
-            Gerencie os servicos disponiveis para agendamento.
-          </p>
-        </div>
-
         <button
           type="button"
           className={styles.primaryButton}
