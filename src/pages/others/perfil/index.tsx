@@ -174,25 +174,6 @@ export default function Perfil() {
 
   return (
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
-      <section className={styles.header}>
-        <div>
-          <h1 style={{ color: theme.colors.text }}>Perfil</h1>
-          <p style={{ color: theme.colors.inactive }}>
-            Mantenha seus dados e sua foto atualizados.
-          </p>
-        </div>
-        <button
-          type="button"
-          className={styles.editButton}
-          onClick={openModal}
-          disabled={!usuario || loading}
-          style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
-        >
-          <FaPen aria-hidden="true" />
-          Editar perfil
-        </button>
-      </section>
-
       {success && <p className={styles.success}>{success}</p>}
       {error && !modalOpen && <p className={styles.error}>{error}</p>}
 
@@ -203,6 +184,16 @@ export default function Perfil() {
           email={usuario?.Email}
           phone={usuario?.Telefone}
           avatarUrl={getProfileImageUrl(usuario?.FotoPerfil)}
+          action={<button
+          type="button"
+          className={styles.editButton}
+          onClick={openModal}
+          disabled={!usuario || loading}
+          style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
+        >
+          <FaPen aria-hidden="true" />
+          Editar perfil
+        </button>}
         />
       </div>
 
