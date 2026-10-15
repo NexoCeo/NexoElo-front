@@ -3,7 +3,7 @@
   justify-content: center;
   align-items: flex-start;
   min-height: 100dvh;
-  padding: 32px 20px;
+  padding: 24px 16px;
   background-size: cover;
   background-position: center;
   overflow-y: auto;
@@ -11,11 +11,11 @@
 
 .card {
   background-color: var(--theme-surface);
-  padding: 32px;
+  padding: 24px;
   border-radius: 12px;
   box-shadow: 0 4px 24px var(--theme-shadow);
   width: 100%;
-  max-width: 440px;
+  max-width: 360px;
 }
 
 .title {
@@ -28,7 +28,7 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .formGroup {
@@ -37,8 +37,9 @@
 }
 
 .label {
+  font-size: 13px;
   font-weight: 600;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 
 .labelWrapper {
@@ -49,7 +50,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 0;
+  margin-bottom: 2px;
 }
 
 .hiddenFileInput {
@@ -57,8 +59,8 @@
 }
 
 .imageCircle {
-  width: 120px;
-  height: 120px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   background-color: var(--theme-bottom);
   display: flex;
@@ -76,7 +78,7 @@
 }
 
 .plusIcon {
-  font-size: 24px;
+  font-size: 18px;
   color: var(--theme-border-strong);
 }
 
@@ -88,11 +90,12 @@
 
 .input {
   width: 100%;
-  padding: 12px 40px 12px 12px;
+  min-height: 40px;
+  padding: 9px 36px 9px 12px;
   border: 1px solid var(--theme-text-muted);
   border-radius: 8px;
   outline: none;
-  font-size: 16px;
+  font-size: 14px;
   transition: border-color 0.3s;
 }
 
@@ -114,6 +117,7 @@ select.input {
   top: 50%;
   transform: translateY(-50%);
   color: var(--theme-text-muted);
+  font-size: 15px;
 }
 
 .iconButton {
@@ -144,11 +148,12 @@ select.input {
 }
 
 .button {
-  padding: 12px;
+  min-height: 40px;
+  padding: 9px 12px;
   background-color: var(--theme-primary);
   border: none;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--theme-on-primary);
   cursor: pointer;
@@ -160,11 +165,12 @@ select.input {
 }
 
 .buttonDisabled {
-  padding: 12px;
+  min-height: 40px;
+  padding: 9px 12px;
   background-color: var(--theme-text-muted);
   border: none;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--theme-on-primary);
   cursor: not-allowed;
@@ -172,7 +178,7 @@ select.input {
 
 .error {
   color: var(--theme-error);
-  font-size: 14px;
+  font-size: 12px;
   margin-top: 4px;
 }
 
@@ -181,11 +187,11 @@ select.input {
   justify-content: space-between;
   align-items: center;
   margin-top: -4px;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
 }
 
 .link {
-  font-size: 14px;
+  font-size: 12px;
   color: var(--theme-primary);
   text-decoration: none;
 }
@@ -216,7 +222,7 @@ select.input {
   }
 
   .card {
-    padding: 24px;
+    padding: 20px;
   }
 
   .locationGrid {
