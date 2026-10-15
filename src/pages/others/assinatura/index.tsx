@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { FaCheck, FaTimes } from "react-icons/fa";
 import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
-import { consultarAssinatura, iniciarCheckout, alterarPlano, listarRecursosPlano, abrirPortal, planos, type AssinaturaAtual, type RecursoPlano } from "@/services/assinatura-service";
+import { consultarAssinatura, iniciarCheckout, alterarPlano, atualizarRecursosAtivos, listarRecursosPlano, abrirPortal, planos, type AssinaturaAtual, type RecursoPlano } from "@/services/assinatura-service";
 import styles from "./style.module.css";
 
 const reais = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
@@ -19,6 +19,7 @@ export default function MinhaAssinatura() {
   const [recursos, setRecursos] = useState<RecursoPlano[]>([]);
   const [selecionados, setSelecionados] = useState<string[]>([]);
   const [carregandoRecursos, setCarregandoRecursos] = useState(false);
+  const [editandoRecursos, setEditandoRecursos] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -73,6 +74,15 @@ export default function MinhaAssinatura() {
 
   async function confirmarTroca(plano: "BASICO" | "INTERMEDIARIO" | "AVANCADO", servicos?: number[], profissionais?: number[]) {
     if (!usuario?.Id) return;
+    if (editandoRecursos) {
+      await executar("recursos", async () => {
+        await atualizarRecursosAtivos(usuario.Id, plano, servicos, profissionais);
+        setDestino(null);
+        setEditandoRecursos(false);
+        showNotification({ type: "success", title: "Recursos atualizados", message: "Sua seleção de recursos ativos foi salva." });
+      });
+      return;
+    }
     const escolhido = planos.find(item => item.id === plano);
     if (!escolhido) return;
     const confirmar = window.confirm(
@@ -84,8 +94,27 @@ export default function MinhaAssinatura() {
       await alterarPlano(usuario.Id, plano, servicos, profissionais);
       setAssinatura(await consultarAssinatura());
       setDestino(null);
+      setEditandoRecursos(false);
       showNotification({ type: "success", title: "Plano alterado", message: "Recursos atualizados. Próxima renovação com o novo preço." });
     });
+  }
+
+  async function editarSelecao() {
+    if (!assinatura || assinatura.Plano === "GRATIS" || assinatura.Plano === "SEM_PLANO") return;
+    setCarregandoRecursos(true);
+    try {
+      const itens = await listarRecursosPlano();
+      const limites = assinatura.Plano === "BASICO" ? [4,2] : assinatura.Plano === "INTERMEDIARIO" ? [8,4] : [Infinity,Infinity];
+      setRecursos(itens);
+      setSelecionados([
+        ...itens.filter(x=>x.Tipo==="SERVICO" && x.Ativo).slice(0,limites[0]).map(x=>`${x.Tipo}:${x.Id}`),
+        ...itens.filter(x=>x.Tipo==="PROFISSIONAL" && x.Ativo).slice(0,limites[1]).map(x=>`${x.Tipo}:${x.Id}`)
+      ]);
+      setEditandoRecursos(true);
+      setDestino(assinatura.Plano);
+    } catch {
+      showNotification({ type: "error", title: "Assinatura", message: "Não foi possível carregar os recursos." });
+    } finally { setCarregandoRecursos(false); }
   }
 
   function alternarRecurso(id: string) {
@@ -117,6 +146,13 @@ export default function MinhaAssinatura() {
             {assinatura.ServicosCadastrados > assinatura.LimiteServicos && <p className={styles.note}>Existem serviços acima do limite do plano atual.</p>}
             {usuario?.Papel === "EMPRESA" && assinatura.ProfissionaisVinculados > assinatura.LimiteProfissionais && <p className={styles.note}>Existem vínculos profissionais acima do limite do plano atual.</p>}
           </div>
+          {assinatura.AcessoAtivo && (assinatura.Plano === "BASICO" || assinatura.Plano === "INTERMEDIARIO") &&
+            (assinatura.ServicosCadastrados > assinatura.LimiteServicos ||
+              (usuario?.Papel === "EMPRESA" && assinatura.ProfissionaisVinculados > assinatura.LimiteProfissionais)) && (
+            <button className={styles.secondaryButton} type="button" onClick={()=>void editarSelecao()} disabled={Boolean(pending)||carregandoRecursos}>
+              Gerenciar recursos ativos
+            </button>
+          )}
           {(assinatura.Plano === "BASICO" || assinatura.Plano === "INTERMEDIARIO" || assinatura.Plano === "AVANCADO") && (
             <button className={styles.secondaryButton} type="button" disabled={Boolean(pending)}
               onClick={() => usuario?.Id && executar("portal", () => abrirPortal(usuario.Id))}>
@@ -181,12 +217,12 @@ export default function MinhaAssinatura() {
                 </label>)}
               </fieldset>)}
             <div className={styles.modalActions}>
-              <button type="button" className={styles.secondaryButton} onClick={()=>setDestino(null)} disabled={Boolean(pending)}>Cancelar</button>
+              <button type="button" className={styles.secondaryButton} onClick={()=>{setDestino(null);setEditandoRecursos(false);}} disabled={Boolean(pending)}>Cancelar</button>
               <button type="button" className={styles.button} disabled={!validos || Boolean(pending)}
                 onClick={()=>void confirmarTroca(destino,
                   servicos.length > limiteServicos ? servicos.filter(x=>selecionados.includes(x.Id)).map(x=>x.Id) : undefined,
                   profissionais.length > limiteProfissionais ? profissionais.filter(x=>selecionados.includes(x.Id)).map(x=>x.Id) : undefined)}>
-                Confirmar seleção e alterar plano
+                {editandoRecursos ? "Salvar recursos ativos" : "Confirmar seleção e alterar plano"}
               </button>
             </div>
           </section>
