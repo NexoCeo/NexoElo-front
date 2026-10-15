@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useNavigate } from "react-router-dom";
-import { FaBars, FaMoon, FaSignOutAlt, FaSun, FaTimes, FaUser } from "react-icons/fa";
+import { FaBars, FaCreditCard, FaMoon, FaSignOutAlt, FaSun, FaTimes, FaUser } from "react-icons/fa";
 import styles from "./style.module.css";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
@@ -140,6 +140,17 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
                   <FaUser aria-hidden="true" />
                   <span>Meu perfil</span>
                 </Link>
+                {canShowFindMe && (
+                  <Link
+                    to={`${basePath}/assinatura`}
+                    style={{ color: theme.colors.text }}
+                    onClick={() => setIsProfileMenuOpen(false)}
+                    role="menuitem"
+                  >
+                    <FaCreditCard aria-hidden="true" />
+                    <span>Minha assinatura</span>
+                  </Link>
+                )}
                 <button
                   type="button"
                   onClick={toggleTheme}
