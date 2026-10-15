@@ -18,6 +18,7 @@ import {
 } from "@/services/usuario-service";
 import styles from "./style.module.css";
 import ProfileOverview from "@/components/profile-overview";
+import LoadingState from "@/components/loading-state";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -209,9 +210,9 @@ export default function Perfil() {
       {error && !modalOpen && <p className={styles.error}>{error}</p>}
 
       <div className={styles.profileShell}>
-        <ProfileOverview
+        {!usuario && loading ? <LoadingState label="Carregando perfil" /> : <ProfileOverview
           role={formatRole(usuario?.Papel)}
-          name={loading ? "Carregando..." : usuario?.Nome || "Nome não informado"}
+          name={usuario?.Nome || "Nome não informado"}
           email={usuario?.Email}
           phone={usuario?.Telefone}
           avatarUrl={getProfileImageUrl(usuario?.FotoPerfil)}
