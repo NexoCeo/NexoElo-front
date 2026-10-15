@@ -118,7 +118,7 @@ export async function criarProfissionalEmpresa(
   formData.append("EmpresaId", String(payload.empresaId));
   formData.append("FotoPerfil", payload.fotoPerfil);
 
-  const response = await api.post<ApiRecord>("/Usuario/InserirUsuario", formData, {
+  const response = await api.post<ApiRecord>("/Usuario/InserirProfissionalEmpresa", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return {
