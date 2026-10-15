@@ -1,4 +1,4 @@
-import { FaEnvelope, FaPhoneAlt } from "react-icons/fa";
+import { FaCamera, FaEnvelope, FaPhoneAlt } from "react-icons/fa";
 import styles from "./style.module.css";
 
 type ProfileOverviewProps = {
@@ -10,6 +10,8 @@ type ProfileOverviewProps = {
   className?: string;
   action?: React.ReactNode;
   subtitle?: string;
+  onPhotoChange?: (file: File) => void;
+  photoSaving?: boolean;
 };
 
 function formatPhone(value?: string | null) {
@@ -19,12 +21,28 @@ function formatPhone(value?: string | null) {
   return value || "Não informado";
 }
 
-export default function ProfileOverview({ name, role, email, phone, avatarUrl, className, action, subtitle }: ProfileOverviewProps) {
+export default function ProfileOverview({ name, role, email, phone, avatarUrl, className, action, subtitle, onPhotoChange, photoSaving = false }: ProfileOverviewProps) {
   const initial = name.trim().charAt(0).toUpperCase() || "?";
   return (
     <section className={`${styles.profile} ${className || ""}`} aria-label="Informações do perfil">
       <div className={styles.avatar}>
         {avatarUrl ? <img src={avatarUrl} alt={`Foto de ${name}`} /> : <span aria-hidden="true">{initial}</span>}
+        {onPhotoChange && (
+          <label className={styles.cameraButton} title="Alterar foto de perfil" aria-label="Alterar foto de perfil">
+            {photoSaving ? <span className={styles.spinner} aria-hidden="true" /> : <FaCamera aria-hidden="true" />}
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              aria-label="Escolher nova foto de perfil"
+              disabled={photoSaving}
+              onChange={event => {
+                const file = event.currentTarget.files?.[0];
+                if (file) onPhotoChange(file);
+                event.currentTarget.value = "";
+              }}
+            />
+          </label>
+        )}
       </div>
       <div className={styles.heading}>
         <h2>{name}</h2>
