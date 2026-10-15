@@ -98,7 +98,7 @@ function Register() {
         className={styles.card}
         style={{
           backgroundColor:
-            theme.colors.bottom,
+            theme.colors.surface,
         }}
       >
         <form
@@ -183,7 +183,7 @@ function Register() {
               <span
                 className={styles.icon}
               >
-                <FaUser size={20} />
+                <FaUser size={15} />
               </span>
             </div>
           </div>
@@ -219,7 +219,7 @@ function Register() {
               <span
                 className={styles.icon}
               >
-                <FaEnvelope size={20} />
+                <FaEnvelope size={15} />
               </span>
             </div>
 
@@ -275,9 +275,9 @@ function Register() {
                 aria-label="Alternar visibilidade da senha"
               >
                 {showPassword ? (
-                  <FaEyeSlash size={20} />
+                  <FaEyeSlash size={15} />
                 ) : (
-                  <FaEye size={20} />
+                  <FaEye size={15} />
                 )}
               </button>
             </div>
