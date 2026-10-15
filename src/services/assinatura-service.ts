@@ -37,6 +37,12 @@ export async function abrirPortal(usuarioId: number) {
   window.location.assign(response.data.Url);
 }
 
-export async function alterarPlano(usuarioId: number, plano: "BASICO" | "INTERMEDIARIO" | "AVANCADO") {
-  await api.post("Assinatura/alterar-plano", { UsuarioId: usuarioId, Plano: plano });
+export async function alterarPlano(usuarioId: number, plano: "BASICO" | "INTERMEDIARIO" | "AVANCADO", servicosAtivos?: number[], profissionaisAtivos?: number[]) {
+  await api.post("Assinatura/alterar-plano", { UsuarioId: usuarioId, Plano: plano, ServicosAtivos: servicosAtivos, ProfissionaisAtivos: profissionaisAtivos });
+}
+
+export interface RecursoPlano { Tipo: "SERVICO" | "PROFISSIONAL"; Id: number; Nome: string; }
+export async function listarRecursosPlano() {
+  const { data } = await api.get<RecursoPlano[]>("Assinatura/recursos");
+  return data;
 }
