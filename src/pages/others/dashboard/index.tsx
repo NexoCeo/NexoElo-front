@@ -129,14 +129,9 @@ export default function Dashboard() {
       <section className={styles.agendaSection} aria-labelledby="dashboard-agenda-title">
         <div className={styles.agendaHeader}>
           <div className={styles.agendaTitleGroup}>
-            <span>
-              <FaCalendarDay aria-hidden="true" />
-              Agenda
-            </span>
             <h2 id="dashboard-agenda-title">
-              {isProfessional && range === "week"
-                ? t("dashboard.week")
-                : t("dashboard.today")}
+              <FaCalendarDay aria-hidden="true" />
+              <span>{isProfessional && range === "week" ? t("dashboard.week") : t("dashboard.today")}</span>
             </h2>
             <p>
               {isProfessional && range === "week" ? t("dashboard.currentWeek") : todayLabel}
