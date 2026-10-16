@@ -72,17 +72,17 @@ export default function NotificationBell() {
   return <div className={styles.wrapper} ref={panelRef}>
     <button type="button" className={styles.bellButton}
       onClick={() => setOpen(value => !value)}
-      aria-label={unread.length ? `Notificações: ${unread.length} não lidas` : "Abrir notificações"}
+      aria-label={unread.length ? `${t("notification.title")}: ${unread.length} ${t("notification.unreadCount")}` : t("notification.open")}
       aria-expanded={open} aria-haspopup="dialog">
       <span className={styles.bellIconWrap}>
         <FaBell aria-hidden="true" />
         {unread.length > 0 && <span className={styles.badge}>{unread.length > 99 ? "99+" : unread.length}</span>}
       </span>
     </button>
-    {open && <section className={styles.panel} role="dialog" aria-label="Notificações">
+    {open && <section className={styles.panel} role="dialog" aria-label={t("notification.title")}>
       <div className={styles.heading}>
-        <strong>Notificações ({unread.length})</strong>
-        <button type="button" onClick={() => setOpen(false)} aria-label="Fechar notificações"><FaTimes /></button>
+        <strong>{t("notification.title")} ({unread.length})</strong>
+        <button type="button" onClick={() => setOpen(false)} aria-label={t("notification.close")}><FaTimes /></button>
       </div>
       <div className={styles.tabs}>
         <button type="button" className={tab === "all" ? styles.active : ""} onClick={() => setTab("all")}>{t("notification.all")}</button>
@@ -94,7 +94,7 @@ export default function NotificationBell() {
         {error && <p className={styles.feedback} role="status">{t("notification.error")}</p>}
         {!visible.length && <div className={styles.empty}>
           <FaInbox aria-hidden="true"/>
-          <strong>Nenhuma notificação {tab === "unread" ? "não lida" : "por enquanto"}</strong>
+          <strong>{tab === "unread" ? t("notification.emptyUnread") : t("notification.emptyAll")}</strong>
           <span>{t("notification.empty")}</span>
         </div>}
         {visible.map(item => <button type="button" className={styles.item}
@@ -102,10 +102,10 @@ export default function NotificationBell() {
           <span className={styles.itemIcon}><FaUserClock /></span>
           <span className={styles.itemText}>
             <strong>{t("notification.linkRequest")}</strong>
-            <span>{item.Nome || "Um profissional"} quer se vincular à sua empresa.</span>
+            <span>{item.Nome || t("notification.someone")} {t("notification.requestSuffix")}</span>
             <small>{t("notification.view")}</small>
           </span>
-          {readIds.includes(notificationId(item)) ? <FaCheck className={styles.read} aria-label="Lida" /> : <span className={styles.unreadDot} aria-label="Não lida" />}
+          {readIds.includes(notificationId(item)) ? <FaCheck className={styles.read} aria-label={t("notification.read")} /> : <span className={styles.unreadDot} aria-label={t("notification.unreadOne")} />}
         </button>)}
       </div>
     </section>}
