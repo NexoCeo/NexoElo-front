@@ -56,7 +56,7 @@ export const translations = {
     "services.empty": "Nenhum serviço cadastrado ainda.",
     "hours.save": "Salvar funcionamento",
     "auth.entering": "Entrando...",
-    "auth.welcome": "Bem-vindo(a) ao sistema!"
+    "auth.welcome": "Bem-vindo(a) ao sistema!",
     "client.expand": "Expandir",
     "client.collapse": "Recolher",
     "booking.complete": "Preencha todos os campos",
@@ -562,7 +562,7 @@ export const translations = {
     "services.empty": "No services registered yet.",
     "hours.save": "Save business hours",
     "auth.entering": "Signing in...",
-    "auth.welcome": "Welcome to the system!"
+    "auth.welcome": "Welcome to the system!",
     "client.expand": "Expand",
     "client.collapse": "Collapse",
     "booking.complete": "Complete all fields",
