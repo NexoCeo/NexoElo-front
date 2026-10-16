@@ -381,15 +381,15 @@ export default function Agenda() {
 
   const lastUpdatedLabel =
     lastUpdated
-      ? `Atualizado às ${lastUpdated.toLocaleTimeString(
-          "pt-BR",
+      ? `${t("agenda.updatedAt")} ${lastUpdated.toLocaleTimeString(
+          lang === "pt" ? "pt-BR" : "en-US",
           {
             hour: "2-digit",
             minute: "2-digit",
             second: "2-digit",
           },
         )}`
-      : "Aguardando atualização";
+      : t("agenda.awaitingUpdate");
 
   async function handleStatusChange(
     agendamentoId: number,
