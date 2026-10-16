@@ -6,12 +6,14 @@ import { useNotification } from "@/context/NotificationContext";
 import { consultarAssinatura, iniciarCheckout, alterarPlano, atualizarRecursosAtivos, listarRecursosPlano, abrirPortal, planos, type AssinaturaAtual, type RecursoPlano } from "@/services/assinatura-service";
 import styles from "./style.module.css";
 import Modal from "@/components/modal";
+import { useLanguage } from "@/context/LanguageContext";
 
-const reais = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
-const nomes: Record<string,string> = { GRATIS: "Grátis", BASICO: "Básico", INTERMEDIARIO: "Intermediário", AVANCADO: "Avançado", SEM_PLANO: "Sem plano" };
 
 export default function MinhaAssinatura() {
   const { usuario } = useUser();
+  const { lang, t } = useLanguage();
+  const reais = new Intl.NumberFormat(lang === "pt" ? "pt-BR" : "en-US", { style: "currency", currency: "BRL" });
+  const nomes: Record<string,string> = { GRATIS:t("subscription.free"), BASICO:t("subscription.basic"), INTERMEDIARIO:t("subscription.intermediate"), AVANCADO:t("subscription.advanced"), SEM_PLANO:t("subscription.noPlan") };
   const { showNotification } = useNotification();
   const [assinatura, setAssinatura] = useState<AssinaturaAtual | null>(null);
   const [loading, setLoading] = useState(true);
@@ -123,23 +125,23 @@ export default function MinhaAssinatura() {
     setSelecionados(prev=>prev.includes(id)?prev.filter(i=>i!==id):[...prev,id]);
   }
 
-  const limite = (valor: number) => valor === 2147483647 ? "Ilimitados" : String(valor);
+  const limite = (valor: number) => valor === 2147483647 ? t("subscription.unlimited") : String(valor);
   return (
     <main className={styles.page}>
-      {loading ? <section className={styles.status}>Carregando assinatura...</section> : assinatura && (
-        <section className={styles.status} aria-label="Plano atual">
+      {loading ? <section className={styles.status}>{t("subscription.loading")}</section> : assinatura && (
+        <section className={styles.status} aria-label={t("subscription.current")}>
           <div>
-            <h2 className={styles.statusTitle}>Plano atual: {nomes[assinatura.Plano] ?? assinatura.Plano}</h2>
+            <h2 className={styles.statusTitle}>{t("subscription.current")}: {nomes[assinatura.Plano] ?? assinatura.Plano}</h2>
             <div className={styles.statusMeta}>
               <span className={assinatura.AcessoAtivo ? styles.active : styles.inactive}>
-                {assinatura.AcessoAtivo ? "● Acesso ativo" : "● Acesso suspenso"}
+                {assinatura.AcessoAtivo ? `● ${t("subscription.active")}` : `● ${t("subscription.suspended")}`}
               </span>
-              {assinatura.DataFim && <span>Válido até {new Date(assinatura.DataFim).toLocaleDateString("pt-BR")}</span>}
-              <span>Serviços: {assinatura.ServicosCadastrados} / {limite(assinatura.LimiteServicos)}</span>
-              {usuario?.Papel === "EMPRESA" && <span>Profissionais: {assinatura.ProfissionaisVinculados} / {limite(assinatura.LimiteProfissionais)}</span>}
+              {assinatura.DataFim && <span>{t("subscription.validUntil")} {new Date(assinatura.DataFim).toLocaleDateString(lang === "pt" ? "pt-BR" : "en-US")}</span>}
+              <span>{t("subscription.services")}: {assinatura.ServicosCadastrados} / {limite(assinatura.LimiteServicos)}</span>
+              {usuario?.Papel === "EMPRESA" && <span>{t("subscription.professionalsLabel")}: {assinatura.ProfissionaisVinculados} / {limite(assinatura.LimiteProfissionais)}</span>}
             </div>
-            {assinatura.ServicosCadastrados > assinatura.LimiteServicos && <p className={styles.note}>Existem serviços acima do limite do plano atual.</p>}
-            {usuario?.Papel === "EMPRESA" && assinatura.ProfissionaisVinculados > assinatura.LimiteProfissionais && <p className={styles.note}>Existem vínculos profissionais acima do limite do plano atual.</p>}
+            {assinatura.ServicosCadastrados > assinatura.LimiteServicos && <p className={styles.note}>{t("subscription.overServices")}</p>}
+            {usuario?.Papel === "EMPRESA" && assinatura.ProfissionaisVinculados > assinatura.LimiteProfissionais && <p className={styles.note}>{t("subscription.overPros")}</p>}
           </div>
           {assinatura.AcessoAtivo && (assinatura.Plano === "BASICO" || assinatura.Plano === "INTERMEDIARIO") &&
             (assinatura.ServicosCadastrados > assinatura.LimiteServicos ||
@@ -157,36 +159,36 @@ export default function MinhaAssinatura() {
         </section>
       )}
 
-      <h2 className={styles.sectionTitle}>Escolha seu plano</h2>
-      <section className={styles.grid} aria-label="Planos disponíveis">
+      <h2 className={styles.sectionTitle}>{t("subscription.choose")}</h2>
+      <section className={styles.grid} aria-label={t("subscription.available")}>
         {planos.map(plano => {
           const atual = assinatura?.Plano === plano.id;
           return (
             <article key={plano.id} className={`${styles.card} ${plano.id === "INTERMEDIARIO" ? styles.featured : ""}`}>
               <div className={styles.cardTop}>
-                <h3 className={styles.cardName}>{plano.nome}</h3>
-                {atual ? <span className={styles.tag}>Plano atual</span> : plano.id === "INTERMEDIARIO" ? <span className={styles.tag}>Mais popular</span> : null}
+                <h3 className={styles.cardName}>{nomes[plano.id] ?? plano.nome}</h3>
+                {atual ? <span className={styles.tag}>{t("subscription.current")}</span> : plano.id === "INTERMEDIARIO" ? <span className={styles.tag}>{t("subscription.mostPopular")}</span> : null}
               </div>
-              <p className={styles.price}>{reais.format(plano.valor)} <small>/mês</small></p>
+              <p className={styles.price}>{reais.format(plano.valor)} <small>/{t("subscription.month")}</small></p>
               <p className={styles.description}>
-                {plano.id === "BASICO" ? "Para começar a organizar seus atendimentos." :
-                 plano.id === "INTERMEDIARIO" ? "Mais capacidade e relatórios para crescer." :
-                 "Liberdade para expandir sua operação."}
+                {plano.id === "BASICO" ? t("subscription.basicDesc") :
+                 plano.id === "INTERMEDIARIO" ? t("subscription.intermediateDesc") :
+                 t("subscription.advancedDesc")}
               </p>
               <ul className={styles.features}>
-                <li className={styles.feature}><FaCheck className={styles.featureIcon} aria-hidden="true" /> {plano.servicos}</li>
-                <li className={styles.feature}><FaCheck className={styles.featureIcon} aria-hidden="true" /> {plano.profissionais}</li>
+                <li className={styles.feature}><FaCheck className={styles.featureIcon} aria-hidden="true" /> {plano.id === "AVANCADO" ? t("subscription.allServices") : `${plano.id === "BASICO" ? 4 : 8} ${t("subscription.services").toLowerCase()}`}</li>
+                <li className={styles.feature}><FaCheck className={styles.featureIcon} aria-hidden="true" /> {plano.id === "AVANCADO" ? t("subscription.allPros") : `${plano.id === "BASICO" ? 2 : 4} ${t("subscription.professionals")}`}</li>
                 <li className={styles.feature}>
                   {plano.relatorios ? <FaCheck className={styles.featureIcon} aria-hidden="true" /> : <FaTimes className={styles.off} aria-hidden="true" />}
-                  <span className={plano.relatorios ? "" : styles.off}>{plano.relatorios ? "Relatórios PDF incluídos" : "Sem relatórios PDF"}</span>
+                  <span className={plano.relatorios ? "" : styles.off}>{plano.relatorios ? t("subscription.reports") : t("subscription.noReports")}</span>
                 </li>
-                <li className={styles.feature}><FaCheck className={styles.featureIcon} aria-hidden="true" /> Agenda e gestão de serviços</li>
+                <li className={styles.feature}><FaCheck className={styles.featureIcon} aria-hidden="true" /> {t("subscription.agenda")}</li>
               </ul>
               <button className={styles.button} type="button"
                 disabled={loading || carregandoRecursos || Boolean(pending) || !usuario?.Id || atual || !assinatura}
                 onClick={() => void selecionarPlano(plano.id)}>
-                {atual ? "Seu plano atual" : pending === plano.id ? "Processando..." :
-                 assinatura?.AcessoAtivo && assinatura.Plano !== "GRATIS" && assinatura.Plano !== "SEM_PLANO" ? "Alterar plano" : "Selecionar plano"}
+                {atual ? t("subscription.currentLabel") : pending === plano.id ? t("subscription.processing") :
+                 assinatura?.AcessoAtivo && assinatura.Plano !== "GRATIS" && assinatura.Plano !== "SEM_PLANO" ? t("subscription.change") : t("subscription.select")}
               </button>
             </article>
           );
@@ -200,22 +202,22 @@ export default function MinhaAssinatura() {
         const ids = (itens: RecursoPlano[]) => itens.filter(x=>selecionados.includes(`${x.Tipo}:${x.Id}`)).map(x=>x.Id);
         const validos = (servicos.length <= limiteServicos || ids(servicos).length === limiteServicos) &&
           (profissionais.length <= limiteProfissionais || ids(profissionais).length === limiteProfissionais);
-        return <Modal open title="Escolha os recursos que continuarão ativos"
+        return <Modal open title={t("subscription.keepResources")}
           onClose={()=>{setDestino(null);setEditandoRecursos(false);}} busy={Boolean(pending)}
           actions={<>
             <button type="button" className={styles.secondaryButton} disabled={Boolean(pending)}
-              onClick={()=>{setDestino(null);setEditandoRecursos(false);}}>Cancelar</button>
+              onClick={()=>{setDestino(null);setEditandoRecursos(false);}}>{t("common.cancel")}</button>
             <button type="button" className={styles.button} disabled={!validos || Boolean(pending)}
               onClick={()=>void confirmarTroca(destino,
                 servicos.length > limiteServicos ? ids(servicos) : undefined,
                 profissionais.length > limiteProfissionais ? ids(profissionais) : undefined)}>
-              {editandoRecursos ? "Salvar recursos ativos" : "Continuar"}
+              {editandoRecursos ? t("subscription.saveResources") : t("subscription.continue")}
             </button>
           </>}>
-          <p>Os recursos não selecionados ficarão indisponíveis para novos agendamentos. Dados e histórico serão preservados.</p>
+          <p>{t("subscription.keepNotice")}</p>
           {([["SERVICO",servicos,limiteServicos],["PROFISSIONAL",profissionais,limiteProfissionais]] as const).map(([tipo,itens,limite]) =>
             itens.length > limite && <fieldset key={tipo} className={styles.selectionGroup}>
-              <legend>{tipo === "SERVICO" ? "Serviços" : "Profissionais"} — selecione {limite} de {itens.length}</legend>
+              <legend>{tipo === "SERVICO" ? t("subscription.services") : t("subscription.professionalsLabel")} — {t("subscription.selectCount")} {limite} {t("subscription.of")} {itens.length}</legend>
               {itens.map(item=><label key={item.Id} className={styles.resource}>
                 <input type="checkbox" checked={selecionados.includes(`${item.Tipo}:${item.Id}`)}
                   onChange={()=>alternarRecurso(`${item.Tipo}:${item.Id}`)} />
@@ -224,19 +226,19 @@ export default function MinhaAssinatura() {
             </fieldset>)}
         </Modal>;
       })()}
-      <Modal open={Boolean(confirmacao)} title="Confirmar alteração do plano"
+      <Modal open={Boolean(confirmacao)} title={t("subscription.confirm")}
         onClose={()=>setConfirmacao(null)} busy={Boolean(pending)}
         actions={<>
           <button type="button" className={styles.secondaryButton} disabled={Boolean(pending)} onClick={()=>setConfirmacao(null)}>Cancelar</button>
           <button type="button" className={styles.button} disabled={Boolean(pending)} onClick={()=>void aplicarTroca()}>
-            {pending ? "Alterando..." : "Confirmar alteração"}
+            {pending ? t("subscription.changing") : t("subscription.apply")}
           </button>
         </>}>
-        <p>Alterar para <strong>{planos.find(item=>item.id===confirmacao?.plano)?.nome}</strong> por <strong>{reais.format(planos.find(item=>item.id===confirmacao?.plano)?.valor ?? 0)}/mês</strong>?</p>
-        {assinatura?.Status === "CANCELAMENTO_PENDENTE" && <p><strong>Renovação:</strong> esta confirmação também desfaz o cancelamento programado e reativa a cobrança recorrente do novo plano.</p>}
-        <p>O novo valor será cobrado na próxima renovação. Os recursos não selecionados ficarão indisponíveis para novos agendamentos, mas os dados e o histórico serão preservados.</p>
+        <p>{t("subscription.changeTo")} <strong>{nomes[confirmacao?.plano ?? ""]}</strong> por <strong>{reais.format(planos.find(item=>item.id===confirmacao?.plano)?.valor ?? 0)}/{t("subscription.month")}</strong>?</p>
+        {assinatura?.Status === "CANCELAMENTO_PENDENTE" && <p><strong>{t("subscription.renewal")}:</strong> {t("subscription.renewalNotice")}</p>}
+        <p>{t("subscription.chargeNotice")}</p>
       </Modal>
-      <p className={styles.note}>O plano Grátis oferece 30 dias com acesso completo. Em mudanças de plano, seus dados são preservados; recursos excedentes precisam ser regularizados.</p>
+      <p className={styles.note}>{t("subscription.freeNote")}</p>
     </main>
   );
 }
