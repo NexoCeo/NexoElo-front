@@ -72,9 +72,9 @@ export default function Perfil() {
         if (active) setUsuario(profile);
       } catch {
         if (active) {
-          const message = "Nao foi possivel atualizar os dados do perfil.";
+          const message = t("profile.loadError");
           setError(message);
-          showNotification({ type: "error", title: "Perfil indisponivel", message });
+          showNotification({ type: "error", title: t("profile.unavailable"), message });
         }
       } finally {
         if (active) setLoading(false);
@@ -136,7 +136,7 @@ export default function Perfil() {
     if (!usuario || photoSaving) return;
     const allowed = ["image/jpeg", "image/png", "image/webp"];
     if (!allowed.includes(file.type) || file.size > 5 * 1024 * 1024) {
-      showNotification({ type: "warning", title: "Foto inválida", message: "Use JPG, PNG ou WEBP com até 5 MB." });
+      showNotification({ type: "warning", title: t("profile.invalidPhoto"), message: t("profile.invalidPhotoDesc") });
       return;
     }
     try {
@@ -154,9 +154,9 @@ export default function Perfil() {
         Slug: updated.Slug || usuario.Slug,
         UrlPublica: updated.UrlPublica || usuario.UrlPublica,
       });
-      showNotification({ type: "success", title: "Foto atualizada", message: "Sua foto de perfil foi alterada." });
+      showNotification({ type: "success", title: t("profile.updatedPhoto"), message: t("profile.updatedPhotoDesc") });
     } catch {
-      showNotification({ type: "error", title: "Falha no envio", message: "Não foi possível atualizar sua foto. Tente novamente." });
+      showNotification({ type: "error", title: t("profile.uploadFailed"), message: t("profile.uploadFailedDesc") });
     } finally {
       setPhotoSaving(false);
     }
@@ -168,9 +168,9 @@ export default function Perfil() {
     setSuccess("");
 
     if (!canSubmit || !usuario) {
-      const message = "Revise os dados informados.";
+      const message = t("profile.review");
       setError(message);
-      showNotification({ type: "warning", title: "Dados invalidos", message });
+      showNotification({ type: "warning", title: t("profile.invalidData"), message });
       return;
     }
 
@@ -190,17 +190,17 @@ export default function Perfil() {
         Slug: updated.Slug || usuario.Slug,
         UrlPublica: updated.UrlPublica || usuario.UrlPublica,
       });
-      setSuccess("Perfil atualizado com sucesso.");
+      setSuccess(t("profile.saved"));
       showNotification({
         type: "success",
-        title: "Perfil atualizado",
-        message: "Seus novos dados ja estao visiveis no sistema.",
+        title: t("profile.savedTitle"),
+        message: t("profile.savedDesc"),
       });
       closeModal();
     } catch {
-      const message = "Nao foi possivel salvar as alteracoes do perfil.";
+      const message = t("profile.saveFailed");
       setError(message);
-      showNotification({ type: "error", title: "Perfil nao salvo", message });
+      showNotification({ type: "error", title: t("profile.saveFailedTitle"), message });
     } finally {
       setSaving(false);
     }
