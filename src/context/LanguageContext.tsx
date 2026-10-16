@@ -10,13 +10,9 @@ type LanguageContextValue = {
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 function detectLanguage(): SupportedLang {
-  if (typeof navigator === "undefined") return "pt";
-  const preferences = navigator.languages?.length ? navigator.languages : [navigator.language];
-  for (const preference of preferences) {
-    const code = preference.toLowerCase().split("-")[0];
-    if (code === "pt" || code === "en") return code;
-  }
-  return "en";
+  // O produto atende prioritariamente ao público brasileiro.
+  // O idioma pode ser alterado manualmente com setLang quando necessário.
+  return "pt";
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
