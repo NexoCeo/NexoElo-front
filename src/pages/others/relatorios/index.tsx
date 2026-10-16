@@ -25,6 +25,7 @@ import {
   type TipoRelatorio,
 } from "@/services/relatorio-service";
 import styles from "./style.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 
 const PdfPreview = lazy(() => import("@/components/pdf-preview"));
 
@@ -82,6 +83,7 @@ function baixarBlob(blob: Blob, nomeArquivo: string) {
 
 export default function Relatorios() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const { usuario } = useUser();
   const { showNotification } = useNotification();
   const [periodo, setPeriodo] = useState(mesAtual);
@@ -90,6 +92,12 @@ export default function Relatorios() {
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
   const [loadingAction, setLoadingAction] = useState("");
   const [error, setError] = useState("");
+
+  const relatoriosTraduzidos = relatorios.map((item, index) => ({...item,
+    titulo: [t("reports.financial"), t("reports.services"), t("reports.monthly")][index],
+    descricao: [t("reports.financialDesc"), t("reports.servicesDesc"), t("reports.monthlyDesc")][index],
+    observacao: [t("reports.financialNote"), t("reports.servicesNote"), t("reports.monthlyNote")][index],
+  }));
 
   const [ano, mes] = useMemo(
     () => periodo.split("-").map((value) => Number(value)),
@@ -201,7 +209,7 @@ export default function Relatorios() {
     return (
       <main className={styles.container} style={pageStyle}>
         <section className={styles.pageHeader}>
-          <p>Esta area esta disponivel apenas para empresas e autonomos.</p>
+          <p>{t("reports.restricted")}</p>
         </section>
       </main>
     );
@@ -211,7 +219,7 @@ export default function Relatorios() {
     <main className={styles.container} style={pageStyle}>
       <section className={styles.pageHeader}>
         <label className={styles.periodField}>
-          <span>Mes de referencia</span>
+          <span>{t("reports.reference")}</span>
           <span className={styles.periodControl}>
             <FaCalendarAlt aria-hidden="true" />
             <input
@@ -231,8 +239,8 @@ export default function Relatorios() {
         </p>
       )}
 
-      <section className={styles.reportGrid} aria-label="Relatorios disponiveis">
-        {relatorios.map((relatorio) => {
+      <section className={styles.reportGrid} aria-label={t("reports.available")}>
+        {relatoriosTraduzidos.map((relatorio) => {
           const previewLoading = loadingAction === `${relatorio.tipo}:preview`;
           const downloadLoading = loadingAction === `${relatorio.tipo}:download`;
 
@@ -258,7 +266,7 @@ export default function Relatorios() {
                   disabled={Boolean(loadingAction)}
                 >
                   <FaEye aria-hidden="true" />
-                  {previewLoading ? "Gerando..." : "Visualizar"}
+                  {previewLoading ? t("reports.generating") : t("reports.preview")}
                 </button>
                 <button
                   type="button"
@@ -266,10 +274,10 @@ export default function Relatorios() {
                   onClick={() => baixarRelatorio(relatorio)}
                   disabled={Boolean(loadingAction)}
                   aria-label={`Baixar ${relatorio.titulo}`}
-                  title="Baixar PDF"
+                  title={t("reports.download")}
                 >
                   <FaDownload aria-hidden="true" />
-                  <span>{downloadLoading ? "Gerando..." : "Baixar"}</span>
+                  <span>{downloadLoading ? t("reports.generating") : t("reports.download")}</span>
                 </button>
               </footer>
             </article>
@@ -295,7 +303,7 @@ export default function Relatorios() {
           >
             <header className={styles.modalHeader}>
               <div>
-                <span>Pre-visualizacao</span>
+                <span>{t("reports.previewTitle")}</span>
                 <h2 id="report-preview-title">{relatorioAtivo.titulo}</h2>
               </div>
               <div className={styles.modalActions}>
@@ -306,14 +314,14 @@ export default function Relatorios() {
                   disabled={!pdfBlob}
                 >
                   <FaDownload aria-hidden="true" />
-                  Baixar PDF
+                  {t("reports.download")} PDF
                 </button>
                 <button
                   type="button"
                   className={styles.closeButton}
                   onClick={fecharModal}
-                  aria-label="Fechar pre-visualizacao"
-                  title="Fechar"
+                  aria-label={t("common.close")}
+                  title={t("common.close")}
                 >
                   <FaTimes aria-hidden="true" />
                 </button>
@@ -324,13 +332,13 @@ export default function Relatorios() {
               {loadingAction ? (
                 <div className={styles.previewFeedback}>
                   <span className={styles.spinner} aria-hidden="true" />
-                  <p>Montando relatorio...</p>
+                  <p>{t("reports.generatingPdf")}</p>
                 </div>
               ) : error ? (
                 <div className={styles.previewFeedback} role="alert">
                   <p>{error}</p>
                   <button type="button" onClick={() => visualizarRelatorio(relatorioAtivo)}>
-                    Tentar novamente
+                    {t("reports.retry")}
                   </button>
                 </div>
               ) : pdfBlob ? (
@@ -338,7 +346,7 @@ export default function Relatorios() {
                   fallback={(
                     <div className={styles.previewFeedback} role="status">
                       <span className={styles.spinner} aria-hidden="true" />
-                      <p>Preparando visualizador...</p>
+                      <p>{t("reports.preparing")}</p>
                     </div>
                   )}
                 >
