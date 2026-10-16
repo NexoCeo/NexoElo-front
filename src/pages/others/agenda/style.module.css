@@ -1,10 +1,10 @@
 .container {
   width: 100%;
-  min-height: 100dvh;
+  min-height: 0;
   display: grid;
-  grid-template-columns: minmax(280px, 330px) minmax(0, 1fr);
-  gap: 28px;
-  padding: 92px clamp(20px, 3vw, 44px) 40px;
+  grid-template-columns: minmax(248px, 292px) minmax(0, 1fr);
+  gap: 20px;
+  padding: 92px clamp(16px, 2.4vw, 34px) 24px;
   align-items: flex-start;
   font-family: Inter, "Segoe UI", Arial, sans-serif;
 }
@@ -12,15 +12,15 @@
 .sidebar {
   width: 100%;
   display: grid;
-  gap: 14px;
+  gap: 10px;
   position: sticky;
-  top: 88px;
+  top: 80px;
 }
 
 .viewControls {
   display: grid;
-  gap: 14px;
-  padding: 12px;
+  gap: 9px;
+  padding: 10px;
   border: 1px solid var(--theme-bottom);
   border-radius: 8px;
   background: var(--theme-surface);
@@ -38,7 +38,7 @@
 
 .segmented button {
   min-width: 0;
-  min-height: 38px;
+  min-height: 34px;
   border: 0;
   border-radius: 5px;
   background: transparent;
@@ -69,7 +69,7 @@
 
 .professionalFilter select {
   width: 100%;
-  min-height: 42px;
+  min-height: 36px;
   padding: 0 36px 0 11px;
   border: 1px solid var(--theme-border-strong);
   border-radius: 6px;
@@ -108,12 +108,13 @@
 }
 
 .todayButton {
+  font-size: 0.84rem;
   width: 100%;
-  min-height: 46px;
+  min-height: 38px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   border: 1px solid var(--theme-primary);
   border-radius: 6px;
   background: var(--theme-primary);
@@ -125,6 +126,7 @@
 }
 
 .closeAllButton {
+  font-size: 0.84rem;
   width: 100%;
   min-height: 46px;
   display: inline-flex;
@@ -207,12 +209,12 @@
 }
 
 .pageHeader {
-  min-height: 86px;
+  min-height: 72px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 24px;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .titleGroup {
@@ -230,7 +232,7 @@
 .titleGroup h1 {
   margin: 0;
   max-width: 760px;
-  font-size: clamp(1.45rem, 2.1vw, 2rem);
+  font-size: clamp(1.3rem, 1.7vw, 1.75rem);
   line-height: 1.2;
   letter-spacing: 0;
   overflow-wrap: anywhere;
@@ -242,7 +244,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 10px;
+  margin-top: 6px;
   color: var(--theme-text-muted);
   font-size: 0.82rem;
 }
