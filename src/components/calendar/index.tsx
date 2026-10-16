@@ -122,7 +122,7 @@ export function WeekCalendar({ selectedDate, setSelectedDate }: CalendarProps) {
   const weekStart = startOfWeek(selectedDate);
   const weekDays = Array.from({ length: 7 }, (_, index) => addDays(weekStart, index));
   const weekEnd = weekDays[6];
-  const rangeFormatter = new Intl.DateTimeFormat("pt-BR", {
+  const rangeFormatter = new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "short",
   });
