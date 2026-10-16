@@ -1,9 +1,11 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import LoadingState from "@/components/loading-state";
+import { useLanguage } from "@/context/LanguageContext";
 import { consultarAssinatura, type AssinaturaAtual } from "@/services/assinatura-service";
 
 export default function AssinaturaGate({ children, relatorios = false, avancado = false }: { children: ReactNode; relatorios?: boolean; avancado?: boolean }) {
+  const { t } = useLanguage();
   const location = useLocation();
   const base = location.pathname.startsWith("/empresa/") ? "/empresa" : "/autonomo";
   const [state, setState] = useState<AssinaturaAtual | null>(null);
@@ -14,15 +16,15 @@ export default function AssinaturaGate({ children, relatorios = false, avancado 
       .catch(() => { if (active) setErro(true); });
     return () => { active = false; };
   }, []);
-  if (!state && !erro) return <LoadingState label="Verificando assinatura" />;
-  if (erro || !state) return <p style={{ padding: 24 }}>Não foi possível validar sua assinatura. Tente atualizar a página.</p>;
+  if (!state && !erro) return <LoadingState label={t("gate.verifying")} />;
+  if (erro || !state) return <p style={{ padding: 24 }}>{t("gate.error")}</p>;
   if (!state.AcessoAtivo || (relatorios && state.Plano !== "GRATIS" && !state.RelatoriosLiberados) || (avancado && state.Plano !== "AVANCADO" && state.Plano !== "GRATIS"))
     return <main style={{ padding: 32 }}>
-      <h1>{!state.AcessoAtivo ? "Assinatura necessária" : avancado && state.Plano !== "AVANCADO" && state.Plano !== "GRATIS" ? "Recurso exclusivo do Avançado" : "Recurso do Intermediário e Avançado"}</h1>
+      <h1>{!state.AcessoAtivo ? t("gate.subscriptionNeeded") : avancado && state.Plano !== "AVANCADO" && state.Plano !== "GRATIS" ? t("gate.advancedOnly") : t("gate.intermediateOnly")}</h1>
       <p>{!state.AcessoAtivo
-        ? "Seu período gratuito ou assinatura terminou. Selecione um plano para continuar."
-        : avancado && state.Plano !== "AVANCADO" && state.Plano !== "GRATIS" ? "Análise de dados está disponível no plano Avançado e durante o teste Grátis." : "Os relatórios estão disponíveis a partir do plano Intermediário."}</p>
-      <Link to={base + "/assinatura"}>Ver planos</Link>
+        ? t("gate.trialEnded")
+        : avancado && state.Plano !== "AVANCADO" && state.Plano !== "GRATIS" ? t("gate.analyticsOnly") : t("gate.reportsOnly")}</p>
+      <Link to={base + "/assinatura"}>{t("gate.viewPlans")}</Link>
     </main>;
   return <>{children}</>;
 }
