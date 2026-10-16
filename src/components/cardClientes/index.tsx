@@ -1,6 +1,7 @@
 import { useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { FaCalendarXmark, FaCheck, FaXmark } from "react-icons/fa6";
 import styles from "./style.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 
 export type AgendaCardItem = {
   Id: number;
@@ -40,7 +41,8 @@ export function Card({
   updatingId,
   onStatusChange,
 }: CardProps) {
-  const labels = ["Cliente", "Serviço", "Profissional", "Horário", "Status", "Valor", "Ações"];
+  const { t } = useLanguage();
+  const labels = [t("common.customer"), t("common.service"), t("common.professional"), t("common.time"), t("common.status"), t("common.value"), t("common.actions")];
   const [widths, setWidths] = useState<number[]>([20, 18, 18, 10, 12, 11, 11]);
   const listRef = useRef<HTMLDivElement>(null);
   const resizing = useRef<{ index: number; x: number; widths: number[]; containerWidth: number } | null>(null);
@@ -105,7 +107,7 @@ export function Card({
       {loading ? (
         <div className={styles.feedback} role="status">
           <span className={styles.loader} aria-hidden="true" />
-          Carregando agendamentos...
+          {t("common.loading")}
         </div>
       ) : error ? (
         <div className={styles.error} role="alert">{error}</div>
@@ -160,7 +162,7 @@ export function Card({
       ) : (
         <div className={styles.emptyState}>
           <FaCalendarXmark aria-hidden="true" />
-          <strong>Nenhum agendamento</strong>
+          <strong>{t("common.noAppointments")}</strong>
           <span>{selectedDateLabel}</span>
         </div>
       )}
