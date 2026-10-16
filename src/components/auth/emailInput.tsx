@@ -1,3 +1,4 @@
+import { useLanguage } from "@/context/LanguageContext";
 import { FaEnvelope } from 'react-icons/fa';
 import styles from './authInputs.module.css';
 import { useTheme } from '../../context/ThemeContext';
@@ -8,6 +9,7 @@ interface EmailInputProps {
 }
 
 export function EmailInput({ value, onChange }: EmailInputProps) {
+  const { t } = useLanguage();
   const { theme } = useTheme();
   
   return (
@@ -20,7 +22,7 @@ export function EmailInput({ value, onChange }: EmailInputProps) {
         style={{ color: theme.colors.text}}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Digite seu e-mail"
+        placeholder={t("auth.enterEmail")}
         required
       />
       <span className={styles.icon}>
