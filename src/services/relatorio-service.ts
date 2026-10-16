@@ -9,9 +9,10 @@ export async function gerarRelatorioPdf(
   tipo: TipoRelatorio,
   ano: number,
   mes: number,
+  idioma: "pt" | "en" = "pt",
 ) {
   const response = await api.get<Blob>(`Relatorios/${tipo}`, {
-    params: { ano, mes },
+    params: { ano, mes, idioma },
     responseType: "blob",
     timeout: 20_000,
   });
