@@ -67,27 +67,21 @@
   min-width: 0;
 }
 
-.agendaTitleGroup > span {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  margin-bottom: 6px;
-  color: var(--theme-secondary-text);
-  font-size: 0.76rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.agendaTitleGroup > span svg {
-  font-size: 0.86rem;
-}
-
 .agendaTitleGroup h2 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
   margin: 0;
   color: var(--theme-text);
   font-size: 1.45rem;
   line-height: 1.25;
   overflow-wrap: anywhere;
+}
+
+ .agendaTitleGroup h2 svg {
+  flex-shrink: 0;
+  color: var(--theme-secondary-text);
+  font-size: 0.9em;
 }
 
 .agendaTitleGroup p {
