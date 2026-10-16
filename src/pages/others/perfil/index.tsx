@@ -17,6 +17,7 @@ import {
   obterPerfilUsuario,
 } from "@/services/usuario-service";
 import styles from "./style.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 import ProfileOverview from "@/components/profile-overview";
 import LoadingState from "@/components/loading-state";
 
@@ -34,6 +35,7 @@ function formatRole(role?: string) {
 
 export default function Perfil() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const { usuario, setUsuario } = useUser();
   const { showNotification } = useNotification();
   const [modalOpen, setModalOpen] = useState(false);
@@ -226,7 +228,7 @@ export default function Perfil() {
           style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
         >
           <FaPen aria-hidden="true" />
-          Editar perfil
+          {t("profile.edit")}
         </button>}
         />}
       </div>
@@ -243,40 +245,40 @@ export default function Perfil() {
             <header className={styles.modalHeader}>
               <div>
                 <h2 id="editar-perfil-title" style={{ color: theme.colors.text }}>
-                  Editar perfil
+                  {t("profile.edit")}
                 </h2>
                 <p style={{ color: theme.colors.inactive }}>
-                  As alteracoes aparecem no sistema assim que forem salvas.
+                  {t("profile.changeNotice")}
                 </p>
               </div>
-              <button type="button" onClick={closeModal} aria-label="Fechar modal" title="Fechar">
+              <button type="button" onClick={closeModal} aria-label={t("common.close")} title={t("common.close")}>
                 <FaTimes aria-hidden="true" />
               </button>
             </header>
 
             <form className={styles.form} onSubmit={handleSubmit}>
               <label className={styles.photoField}>
-                Foto de perfil
+                {t("profile.photo")}
                 <span className={styles.photoControl}>
                   <span className={styles.photoPreview}>
                     <img src={fotoPreview} alt="Previa da foto de perfil" />
                   </span>
                   <span>
-                    <strong>{fotoPerfil?.name || "Escolher nova foto"}</strong>
+                    <strong>{fotoPerfil?.name || t("profile.choosePhoto")}</strong>
                     <small>JPG, PNG ou WEBP, ate 5 MB</small>
                   </span>
                   <FaCamera aria-hidden="true" />
                   <input
                     type="file"
                     accept="image/png,image/jpeg,image/webp"
-                    aria-label="Foto de perfil"
+                    aria-label={t("profile.photo")}
                     onChange={(event) => setFotoPerfil(event.target.files?.[0] ?? null)}
                   />
                 </span>
               </label>
 
               <label>
-                Nome
+                {t("profile.name")}
                 <span className={styles.inputWrap}>
                   <input
                     type="text"
@@ -289,7 +291,7 @@ export default function Perfil() {
               </label>
 
               <label>
-                E-mail
+                {t("profile.email")}
                 <span className={styles.inputWrap}>
                   <input
                     type="email"
@@ -301,14 +303,14 @@ export default function Perfil() {
               </label>
 
               <label>
-                Telefone
+                {t("profile.phone")}
                 <span className={styles.inputWrap}>
                   <input
                     type="tel"
                     inputMode="numeric"
                     value={telefone}
                     onChange={(event) => setTelefone(event.target.value)}
-                    placeholder="DDD e numero"
+                    placeholder={t("profile.phonePlaceholder")}
                   />
                   <FaPhone aria-hidden="true" />
                 </span>
@@ -318,7 +320,7 @@ export default function Perfil() {
 
               <footer className={styles.modalActions}>
                 <button type="button" className={styles.cancelButton} onClick={closeModal}>
-                  Cancelar
+                  {t("common.cancel")}
                 </button>
                 <button
                   type="submit"
@@ -327,7 +329,7 @@ export default function Perfil() {
                   style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
                 >
                   <FaSave aria-hidden="true" />
-                  {saving ? "Salvando..." : "Salvar alteracoes"}
+                  {saving ? t("profile.saving") : t("common.save")}
                 </button>
               </footer>
             </form>
