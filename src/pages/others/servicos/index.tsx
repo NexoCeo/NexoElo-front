@@ -11,6 +11,7 @@ import {
 import type { Servico } from "@/types/servico";
 import { getUploadedImageUrl } from "@/components/header/profile-image";
 import styles from "./style.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 import LoadingState from "@/components/loading-state";
 
 function formatCurrency(value: number) {
@@ -22,6 +23,7 @@ function formatCurrency(value: number) {
 
 export default function Servicos() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const { usuario } = useUser();
   const { showNotification } = useNotification();
   const [servicos, setServicos] = useState<Servico[]>([]);
@@ -243,7 +245,7 @@ export default function Servicos() {
           style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
         >
           <FaPlus aria-hidden="true" />
-          Novo servico
+          {t("services.new")}
         </button>
       </section>
 
@@ -252,10 +254,10 @@ export default function Servicos() {
 
       <section className={styles.tableWrap} style={{ backgroundColor: theme.colors.background2 }}>
         {loading ? (
-          <LoadingState label="Carregando serviços" variant="table" embedded />
+          <LoadingState label={t("services.loading")} variant="table" embedded />
         ) : servicos.length === 0 ? (
           <p className={styles.feedback} style={{ color: theme.colors.inactive }}>
-            Nenhum servico cadastrado ainda.
+            {t("services.empty")}
           </p>
         ) : (
           <table className={styles.table}>
