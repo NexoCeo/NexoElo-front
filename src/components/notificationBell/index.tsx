@@ -1,3 +1,4 @@
+import { useLanguage } from "@/context/LanguageContext";
 import { useEffect, useRef, useState } from "react";
 import { FaBell, FaCheck, FaInbox, FaTimes, FaUserClock } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +17,7 @@ function getRead(empresaId: number): string[] {
 function notificationId(item: SolicitacaoVinculo) { return "vinculo:" + item.VinculoId; }
 
 export default function NotificationBell() {
+  const { t } = useLanguage();
   const { usuario } = useUser();
   const navigate = useNavigate();
   const empresaId = usuario?.Papel?.toUpperCase() === "EMPRESA" ? usuario.Id : 0;
@@ -83,25 +85,25 @@ export default function NotificationBell() {
         <button type="button" onClick={() => setOpen(false)} aria-label="Fechar notificações"><FaTimes /></button>
       </div>
       <div className={styles.tabs}>
-        <button type="button" className={tab === "all" ? styles.active : ""} onClick={() => setTab("all")}>Todas</button>
-        <button type="button" className={tab === "unread" ? styles.active : ""} onClick={() => setTab("unread")}>Não lidas</button>
+        <button type="button" className={tab === "all" ? styles.active : ""} onClick={() => setTab("all")}>{t("notification.all")}</button>
+        <button type="button" className={tab === "unread" ? styles.active : ""} onClick={() => setTab("unread")}>{t("notification.unread")}</button>
         <button type="button" className={styles.clear} disabled={!unread.length}
-          onClick={() => persistRead([...new Set([...readIds, ...unread.map(notificationId)])])}>Marcar todas como lidas</button>
+          onClick={() => persistRead([...new Set([...readIds, ...unread.map(notificationId)])])}>{t("notification.markRead")}</button>
       </div>
       <div className={styles.content}>
-        {error && <p className={styles.feedback} role="status">Não foi possível atualizar as notificações.</p>}
+        {error && <p className={styles.feedback} role="status">{t("notification.error")}</p>}
         {!visible.length && <div className={styles.empty}>
           <FaInbox aria-hidden="true"/>
           <strong>Nenhuma notificação {tab === "unread" ? "não lida" : "por enquanto"}</strong>
-          <span>Novas solicitações de vínculo aparecerão aqui.</span>
+          <span>{t("notification.empty")}</span>
         </div>}
         {visible.map(item => <button type="button" className={styles.item}
             key={item.VinculoId} onClick={() => openRequest(item)}>
           <span className={styles.itemIcon}><FaUserClock /></span>
           <span className={styles.itemText}>
-            <strong>Solicitação de vínculo</strong>
+            <strong>{t("notification.linkRequest")}</strong>
             <span>{item.Nome || "Um profissional"} quer se vincular à sua empresa.</span>
-            <small>Ver solicitação</small>
+            <small>{t("notification.view")}</small>
           </span>
           {readIds.includes(notificationId(item)) ? <FaCheck className={styles.read} aria-label="Lida" /> : <span className={styles.unreadDot} aria-label="Não lida" />}
         </button>)}
