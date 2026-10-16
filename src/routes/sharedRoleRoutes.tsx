@@ -22,6 +22,7 @@ import Servicos from "@/pages/others/servicos";
 import Funcionamento from "@/pages/others/funcionamento";
 import Relatorios from "@/pages/others/relatorios";
 import AnaliseDados from "@/pages/others/analise-dados";
+import WhatsAppBusiness from "@/pages/others/whatsapp-business";
 import MinhaAssinatura from "@/pages/others/assinatura";
 import AssinaturaGate from "@/components/assinatura-gate";
 
@@ -148,6 +149,10 @@ export default function SharedRoleRoutes({
 
       {!requireApprovedProfessional && (
         <Route path="analise-dados" element={<ProtectedRoute><AssinaturaGate avancado><AnaliseDados /></AssinaturaGate></ProtectedRoute>} />
+      )}
+
+      {!requireApprovedProfessional && (
+        <Route path="analise-dados/whatsapp-business" element={<ProtectedRoute><AssinaturaGate avancado><WhatsAppBusiness /></AssinaturaGate></ProtectedRoute>} />
       )}
 
       <Route
