@@ -1,3 +1,4 @@
+import { useLanguage } from "@/context/LanguageContext";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import styles from './authInputs.module.css';
 import { useTheme } from '../../context/ThemeContext';
@@ -11,6 +12,7 @@ interface PasswordInputProps {
 }
 
 export function PasswordInput({ value, onChange, showPassword, togglePassword, autoComplete = 'current-password' }: PasswordInputProps) {
+  const { t } = useLanguage();
   const { theme } = useTheme();
   
   return (
@@ -23,7 +25,7 @@ export function PasswordInput({ value, onChange, showPassword, togglePassword, a
           style={{ color: theme.colors.text}}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Digite sua senha"
+          placeholder={t("auth.enterPassword")}
           required
         />
         <span onClick={togglePassword} className={`${styles.icon} ${styles.passwordIcon}`}>
