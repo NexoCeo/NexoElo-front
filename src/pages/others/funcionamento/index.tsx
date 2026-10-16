@@ -447,7 +447,7 @@ export default function Funcionamento() {
                         className={`${styles.dayButton} ${active ? styles.dayButtonActive : ""}`}
                         onClick={() => toggleDia(dia.key)}
                         aria-pressed={active}
-                        aria-label={`${dia.label}: ${active ? "selecionado" : "nao selecionado"}`}
+                        aria-label={`${[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)]}: ${active ? "selecionado" : "nao selecionado"}`}
                         style={{
                           borderColor: active ? theme.colors.primary : theme.colors.bottom,
                           color: active ? theme.colors.text : theme.colors.inactive,
@@ -455,8 +455,8 @@ export default function Funcionamento() {
                         }}
                       >
                         <span className={styles.dayCheck}>{active && <FaCheck aria-hidden="true" />}</span>
-                        <strong>{dia.short}</strong>
-                        <span className={styles.dayFullName}>{dia.label}</span>
+                        <strong>{[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)].slice(0,3)}</strong>
+                        <span className={styles.dayFullName}>{[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)]}</span>
                       </button>
                     );
                   })}
@@ -519,20 +519,20 @@ export default function Funcionamento() {
                     const fim = horario?.Fim ?? config.HorarioFechamento;
                     return <div key={dia.key} className={styles.dayHoursRow}>
                       <div className={styles.dayHoursIdentity}>
-                        <strong>{dia.label}</strong>
-                        <span>{inicio} – {fim}{horario ? " · Personalizado" : " · Padrão"}</span>
+                        <strong>{[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)]}</strong>
+                        <span>{inicio} – {fim}{horario ? ` · ${t("hours.custom")}` : ` · ${t("hours.default")}`}</span>
                       </div>
                       <button type="button" className={styles.customizeButton}
                         onClick={() => personalizarDia(dia.key)}
                         aria-expanded={Boolean(horario)}>
-                        {horario ? "Usar padrão" : "Personalizar"}
+                        {horario ? t("hours.useDefault") : t("hours.customize")}
                       </button>
                       {horario && <div className={styles.dayHoursEditor}>
-                        <label>Abre às
+                        <label>{t("hours.open")}
                           <input type="time" value={horario.Inicio} step="900"
                             onChange={event => alterarHorarioDia(dia.key, "Inicio", event.target.value)} />
                         </label>
-                        <label>Fecha às
+                        <label>{t("hours.end")}
                           <input type="time" value={horario.Fim} step="900"
                             onChange={event => alterarHorarioDia(dia.key, "Fim", event.target.value)} />
                         </label>
@@ -543,15 +543,15 @@ export default function Funcionamento() {
                           </div>
                           {horario.Intervalos.map((pausa, index) =>
                             <div className={styles.dayPauseRow} key={index}>
-                              <input aria-label={`Início da pausa ${index + 1} de ${dia.label}`}
+                              <input aria-label={`Início da pausa ${index + 1} de ${[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)]}`}
                                 type="time" value={pausa.Inicio} step="900"
                                 onChange={event => alterarPausaDia(dia.key, index, "Inicio", event.target.value)} />
                               <span>{t("hours.until")}</span>
-                              <input aria-label={`Fim da pausa ${index + 1} de ${dia.label}`}
+                              <input aria-label={`Fim da pausa ${index + 1} de ${[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)]}`}
                                 type="time" value={pausa.Fim} step="900"
                                 onChange={event => alterarPausaDia(dia.key, index, "Fim", event.target.value)} />
                               <button type="button" onClick={() => removerPausaDia(dia.key, index)}
-                                aria-label={`Remover pausa ${index + 1} de ${dia.label}`}><FaTrash aria-hidden="true" /></button>
+                                aria-label={`Remover pausa ${index + 1} de ${[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)]}`}><FaTrash aria-hidden="true" /></button>
                             </div>
                           )}
                           {!horario.Intervalos.length && <small>{t("hours.noBreaksDay")}</small>}
@@ -591,7 +591,7 @@ export default function Funcionamento() {
                       <div key={index} className={styles.intervalRow} style={{ borderColor: theme.colors.bottom }}>
                         <div className={styles.intervalName}>
                           <FaCoffee aria-hidden="true" />
-                          <span style={{ color: theme.colors.text }}>Pausa {index + 1}</span>
+                          <span style={{ color: theme.colors.text }}>{t("hours.break")} {index + 1}</span>
                         </div>
                         <label style={{ color: theme.colors.inactive }}>
                           Inicio
@@ -647,7 +647,7 @@ export default function Funcionamento() {
                   style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
                 >
                   <FaSave aria-hidden="true" />
-                  {saving ? "Salvando..." : "Salvar funcionamento"}
+                  {saving ? t("profile.saving") : t("hours.saved")}
                 </button>
               </div>
             </>
@@ -664,7 +664,7 @@ export default function Funcionamento() {
             <span style={{ color: theme.colors.inactive }}>{t("hours.summaryDays")}</span>
             <strong style={{ color: theme.colors.text }}>
               {diasSelecionados.length > 0
-                ? diasSelecionados.map((dia) => dia.short).join(", ")
+                ? diasSelecionados.map(dia => [t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item => item.key===dia.key)].slice(0,3)).join(", ")
                 : "Nenhum dia"}
             </strong>
           </div>
@@ -677,7 +677,7 @@ export default function Funcionamento() {
                 const inicio = horario?.Inicio ?? config?.HorarioAbertura ?? "--:--";
                 const fim = horario?.Fim ?? config?.HorarioFechamento ?? "--:--";
                 return <small key={dia.key} style={{ color: theme.colors.text }}>
-                  {dia.short}<span style={{ color: theme.colors.inactive }}>{inicio} – {fim}</span>
+                  {[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)].slice(0,3)}<span style={{ color: theme.colors.inactive }}>{inicio} – {fim}</span>
                 </small>;
               })}
               {!diasSelecionados.length && <small>Escolha os dias de atendimento.</small>}
