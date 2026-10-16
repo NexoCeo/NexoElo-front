@@ -38,6 +38,7 @@ import {
   type SolicitacaoVinculo,
 } from "@/services/vinculo-service";
 import styles from "./style.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 
 type ApiError =
   | string
@@ -110,6 +111,7 @@ type WhatsAppShare = {
 
 export default function Profissionais() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const { usuario } = useUser();
   const [searchParams, setSearchParams] = useSearchParams();
   const { showNotification } = useNotification();
@@ -529,7 +531,7 @@ export default function Profissionais() {
       <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
         <section className={styles.header}>
           <p style={{ color: theme.colors.inactive }}>
-            Apenas empresas podem gerenciar profissionais vinculados.
+            {t("pros.onlyBusiness")}
           </p>
         </section>
       </main>
@@ -546,7 +548,7 @@ export default function Profissionais() {
             onClick={openSolicitacoesModal}
           >
             <FaUserClock />
-            Solicitacoes de vinculo
+            {t("pros.linkRequests")}
           </button>
           <button
             type="button"
@@ -555,7 +557,7 @@ export default function Profissionais() {
             style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
           >
             <FaUserPlus />
-            Novo profissional
+            {t("pros.new")}
           </button>
         </div>
       </section>
@@ -566,21 +568,21 @@ export default function Profissionais() {
       <section className={styles.tableWrap} style={{ backgroundColor: theme.colors.background2 }}>
         {loading ? (
           <p className={styles.feedback} style={{ color: theme.colors.text }}>
-            Carregando profissionais...
+            {t("pros.listLoading")}
           </p>
         ) : profissionais.length === 0 ? (
           <p className={styles.feedback} style={{ color: theme.colors.inactive }}>
-            Nenhum profissional vinculado ainda.
+            {t("pros.empty")}
           </p>
         ) : (
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Profissional</th>
-                <th>Email</th>
-                <th>Telefone</th>
-                <th>Status</th>
-                <th className={styles.actionsHeader}>Acoes</th>
+                <th>{t("common.professional")}</th>
+                <th>{t("pros.email")}</th>
+                <th>{t("pros.phone")}</th>
+                <th>{t("common.status")}</th>
+                <th className={styles.actionsHeader}>{t("common.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -588,14 +590,14 @@ export default function Profissionais() {
                 <tr key={profissional.Id || profissional.Email || profissional.Nome}>
                   <td data-label="Profissional">
                     <strong style={{ color: theme.colors.text }}>
-                      {profissional.Nome || "Sem nome"}
+                      {profissional.Nome || t("services.unnamed")}
                     </strong>
                   </td>
-                  <td data-label="Email">{profissional.Email || "Nao informado"}</td>
-                  <td data-label="Telefone">{profissional.Telefone || "Nao informado"}</td>
+                  <td data-label="Email">{profissional.Email || t("pros.notProvided")}</td>
+                  <td data-label="Telefone">{profissional.Telefone || t("pros.notProvided")}</td>
                   <td data-label="Status">
                     <span className={styles.status}>
-                      {profissional.VinculoStatus || "Vinculado"}
+                      {profissional.VinculoStatus || t("pros.selected")}
                     </span>
                   </td>
                   <td className={styles.actionsCell} data-label="Acoes">
@@ -622,9 +624,9 @@ export default function Profissionais() {
           <section className={styles.modal} style={{ backgroundColor: theme.colors.background2 }}>
             <header className={styles.modalHeader}>
               <div>
-                <h2 style={{ color: theme.colors.text }}>Novo profissional</h2>
+                <h2 style={{ color: theme.colors.text }}>{t("pros.new")}</h2>
                 <p style={{ color: theme.colors.inactive }}>
-                  Cadastre o acesso do profissional e vincule a esta empresa.
+                  {t("pros.registerDesc")}
                 </p>
               </div>
               <button type="button" onClick={closeModal} aria-label="Fechar modal">
@@ -634,12 +636,12 @@ export default function Profissionais() {
 
             <form className={styles.form} onSubmit={handleCreateProfissional}>
               <label className={styles.photoField}>
-                Foto de perfil
+                {t("profile.photo")}
                 <span className={styles.photoControl}>
                   <span className={styles.photoPreview}>
                     {previewUrl ? <img src={previewUrl} alt="Foto selecionada" /> : <FaPlus />}
                   </span>
-                  <strong>{fotoPerfil ? fotoPerfil.name : "Selecionar foto"}</strong>
+                  <strong>{fotoPerfil ? fotoPerfil.name : t("pros.photo")}</strong>
                   <input
                     type="file"
                     accept="image/*"
@@ -649,20 +651,20 @@ export default function Profissionais() {
               </label>
 
               <label>
-                Nome
+                {t("profile.name")}
                 <div className={styles.inputWrap}>
                   <input
                     type="text"
                     value={nome}
                     onChange={(event) => setNome(event.target.value)}
-                    placeholder="Nome do profissional"
+                    placeholder={t("pros.namePlaceholder")}
                   />
                   <FaUser />
                 </div>
               </label>
 
               <label>
-                Email
+                {t("profile.email")}
                 <div className={styles.inputWrap}>
                   <input
                     type="email"
@@ -675,7 +677,7 @@ export default function Profissionais() {
               </label>
 
               <label>
-                Telefone
+                {t("profile.phone")}
                 <div className={styles.inputWrap}>
                   <input
                     type="tel"
@@ -695,7 +697,7 @@ export default function Profissionais() {
                 disabled={!canSubmit}
                 style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
               >
-                {saving ? "Criando..." : "Criar profissional"}
+                {saving ? t("pros.creating") : t("pros.create")}
               </button>
             </form>
           </section>
@@ -714,10 +716,10 @@ export default function Profissionais() {
             <header className={styles.modalHeader}>
               <div>
                 <h2 id="whatsapp-access-title" style={{ color: theme.colors.text }}>
-                  Acesso criado
+                  {t("pros.accessCreated")}
                 </h2>
                 <p style={{ color: theme.colors.inactive }}>
-                  Compartilhe as credenciais com {whatsAppShare.professionalName}.
+                  {t("pros.shareCredentials")} {whatsAppShare.professionalName}.
                 </p>
               </div>
               <button
@@ -730,7 +732,7 @@ export default function Profissionais() {
             </header>
 
             <p className={styles.whatsappMessage}>
-              O WhatsApp abrirá com a mensagem preenchida. Revise os dados e toque em enviar.
+              {t("pros.whatsAppNotice")}
             </p>
 
             <div className={styles.modalActions}>
@@ -739,7 +741,7 @@ export default function Profissionais() {
                 className={styles.secondaryButton}
                 onClick={() => setWhatsAppShare(null)}
               >
-                Agora não
+                {t("pros.notNow")}
               </button>
               <a
                 className={styles.whatsappButton}
@@ -749,7 +751,7 @@ export default function Profissionais() {
                 onClick={() => setWhatsAppShare(null)}
               >
                 <FaWhatsapp />
-                Enviar pelo WhatsApp
+                {t("pros.sendWhatsApp")}
               </a>
             </div>
           </section>
@@ -768,10 +770,10 @@ export default function Profissionais() {
             <header className={styles.modalHeader}>
               <div>
                 <h2 id="solicitacoes-title" style={{ color: theme.colors.text }}>
-                  Solicitacoes de vinculo
+                  {t("pros.linkRequests")}
                 </h2>
                 <p style={{ color: theme.colors.inactive }}>
-                  Profissionais que escolheram esta empresa no cadastro.
+                  {t("pros.requestsDescription")}
                 </p>
               </div>
               <button
@@ -784,16 +786,16 @@ export default function Profissionais() {
             </header>
 
             {loadingSolicitacoes ? (
-              <p className={styles.servicesFeedback}>Carregando solicitacoes...</p>
+              <p className={styles.servicesFeedback}>{t("pros.requestsLoading")}</p>
             ) : solicitacoes.length === 0 ? (
-              <p className={styles.servicesFeedback}>Nenhuma solicitacao pendente.</p>
+              <p className={styles.servicesFeedback}>{t("pros.requestsEmpty")}</p>
             ) : (
               <div className={styles.requestsList}>
                 {solicitacoes.map((solicitacao) => (
                   <article className={styles.requestItem} key={solicitacao.VinculoId}>
                     <div>
                       <strong>{solicitacao.Nome}</strong>
-                      <span>{solicitacao.Email || solicitacao.Telefone || "Contato nao informado"}</span>
+                      <span>{solicitacao.Email || solicitacao.Telefone || t("pros.contactMissing")}</span>
                     </div>
                     <div className={styles.requestActions}>
                       <button
@@ -802,7 +804,7 @@ export default function Profissionais() {
                         onClick={() => responderSolicitacao(solicitacao, "RECUSADO")}
                         disabled={Boolean(respondendoId)}
                         aria-label={`Recusar vinculo de ${solicitacao.Nome}`}
-                        title="Recusar"
+                        title={t("pros.reject")}
                       >
                         <FaTimes />
                       </button>
@@ -812,7 +814,7 @@ export default function Profissionais() {
                         onClick={() => responderSolicitacao(solicitacao, "APROVADO")}
                         disabled={Boolean(respondendoId)}
                         aria-label={`Aprovar vinculo de ${solicitacao.Nome}`}
-                        title="Aprovar"
+                        title={t("pros.approve")}
                       >
                         <FaCheck />
                       </button>
@@ -838,10 +840,10 @@ export default function Profissionais() {
             <header className={styles.modalHeader}>
               <div>
                 <h2 id="servicos-profissional-title" style={{ color: theme.colors.text }}>
-                  Servicos de {profissionalEmEdicao.Nome}
+                  {t("subscription.services")} {t("subscription.of")} {profissionalEmEdicao.Nome}
                 </h2>
                 <p style={{ color: theme.colors.inactive }}>
-                  Servicos oferecidos por este profissional.
+                  {t("pros.offered")}
                 </p>
               </div>
               <button
@@ -856,15 +858,15 @@ export default function Profissionais() {
 
             <form className={styles.servicesForm} onSubmit={handleSaveServicos}>
               <div className={styles.servicesSummary}>
-                <span>Servicos da empresa</span>
-                <strong>{servicoIdsSelecionados.length} selecionado(s)</strong>
+                <span>{t("pros.services")}</span>
+                <strong>{servicoIdsSelecionados.length} {t("pros.selected")}</strong>
               </div>
 
               {loadingServicos ? (
-                <p className={styles.servicesFeedback}>Carregando servicos...</p>
+                <p className={styles.servicesFeedback}>{t("pros.servicesLoading")}</p>
               ) : servicosEmpresa.length === 0 ? (
                 <p className={styles.servicesFeedback}>
-                  Nenhum servico cadastrado para esta empresa.
+                  {t("pros.servicesEmpty")}
                 </p>
               ) : (
                 <div className={styles.servicesList}>
@@ -902,7 +904,7 @@ export default function Profissionais() {
                   onClick={closeServicosModal}
                   disabled={savingServicos}
                 >
-                  Cancelar
+                  {t("common.cancel")}
                 </button>
                 <button
                   type="submit"
@@ -911,7 +913,7 @@ export default function Profissionais() {
                   style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
                 >
                   <FaSave />
-                  {savingServicos ? "Salvando..." : "Salvar servicos"}
+                  {savingServicos ? t("profile.saving") : t("pros.saveServices")}
                 </button>
               </footer>
             </form>
