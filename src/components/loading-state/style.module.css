@@ -1,7 +1,26 @@
-.loading{display:flex;align-items:center;justify-content:center;min-height:190px;width:100%;color:var(--theme-primary,#2563eb)}
-.compact{min-height:60px}
-.spinner{width:30px;height:30px;border:3px solid currentColor;border-right-color:transparent;border-bottom-color:transparent;border-radius:50%;animation:spin .8s linear infinite}
-.compact .spinner{width:22px;height:22px;border-width:2px}
+.loading{width:100%;min-height:180px;color:var(--theme-text);box-sizing:border-box}
+.page{width:min(100%,1180px);margin:0 auto;padding:84px 24px 24px;box-sizing:border-box;display:grid;gap:18px}
+.intro{display:grid;gap:11px;margin-bottom:6px}
+.bar,.avatar,.input{display:block;background:linear-gradient(100deg,var(--theme-background2,#182237) 15%,var(--theme-glass-strong,#344054) 45%,var(--theme-background2,#182237) 75%);background-size:220% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:4px}
+.bar{height:13px;max-width:100%}
+.intro .bar:first-child{height:22px}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.tile,.panel,.form{border:1px solid var(--theme-bottom,#263349);border-radius:10px;background:var(--theme-background2,#131d2c)}
+.tile{min-height:110px;display:grid;align-content:center;gap:15px;padding:17px}
+.tile .bar:nth-child(2){height:28px}
+.panel{padding:20px;min-height:250px;display:grid;align-content:start;gap:9px}
+.panelHead,.tableRow{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.panelHead{padding:7px 0 17px;border-bottom:1px solid var(--theme-bottom,#263349)}
+.tableRow{padding:16px 6px;border-bottom:1px solid var(--theme-bottom,#263349)}
+.form{width:min(100%,420px);margin:0 auto;padding:24px;display:grid;gap:16px}
+.field{display:grid;gap:9px}
+.input{height:40px;border-radius:5px}
+.profile{display:flex;align-items:center;flex-direction:column;gap:15px}
+.profile .avatar{width:96px;height:96px;border-radius:50%;margin-bottom:6px}
+.profileInfo{margin:20px 0;width:min(100%,450px);display:grid;gap:22px}
+.compact{min-height:70px}
+.compactLines{width:min(100%,310px);display:grid;gap:11px;padding:12px 0}
 .srOnly{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
-@keyframes spin{to{transform:rotate(360deg)}}
-@media(prefers-reduced-motion:reduce){.spinner{animation-duration:2s}}
+@keyframes shimmer{to{background-position-x:-220%}}
+@media(max-width:700px){.page{padding:75px 14px 20px}.metrics{grid-template-columns:1fr 1fr}.metrics .tile:last-child{display:none}.panel{padding:12px}.tableRow .bar:last-child{display:none}}
+@media(prefers-reduced-motion:reduce){.bar,.avatar,.input{animation:none}}
