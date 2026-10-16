@@ -1,26 +1,12 @@
 import { useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import styles from "./style.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface CalendarProps {
   selectedDate: Date;
   setSelectedDate: (date: Date) => void;
 }
-
-const meses = [
-  "Janeiro",
-  "Fevereiro",
-  "Março",
-  "Abril",
-  "Maio",
-  "Junho",
-  "Julho",
-  "Agosto",
-  "Setembro",
-  "Outubro",
-  "Novembro",
-  "Dezembro",
-];
 
 const diasSemana = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"];
 
@@ -47,6 +33,8 @@ function addDays(date: Date, amount: number) {
 }
 
 export function Calendar({ selectedDate, setSelectedDate }: CalendarProps) {
+  const { lang, t } = useLanguage();
+  const locale = lang === "pt" ? "pt-BR" : "en-US";
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(
     new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1),
@@ -71,7 +59,7 @@ export function Calendar({ selectedDate, setSelectedDate }: CalendarProps) {
     const date = new Date(currentYear, currentMonth, day);
     const isToday = sameDay(date, today);
     const isSelected = sameDay(date, selectedDate);
-    const ariaLabel = new Intl.DateTimeFormat("pt-BR", {
+    const ariaLabel = new Intl.DateTimeFormat(locale, {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -97,28 +85,28 @@ export function Calendar({ selectedDate, setSelectedDate }: CalendarProps) {
         <button
           type="button"
           onClick={() => changeMonth(-1)}
-          title="Mês anterior"
-          aria-label="Mês anterior"
+          title={t("calendar.previousMonth")}
+          aria-label={t("calendar.previousMonth")}
         >
           <FaChevronLeft aria-hidden="true" />
         </button>
         <div className={styles.monthYear} aria-live="polite">
-          <span className={styles.month}>{meses[currentMonth]}</span>
+          <span className={styles.month}>{new Intl.DateTimeFormat(locale, { month: "long" }).format(new Date(currentYear, currentMonth, 1))}</span>
           <span className={styles.year}>{currentYear}</span>
         </div>
         <button
           type="button"
           onClick={() => changeMonth(1)}
-          title="Próximo mês"
-          aria-label="Próximo mês"
+          title={t("calendar.nextMonth")}
+          aria-label={t("calendar.nextMonth")}
         >
           <FaChevronRight aria-hidden="true" />
         </button>
       </div>
 
       <div className={styles.weekdays} aria-hidden="true">
-        {diasSemana.map((day) => (
-          <span key={day}>{day}</span>
+        {diasSemana.map((day, index) => (
+          <span key={day}>{new Intl.DateTimeFormat(locale, { weekday: "short" }).format(new Date(2026, 9, 11 + index)).replace(".", "").toLocaleUpperCase(locale)}</span>
         ))}
       </div>
 
@@ -147,8 +135,8 @@ export function WeekCalendar({ selectedDate, setSelectedDate }: CalendarProps) {
         <button
           type="button"
           onClick={() => changeWeek(-1)}
-          title="Semana anterior"
-          aria-label="Semana anterior"
+          title={t("calendar.previousWeek")}
+          aria-label={t("calendar.previousWeek")}
         >
           <FaChevronLeft aria-hidden="true" />
         </button>
@@ -161,8 +149,8 @@ export function WeekCalendar({ selectedDate, setSelectedDate }: CalendarProps) {
         <button
           type="button"
           onClick={() => changeWeek(1)}
-          title="Próxima semana"
-          aria-label="Próxima semana"
+          title={t("calendar.nextWeek")}
+          aria-label={t("calendar.nextWeek")}
         >
           <FaChevronRight aria-hidden="true" />
         </button>
