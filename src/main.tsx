@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client'
 import './styles/index.css'
 import App from './App.tsx'
 import { ThemeProvider } from "./context/ThemeContext";
+import { LanguageProvider } from "./context/LanguageContext";
 import { UserProvider } from './context/UserContext.tsx';
 import { NotificationProvider } from './context/NotificationContext.tsx';
 import { migrateLegacyAuthSession } from "./services/legacy-auth-migration.ts";
@@ -32,6 +33,7 @@ async function bootstrap() {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <BrowserRouter>
+        <LanguageProvider>
         <ThemeProvider>
           <UserProvider>
             <NotificationProvider>
@@ -39,6 +41,7 @@ async function bootstrap() {
             </NotificationProvider>
           </UserProvider>
         </ThemeProvider>
+        </LanguageProvider>
       </BrowserRouter>
     </StrictMode>
   )
