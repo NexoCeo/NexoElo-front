@@ -328,7 +328,7 @@ export default function ClienteFinalHome() {
 
           <button type="button" className={styles.logoutButton} onClick={() => void handleLogout()}>
             <FaSignOutAlt aria-hidden="true" />
-            <span>Sair</span>
+            <span>{t("client.logout")}</span>
           </button>
         </div>
       </header>
@@ -352,7 +352,7 @@ export default function ClienteFinalHome() {
           >
             <header className={styles.pageHeader}>
               <div>
-                <span>Cliente final</span>
+                <span>{t("client.final")}</span>
                 <h1>Olá, {cliente?.Nome || "cliente"}</h1>
               </div>
               <button type="button" className={styles.primaryButton} onClick={() => navigate("/cliente-final/agendar")}>
@@ -363,11 +363,11 @@ export default function ClienteFinalHome() {
 
             <div className={styles.summaryGrid} aria-label="Resumo dos agendamentos">
               <div>
-                <span>Próximos</span>
+                <span>{t("client.upcoming")}</span>
                 <strong>{upcomingAppointments.length}</strong>
               </div>
               <div>
-                <span>Anteriores</span>
+                <span>{t("client.previous")}</span>
                 <strong>{previousAppointments.length}</strong>
               </div>
             </div>
@@ -376,7 +376,7 @@ export default function ClienteFinalHome() {
               <div className={styles.sectionHeading}>
                 <div>
                   <span>Agenda</span>
-                  <h2 id="next-appointment-title">Próximo atendimento</h2>
+                  <h2 id="next-appointment-title">{t("client.nextAppointment")}</h2>
                 </div>
                 {upcomingAppointments.length > 1 && (
                   <button type="button" className={styles.textButton} onClick={() => setActiveSection("historico")}>
@@ -386,11 +386,11 @@ export default function ClienteFinalHome() {
               </div>
 
               {loading ? (
-                <div className={styles.feedback} role="status">Carregando agendamentos...</div>
+                <div className={styles.feedback} role="status">{t("client.loading")}</div>
               ) : error ? (
                 <div className={styles.feedback} role="alert">
                   <span>{error}</span>
-                  <button type="button" onClick={() => void loadAppointments()}>Tentar novamente</button>
+                  <button type="button" onClick={() => void loadAppointments()}>{t("client.retry")}</button>
                 </div>
               ) : upcomingAppointments[0] ? (
                 <AppointmentCard
@@ -402,10 +402,10 @@ export default function ClienteFinalHome() {
                 <div className={styles.emptyState}>
                   <FaCalendarAlt aria-hidden="true" />
                   <div>
-                    <strong>Nenhum atendimento agendado</strong>
-                    <span>Escolha um serviço e encontre o melhor horário.</span>
+                    <strong>{t("client.emptyUpcoming")}</strong>
+                    <span>{t("client.emptyUpcomingNote")}</span>
                   </div>
-                  <button type="button" onClick={() => navigate("/cliente-final/agendar")}>Agendar</button>
+                  <button type="button" onClick={() => navigate("/cliente-final/agendar")}>{t("client.book")}</button>
                 </div>
               )}
             </section>
@@ -421,8 +421,8 @@ export default function ClienteFinalHome() {
           >
             <header className={styles.pageHeader}>
               <div>
-                <span>Agendamentos</span>
-                <h1>Histórico</h1>
+                <span>{t("client.appointments")}</span>
+                <h1>{t("client.history")}</h1>
               </div>
               <button
                 type="button"
@@ -436,18 +436,18 @@ export default function ClienteFinalHome() {
             </header>
 
             {loading ? (
-              <div className={styles.feedback} role="status">Carregando histórico...</div>
+              <div className={styles.feedback} role="status">{t("client.historyLoading")}</div>
             ) : error ? (
               <div className={styles.feedback} role="alert">
                 <span>{error}</span>
-                <button type="button" onClick={() => void loadAppointments()}>Tentar novamente</button>
+                <button type="button" onClick={() => void loadAppointments()}>{t("client.retry")}</button>
               </div>
             ) : appointments.length === 0 ? (
               <div className={styles.emptyState}>
                 <FaHistory aria-hidden="true" />
                 <div>
-                  <strong>Seu histórico está vazio</strong>
-                  <span>Seus agendamentos aparecerão aqui.</span>
+                  <strong>{t("client.historyEmpty")}</strong>
+                  <span>{t("client.historyEmptyNote")}</span>
                 </div>
               </div>
             ) : (
@@ -455,7 +455,7 @@ export default function ClienteFinalHome() {
                 {upcomingAppointments.length > 0 && (
                   <section aria-labelledby="upcoming-title">
                     <div className={styles.listTitle}>
-                      <h2 id="upcoming-title">Próximos</h2>
+                      <h2 id="upcoming-title">{t("client.upcoming")}</h2>
                       <span>{upcomingAppointments.length}</span>
                     </div>
                     <div className={styles.appointmentList}>
@@ -474,7 +474,7 @@ export default function ClienteFinalHome() {
                 {previousAppointments.length > 0 && (
                   <section aria-labelledby="previous-title">
                     <div className={styles.listTitle}>
-                      <h2 id="previous-title">Anteriores</h2>
+                      <h2 id="previous-title">{t("client.previous")}</h2>
                       <span>{previousAppointments.length}</span>
                     </div>
                     <div className={styles.appointmentList}>
