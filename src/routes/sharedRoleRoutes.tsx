@@ -148,8 +148,10 @@ export default function SharedRoleRoutes({
       )}
 
       {!requireApprovedProfessional && (
-        <Route path="analise-dados" element={<Navigate to="analise-dados/metricas" replace />} />
-        <Route path="analise-dados/metricas" element={<ProtectedRoute><AssinaturaGate avancado><AnaliseDados /></AssinaturaGate></ProtectedRoute>} />
+        <>
+          <Route path="analise-dados" element={<Navigate to={location.pathname.startsWith("/empresa/") ? "/empresa/analise-dados/metricas" : "/autonomo/analise-dados/metricas"} replace />} />
+          <Route path="analise-dados/metricas" element={<ProtectedRoute><AssinaturaGate avancado><AnaliseDados /></AssinaturaGate></ProtectedRoute>} />
+        </>
       )}
 
       {!requireApprovedProfessional && (
