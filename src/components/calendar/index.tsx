@@ -116,6 +116,8 @@ export function Calendar({ selectedDate, setSelectedDate }: CalendarProps) {
 }
 
 export function WeekCalendar({ selectedDate, setSelectedDate }: CalendarProps) {
+  const { t, lang } = useLanguage();
+  const locale = lang === "pt" ? "pt-BR" : "en-US";
   const today = new Date();
   const weekStart = startOfWeek(selectedDate);
   const weekDays = Array.from({ length: 7 }, (_, index) => addDays(weekStart, index));
