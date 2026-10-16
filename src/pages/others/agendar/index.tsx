@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "@/services/api";
 import styles from "./style.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 
 type Disponibilidade = {
   diaSemana: number;
@@ -10,6 +11,7 @@ type Disponibilidade = {
 };
 
 export default function Agendar() {
+  const { t, lang } = useLanguage();
   const { username } = useParams();
 
   const [horarios, setHorarios] = useState<Date[]>([]);
@@ -82,7 +84,7 @@ export default function Agendar() {
       !nomeCliente.trim() ||
       !telefone.trim()
     ) {
-      window.alert("Preencha todos os campos");
+      window.alert(t("booking.complete"));
       return;
     }
 
@@ -103,7 +105,7 @@ export default function Agendar() {
     <div className={styles.container}>
       <div className={styles.grid}>
         <h2 className={styles.title}>
-          Agende com{" "}
+          {t("booking.with")}{" "}
           <span className={styles.name}>
             {username}
           </span>
@@ -111,7 +113,7 @@ export default function Agendar() {
 
         <input
           className={styles.input}
-          placeholder="Seu nome"
+          placeholder={t("auth.yourName")}
           value={nomeCliente}
           onChange={(event) => {
             setNomeCliente(event.target.value);
@@ -120,7 +122,7 @@ export default function Agendar() {
 
         <input
           className={styles.input}
-          placeholder="Seu telefone (ex: 5527997333212)"
+          placeholder={t("booking.yourPhone")}
           value={telefone}
           onChange={(event) => {
             setTelefone(event.target.value);
@@ -128,7 +130,7 @@ export default function Agendar() {
         />
 
         <h4 className={styles.subtitle}>
-          Escolha um horário:
+          {t("booking.chooseTime")}
         </h4>
 
         <div className={styles.horariosContainer}>
@@ -147,7 +149,7 @@ export default function Agendar() {
                   selecionado ? styles.selected : ""
                 }`}
               >
-                {horario.toLocaleString("pt-BR", {
+                {horario.toLocaleString(lang === "pt" ? "pt-BR" : "en-US", {
                   dateStyle: "short",
                   timeStyle: "short",
                 })}
@@ -163,12 +165,12 @@ export default function Agendar() {
             void agendar();
           }}
         >
-          Confirmar agendamento
+          {t("booking.confirm")}
         </button>
 
         {whatsLink && (
           <div className={styles.whatsappLinkContainer}>
-            <p>Toque abaixo para abrir no WhatsApp:</p>
+            <p>{t("booking.whatsapp")}</p>
 
             <a
               href={whatsLink}
