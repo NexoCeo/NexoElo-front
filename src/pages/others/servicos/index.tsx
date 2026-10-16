@@ -273,7 +273,7 @@ export default function Servicos() {
             <tbody>
               {servicos.map((servico) => (
                 <tr key={servico.Id || servico.NomeServico}>
-                  <td data-label="Servico">
+                  <td data-label={t("common.service")}>
                     <div className={styles.serviceIdentity}>
                       <span className={styles.serviceThumbnail} aria-hidden="true">
                         <FaImage />
@@ -290,14 +290,14 @@ export default function Servicos() {
                       </strong>
                     </div>
                   </td>
-                  <td data-label="Codigo">{servico.Id || t("services.newCode")}</td>
-                  <td data-label="Duracao">{servico.TempoEstimadoMinutos || 0} min</td>
-                  <td className={styles.valueCell} data-label="Valor">
+                  <td data-label={t("common.code")}>{servico.Id || t("services.newCode")}</td>
+                  <td data-label={t("common.duration")}>{servico.TempoEstimadoMinutos || 0} min</td>
+                  <td className={styles.valueCell} data-label={t("common.value")}>
                     <strong style={{ color: theme.colors.primary }}>
                       {formatCurrency(servico.Valor)}
                     </strong>
                   </td>
-                  <td className={styles.actionsCell} data-label="Acoes">
+                  <td className={styles.actionsCell} data-label={t("common.actions")}>
                     <div
                       className={styles.actionsMenu}
                       ref={openMenuId === servico.Id ? menuRef : undefined}
@@ -390,7 +390,7 @@ export default function Servicos() {
               </label>
 
               <label>
-                Valor
+                {t("common.value")}
                 <input
                   type="text"
                   inputMode="decimal"
