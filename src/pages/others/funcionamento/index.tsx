@@ -21,6 +21,7 @@ import {
 } from "@/services/funcionamento-service";
 import type { DiaFuncionamentoKey, FuncionamentoConfig } from "@/types/funcionamento";
 import styles from "./style.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 import LoadingState from "@/components/loading-state";
 
 const DIAS: Array<{ key: DiaFuncionamentoKey; label: string; short: string }> = [
@@ -157,6 +158,7 @@ function getNovoIntervalo(config: FuncionamentoConfig) {
 
 export default function Funcionamento() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const { usuario } = useUser();
   const { showNotification } = useNotification();
   const [config, setConfig] = useState<FuncionamentoConfig | null>(null);
@@ -375,7 +377,7 @@ export default function Funcionamento() {
       if (!especial.Inicio || !especial.Fim || abertura >= fechamento ||
           hasIntervaloInvalido(diario) || hasIntervaloSobreposto(diario) ||
           getPausaTotal(diario) >= fechamento - abertura) {
-        const message = `Revise o horário e as pausas de ${dia.label}.`;
+        const message = `Revise o horário e as pausas de ${[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(d => d.key === dia.key)]}.`;
         setError(message);
         showNotification({ type: "warning", title: "Horário específico inválido", message });
         return;
@@ -410,7 +412,7 @@ export default function Funcionamento() {
 
   return (
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
-      <div className={styles.intro}><strong>Defina quando seus clientes podem agendar</strong><span>Escolha os dias, informe o horário de atendimento e, se precisar, adicione pausas.</span></div>
+      <div className={styles.intro}><strong>{t("hours.intro")}</strong><span>{t("hours.introDesc")}</span></div>
       <div className={styles.content}>
         <form className={styles.editor} onSubmit={handleSubmit} noValidate>
           {loading || !config ? (
@@ -424,14 +426,14 @@ export default function Funcionamento() {
                   <div className={styles.titleGroup}>
                     <span className={styles.step} style={{ backgroundColor: theme.colors.primary }}>1</span>
                     <div>
-                      <h2 style={{ color: theme.colors.text }}>Em quais dias você atende?</h2>
-                      <p style={{ color: theme.colors.inactive }}>Selecione os dias em que seus clientes podem marcar horários</p>
+                      <h2 style={{ color: theme.colors.text }}>{t("hours.daysTitle")}</h2>
+                      <p style={{ color: theme.colors.inactive }}>{t("hours.daysDesc")}</p>
                     </div>
                   </div>
                   <div className={styles.presets} aria-label="Selecao rapida de dias">
-                    <button type="button" onClick={() => setDiasSelecionados(DIAS_UTEIS)}>Segunda a sexta</button>
-                    <button type="button" onClick={() => setDiasSelecionados(new Set(DIAS.map((dia) => dia.key)))}>Todos os dias</button>
-                    <button type="button" onClick={() => setDiasSelecionados(new Set())}>Nenhum</button>
+                    <button type="button" onClick={() => setDiasSelecionados(DIAS_UTEIS)}>{t("hours.weekdays")}</button>
+                    <button type="button" onClick={() => setDiasSelecionados(new Set(DIAS.map((dia) => dia.key)))}>{t("hours.allDays")}</button>
+                    <button type="button" onClick={() => setDiasSelecionados(new Set())}>{t("hours.none")}</button>
                   </div>
                 </div>
 
@@ -466,8 +468,8 @@ export default function Funcionamento() {
                   <div className={styles.titleGroup}>
                     <span className={styles.step} style={{ backgroundColor: theme.colors.primary }}>2</span>
                     <div>
-                      <h2 style={{ color: theme.colors.text }}>Que horas você começa e termina?</h2>
-                      <p style={{ color: theme.colors.inactive }}>Horário padrão. Se algum dia for diferente, personalize no card seguinte.</p>
+                      <h2 style={{ color: theme.colors.text }}>{t("hours.timeTitle")}</h2>
+                      <p style={{ color: theme.colors.inactive }}>{t("hours.timeDesc")}</p>
                     </div>
                   </div>
                   <span className={styles.duration} style={{ color: theme.colors.primary }}>
@@ -505,8 +507,8 @@ export default function Funcionamento() {
                   <div className={styles.titleGroup}>
                     <FaPencilAlt className={styles.editSymbol} aria-hidden="true" />
                     <div>
-                      <h2 style={{ color: theme.colors.text }}>Algum dia tem um horário diferente?</h2>
-                      <p style={{ color: theme.colors.inactive }}>Por exemplo: segunda a sexta das 08h às 17h e sábado das 08h às 12h.</p>
+                      <h2 style={{ color: theme.colors.text }}>{t("hours.customTitle")}</h2>
+                      <p style={{ color: theme.colors.inactive }}>{t("hours.customDesc")}</p>
                     </div>
                   </div>
                 </div>
@@ -536,15 +538,15 @@ export default function Funcionamento() {
                         </label>
                         <div className={styles.dayPauses}>
                           <div className={styles.dayPausesHeader}>
-                            <span>Pausas neste dia (opcional)</span>
-                            <button type="button" onClick={() => adicionarPausaDia(dia.key)}>+ Adicionar pausa</button>
+                            <span>{t("hours.breaksDay")}</span>
+                            <button type="button" onClick={() => adicionarPausaDia(dia.key)}>+ {t("hours.addBreak")}</button>
                           </div>
                           {horario.Intervalos.map((pausa, index) =>
                             <div className={styles.dayPauseRow} key={index}>
                               <input aria-label={`Início da pausa ${index + 1} de ${dia.label}`}
                                 type="time" value={pausa.Inicio} step="900"
                                 onChange={event => alterarPausaDia(dia.key, index, "Inicio", event.target.value)} />
-                              <span>até</span>
+                              <span>{t("hours.until")}</span>
                               <input aria-label={`Fim da pausa ${index + 1} de ${dia.label}`}
                                 type="time" value={pausa.Fim} step="900"
                                 onChange={event => alterarPausaDia(dia.key, index, "Fim", event.target.value)} />
@@ -552,12 +554,12 @@ export default function Funcionamento() {
                                 aria-label={`Remover pausa ${index + 1} de ${dia.label}`}><FaTrash aria-hidden="true" /></button>
                             </div>
                           )}
-                          {!horario.Intervalos.length && <small>Sem pausas neste dia.</small>}
+                          {!horario.Intervalos.length && <small>{t("hours.noBreaksDay")}</small>}
                         </div>
                       </div>}
                     </div>;
                   })}
-                  {!diasSelecionados.length && <p>Selecione os dias de atendimento no primeiro card.</p>}
+                  {!diasSelecionados.length && <p>{t("hours.selectDays")}</p>}
                 </div>
               </section>
 
@@ -566,8 +568,8 @@ export default function Funcionamento() {
                   <div className={styles.titleGroup}>
                     <span className={styles.step} style={{ backgroundColor: theme.colors.primary }}>3</span>
                     <div>
-                      <h2 style={{ color: theme.colors.text }}>Você faz alguma pausa?</h2>
-                      <p style={{ color: theme.colors.inactive }}>Opcional: bloqueie horários de almoço, descanso ou outras pausas.</p>
+                      <h2 style={{ color: theme.colors.text }}>{t("hours.breaksTitle")}</h2>
+                      <p style={{ color: theme.colors.inactive }}>{t("hours.breaksDesc")}</p>
                     </div>
                   </div>
                   <button type="button" className={styles.addButton} onClick={addIntervalo}>
@@ -579,8 +581,8 @@ export default function Funcionamento() {
                   <div className={styles.emptyState} style={{ borderColor: theme.colors.bottom }}>
                     <FaCoffee aria-hidden="true" />
                     <div>
-                      <strong style={{ color: theme.colors.text }}>Sem pausas</strong>
-                      <span style={{ color: theme.colors.inactive }}>Atendimento continuo durante o expediente.</span>
+                      <strong style={{ color: theme.colors.text }}>{t("hours.noBreaks")}</strong>
+                      <span style={{ color: theme.colors.inactive }}>{t("hours.continuous")}</span>
                     </div>
                   </div>
                 ) : (
@@ -655,11 +657,11 @@ export default function Funcionamento() {
         <aside className={styles.summary} style={cardStyle}>
           <div className={styles.summaryTitle}>
             <FaCalendarAlt aria-hidden="true" style={{ color: theme.colors.primary }} />
-            <h2 style={{ color: theme.colors.text }}>Como ficará sua agenda</h2>
+            <h2 style={{ color: theme.colors.text }}>{t("hours.summary")}</h2>
           </div>
 
           <div className={styles.summaryBlock}>
-            <span style={{ color: theme.colors.inactive }}>Dias em que clientes podem agendar</span>
+            <span style={{ color: theme.colors.inactive }}>{t("hours.summaryDays")}</span>
             <strong style={{ color: theme.colors.text }}>
               {diasSelecionados.length > 0
                 ? diasSelecionados.map((dia) => dia.short).join(", ")
@@ -668,7 +670,7 @@ export default function Funcionamento() {
           </div>
 
           <div className={styles.summaryBlock}>
-            <span style={{ color: theme.colors.inactive }}>Horários por dia</span>
+            <span style={{ color: theme.colors.inactive }}>{t("hours.summaryHours")}</span>
             <div className={styles.summaryIntervals}>
               {diasSelecionados.map(dia => {
                 const horario = horariosPorDia[dia.key];
@@ -683,7 +685,7 @@ export default function Funcionamento() {
           </div>
 
           <div className={styles.summaryBlock}>
-            <span style={{ color: theme.colors.inactive }}>Pausas do horário padrão</span>
+            <span style={{ color: theme.colors.inactive }}>{t("hours.summaryBreaks")}</span>
             {config?.Intervalos.length ? (
               <div className={styles.summaryIntervals}>
                 {config.Intervalos.map((intervalo, index) => (
