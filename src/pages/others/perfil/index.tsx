@@ -21,6 +21,35 @@ import { useLanguage } from "@/context/LanguageContext";
 import ProfileOverview from "@/components/profile-overview";
 import LoadingState from "@/components/loading-state";
 
+const MAX_SOURCE_PHOTO_BYTES = 30 * 1024 * 1024;
+const MAX_UPLOAD_PHOTO_BYTES = 5 * 1024 * 1024;
+
+function isValidPhoto(file: File) {
+  return ["image/jpeg", "image/png", "image/webp"].includes(file.type) && file.size <= MAX_SOURCE_PHOTO_BYTES;
+}
+
+async function preparePhoto(file: File): Promise<File> {
+  if (!isValidPhoto(file)) throw new Error("Invalid photo");
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const img = new Image();
+    img.src = objectUrl;
+    await img.decode();
+    const scale = Math.min(1, 1200 / Math.max(img.naturalWidth, img.naturalHeight));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Image processing unavailable");
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/jpeg", 0.82));
+    if (!blob || blob.size > MAX_UPLOAD_PHOTO_BYTES) throw new Error("Unable to optimize photo");
+    return new File([blob], "profile-photo.jpg", { type: "image/jpeg", lastModified: Date.now() });
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function formatRole(role?: string, lang: "pt" | "en" = "pt") {
@@ -134,18 +163,18 @@ export default function Perfil() {
 
   async function handlePhotoChange(file: File) {
     if (!usuario || photoSaving) return;
-    const allowed = ["image/jpeg", "image/png", "image/webp"];
-    if (!allowed.includes(file.type) || file.size > 5 * 1024 * 1024) {
+    if (!isValidPhoto(file)) {
       showNotification({ type: "warning", title: t("profile.invalidPhoto"), message: t("profile.invalidPhotoDesc") });
       return;
     }
     try {
       setPhotoSaving(true);
+      const optimizedPhoto = await preparePhoto(file);
       const updated = await atualizarPerfilUsuario(usuario.Id, {
         Nome: usuario.Nome,
         Email: usuario.Email,
         Telefone: usuario.Telefone,
-        FotoPerfil: file,
+        FotoPerfil: optimizedPhoto,
       });
       setUsuario({
         ...usuario,
@@ -174,13 +203,21 @@ export default function Perfil() {
       return;
     }
 
+    if (fotoPerfil && !isValidPhoto(fotoPerfil)) {
+      const message = t("profile.invalidPhotoDesc");
+      setError(message);
+      showNotification({ type: "warning", title: t("profile.invalidPhoto"), message });
+      return;
+    }
+
     try {
       setSaving(true);
+      const optimizedPhoto = fotoPerfil ? await preparePhoto(fotoPerfil) : null;
       const updated = await atualizarPerfilUsuario(usuario.Id, {
         Nome: nome.trim(),
         Email: email.trim(),
         Telefone: telefoneDigits,
-        FotoPerfil: fotoPerfil,
+        FotoPerfil: optimizedPhoto,
       });
 
       setUsuario({
@@ -265,7 +302,7 @@ export default function Perfil() {
                   </span>
                   <span>
                     <strong>{fotoPerfil?.name || t("profile.choosePhoto")}</strong>
-                    <small>JPG, PNG ou WEBP, ate 5 MB</small>
+                    <small>JPG, PNG, WEBP · até 30 MB (otimização automática)</small>
                   </span>
                   <FaCamera aria-hidden="true" />
                   <input
