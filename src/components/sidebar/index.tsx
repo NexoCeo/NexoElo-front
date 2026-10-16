@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import { FaCalendarAlt, FaChartBar, FaChartLine, FaClock, FaHome, FaTimes, FaTools } from "react-icons/fa";
 import { FaPerson } from "react-icons/fa6";
 import styles from "./style.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
 import { getRoleBasePath } from "@/routes/role-paths";
@@ -15,6 +16,7 @@ interface SidebarProps {
 
 export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const { usuario } = useUser();
   const navRef = useRef<HTMLElement>(null);
   const [relatoriosLiberados, setRelatoriosLiberados] = useState(false);
@@ -69,7 +71,7 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
       id="app-sidebar"
       className={`${styles.nav} ${isMenuOpen ? styles.open : ""}`}
       style={sidebarStyle}
-      aria-label="Navegacao principal"
+      aria-label={t("nav.main")}
       aria-hidden={!isMenuOpen}
     >
       <button
@@ -77,7 +79,7 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
         className={styles.closeMenuIcon}
         style={{ color: theme.colors.text }}
         onClick={closeMenu}
-        aria-label="Fechar menu"
+        aria-label={t("nav.close")}
       >
         <FaTimes aria-hidden="true" />
       </button>
@@ -86,14 +88,14 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
         <li className={styles.navItem}>
           <NavLink to={`${basePath}/dashboard`} end className={linkClassName} onClick={closeMenu}>
             <FaHome className={styles.navIcon} aria-hidden="true" />
-            <span>Dashboard</span>
+            <span>{t("nav.dashboard")}</span>
           </NavLink>
         </li>
 
         <li className={styles.navItem}>
           <NavLink to={`${basePath}/agenda`} end className={linkClassName} onClick={closeMenu}>
             <FaCalendarAlt className={styles.navIcon} aria-hidden="true" />
-            <span>Agenda</span>
+            <span>{t("nav.calendar")}</span>
           </NavLink>
         </li>
 
@@ -101,7 +103,7 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
           <li className={styles.navItem}>
             <NavLink to={`${basePath}/servicos`} end className={linkClassName} onClick={closeMenu}>
               <FaTools className={styles.navIcon} aria-hidden="true" />
-              <span>Servicos</span>
+              <span>{t("nav.services")}</span>
             </NavLink>
           </li>
         )}
@@ -115,7 +117,7 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
               onClick={closeMenu}
             >
               <FaClock className={styles.navIcon} aria-hidden="true" />
-              <span>Funcionamento</span>
+              <span>{t("nav.hours")}</span>
             </NavLink>
           </li>
         )}
@@ -124,7 +126,7 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
           <li className={styles.navItem}>
             <NavLink to={`${basePath}/relatorios`} end className={linkClassName} onClick={closeMenu}>
               <FaChartBar className={styles.navIcon} aria-hidden="true" />
-              <span>Relatorios</span>
+              <span>{t("nav.reports")}</span>
             </NavLink>
           </li>
         )}
@@ -133,7 +135,7 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
           <li className={styles.navItem}>
             <NavLink to={`${basePath}/analise-dados`} end className={linkClassName} onClick={closeMenu}>
               <FaChartLine className={styles.navIcon} aria-hidden="true" />
-              <span>Análise de dados</span>
+              <span>{t("nav.analytics")}</span>
             </NavLink>
           </li>
         )}
@@ -142,7 +144,7 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
           <li className={styles.navItem}>
             <NavLink to="/empresa/profissionais" end className={linkClassName} onClick={closeMenu}>
               <FaPerson className={styles.navIcon} aria-hidden="true" />
-              <span>Profissionais</span>
+              <span>{t("nav.professionals")}</span>
             </NavLink>
           </li>
         )}
