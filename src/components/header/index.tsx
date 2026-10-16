@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Link, useNavigate } from "react-router-dom";
 import { FaBars, FaCreditCard, FaMoon, FaSignOutAlt, FaSun, FaTimes, FaUser } from "react-icons/fa";
 import styles from "./style.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
@@ -19,6 +20,7 @@ interface HeaderProps {
 
 export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
   const { theme, themeName, toggleTheme } = useTheme();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { usuario, logout: clearUser } = useUser();
   const { showNotification } = useNotification();
@@ -27,7 +29,7 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
   const [isFindMeOpen, setIsFindMeOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const fotoUrl = getProfileImageUrl(usuario?.FotoPerfil);
-  const primeiroNome = usuario?.Nome?.trim().split(/\s+/)[0] || "Conta";
+  const primeiroNome = usuario?.Nome?.trim().split(/\s+/)[0] || t("header.account");
   const papel = usuario?.Papel?.toUpperCase();
   const canShowFindMe = papel === "EMPRESA" || papel === "AUTONOMO";
 
@@ -67,10 +69,10 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
       clearUser();
       showNotification({
         type: remoteLogoutFailed ? "warning" : "success",
-        title: "Sessao encerrada",
+        title: t("header.sessionEnded"),
         message: remoteLogoutFailed
-          ? "Voce saiu neste dispositivo, mas o servidor nao respondeu."
-          : "Voce saiu da sua conta com seguranca.",
+          ? t("header.logoutOffline")
+          : t("header.logoutSuccess"),
       });
       navigate("/global/login");
     }
@@ -87,10 +89,10 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
           className={styles.menuButton}
           style={{ color: theme.colors.text }}
           onClick={toggleMenu}
-          aria-label="Abrir menu"
+          aria-label={t("nav.open")}
           aria-expanded={isMenuOpen}
           aria-controls="app-sidebar"
-          title="Abrir menu"
+          title={t("nav.open")}
         >
           <FaBars aria-hidden="true" />
         </button>
@@ -104,7 +106,7 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
               style={{ color: theme.colors.text }}
               onClick={() => setIsFindMeOpen(true)}
             >
-              Me encontre
+              {t("header.findMe")}
             </button>
           )}
 
@@ -113,7 +115,7 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
               type="button"
               className={styles.profileButton}
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-              aria-label="Abrir menu do perfil"
+              aria-label={t("header.profileMenu")}
               aria-expanded={isProfileMenuOpen}
               aria-haspopup="menu"
             >
@@ -142,7 +144,7 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
                   role="menuitem"
                 >
                   <FaUser aria-hidden="true" />
-                  <span>Meu perfil</span>
+                  <span>{t("header.profile")}</span>
                 </Link>
                 {canShowFindMe && (
                   <Link
@@ -152,7 +154,7 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
                     role="menuitem"
                   >
                     <FaCreditCard aria-hidden="true" />
-                    <span>Minha assinatura</span>
+                    <span>{t("header.subscription")}</span>
                   </Link>
                 )}
                 <button
@@ -161,14 +163,14 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
                   className={styles.themeAction}
                   style={{ color: theme.colors.text }}
                   role="menuitem"
-                  aria-label={themeName === "dark" ? "Usar tema claro" : "Usar tema escuro"}
+                  aria-label={themeName === "dark" ? t("header.useLightTheme") : t("header.useDarkTheme")}
                 >
                   {themeName === "dark" ? (
                     <FaSun className={styles.sunIcon} aria-hidden="true" />
                   ) : (
                     <FaMoon className={styles.moonIcon} aria-hidden="true" />
                   )}
-                  <span>{themeName === "dark" ? "Tema claro" : "Tema escuro"}</span>
+                  <span>{themeName === "dark" ? t("header.lightTheme") : t("header.darkTheme")}</span>
                 </button>
                 <button
                   type="button"
@@ -178,7 +180,7 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
                   role="menuitem"
                 >
                   <FaSignOutAlt aria-hidden="true" />
-                  <span>Sair</span>
+                  <span>{t("header.logout")}</span>
                 </button>
               </div>
             )}
@@ -197,14 +199,14 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
               }}
               role="dialog"
               aria-modal="true"
-              aria-label="Me encontre"
+              aria-label={t("header.findMe")}
             >
               <button
                 type="button"
                 className={styles.closeModalButton}
                 style={{ color: theme.colors.text }}
                 onClick={() => setIsFindMeOpen(false)}
-                aria-label="Fechar Me encontre"
+                aria-label={t("header.closeFindMe")}
               >
                 <FaTimes aria-hidden="true" />
               </button>
