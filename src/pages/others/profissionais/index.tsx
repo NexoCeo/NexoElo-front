@@ -597,7 +597,7 @@ export default function Profissionais() {
                   <td data-label="Telefone">{profissional.Telefone || t("pros.notProvided")}</td>
                   <td data-label="Status">
                     <span className={styles.status}>
-                      {profissional.VinculoStatus || t("pros.selected")}
+                      {profissional.VinculoStatus?.toUpperCase() === "APROVADO" ? t("status.approved") : profissional.VinculoStatus?.toUpperCase() === "PENDENTE" ? t("status.pending") : profissional.VinculoStatus?.toUpperCase() === "RECUSADO" ? t("status.rejected") : t("status.linked")}
                     </span>
                   </td>
                   <td className={styles.actionsCell} data-label="Acoes">
