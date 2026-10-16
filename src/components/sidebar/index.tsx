@@ -142,17 +142,21 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
         {canManageSharedSettings && analiseLiberada && (
           <li className={styles.navItem}>
             <div className={styles.analyticsGroup}>
-              <div className={styles.analyticsMain}>
-                <NavLink to={analyticsPath} end className={linkClassName} onClick={closeMenu}>
-                  <FaChartLine className={styles.navIcon} aria-hidden="true" />
-                  <span>{t("nav.analytics")}</span>
+              <button type="button" className={`${styles.analyticsAnchor} ${location.pathname.startsWith(analyticsPath) ? styles.groupActive : ""}`} onClick={() => setAnalyticsExpanded(v => !v)} aria-expanded={analyticsExpanded} aria-controls="analytics-submenu">
+                <FaChartLine className={styles.navIcon} aria-hidden="true" />
+                <span>{t("nav.analytics")}</span>
+                <span className={styles.expandChevron} aria-hidden="true">{analyticsExpanded ? "▾" : "▸"}</span>
+              </button>
+              {analyticsExpanded && <div id="analytics-submenu" className={styles.analyticsChildren}>
+                <NavLink to={`${analyticsPath}/metricas`} end className={linkClassName} onClick={closeMenu}>
+                  <FaChartBar className={styles.navIcon} aria-hidden="true" />
+                  <span>Métricas</span>
                 </NavLink>
-                <button type="button" className={styles.expandButton} onClick={() => setAnalyticsExpanded(v => !v)} aria-label="Expandir Análise de dados" aria-expanded={analyticsExpanded}> {analyticsExpanded ? "−" : "+"} </button>
-              </div>
-              {analyticsExpanded && whatsAppLiberado && <NavLink to={`${analyticsPath}/whatsapp-business`} className={linkClassName} onClick={closeMenu}>
-                <FaWhatsapp className={styles.navIcon} aria-hidden="true" />
-                <span>WhatsApp Business</span>
-              </NavLink>}
+                {whatsAppLiberado && <NavLink to={`${analyticsPath}/whatsapp-business`} end className={linkClassName} onClick={closeMenu}>
+                  <FaWhatsapp className={styles.navIcon} aria-hidden="true" />
+                  <span>WhatsApp Business</span>
+                </NavLink>}
+              </div>}
             </div>
           </li>
         )}
