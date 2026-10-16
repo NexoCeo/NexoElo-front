@@ -1,3 +1,4 @@
+import { useLanguage } from "@/context/LanguageContext";
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '@/context/ThemeContext';
@@ -9,6 +10,7 @@ import { useLoginForm } from '@/hooks/useLoginForm';
 import logo from '@/assets/logo.png';
 
 export default function Login() {
+  const { t } = useLanguage();
   const { theme } = useTheme();
   const {
     email,
@@ -78,14 +80,14 @@ export default function Login() {
           
           <div className={styles.footerWrapper}>
             {/* Botão */}
-            <SubmitButton disabled={!(isFormValid() || didSyncAutofill)} loading={loading}>Entrar</SubmitButton>
+            <SubmitButton disabled={!(isFormValid() || didSyncAutofill)} loading={loading}>{t("auth.login")}</SubmitButton>
 
             {/* Links */}
             <div className={styles.forgot}>
-              <Link to="/global/register" className={styles.link} style={{ color: theme.colors.inactive }}>Criar conta</Link>
+              <Link to="/global/register" className={styles.link} style={{ color: theme.colors.inactive }}>{t("auth.createAccount")}</Link>
             </div>
             <div className={styles.forgot}>
-              <a href="/global/recuperarSenha" className={styles.link} style={{ color: theme.colors.inactive }}>Esqueceu a senha?</a>
+              <a href="/global/recuperarSenha" className={styles.link} style={{ color: theme.colors.inactive }}>{t("auth.forgot")}</a>
             </div>
           </div>
         </form>
