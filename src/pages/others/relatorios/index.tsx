@@ -83,7 +83,7 @@ function baixarBlob(blob: Blob, nomeArquivo: string) {
 
 export default function Relatorios() {
   const { theme } = useTheme();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { usuario } = useUser();
   const { showNotification } = useNotification();
   const [periodo, setPeriodo] = useState(mesAtual);
@@ -144,7 +144,7 @@ export default function Relatorios() {
     setLoadingAction(`${relatorio.tipo}:preview`);
 
     try {
-      const arquivo = await gerarRelatorioPdf(relatorio.tipo, ano, mes);
+      const arquivo = await gerarRelatorioPdf(relatorio.tipo, ano, mes, lang);
       setPdfBlob(arquivo);
       showNotification({
         type: "success",
@@ -165,7 +165,7 @@ export default function Relatorios() {
     setLoadingAction(`${relatorio.tipo}:download`);
 
     try {
-      const arquivo = await gerarRelatorioPdf(relatorio.tipo, ano, mes);
+      const arquivo = await gerarRelatorioPdf(relatorio.tipo, ano, mes, lang);
       baixarBlob(arquivo, nomeArquivoRelatorio(relatorio.tipo, ano, mes));
       showNotification({
         type: "success",
