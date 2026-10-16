@@ -18,12 +18,22 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
   const { usuario } = useUser();
   const navRef = useRef<HTMLElement>(null);
   const [relatoriosLiberados, setRelatoriosLiberados] = useState(false);
+  const [analiseLiberada, setAnaliseLiberada] = useState(false);
   useEffect(() => {
-    if (usuario?.Papel !== "EMPRESA" && usuario?.Papel !== "AUTONOMO") return;
+    if (usuario?.Papel !== "EMPRESA" && usuario?.Papel !== "AUTONOMO") {
+      setRelatoriosLiberados(false);
+      setAnaliseLiberada(false);
+      return;
+    }
+    setRelatoriosLiberados(false);
+    setAnaliseLiberada(false);
     let active = true;
     consultarAssinatura().then(acesso => {
-      if (active) setRelatoriosLiberados(acesso.AcessoAtivo && acesso.RelatoriosLiberados);
-    }).catch(() => { if (active) setRelatoriosLiberados(false); });
+      if (active) {
+        setRelatoriosLiberados(acesso.AcessoAtivo && acesso.RelatoriosLiberados);
+        setAnaliseLiberada(acesso.AcessoAtivo && acesso.Plano === "AVANCADO");
+      }
+    }).catch(() => { if (active) { setRelatoriosLiberados(false); setAnaliseLiberada(false); } });
     return () => { active = false; };
   }, [usuario?.Papel, usuario?.Id]);
   const basePath = getRoleBasePath(usuario?.Papel);
@@ -119,7 +129,7 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
           </li>
         )}
 
-        {canManageSharedSettings && (
+        {canManageSharedSettings && analiseLiberada && (
           <li className={styles.navItem}>
             <NavLink to={`${basePath}/analise-dados`} end className={linkClassName} onClick={closeMenu}>
               <FaChartLine className={styles.navIcon} aria-hidden="true" />
