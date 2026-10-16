@@ -3,6 +3,7 @@ import styles from "./style.module.css";
 type LoadingStateProps = {
   label?: string;
   compact?: boolean;
+  embedded?: boolean;
   variant?: "cards" | "table" | "form" | "profile" | "analytics";
 };
 
@@ -19,10 +20,10 @@ function Bar({ width = "100%" }: { width?: string }) {
   return <span aria-hidden="true" className={styles.bar} style={{ width }} />;
 }
 
-export default function LoadingState({ label = "Carregando", compact = false, variant }: LoadingStateProps) {
+export default function LoadingState({ label = "Carregando", compact = false, embedded = false, variant }: LoadingStateProps) {
   const kind = variant ?? inferVariant();
   return (
-    <div className={`${styles.loading} ${compact ? styles.compact : ""}`} role="status" aria-live="polite" aria-label={label} aria-busy="true">
+    <div className={`${styles.loading} ${compact ? styles.compact : ""} ${embedded ? styles.embedded : ""}`} role="status" aria-live="polite" aria-label={label} aria-busy="true">
       <span className={styles.srOnly}>{label}</span>
       {compact ? <div className={styles.compactLines}><Bar width="65%"/><Bar width="86%"/><Bar width="44%"/></div> : (
         <div className={styles.page}>
