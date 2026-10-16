@@ -2,6 +2,7 @@ import api from "./api";
 
 export type WhatsAppStatus = {
   conectado: boolean;
+  integracaoDisponivel?: boolean;
   numero?: string;
   nomeExibicao?: string;
   status?: string;
