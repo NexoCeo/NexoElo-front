@@ -20,6 +20,7 @@ import {
 import type { Agendamento } from "@/types/agendamento";
 import type { Profissional } from "@/types/profissional";
 import styles from "./style.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 
 const REFRESH_INTERVAL_MS = 15_000;
 
@@ -49,8 +50,8 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
-function formatSelectedDate(date: Date) {
-  const formatted = new Intl.DateTimeFormat("pt-BR", {
+function formatSelectedDate(date: Date, locale: string) {
+  const formatted = new Intl.DateTimeFormat(locale, {
     weekday: "long",
     day: "2-digit",
     month: "long",
@@ -76,6 +77,7 @@ const statusLabels: Record<AgendaRealtimeStatus, string> = {
 
 export default function Agenda() {
   const { theme } = useTheme();
+  const { t, lang } = useLanguage();
   const { usuario } = useUser();
   const { showNotification } = useNotification();
 
@@ -382,7 +384,7 @@ export default function Agenda() {
         });
     }, [agendamentos]);
 
-  const selectedPeriodLabel = formatSelectedDate(selectedDate);
+  const selectedPeriodLabel = formatSelectedDate(selectedDate, lang === "pt" ? "pt-BR" : "en-US");
 
   const lastUpdatedLabel =
     lastUpdated
@@ -481,7 +483,7 @@ export default function Agenda() {
     >
       <aside
         className={styles.sidebar}
-        aria-label="Seleção de data"
+        aria-label={t("dashboard.period")}
       >
         <div
           className={
@@ -492,7 +494,7 @@ export default function Agenda() {
             className={
               styles.segmented
             }
-            aria-label="Visualizacao da agenda"
+            aria-label={t("dashboard.period")}
           >
             <button
               type="button"
@@ -508,7 +510,7 @@ export default function Agenda() {
                 viewMode === "month"
               }
             >
-              Mensal
+              {t("agenda.monthly")}
             </button>
 
             <button
@@ -525,7 +527,7 @@ export default function Agenda() {
                 viewMode === "week"
               }
             >
-              Semanal
+              {t("agenda.weekly")}
             </button>
           </div>
 
@@ -535,7 +537,7 @@ export default function Agenda() {
                 styles.professionalFilter
               }
             >
-              Profissional
+              {t("common.professional")}
 
               <select
                 value={profissionalId}
@@ -548,7 +550,7 @@ export default function Agenda() {
                 }
               >
                 <option value={0}>
-                  Todos os profissionais
+                  {t("agenda.allProfessionals")}
                 </option>
 
                 {profissionais.map(
@@ -602,7 +604,7 @@ export default function Agenda() {
             aria-hidden="true"
           />
 
-          Ir para hoje
+          {t("agenda.today")}
         </button>
 
         {podeGerenciar && (
@@ -613,7 +615,7 @@ export default function Agenda() {
             disabled={closingDay}
           >
             <FaCalendarCheck aria-hidden="true" />
-            {closingDay ? "Fechando..." : "Fechar todos agendamentos"}
+            {closingDay ? t("agenda.closing") : t("agenda.closeAll")}
           </button>
         )}
       </aside>
@@ -649,9 +651,7 @@ export default function Agenda() {
 
               <span>
                 {
-                  statusLabels[
-                    realtimeStatus
-                  ]
+                  t(`agenda.${realtimeStatus}`)
                 }
               </span>
 
@@ -681,8 +681,8 @@ export default function Agenda() {
               }{" "}
               {agendaItems.length ===
               1
-                ? "agendamento"
-                : "agendamentos"}
+                ? t("dashboard.oneAppointment")
+                : t("dashboard.manyAppointments")}
             </span>
 
             <button
@@ -696,8 +696,8 @@ export default function Agenda() {
               disabled={
                 refreshing || loading
               }
-              title="Atualizar agenda"
-              aria-label="Atualizar agenda"
+              title={t("agenda.refresh")}
+              aria-label={t("agenda.refresh")}
             >
               <FaRotate
                 className={
