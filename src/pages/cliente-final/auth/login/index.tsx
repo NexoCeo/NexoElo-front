@@ -1,3 +1,4 @@
+import { useLanguage } from "@/context/LanguageContext";
 import { FaEye, FaEyeSlash, FaUser } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useClienteFinalLoginForm } from "@/hooks/useClienteFinalLoginForm";
@@ -5,6 +6,7 @@ import { useTheme } from '@/context/ThemeContext';
 import styles from "../style.module.css";
 
 export default function ClienteFinalLogin() {
+  const { t } = useLanguage();
   const { theme } = useTheme();
   const {
     login,
@@ -28,11 +30,11 @@ export default function ClienteFinalLogin() {
       <form className={styles.panel} onSubmit={handleLogin}>
         <div className={styles.heading}>
           <span className={styles.mark}>CF</span>
-          <h1>Entrar como cliente</h1>
+          <h1>{t("auth.customerSignIn")}</h1>
         </div>
 
         <label className={styles.field}>
-          E-mail ou telefone
+          {t("auth.emailOrPhone")}
           <div className={styles.inputWrap}>
             <input
               type="text"
@@ -49,15 +51,15 @@ export default function ClienteFinalLogin() {
         </label>
 
         <label className={styles.field}>
-          Senha
+          {t("auth.password")}
           <div className={styles.inputWrap}>
             <input
               type={showPassword ? "text" : "password"}
               value={senha}
               onChange={(event) => setSenha(event.target.value)}
-              placeholder="Digite sua senha"
+              placeholder={t("auth.enterPassword")}
             />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label="Alternar senha">
+            <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={t("auth.showPassword")}>
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
           </div>
@@ -66,11 +68,11 @@ export default function ClienteFinalLogin() {
         {error && <p className={styles.error}>{error}</p>}
 
         <button className={styles.submit} type="submit" disabled={!isFormValid() || loading} style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}>
-          {loading ? "Entrando..." : "Entrar"}
+          {loading ? t("auth.signingIn") : t("auth.login")}
         </button>
 
         <Link className={styles.link} to={registerPath}>
-          Criar conta de cliente
+          {t("auth.customerAccount")}
         </Link>
       </form>
     </main>
