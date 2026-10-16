@@ -263,11 +263,11 @@ export default function Servicos() {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Servico</th>
-                <th>Codigo</th>
-                <th>Duracao</th>
-                <th className={styles.valueHeader}>Valor</th>
-                <th className={styles.actionsHeader}>Acoes</th>
+                <th>{t("common.service")}</th>
+                <th>{t("common.code")}</th>
+                <th>{t("common.duration")}</th>
+                <th className={styles.valueHeader}>{t("common.value")}</th>
+                <th className={styles.actionsHeader}>{t("common.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -286,11 +286,11 @@ export default function Servicos() {
                         )}
                       </span>
                       <strong style={{ color: theme.colors.text }}>
-                        {servico.NomeServico || "Sem nome"}
+                        {servico.NomeServico || t("services.unnamed")}
                       </strong>
                     </div>
                   </td>
-                  <td data-label="Codigo">{servico.Id || "Novo"}</td>
+                  <td data-label="Codigo">{servico.Id || t("services.newCode")}</td>
                   <td data-label="Duracao">{servico.TempoEstimadoMinutos || 0} min</td>
                   <td className={styles.valueCell} data-label="Valor">
                     <strong style={{ color: theme.colors.primary }}>
@@ -305,7 +305,7 @@ export default function Servicos() {
                       <button
                         type="button"
                         className={styles.menuTrigger}
-                        aria-label={`Opcoes de ${servico.NomeServico}`}
+                        aria-label={`${t("services.options")} ${servico.NomeServico}`}
                         aria-haspopup="menu"
                         aria-expanded={openMenuId === servico.Id}
                         onClick={() => setOpenMenuId((current) => (
@@ -322,7 +322,7 @@ export default function Servicos() {
                             onClick={() => openEditModal(servico)}
                           >
                             <FaPen aria-hidden="true" />
-                            Editar
+                            {t("common.edit")}
                           </button>
                         </div>
                       )}
@@ -347,12 +347,12 @@ export default function Servicos() {
             <header className={styles.modalHeader}>
               <div>
                 <h2 id="servico-modal-title" style={{ color: theme.colors.text }}>
-                  {editingServico ? "Editar servico" : "Novo servico"}
+                  {editingServico ? t("services.editTitle") : t("services.createTitle")}
                 </h2>
                 <p style={{ color: theme.colors.inactive }}>
                   {editingServico
-                    ? "Atualize as informacoes exibidas no agendamento."
-                    : "Cadastre um servico disponivel para agendamento."}
+                    ? t("services.editDescription")
+                    : t("services.createDescription")}
                 </p>
               </div>
               <button type="button" onClick={closeModal} aria-label="Fechar modal" title="Fechar">
@@ -362,29 +362,29 @@ export default function Servicos() {
 
             <form className={styles.form} onSubmit={handleSubmit}>
               <label className={styles.imageField}>
-                Imagem do servico
+                {t("services.image")}
                 <span className={styles.imageControl}>
                   <span className={styles.imagePreview} aria-hidden="true">
                     <FaImage />
                     {imagemPreviewUrl && <img src={imagemPreviewUrl} alt="" />}
                   </span>
-                  <span>{imagemServico?.name || "Selecionar imagem"}</span>
+                  <span>{imagemServico?.name || t("services.selectImage")}</span>
                   <input
                     type="file"
                     accept="image/png,image/jpeg,image/webp"
-                    aria-label="Imagem do servico"
+                    aria-label={t("services.image")}
                     onChange={(event) => setImagemServico(event.target.files?.[0] ?? null)}
                   />
                 </span>
               </label>
 
               <label>
-                Nome do servico
+                {t("services.name")}
                 <input
                   type="text"
                   value={nomeServico}
                   onChange={(event) => setNomeServico(event.target.value)}
-                  placeholder="Ex: Corte masculino"
+                  placeholder={t("services.exampleName")}
                   autoFocus
                 />
               </label>
@@ -396,12 +396,12 @@ export default function Servicos() {
                   inputMode="decimal"
                   value={valor}
                   onChange={(event) => setValor(event.target.value)}
-                  placeholder="Ex: 45,00"
+                  placeholder={t("services.examplePrice")}
                 />
               </label>
 
               <div className={styles.fieldGroup}>
-                <label htmlFor="service-duration">Tempo estimado</label>
+                <label htmlFor="service-duration">{t("services.estimated")}</label>
                 <div className={styles.durationField}>
                   <input
                     id="service-duration"
@@ -410,7 +410,7 @@ export default function Servicos() {
                     step="5"
                     value={tempoEstimadoMinutos}
                     onChange={(event) => setTempoEstimadoMinutos(event.target.value)}
-                    aria-label="Tempo estimado"
+                    aria-label={t("services.estimated")}
                     aria-describedby="duration-unit"
                   />
                   <span id="duration-unit">min</span>
@@ -426,8 +426,8 @@ export default function Servicos() {
                 style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
               >
                 {saving
-                  ? "Salvando..."
-                  : editingServico ? "Salvar alteracoes" : "Criar servico"}
+                  ? t("services.saving")
+                  : editingServico ? t("common.save") : t("services.create")}
               </button>
             </form>
           </section>
