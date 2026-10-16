@@ -1,3 +1,4 @@
+import { useLanguage } from "@/context/LanguageContext";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import api from "@/services/api";
@@ -18,6 +19,7 @@ interface AlteraSenhaProps {
 }
 
 export default function AlteraSenha({ tokenTemporario, onSuccess, onFailure }: AlteraSenhaProps) {
+  const { t } = useLanguage();
   const { theme } = useTheme();
   const { control, handleSubmit, formState: { errors }, watch } = useForm<FormData>({
     defaultValues: {
@@ -33,7 +35,7 @@ export default function AlteraSenha({ tokenTemporario, onSuccess, onFailure }: A
 
   const onSubmit = async (data: FormData) => {
     if (data.novaSenha !== data.confirmarSenha) {
-      setError("As senhas não coincidem.");
+      setError(t("password.mismatch"));
       return;
     }
     try {
@@ -48,7 +50,7 @@ export default function AlteraSenha({ tokenTemporario, onSuccess, onFailure }: A
       onSuccess();
 
     } catch {
-      setError("Erro ao alterar a senha.");
+      setError(t("password.changeError"));
       onFailure();
     } finally {
       setLoading(false);
@@ -62,16 +64,16 @@ export default function AlteraSenha({ tokenTemporario, onSuccess, onFailure }: A
           name="novaSenha"
           control={control}
           rules={{ 
-            required: "A nova senha é obrigatória.",
+            required: t("password.required"),
             minLength: {
               value: 8,
-              message: "A senha deve ter no mínimo 8 caracteres."
+              message: t("password.minLength")
             }
           }}
           render={({ field }) => (
             <InputGeneric
               type={showNovaSenha ? 'text' : 'password'}
-              placeholder="Digite uma nova senha."
+              placeholder={t("password.newPlaceholder")}
               icon={
                 <span onClick={() => setShowNovaSenha(!showNovaSenha)} style={{ cursor: 'pointer' }}>
                   {showNovaSenha ? <FaLockOpen size={20} /> : <FaLock size={20} />}
@@ -86,13 +88,13 @@ export default function AlteraSenha({ tokenTemporario, onSuccess, onFailure }: A
           name="confirmarSenha"
           control={control}
           rules={{ 
-            required: "A confirmação de senha é obrigatória.",
-            validate: (value) => value === watch('novaSenha') || "As senhas não coincidem."
+            required: t("password.confirmRequired"),
+            validate: (value) => value === watch('novaSenha') || t("password.mismatch")
           }}
           render={({ field }) => (
             <InputGeneric
               type={showConfirmarSenha ? 'text' : 'password'}
-              placeholder="Confirme a nova senha!"
+              placeholder={t("password.confirmPlaceholder")}
                icon={
                 <span onClick={() => setShowConfirmarSenha(!showConfirmarSenha)} style={{ cursor: 'pointer' }}>
                   {showConfirmarSenha ? <FaLockOpen size={20} /> : <FaLock size={20} />}
@@ -111,7 +113,7 @@ export default function AlteraSenha({ tokenTemporario, onSuccess, onFailure }: A
         className={styles.button}
         style={{color: theme.colors.text}}
       >
-        {loading ? <span className={styles.spinner}></span> : "Alterar senha"}
+        {loading ? <span className={styles.spinner}></span>  : t("password.change")}
       </button>
     </form>
   );
