@@ -479,7 +479,7 @@ export default function Funcionamento() {
 
                 <div className={styles.timeRange}>
                   <label style={{ color: theme.colors.text }}>
-                    Início do atendimento
+                    {t("hours.open")}
                     <input
                       type="time"
                       value={config.HorarioAbertura}
@@ -490,7 +490,7 @@ export default function Funcionamento() {
                   </label>
                   <FaArrowRight className={styles.timeArrow} aria-hidden="true" />
                   <label style={{ color: theme.colors.text }}>
-                    Fim do atendimento
+                    {t("hours.end")}
                     <input
                       type="time"
                       value={config.HorarioFechamento}
@@ -573,7 +573,7 @@ export default function Funcionamento() {
                     </div>
                   </div>
                   <button type="button" className={styles.addButton} onClick={addIntervalo}>
-                    <FaPlus aria-hidden="true" /> Adicionar pausa
+                    <FaPlus aria-hidden="true" /> {t("hours.breakAdd")}
                   </button>
                 </div>
 
@@ -594,7 +594,7 @@ export default function Funcionamento() {
                           <span style={{ color: theme.colors.text }}>{t("hours.break")} {index + 1}</span>
                         </div>
                         <label style={{ color: theme.colors.inactive }}>
-                          Inicio
+                          {t("hours.start")}
                           <input
                             aria-label={`Inicio da pausa ${index + 1}`}
                             type="time"
@@ -606,7 +606,7 @@ export default function Funcionamento() {
                           />
                         </label>
                         <label style={{ color: theme.colors.inactive }}>
-                          Fim
+                          {t("hours.finish")}
                           <input
                             aria-label={`Fim da pausa ${index + 1}`}
                             type="time"
@@ -647,7 +647,7 @@ export default function Funcionamento() {
                   style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
                 >
                   <FaSave aria-hidden="true" />
-                  {saving ? t("profile.saving") : t("hours.saved")}
+                  {saving ? t("profile.saving") : t("hours.save")}
                 </button>
               </div>
             </>
@@ -690,7 +690,7 @@ export default function Funcionamento() {
               <div className={styles.summaryIntervals}>
                 {config.Intervalos.map((intervalo, index) => (
                   <small key={index} style={{ color: theme.colors.text }}>
-                    Pausa {index + 1}<span style={{ color: theme.colors.inactive }}>{intervalo.Inicio} - {intervalo.Fim}</span>
+                    {t("hours.break")} {index + 1}<span style={{ color: theme.colors.inactive }}>{intervalo.Inicio} - {intervalo.Fim}</span>
                   </small>
                 ))}
               </div>
