@@ -155,10 +155,10 @@ function Register() {
                 color: theme.colors.text,
               }}
             >
-              Nome
+              {t("auth.name")}
             </label>
 
-            <InputGeneric value={nome} onChange={setNome} name="name" type="text" placeholder="Digite seu nome" icon={<FaUser size={15} />} />
+            <InputGeneric value={nome} onChange={setNome} name="name" type="text" placeholder={t("auth.enterName")} icon={<FaUser size={15} />} />
           </div>
 
           {/* Email */}
@@ -169,7 +169,7 @@ function Register() {
                 color: theme.colors.text,
               }}
             >
-              Email
+              {t("auth.email")}
             </label>
 
             <EmailInput value={email} onChange={setEmail} />
@@ -189,7 +189,7 @@ function Register() {
                 color: theme.colors.text,
               }}
             >
-              Senha
+              {t("auth.password")}
             </label>
 
             <PasswordInput value={senha} onChange={setSenha} showPassword={showPassword} togglePassword={() => setShowPassword(!showPassword)} autoComplete="new-password" />
@@ -203,7 +203,7 @@ function Register() {
                 color: theme.colors.text,
               }}
             >
-              Tipo de Usuario
+              {t("auth.type")}
             </label>
 
             <div
@@ -222,15 +222,15 @@ function Register() {
                 required
               >
                 <option value="autonomo" style={{color: theme.colors.text}}>
-                  Autonomo
+                  {t("auth.independent")}
                 </option>
 
                 <option value="empresa" style={{color: theme.colors.text}}>
-                  Empresa
+                  {t("auth.company")}
                 </option>
 
                 <option value="profissional" style={{color: theme.colors.text}}>
-                  Profissional
+                  {t("auth.professional")}
                 </option>
               </select>
             </div>
@@ -249,7 +249,7 @@ function Register() {
                     theme.colors.text,
                 }}
               >
-                Empresa
+                {t("auth.company")}
               </label>
 
               <div
@@ -276,11 +276,11 @@ function Register() {
                 >
                   <option value={0}>
                     {loadingEmpresas
-                      ? "Carregando empresas..."
+                      ? t("auth.loadingCompanies")
                       : empresas.length ===
                           0
-                        ? "Nenhuma empresa encontrada"
-                        : "Selecione uma empresa"}
+                        ? t("auth.noCompanies")
+                        : t("auth.chooseCompany")}
                   </option>
 
                   {empresas.map(
@@ -305,9 +305,7 @@ function Register() {
                       styles.error
                     }
                   >
-                    Nenhuma empresa
-                    encontrada nesta
-                    cidade.
+                    {t("auth.noCompaniesHere")}
                   </p>
                 )}
             </div>
@@ -332,10 +330,10 @@ function Register() {
                       theme.colors.text,
                   }}
                 >
-                  Nome Fantasia
+                  {t("auth.companyName")}
                 </label>
 
-                <InputGeneric type="text" name="nomeFantasia" value={nomeFantasia} onChange={setNomeFantasia} placeholder="Digite o nome fantasia" icon={<FaUser size={15} />} />
+                <InputGeneric type="text" name="nomeFantasia" value={nomeFantasia} onChange={setNomeFantasia} placeholder={t("auth.enterBusinessName")} icon={<FaUser size={15} />} />
               </div>
 
               {/* CNPJ */}
@@ -356,7 +354,7 @@ function Register() {
                   CNPJ
                 </label>
 
-                <InputGeneric type="text" name="cnpj" value={cnpj} onChange={setCnpj} placeholder="Digite o CNPJ" icon={<FaUser size={15} />}                />
+                <InputGeneric type="text" name="cnpj" value={cnpj} onChange={setCnpj} placeholder={t("auth.enterCnpj")} icon={<FaUser size={15} />}                />
               </div>
             </>
           )}
@@ -380,7 +378,7 @@ function Register() {
                   theme.colors.primary,
               }}
             >
-              Ja tenho uma conta
+              {t("auth.haveAccount")}
             </Link>
           </div>
 
