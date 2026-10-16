@@ -23,6 +23,7 @@ import { useNotification } from "@/context/NotificationContext";
 import type { Agendamento } from "@/types/agendamento";
 import styles from "./style.module.css";
 import ProfileOverview from "@/components/profile-overview";
+import { useLanguage } from "@/context/LanguageContext";
 
 type HomeSection = "home" | "historico" | "perfil";
 
@@ -46,7 +47,7 @@ const navigationItems: Array<{
   label: string;
   Icon: IconType;
 }> = [
-  { id: "home", label: "Home", Icon: FaHome },
+  { id: "home", label: "Início", Icon: FaHome },
   { id: "historico", label: "Histórico", Icon: FaHistory },
   { id: "perfil", label: "Perfil", Icon: FaUser },
 ];
@@ -175,6 +176,7 @@ function AppointmentCard({
 
 export default function ClienteFinalHome() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const { showNotification } = useNotification();
   const cliente = getClienteFinalUser();
   const [activeSection, setActiveSection] = useState<HomeSection>("home");
@@ -300,13 +302,13 @@ export default function ClienteFinalHome() {
             type="button"
             className={styles.brand}
             onClick={() => setActiveSection("home")}
-            aria-label="Ir para a home"
+            aria-label={t("client.goHome")}
           >
             <span aria-hidden="true">CF</span>
-            <strong>Cliente final</strong>
+            <strong>{t("client.account")}</strong>
           </button>
 
-          <nav className={styles.navigation} aria-label="Navegação do cliente" role="tablist">
+          <nav className={styles.navigation} aria-label={t("client.navigation")} role="tablist">
             {navigationItems.map(({ id, label, Icon }) => (
               <button
                 key={id}
@@ -319,7 +321,7 @@ export default function ClienteFinalHome() {
                 onClick={() => setActiveSection(id)}
               >
                 <Icon aria-hidden="true" />
-                <span>{label}</span>
+                <span>{id === "home" ? t("client.home") : id === "historico" ? t("client.history") : t("client.profile")}</span>
               </button>
             ))}
           </nav>
