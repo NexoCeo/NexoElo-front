@@ -7,9 +7,11 @@ import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
 import { getClienteFinalAgendamentoUrl, obterSlugUsuario } from "@/services/agenda-publica-service";
 import LoadingState from "@/components/loading-state";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function QrCode() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const { usuario, setUsuario } = useUser();
   const { showNotification } = useNotification();
   const [slugFallback, setSlugFallback] = useState("");
@@ -33,14 +35,14 @@ export default function QrCode() {
       .then(value => {
         if (!active) return;
         if (!value) {
-          setError("Link da agenda pública indisponível.");
+          setError(t("qr.unavailable"));
           return;
         }
         setSlugFallback(value);
         setUsuario({ ...usuario, Slug: value });
       })
       .catch(() => {
-        if (active) setError("Não foi possível obter o link da agenda pública.");
+        if (active) setError(t("qr.loadFailed"));
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -61,15 +63,15 @@ export default function QrCode() {
       setCopyStatus("copied");
       showNotification({
         type: "success",
-        title: "Link copiado",
-        message: "O link da agenda pública está pronto para compartilhar.",
+        title: t("qr.copied"),
+        message: t("qr.copiedDescription"),
       });
     } catch {
       setCopyStatus("error");
       showNotification({
         type: "error",
-        title: "Link não copiado",
-        message: "Não foi possível copiar o link. Tente novamente.",
+        title: t("qr.notCopied"),
+        message: t("qr.copyFailed"),
       });
     }
   }
@@ -79,9 +81,9 @@ export default function QrCode() {
   return (
     <section className={styles.wrapper}>
       <div className={styles.header}>
-        <h3 style={{ color: theme.colors.text }}>Agenda pública</h3>
+        <h3 style={{ color: theme.colors.text }}>{t("qr.title")}</h3>
         <p style={{ color: theme.colors.inactive }}>
-          Compartilhe o QR Code ou o link para clientes agendarem.
+          {t("qr.description")}
         </p>
       </div>
 
@@ -90,7 +92,7 @@ export default function QrCode() {
           <div className={styles.container}>
             <QRCodeSVG
               value={urlAgendamento}
-              title="QR Code da agenda pública"
+              title={t("qr.title")}
               size={200}
               level="Q"
               marginSize={2}
@@ -102,9 +104,9 @@ export default function QrCode() {
               type="button"
               className={`${styles.copyLinkButton} ${copyStatus === "copied" ? styles.copyLinkButtonSuccess : ""}`}
               onClick={copyAgendaLink}
-              aria-label={copyStatus === "copied" ? "Link copiado" : "Copiar link da agenda pública"}
+              aria-label={copyStatus === "copied" ? t("qr.copied") : t("qr.copy")}
             >
-              <span>{copyStatus === "copied" ? "Link copiado" : "Copiar link da agenda pública"}</span>
+              <span>{copyStatus === "copied" ? t("qr.copied") : t("qr.copy")}</span>
               {copyStatus === "copied" ? <FaCheck aria-hidden="true" /> : <FaCopy aria-hidden="true" />}
             </button>
             {copyStatus === "error" && (
@@ -113,9 +115,9 @@ export default function QrCode() {
           </div>
         </div>
       ) : loading ? (
-        <LoadingState label="Preparando agenda pública" compact />
+        <LoadingState label={t("qr.preparing")} compact />
       ) : (
-        <p className={styles.error}>{error || "Link da agenda pública indisponível."}</p>
+        <p className={styles.error}>{error || t("qr.unavailable")}</p>
       )}
     </section>
   );
