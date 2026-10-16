@@ -120,3 +120,11 @@
     transition: none;
   }
 }
+
+.analyticsGroup { display: grid; gap: 4px; }
+.analyticsGroup > a { padding-left: 24px; font-size: .9rem; }
+.analyticsMain { display: flex; align-items: center; }
+.analyticsMain > a { flex: 1; }
+.expandButton { border: 0; background: transparent; color: var(--sidebar-text); cursor: pointer; font-size: 22px; width: 34px; min-height: 42px; border-radius: 6px; }
+.expandButton:hover { background: var(--theme-primary-soft); }
+.expandButton:focus-visible { outline: 2px solid var(--sidebar-primary); }
