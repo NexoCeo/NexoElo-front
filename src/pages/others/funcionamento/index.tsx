@@ -191,9 +191,9 @@ export default function Funcionamento() {
         const data = await obterFuncionamento(usuarioId);
         setConfig(data);
       } catch {
-        const message = "Nao foi possivel carregar a configuracao de funcionamento.";
+        const message = t("hours.loadError");
         setError(message);
-        showNotification({ type: "error", title: "Funcionamento indisponivel", message });
+        showNotification({ type: "error", title: t("hours.unavailable"), message });
         setConfig(criarFuncionamentoPadrao(usuarioId));
       } finally {
         setLoading(false);
@@ -265,8 +265,8 @@ export default function Funcionamento() {
       Intervalos: current.Intervalos,
     });
     if (!nova) {
-      showNotification({ type: "warning", title: "Sem espaço para pausa",
-        message: "O horário deste dia não comporta outra pausa." });
+      showNotification({ type: "warning", title: t("hours.noBreakSpace"),
+        message: t("hours.noBreakSpaceDesc") });
       return;
     }
     updateConfig({ HorariosPorDia: { ...config?.HorariosPorDia, [dia]: {
@@ -288,9 +288,9 @@ export default function Funcionamento() {
     const novoIntervalo = getNovoIntervalo(config);
 
     if (!novoIntervalo) {
-      const message = "O expediente precisa ter mais de 30 minutos para receber uma pausa.";
+      const message = t("hours.shortDay");
       setError(message);
-      showNotification({ type: "warning", title: "Pausa nao adicionada", message });
+      showNotification({ type: "warning", title: t("hours.breakNotAdded"), message });
       return;
     }
 
@@ -319,51 +319,51 @@ export default function Funcionamento() {
     setSuccess("");
 
     if (!config || !usuarioId) {
-      const message = "Usuario nao encontrado para salvar funcionamento.";
+      const message = t("hours.userMissing");
       setError(message);
-      showNotification({ type: "error", title: "Nao foi possivel salvar", message });
+      showNotification({ type: "error", title: t("hours.notSaved"), message });
       return;
     }
 
     if (diasSelecionados.length === 0) {
-      const message = "Selecione pelo menos um dia de atendimento.";
+      const message = t("hours.daysRequired");
       setError(message);
-      showNotification({ type: "warning", title: "Dias nao selecionados", message });
+      showNotification({ type: "warning", title: t("hours.noDays"), message });
       return;
     }
 
     if (!config.HorarioAbertura || !config.HorarioFechamento) {
-      const message = "Informe os horarios de abertura e fechamento.";
+      const message = t("hours.timeRequired");
       setError(message);
-      showNotification({ type: "warning", title: "Horario incompleto", message });
+      showNotification({ type: "warning", title: t("hours.timeIncomplete"), message });
       return;
     }
 
     if (timeToMinutes(config.HorarioAbertura) >= timeToMinutes(config.HorarioFechamento)) {
-      const message = "O horario de abertura deve ser anterior ao fechamento.";
+      const message = t("hours.timeInvalidDesc");
       setError(message);
-      showNotification({ type: "warning", title: "Horario invalido", message });
+      showNotification({ type: "warning", title: t("hours.timeInvalid"), message });
       return;
     }
 
     if (hasIntervaloInvalido(config)) {
-      const message = "Todas as pausas devem ficar dentro do horario de funcionamento.";
+      const message = t("hours.breakOutside");
       setError(message);
-      showNotification({ type: "warning", title: "Pausa invalida", message });
+      showNotification({ type: "warning", title: t("hours.breakInvalid"), message });
       return;
     }
 
     if (hasIntervaloSobreposto(config)) {
-      const message = "As pausas nao podem se sobrepor.";
+      const message = t("hours.overlap");
       setError(message);
-      showNotification({ type: "warning", title: "Pausas sobrepostas", message });
+      showNotification({ type: "warning", title: t("hours.overlapTitle"), message });
       return;
     }
 
     if (pausaTotal >= expedienteTotal) {
-      const message = "As pausas precisam deixar algum horario disponivel para atendimento.";
+      const message = t("hours.noAvailability");
       setError(message);
-      showNotification({ type: "warning", title: "Agenda sem disponibilidade", message });
+      showNotification({ type: "warning", title: t("hours.noAvailabilityTitle"), message });
       return;
     }
 
@@ -377,9 +377,9 @@ export default function Funcionamento() {
       if (!especial.Inicio || !especial.Fim || abertura >= fechamento ||
           hasIntervaloInvalido(diario) || hasIntervaloSobreposto(diario) ||
           getPausaTotal(diario) >= fechamento - abertura) {
-        const message = `Revise o horário e as pausas de ${[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(d => d.key === dia.key)]}.`;
+        const message = `${t("hours.reviewDay")} ${[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(d => d.key === dia.key)]}.`;
         setError(message);
-        showNotification({ type: "warning", title: "Horário específico inválido", message });
+        showNotification({ type: "warning", title: t("hours.specificInvalid"), message });
         return;
       }
     }
@@ -388,18 +388,18 @@ export default function Funcionamento() {
       setSaving(true);
       const savedConfig = await salvarFuncionamento(usuarioId, config);
       setConfig(savedConfig);
-      setSuccess("Funcionamento salvo com sucesso.");
+      setSuccess(t("hours.saved"));
       showNotification({
         type: "success",
         title: "Funcionamento salvo",
-        message: "Os novos dias e horarios ja valem para os agendamentos.",
+        message: t("hours.savedDesc"),
       });
     } catch (err) {
       const message = isAxiosError<ApiError>(err)
         ? getApiErrorMessage(err.response?.data)
         : "Nao foi possivel salvar o funcionamento.";
       setError(message);
-      showNotification({ type: "error", title: "Funcionamento nao salvo", message });
+      showNotification({ type: "error", title: t("hours.saveFailedTitle"), message });
     } finally {
       setSaving(false);
     }
