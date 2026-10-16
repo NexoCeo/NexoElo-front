@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { NavLink } from "react-router-dom";
-import { FaCalendarAlt, FaChartBar, FaClock, FaHome, FaTimes, FaTools } from "react-icons/fa";
+import { FaCalendarAlt, FaChartBar, FaChartLine, FaClock, FaHome, FaTimes, FaTools } from "react-icons/fa";
 import { FaPerson } from "react-icons/fa6";
 import styles from "./style.module.css";
 import { useTheme } from "@/context/ThemeContext";
@@ -115,6 +115,15 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
             <NavLink to={`${basePath}/relatorios`} end className={linkClassName} onClick={closeMenu}>
               <FaChartBar className={styles.navIcon} aria-hidden="true" />
               <span>Relatorios</span>
+            </NavLink>
+          </li>
+        )}
+
+        {canManageSharedSettings && (
+          <li className={styles.navItem}>
+            <NavLink to={`${basePath}/analise-dados`} end className={linkClassName} onClick={closeMenu}>
+              <FaChartLine className={styles.navIcon} aria-hidden="true" />
+              <span>Análise de dados</span>
             </NavLink>
           </li>
         )}
