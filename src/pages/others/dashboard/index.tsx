@@ -14,6 +14,7 @@ import { createAgendaRealtimeClient } from "@/services/agenda-realtime-service";
 import { getRolePagePath } from "@/routes/role-paths";
 import type { Agendamento } from "@/types/agendamento";
 import styles from "./style.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 
 type DashboardRange = "today" | "week";
 
@@ -49,6 +50,7 @@ function toCardItem(appointment: Agendamento, includeDate: boolean): AgendaCardI
 
 export default function Dashboard() {
   const { theme } = useTheme();
+  const { t, lang } = useLanguage();
   const { showNotification } = useNotification();
   const usuario = getStoredUser<{ Id?: number; Papel?: string }>();
   const role = usuario?.Papel?.toUpperCase();
@@ -77,13 +79,13 @@ export default function Dashboard() {
         ));
       }
     } catch {
-      const message = "Nao foi possivel carregar seus agendamentos.";
+      const message = t("dashboard.loadError");
       setError(message);
-      showNotification({ type: "error", title: "Agenda indisponivel", message });
+      showNotification({ type: "error", title: t("dashboard.unavailable"), message });
     } finally {
       setLoading(false);
     }
-  }, [isProfessional, range, showNotification, usuario?.Id]);
+  }, [isProfessional, range, showNotification, t, usuario?.Id]);
 
   useEffect(() => {
     void loadAppointments();
@@ -113,14 +115,14 @@ export default function Dashboard() {
     [appointments, isProfessional, range],
   );
 
-  const todayLabel = new Intl.DateTimeFormat("pt-BR", {
+  const todayLabel = new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US", {
     weekday: "long",
     day: "2-digit",
     month: "long",
   }).format(new Date());
   const appointmentCountLabel = loading
-    ? "Atualizando agenda"
-    : `${agendaItems.length} ${agendaItems.length === 1 ? "agendamento" : "agendamentos"}`;
+    ? t("dashboard.update")
+    : `${agendaItems.length} ${agendaItems.length === 1 ? t("dashboard.oneAppointment") : t("dashboard.manyAppointments")}`;
 
   return (
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
@@ -133,11 +135,11 @@ export default function Dashboard() {
             </span>
             <h2 id="dashboard-agenda-title">
               {isProfessional && range === "week"
-                ? "Compromissos desta semana"
-                : "Agendamentos de hoje"}
+                ? t("dashboard.week")
+                : t("dashboard.today")}
             </h2>
             <p>
-              {isProfessional && range === "week" ? "Semana atual" : todayLabel}
+              {isProfessional && range === "week" ? t("dashboard.currentWeek") : todayLabel}
               <span aria-hidden="true" />
               {appointmentCountLabel}
             </p>
@@ -145,14 +147,14 @@ export default function Dashboard() {
 
           <div className={styles.agendaActions}>
             {isProfessional ? (
-              <div className={styles.segmented} aria-label="Período da agenda">
+              <div className={styles.segmented} aria-label={t("dashboard.period")}>
                 <button
                   type="button"
                   className={range === "today" ? styles.active : ""}
                   onClick={() => setRange("today")}
                   aria-pressed={range === "today"}
                 >
-                  Hoje
+                  {t("dashboard.todayFilter")}
                 </button>
                 <button
                   type="button"
@@ -160,7 +162,7 @@ export default function Dashboard() {
                   onClick={() => setRange("week")}
                   aria-pressed={range === "week"}
                 >
-                  Esta semana
+                  {t("dashboard.weekFilter")}
                 </button>
               </div>
             ) : canOpenAgenda ? (
@@ -168,7 +170,7 @@ export default function Dashboard() {
                 className={styles.agendaLink}
                 to={getRolePagePath(role, "agenda")}
               >
-                Abrir agenda
+                {t("dashboard.openCalendar")}
                 <FaArrowRight aria-hidden="true" />
               </Link>
             ) : null}
@@ -180,7 +182,7 @@ export default function Dashboard() {
           loading={loading}
           error={error}
           selectedDateLabel={
-            isProfessional && range === "week" ? "Esta semana" : "Hoje"
+            isProfessional && range === "week" ? t("dashboard.weekFilter") : t("dashboard.todayFilter")
           }
         />
       </section>
