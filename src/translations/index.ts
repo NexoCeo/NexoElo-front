@@ -130,7 +130,7 @@ export const translations = {
     "profile.uploadFailed": "Falha no envio",
     "profile.updatedPhotoDesc": "Sua foto de perfil foi alterada.",
     "profile.updatedPhoto": "Foto atualizada",
-    "profile.invalidPhotoDesc": "Use JPG, PNG ou WEBP com até 5 MB.",
+    "profile.invalidPhotoDesc": "Use JPG, PNG ou WEBP com até 30 MB.",
     "profile.invalidPhoto": "Foto inválida",
     "profile.unavailable": "Perfil indisponível",
     "profile.loadError": "Não foi possível atualizar os dados do perfil.",
