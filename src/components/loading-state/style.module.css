@@ -24,3 +24,10 @@
 @keyframes shimmer{to{background-position-x:-220%}}
 @media(max-width:700px){.page{padding:75px 14px 20px}.metrics{grid-template-columns:1fr 1fr}.metrics .tile:last-child{display:none}.panel{padding:12px}.tableRow .bar:last-child{display:none}}
 @media(prefers-reduced-motion:reduce){.bar,.avatar,.input{animation:none}}
+
+/* Skeleton dentro de paineis: sem cabecalho e espacamento de pagina duplicados. */
+.embedded .page{padding:0;width:100%;gap:0}
+.embedded .intro{display:none}
+.embedded .panel{border:0;background:transparent;padding:0;min-height:230px}
+.embedded .panelHead{padding:12px 16px 18px}
+.embedded .tableRow{padding:16px;border-bottom:1px solid var(--theme-bottom,#263349)}
