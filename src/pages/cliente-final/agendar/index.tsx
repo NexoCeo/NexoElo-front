@@ -34,6 +34,7 @@ import {
   getUploadedImageUrl,
 } from "@/components/header/profile-image";
 import styles from "./style.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 import { useNotification } from "@/context/NotificationContext";
 
 type ApiError = string | {
@@ -147,6 +148,7 @@ function ServicePhoto({ source, name }: { source?: string; name: string }) {
 }
 
 export default function ClienteFinalAgendar() {
+  const { t } = useLanguage();
   const { username } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -508,8 +510,8 @@ export default function ClienteFinalAgendar() {
     <main className={styles.container}>
       <header className={styles.header}>
         <div>
-          <span>Cliente final</span>
-          <h1>Novo agendamento</h1>
+          <span>{t("client.final")}</span>
+          <h1>{t("client.booking")}</h1>
         </div>
         <Link to={cliente ? "/cliente-final/home" : loginUrl}>
           {cliente ? "Voltar" : "Entrar"}
@@ -521,7 +523,7 @@ export default function ClienteFinalAgendar() {
           <fieldset className={`${styles.selectionGroup} ${expandedSection !== "responsavel" ? styles.selectionGroupCollapsed : ""}`}>
             <StepLegend
               number={1}
-              title="Autonomo ou empresa"
+              title={t("client.providerStep")}
               summary={selectedResponsavel?.Nome}
               expanded={expandedSection === "responsavel"}
               controls="responsavel-options"
@@ -531,9 +533,9 @@ export default function ClienteFinalAgendar() {
             {expandedSection === "responsavel" && (
               <div id="responsavel-options">
                 {loadingResponsaveis ? (
-                  <p className={styles.optionFeedback}>Carregando prestadores...</p>
+                  <p className={styles.optionFeedback}>{t("client.providersLoading")}</p>
                 ) : responsaveis.length === 0 ? (
-                  <p className={styles.optionFeedback}>Nenhum prestador disponivel.</p>
+                  <p className={styles.optionFeedback}>{t("client.providersEmpty")}</p>
                 ) : (
                   <div className={styles.optionGrid}>
                     {responsaveis.map((responsavel) => {
@@ -552,9 +554,9 @@ export default function ClienteFinalAgendar() {
                             <strong>{responsavel.Nome}</strong>
                             <small>
                               {responsavel.TipoUsuario === "EMPRESA" ? (
-                                <><FaBuilding aria-hidden="true" /> Empresa</>
+                                <><FaBuilding aria-hidden="true" /> {t("client.business")}</>
                               ) : (
-                                <><FaUser aria-hidden="true" /> Autonomo</>
+                                <><FaUser aria-hidden="true" /> {t("client.independent")}</>
                               )}
                             </small>
                           </span>
@@ -572,7 +574,7 @@ export default function ClienteFinalAgendar() {
             <fieldset className={`${styles.selectionGroup} ${expandedSection !== "profissional" ? styles.selectionGroupCollapsed : ""}`}>
               <StepLegend
                 number={professionalStep}
-                title="Profissional"
+                title={t("client.professionalStep")}
                 summary={selectedProfissional?.Nome}
                 expanded={expandedSection === "profissional"}
                 controls="profissional-options"
@@ -582,9 +584,9 @@ export default function ClienteFinalAgendar() {
               {expandedSection === "profissional" && (
                 <div id="profissional-options">
                   {loadingProfissionais ? (
-                    <p className={styles.optionFeedback}>Carregando profissionais...</p>
+                    <p className={styles.optionFeedback}>{t("client.professionalsLoading")}</p>
                   ) : profissionais.length === 0 ? (
-                    <p className={styles.optionFeedback}>Nenhum profissional disponivel.</p>
+                    <p className={styles.optionFeedback}>{t("client.professionalsEmpty")}</p>
                   ) : (
                     <div className={styles.optionGrid}>
                       {profissionais.map((profissional) => {
@@ -601,7 +603,7 @@ export default function ClienteFinalAgendar() {
                             <ProfilePhoto source={profissional.FotoPerfil} name={profissional.Nome} />
                             <span className={styles.optionText}>
                               <strong>{profissional.Nome}</strong>
-                              <small><FaUser aria-hidden="true" /> Profissional</small>
+                              <small><FaUser aria-hidden="true" /> {t("client.professional")}</small>
                             </span>
                             {selected && <FaCheck className={styles.selectedIcon} aria-hidden="true" />}
                           </button>
@@ -620,7 +622,7 @@ export default function ClienteFinalAgendar() {
           >
             <StepLegend
               number={serviceStep}
-              title="Servico"
+              title={t("client.serviceStep")}
               summary={selectedServico?.NomeServico}
               expanded={expandedSection === "servico"}
               disabled={!responsavelId || (responsavelEhEmpresa && !profissionalId)}
@@ -634,13 +636,13 @@ export default function ClienteFinalAgendar() {
             {expandedSection === "servico" && (
               <div id="servico-options">
                 {loadingServicos ? (
-                  <p className={styles.optionFeedback}>Carregando servicos...</p>
+                  <p className={styles.optionFeedback}>{t("client.servicesLoading")}</p>
                 ) : !responsavelId ? (
-                  <p className={styles.optionFeedback}>Selecione quem vai atender.</p>
+                  <p className={styles.optionFeedback}>{t("client.chooseProvider")}</p>
                 ) : responsavelEhEmpresa && !profissionalId ? (
-                  <p className={styles.optionFeedback}>Selecione um profissional.</p>
+                  <p className={styles.optionFeedback}>{t("client.chooseProfessional")}</p>
                 ) : servicos.length === 0 ? (
-                  <p className={styles.optionFeedback}>Nenhum servico disponivel.</p>
+                  <p className={styles.optionFeedback}>{t("client.servicesEmpty")}</p>
                 ) : (
                   <div className={`${styles.optionGrid} ${styles.serviceGrid}`}>
                     {servicos.map((servico) => {
@@ -676,7 +678,7 @@ export default function ClienteFinalAgendar() {
           >
             <StepLegend
               number={scheduleStep}
-              title="Data e horario"
+              title={t("client.dateTimeStep")}
               summary={selectedHorario?.Horario || dataSelecionada}
               expanded={expandedSection === "horario"}
               disabled={!servicoId}
@@ -687,7 +689,7 @@ export default function ClienteFinalAgendar() {
             {expandedSection === "horario" && (
               <div id="horario-options" className={styles.scheduleLayout}>
                 <label className={styles.dateField} htmlFor="booking-date">
-                  <span><FaCalendarAlt aria-hidden="true" /> Data</span>
+                  <span><FaCalendarAlt aria-hidden="true" /> {t("client.date")}</span>
                   <input
                     id="booking-date"
                     type="date"
@@ -699,13 +701,13 @@ export default function ClienteFinalAgendar() {
                 </label>
 
                 <fieldset className={styles.scheduleFieldset} disabled={!dataSelecionada || loadingHorarios}>
-                  <legend>Horarios disponiveis</legend>
+                  <legend>{t("client.availableSlots")}</legend>
                   {!dataSelecionada ? (
-                    <p className={styles.scheduleFeedback}>Selecione uma data para consultar.</p>
+                    <p className={styles.scheduleFeedback}>{t("client.chooseDate")}</p>
                   ) : loadingHorarios ? (
-                    <p className={styles.scheduleFeedback}>Carregando horarios...</p>
+                    <p className={styles.scheduleFeedback}>{t("client.slotsLoading")}</p>
                   ) : horariosDisponiveis.length === 0 ? (
-                    <p className={styles.scheduleFeedback}>Nenhum horario disponivel nesta data.</p>
+                    <p className={styles.scheduleFeedback}>{t("client.slotsEmpty")}</p>
                   ) : (
                     <div className={styles.timeGrid}>
                       {horariosDisponiveis.map((horario) => {
