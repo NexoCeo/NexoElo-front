@@ -165,10 +165,10 @@ export default function Agenda() {
           return;
         }
 
-        const message = "Não foi possível carregar os agendamentos deste dia.";
+        const message = t("agenda.loadFailed");
         setError(message);
         if (!silent) {
-          showNotification({ type: "error", title: "Agenda indisponível", message });
+          showNotification({ type: "error", title: t("agenda.unavailable"), message });
         }
       } finally {
         if (
@@ -230,7 +230,7 @@ export default function Agenda() {
           showNotification({
             type: "error",
             title: "Filtro indisponível",
-            message: "Não foi possível carregar os profissionais da empresa.",
+            message: t("agenda.professionalsFailed"),
           });
         }
       });
@@ -406,16 +406,16 @@ export default function Agenda() {
       setActionFeedback({
         kind: "success",
         text: status === "CANCELADO"
-          ? "Agendamento cancelado."
-          : "Agendamento concluído.",
+          ? t("agenda.canceled")
+          : t("agenda.completed"),
       });
       showNotification({
         type: "success",
-        title: status === "CANCELADO" ? "Agendamento cancelado" : "Agendamento concluído",
+        title: status === "CANCELADO" ? t("agenda.canceledTitle") : t("agenda.completedTitle"),
         message: "O status foi atualizado na agenda.",
       });
     } catch (actionError) {
-      const message = getApiError(actionError, "Não foi possível atualizar o agendamento.");
+      const message = getApiError(actionError, t("agenda.updateFailed"));
       setActionFeedback({
         kind: "error",
         text: message,
@@ -439,14 +439,14 @@ export default function Agenda() {
       setActionFeedback({
         kind: "success",
         text: quantidade === 0
-          ? "Não havia agendamentos pendentes para concluir hoje."
+          ? t("agenda.nonePending")
           : `${quantidade} ${quantidade === 1 ? "agendamento concluído" : "agendamentos concluídos"}.`,
       });
       showNotification({
         type: quantidade === 0 ? "warning" : "success",
-        title: quantidade === 0 ? "Agenda já estava em dia" : "Agendamentos concluídos",
+        title: quantidade === 0 ? t("agenda.dayCurrent") : t("agenda.completedAll"),
         message: quantidade === 0
-          ? "Não havia agendamentos pendentes para concluir hoje."
+          ? t("agenda.nonePending")
           : `${quantidade} ${quantidade === 1 ? "agendamento foi concluído" : "agendamentos foram concluídos"}.`,
       });
 
@@ -454,12 +454,12 @@ export default function Agenda() {
         await loadAgenda(true);
       }
     } catch (actionError) {
-      const message = getApiError(actionError, "Não foi possível concluir os agendamentos do dia.");
+      const message = getApiError(actionError, t("agenda.closeFailed"));
       setActionFeedback({
         kind: "error",
         text: message,
       });
-      showNotification({ type: "error", title: "Dia não encerrado", message });
+      showNotification({ type: "error", title: t("agenda.closeErrorTitle"), message });
     } finally {
       setClosingDay(false);
     }
