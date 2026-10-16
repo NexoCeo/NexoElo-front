@@ -20,6 +20,7 @@ import {
 import { getStoredUser } from "@/services/auth-token";
 
 import styles from "./style.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function ProfessionalAccessGate({
   children,
@@ -27,6 +28,7 @@ export default function ProfessionalAccessGate({
   children: ReactNode;
 }) {
   const { usuario } = useUser();
+  const { t } = useLanguage();
 
   const storedRole =
     getStoredUser<{ Papel?: string }>()?.Papel;
@@ -183,23 +185,23 @@ export default function ProfessionalAccessGate({
 
         <h1 id="professional-access-title">
           {failed
-            ? "Nao foi possivel verificar seu vinculo"
+            ? t("gateProfessional.failedTitle")
             : checking
-              ? "Verificando seu vinculo"
-              : "Acesso aguardando aprovacao"}
+              ? t("gateProfessional.checkingTitle")
+              : t("gateProfessional.waitTitle")}
         </h1>
 
         <p id="professional-access-description">
           {failed
-            ? "Nao foi possivel confirmar a situacao do seu vinculo neste momento."
+            ? t("gateProfessional.failedDesc")
             : checking
-              ? "Estamos verificando o status do seu vinculo com a empresa."
-              : "Aguarde a aprovacao da solicitacao de vinculo. Esse processo pode levar de 1 a 3 dias."}
+              ? t("gateProfessional.checkingDesc")
+              : t("gateProfessional.waitDesc")}
         </p>
 
         {statusBloqueado && (
           <div className={styles.statusBox}>
-            <span>Status atual</span>
+            <span>{t("gateProfessional.status")}</span>
 
             <strong>
               {vinculo?.status}
@@ -207,7 +209,7 @@ export default function ProfessionalAccessGate({
 
             {vinculo?.empresaNome && (
               <small>
-                Empresa:{" "}
+                {t("gateProfessional.company")}:{" "}
                 {vinculo.empresaNome}
               </small>
             )}
@@ -218,10 +220,7 @@ export default function ProfessionalAccessGate({
           <small
             className={styles.helpText}
           >
-            O acesso ao sistema sera
-            liberado automaticamente
-            quando o vinculo estiver
-            APROVADO.
+            {t("gateProfessional.automatic")}
           </small>
         )}
 
@@ -237,7 +236,7 @@ export default function ProfessionalAccessGate({
               )
             }
           >
-            Tentar novamente
+            {t("gateProfessional.retry")}
           </button>
         )}
       </section>
