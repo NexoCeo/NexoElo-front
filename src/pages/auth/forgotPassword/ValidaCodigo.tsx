@@ -1,3 +1,4 @@
+import { useLanguage } from "@/context/LanguageContext";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./step.module.css";
@@ -17,6 +18,7 @@ interface ValidaCodigoProps {
 }
 
 export default function ValidaCodigo({ email, onSuccess, onFailure }: ValidaCodigoProps) {
+  const { t } = useLanguage();
   const { theme } = useTheme();
   const { control, handleSubmit } = useForm<FormData>({
     defaultValues: {
@@ -53,7 +55,7 @@ export default function ValidaCodigo({ email, onSuccess, onFailure }: ValidaCodi
           render={({ field }) => (
             <InputGeneric
               type="text"
-              placeholder="Digite o código recebido"
+              placeholder={t("password.codePlaceholder")}
               icon={<FaKey size={20} />}
               {...field}
             />
@@ -67,7 +69,7 @@ export default function ValidaCodigo({ email, onSuccess, onFailure }: ValidaCodi
         className={styles.button}
         style={{color: theme.colors.text}}
       >
-        {loading ? <span className={styles.spinner}></span> : "Enviar código"}
+        {loading ? <span className={styles.spinner}></span>  : t("password.sendCode")}
       </button>
     </form>
   );
