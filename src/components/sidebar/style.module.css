@@ -128,3 +128,13 @@
 .expandButton { border: 0; background: transparent; color: var(--sidebar-text); cursor: pointer; font-size: 22px; width: 34px; min-height: 42px; border-radius: 6px; }
 .expandButton:hover { background: var(--theme-primary-soft); }
 .expandButton:focus-visible { outline: 2px solid var(--sidebar-primary); }
+
+.analyticsAnchor { width: 100%; min-height: 48px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: var(--sidebar-inactive); display: flex; align-items: center; gap: 12px; font: inherit; font-weight: 700; text-align: left; cursor: pointer; }
+.analyticsAnchor:hover, .analyticsAnchor.groupActive { background: var(--theme-primary-soft); color: var(--sidebar-primary); }
+.analyticsAnchor.groupActive { box-shadow: inset 3px 0 var(--sidebar-primary); }
+.analyticsAnchor:focus-visible { outline: 2px solid var(--sidebar-primary); outline-offset: 2px; }
+.analyticsAnchor > span:nth-child(2) { flex: 1; }
+.expandChevron { margin-left: auto; font-size: 15px; }
+.analyticsChildren { display: grid; gap: 4px; margin-left: 16px; padding-left: 8px; border-left: 1px solid var(--theme-primary-soft); }
+.analyticsChildren .navLink { min-height: 44px; font-size: .91rem; }
+.analyticsChildren .navIcon { width: 20px; flex-basis: 20px; font-size: 18px; }
