@@ -68,13 +68,6 @@ function isToday(date: Date) {
   );
 }
 
-const statusLabels: Record<AgendaRealtimeStatus, string> = {
-  connecting: "Conectando",
-  connected: "Ao vivo",
-  reconnecting: "Reconectando",
-  offline: "Atualização periódica",
-};
-
 export default function Agenda() {
   const { theme } = useTheme();
   const { t, lang } = useLanguage();
@@ -651,7 +644,7 @@ export default function Agenda() {
 
               <span>
                 {
-                  t(`agenda.${realtimeStatus}`)
+                  realtimeStatus === "connected" ? t("agenda.online") : realtimeStatus === "connecting" ? t("agenda.connecting") : realtimeStatus === "reconnecting" ? t("agenda.reconnecting") : t("agenda.offline")
                 }
               </span>
 
