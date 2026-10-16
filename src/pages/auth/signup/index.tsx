@@ -1,3 +1,4 @@
+import { useLanguage } from "@/context/LanguageContext";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -15,6 +16,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useRegisterForm } from "@/hooks/useRegisterForm";
 
 function Register() {
+  const { t } = useLanguage();
   const { theme } = useTheme();
 
   const {
@@ -383,7 +385,7 @@ function Register() {
           </div>
 
           {/* Botão cadastrar */}
-          <SubmitButton disabled={!isFormValid() || loadingEmpresas} loading={loading}>Cadastrar</SubmitButton>
+          <SubmitButton disabled={!isFormValid() || loadingEmpresas} loading={loading}>{t("auth.register")}</SubmitButton>
         </form>
       </div>
     </div>
