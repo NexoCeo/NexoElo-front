@@ -37,7 +37,7 @@ export default function WhatsAppBusiness() {
       const response = await buscarStatusWhatsApp();
       setStatus(response);
       setPreferences(old => ({ ...old, confirmacoes: response.confirmacoes, lembretes: response.lembretes, promocoes: response.promocoes }));
-      setAvailable(true);
+      setAvailable(response.integracaoDisponivel === true);
     } catch { setAvailable(false); }
   }
   useEffect(() => { void refresh(); }, []);
@@ -91,7 +91,7 @@ export default function WhatsAppBusiness() {
       <div><small>ANÁLISE DE DADOS / WHATSAPP BUSINESS</small><h1 className={styles.title}><FaWhatsapp aria-hidden="true" /> WhatsApp Business</h1>
       <p className={styles.muted}>Gerencie conexão, confirmações, lembretes, promoções e consumo de mensagens da sua empresa.</p></div>
     </div>
-    {!available && <div role="status" className={styles.notice}><FaExclamationTriangle aria-hidden="true" /> O módulo de WhatsApp Cloud API ainda não foi habilitado no backend. Os envios permanecem desligados até a configuração oficial da Meta.</div>}
+    {!available && <div role="status" className={styles.notice}><FaExclamationTriangle aria-hidden="true" /> O módulo de WhatsApp Cloud API ainda não foi habilitado para conexões reais. Os envios permanecem desligados até a configuração oficial da Meta.</div>}
     {message && <p role="status" className={styles.notice}>{message}</p>}
     <section className={styles.card}>
       <h2>Conexão com a Meta</h2>
