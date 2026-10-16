@@ -1,3 +1,4 @@
+import { useLanguage } from "@/context/LanguageContext";
 import { useEffect, useState } from "react";
 import { FaEnvelope, FaEye, FaEyeSlash, FaPhoneAlt, FaPlus, FaUser } from "react-icons/fa";
 import { Link } from "react-router-dom";
@@ -26,6 +27,7 @@ export default function ClienteFinalRegister() {
     isFormValid,
     handleSubmit,
   } = useClienteFinalRegisterForm();
+  const { t } = useLanguage();
   const [previewUrl, setPreviewUrl] = useState("");
   const loginPath = redirectTo
     ? `/cliente-final/login?redirectTo=${encodeURIComponent(redirectTo)}`
@@ -48,11 +50,11 @@ export default function ClienteFinalRegister() {
       <form className={styles.panel} onSubmit={handleSubmit}>
         <div className={styles.heading}>
           <span className={styles.mark}>CF</span>
-          <h1>Criar conta</h1>
+          <h1>{t("auth.createAccount")}</h1>
         </div>
 
         <div className={styles.photoField}>
-          <span>Foto de perfil</span>
+          <span>{t("profile.photo")}</span>
           <label className={styles.photoControl}>
             <span className={styles.photoPreview}>
               {previewUrl ? (
@@ -61,7 +63,7 @@ export default function ClienteFinalRegister() {
                 <FaPlus />
               )}
             </span>
-            <strong>{fotoPerfil ? fotoPerfil.name : "Selecionar foto"}</strong>
+            <strong>{fotoPerfil ? fotoPerfil.name : t("pros.photo")}</strong>
             <input
               className={styles.photoInput}
               type="file"
@@ -72,20 +74,20 @@ export default function ClienteFinalRegister() {
         </div>
 
         <label className={styles.field}>
-          Nome completo
+          {t("auth.fullName")}
           <div className={styles.inputWrap}>
             <input
               type="text"
               value={nome}
               onChange={(event) => setNome(event.target.value)}
-              placeholder="Seu nome"
+              placeholder={t("auth.yourName")}
             />
             <span><FaUser /></span>
           </div>
         </label>
 
         <label className={styles.field}>
-          E-mail
+          {t("auth.email")}
           <div className={styles.inputWrap}>
             <input
               type="email"
@@ -98,7 +100,7 @@ export default function ClienteFinalRegister() {
         </label>
 
         <label className={styles.field}>
-          Telefone
+          {t("profile.phone")}
           <div className={styles.inputWrap}>
             <input
               type="tel"
@@ -111,28 +113,28 @@ export default function ClienteFinalRegister() {
         </label>
 
         <label className={styles.field}>
-          Senha
+          {t("auth.password")}
           <div className={styles.inputWrap}>
             <input
               type={showPassword ? "text" : "password"}
               value={senha}
               onChange={(event) => setSenha(event.target.value)}
-              placeholder="Minimo de 6 caracteres"
+              placeholder={t("auth.minPassword")}
             />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label="Alternar senha">
+            <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={t("auth.showPassword")}>
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
           </div>
         </label>
 
         <label className={styles.field}>
-          Confirmar senha
+          {t("auth.confirmPassword")}
           <div className={styles.inputWrap}>
             <input
               type={showPassword ? "text" : "password"}
               value={confirmarSenha}
               onChange={(event) => setConfirmarSenha(event.target.value)}
-              placeholder="Repita sua senha"
+              placeholder={t("auth.repeatPassword")}
             />
           </div>
         </label>
@@ -140,11 +142,11 @@ export default function ClienteFinalRegister() {
         {error && <p className={styles.error}>{error}</p>}
 
         <button className={styles.submit} type="submit" disabled={!isFormValid() || loading}>
-          {loading ? "Criando..." : "Cadastrar"}
+          {loading ? t("auth.creating") : t("auth.register")}
         </button>
 
         <Link className={styles.link} to={loginPath}>
-          Ja tenho conta
+          {t("auth.haveCustomerAccount")}
         </Link>
       </form>
     </main>
