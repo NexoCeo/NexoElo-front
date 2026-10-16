@@ -153,7 +153,7 @@ export default function MinhaAssinatura() {
           {(assinatura.Plano === "BASICO" || assinatura.Plano === "INTERMEDIARIO" || assinatura.Plano === "AVANCADO") && (
             <button className={styles.secondaryButton} type="button" disabled={Boolean(pending)}
               onClick={() => usuario?.Id && executar("portal", () => abrirPortal(usuario.Id))}>
-              Gerenciar pagamento
+              {t("subscription.manage")}
             </button>
           )}
         </section>
