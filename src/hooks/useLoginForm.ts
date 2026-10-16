@@ -1,3 +1,4 @@
+import { useLanguage } from "@/context/LanguageContext";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { isAxiosError } from "axios";
@@ -7,6 +8,7 @@ import { Login } from "@/services/auth-service";
 import { getRoleDashboardPath } from "@/routes/role-paths";
 
 export function useLoginForm() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const { setUsuario } = useUser();
@@ -112,8 +114,8 @@ export function useLoginForm() {
        */
       showNotification({
         type: "success",
-        title: "Entrando...",
-        message: "Bem-vindo(a) ao sistema!",
+        title: t("auth.entering"),
+        message: t("auth.welcome"),
       });
 
       navigate(
