@@ -1,3 +1,4 @@
+import { useLanguage } from "@/context/LanguageContext";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./step.module.css";
@@ -16,6 +17,7 @@ interface SolicitaEmailProps {
 }
 
 export default function SolicitaEmail({ onSuccess, onFailure }: SolicitaEmailProps) {
+  const { t } = useLanguage();
   const { theme } = useTheme();
   const { control, handleSubmit } = useForm<FormData>({
     defaultValues: {
@@ -50,7 +52,7 @@ export default function SolicitaEmail({ onSuccess, onFailure }: SolicitaEmailPro
           render={({ field }) => (
             <InputGeneric
               type="email"
-              placeholder="Digite seu email"
+              placeholder={t("auth.enterEmail")}
               icon={<FaEnvelope size={20} />}
               {...field}
             />
@@ -64,7 +66,7 @@ export default function SolicitaEmail({ onSuccess, onFailure }: SolicitaEmailPro
         className={styles.button}
         style={{color: theme.colors.text}}
       >
-        {loading ? <span className={styles.spinner}></span> : "Enviar código"}
+        {loading ? <span className={styles.spinner}></span>  : t("password.sendCode")}
       </button>
     </form>
   );
