@@ -23,19 +23,19 @@ import LoadingState from "@/components/loading-state";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function formatRole(role?: string) {
+function formatRole(role?: string, lang: "pt" | "en" = "pt") {
   const labels: Record<string, string> = {
-    EMPRESA: "Empresa",
-    AUTONOMO: "Autonomo",
-    PROFISSIONAL: "Profissional",
+    EMPRESA: lang === "pt" ? "Empresa" : "Business",
+    AUTONOMO: lang === "pt" ? "Autônomo" : "Independent professional",
+    PROFISSIONAL: lang === "pt" ? "Profissional" : "Professional",
   };
 
-  return labels[role?.toUpperCase() ?? ""] ?? "Usuario";
+  return labels[role?.toUpperCase() ?? ""] ?? (lang === "pt" ? "Usuário" : "User");
 }
 
 export default function Perfil() {
   const { theme } = useTheme();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { usuario, setUsuario } = useUser();
   const { showNotification } = useNotification();
   const [modalOpen, setModalOpen] = useState(false);
@@ -213,8 +213,8 @@ export default function Perfil() {
 
       <div className={styles.profileShell}>
         {!usuario && loading ? <LoadingState label="Carregando perfil" /> : <ProfileOverview
-          role={formatRole(usuario?.Papel)}
-          name={usuario?.Nome || "Nome não informado"}
+          role={formatRole(usuario?.Papel, lang)}
+          name={usuario?.Nome || t("profile.notProvided")}
           email={usuario?.Email}
           phone={usuario?.Telefone}
           avatarUrl={getProfileImageUrl(usuario?.FotoPerfil)}
