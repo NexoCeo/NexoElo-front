@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { NavLink } from "react-router-dom";
-import { FaCalendarAlt, FaChartBar, FaChartLine, FaClock, FaHome, FaTimes, FaTools } from "react-icons/fa";
+import { NavLink, useLocation } from "react-router-dom";
+import { FaCalendarAlt, FaChartBar, FaChartLine, FaClock, FaHome, FaTimes, FaTools, FaWhatsapp } from "react-icons/fa";
 import { FaPerson } from "react-icons/fa6";
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
@@ -19,6 +19,8 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
   const { t } = useLanguage();
   const { usuario } = useUser();
   const navRef = useRef<HTMLElement>(null);
+  const location = useLocation();
+  const [analyticsExpanded, setAnalyticsExpanded] = useState(false);
   const [relatoriosLiberados, setRelatoriosLiberados] = useState(false);
   const [analiseLiberada, setAnaliseLiberada] = useState(false);
   useEffect(() => {
@@ -39,6 +41,8 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
     return () => { active = false; };
   }, [usuario?.Papel, usuario?.Id]);
   const basePath = getRoleBasePath(usuario?.Papel);
+  const analyticsPath = `${basePath}/analise-dados`;
+  useEffect(() => { if (location.pathname.startsWith(analyticsPath)) setAnalyticsExpanded(true); }, [location.pathname, analyticsPath]);
   const canManageSharedSettings = usuario?.Papel === "EMPRESA" || usuario?.Papel === "AUTONOMO";
   const sidebarStyle = {
     backgroundColor: theme.colors.background2,
@@ -133,10 +137,19 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
 
         {canManageSharedSettings && analiseLiberada && (
           <li className={styles.navItem}>
-            <NavLink to={`${basePath}/analise-dados`} end className={linkClassName} onClick={closeMenu}>
-              <FaChartLine className={styles.navIcon} aria-hidden="true" />
-              <span>{t("nav.analytics")}</span>
-            </NavLink>
+            <div className={styles.analyticsGroup}>
+              <div className={styles.analyticsMain}>
+                <NavLink to={analyticsPath} end className={linkClassName} onClick={closeMenu}>
+                  <FaChartLine className={styles.navIcon} aria-hidden="true" />
+                  <span>{t("nav.analytics")}</span>
+                </NavLink>
+                <button type="button" className={styles.expandButton} onClick={() => setAnalyticsExpanded(v => !v)} aria-label="Expandir Análise de dados" aria-expanded={analyticsExpanded}> {analyticsExpanded ? "−" : "+"} </button>
+              </div>
+              {analyticsExpanded && <NavLink to={`${analyticsPath}/whatsapp-business`} className={linkClassName} onClick={closeMenu}>
+                <FaWhatsapp className={styles.navIcon} aria-hidden="true" />
+                <span>WhatsApp Business</span>
+              </NavLink>}
+            </div>
           </li>
         )}
 
