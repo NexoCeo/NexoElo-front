@@ -309,7 +309,7 @@ export default function ClienteFinalHome() {
           </button>
 
           <nav className={styles.navigation} aria-label={t("client.navigation")} role="tablist">
-            {navigationItems.map(({ id, label, Icon }) => (
+            {navigationItems.map(({ id, Icon }) => (
               <button
                 key={id}
                 type="button"
