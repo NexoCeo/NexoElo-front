@@ -30,8 +30,8 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
     let active = true;
     consultarAssinatura().then(acesso => {
       if (active) {
-        setRelatoriosLiberados(acesso.AcessoAtivo && acesso.RelatoriosLiberados);
-        setAnaliseLiberada(acesso.AcessoAtivo && acesso.Plano === "AVANCADO");
+        setRelatoriosLiberados(acesso.AcessoAtivo && (acesso.Plano === "GRATIS" || acesso.RelatoriosLiberados));
+        setAnaliseLiberada(acesso.AcessoAtivo && (acesso.Plano === "GRATIS" || acesso.Plano === "AVANCADO"));
       }
     }).catch(() => { if (active) { setRelatoriosLiberados(false); setAnaliseLiberada(false); } });
     return () => { active = false; };
