@@ -64,6 +64,7 @@ function StepLegend({
   controls,
   onToggle,
 }: StepLegendProps) {
+  const { t } = useLanguage();
   return (
     <legend>
       <button
@@ -71,7 +72,7 @@ function StepLegend({
         className={styles.stepToggle}
         aria-expanded={expanded}
         aria-controls={controls}
-        aria-label={`${expanded ? "Recolher" : "Expandir"} ${title}`}
+        aria-label={`${expanded ? t("client.collapse") : t("client.expand")} ${title}`}
         disabled={disabled}
         onClick={onToggle}
       >
