@@ -122,19 +122,45 @@
 }
 
 .analyticsGroup { display: grid; gap: 4px; }
-.analyticsGroup > a { padding-left: 24px; font-size: .9rem; }
-.analyticsMain { display: flex; align-items: center; }
-.analyticsMain > a { flex: 1; }
-.expandButton { border: 0; background: transparent; color: var(--sidebar-text); cursor: pointer; font-size: 22px; width: 34px; min-height: 42px; border-radius: 6px; }
-.expandButton:hover { background: var(--theme-primary-soft); }
-.expandButton:focus-visible { outline: 2px solid var(--sidebar-primary); }
-
-.analyticsAnchor { width: 100%; min-height: 48px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: var(--sidebar-inactive); display: flex; align-items: center; gap: 12px; font: inherit; font-weight: 700; text-align: left; cursor: pointer; }
-.analyticsAnchor:hover, .analyticsAnchor.groupActive { background: var(--theme-primary-soft); color: var(--sidebar-primary); }
-.analyticsAnchor.groupActive { box-shadow: inset 3px 0 var(--sidebar-primary); }
-.analyticsAnchor:focus-visible { outline: 2px solid var(--sidebar-primary); outline-offset: 2px; }
-.analyticsAnchor > span:nth-child(2) { flex: 1; }
+button.analyticsAnchor {
+  appearance: none;
+  -webkit-appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 12px;
+  margin: 0;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--sidebar-inactive);
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+button.analyticsAnchor:hover,
+button.analyticsAnchor.groupActive {
+  background: var(--theme-primary-soft);
+  color: var(--sidebar-primary);
+}
+button.analyticsAnchor.groupActive { box-shadow: inset 3px 0 var(--sidebar-primary); }
+button.analyticsAnchor:focus-visible { outline: 2px solid var(--sidebar-primary); outline-offset: 2px; }
+button.analyticsAnchor > span:nth-child(2) { flex: 1; }
 .expandChevron { margin-left: auto; font-size: 15px; }
-.analyticsChildren { display: grid; gap: 4px; margin-left: 16px; padding-left: 8px; border-left: 1px solid var(--theme-primary-soft); }
+.analyticsChildren {
+  display: grid;
+  gap: 4px;
+  margin-left: 16px;
+  padding-left: 8px;
+  border-left: 1px solid var(--theme-primary-soft);
+}
 .analyticsChildren .navLink { min-height: 44px; font-size: .91rem; }
 .analyticsChildren .navIcon { width: 20px; flex-basis: 20px; font-size: 18px; }
