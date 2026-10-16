@@ -6,6 +6,7 @@ import { listarHistoricoAgendamentos } from "@/services/agendamento-service";
 import type { Agendamento } from "@/types/agendamento";
 import LoadingState from "@/components/loading-state";
 import styles from "./style.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 
 type ClienteRetencao = {
   id: number;
@@ -20,8 +21,8 @@ function diasDesde(data: Date, referencia: Date) {
   const diaVisita = new Date(data.getFullYear(), data.getMonth(), data.getDate()).getTime();
   return Math.floor((diaAtual - diaVisita) / 86400000);
 }
-function formatarData(data: Date) {
-  return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric" }).format(data);
+function formatarData(data: Date, lang: "pt" | "en") {
+  return new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US", { day: "2-digit", month: "short", year: "numeric" }).format(data);
 }
 function agruparClientes(agendamentos: Agendamento[], referencia: Date): ClienteRetencao[] {
   const clientes = new Map<number, { nome: string; ultimaVisita: Date; visitas: number }>();
@@ -43,6 +44,7 @@ function agruparClientes(agendamentos: Agendamento[], referencia: Date): Cliente
 
 export default function AnaliseDados() {
   const { theme } = useTheme();
+  const { t, lang } = useLanguage();
   const { usuario } = useUser();
   const [historico, setHistorico] = useState<Agendamento[]>([]);
   const [filtro, setFiltro] = useState<Filtro>(30);
@@ -55,7 +57,7 @@ export default function AnaliseDados() {
     setCarregando(true);
     listarHistoricoAgendamentos(usuario.Id)
       .then(items => { if (ativo) { setHistorico(items); setErro(""); } })
-      .catch(() => { if (ativo) setErro("Não foi possível carregar o histórico de atendimentos."); })
+      .catch(() => { if (ativo) setErro(t("analytics.error")); })
       .finally(() => { if (ativo) setCarregando(false); });
     return () => { ativo = false; };
   }, [usuario?.Id, permitido]);
@@ -70,52 +72,52 @@ export default function AnaliseDados() {
     "--analysis-primary": theme.colors.primary,
   } as CSSProperties;
 
-  if (!permitido) return <main className={styles.container}>Esta área está disponível somente para empresas e autônomos.</main>;
+  if (!permitido) return <main className={styles.container}>{t("analytics.notAllowed")}</main>;
   return <main className={styles.container} style={cssVars}>
     <div className={styles.grid}>
       <section className={styles.section}>
         <div className={styles.sectionHead}>
-          <div className={styles.sectionName}><FaUserClock aria-hidden="true"/><span>Recuperação de clientes</span></div>
-          <p>Encontre clientes que já foram atendidos, mas não voltaram recentemente.</p>
+          <div className={styles.sectionName}><FaUserClock aria-hidden="true"/><span>{t("analytics.recovery")}</span></div>
+          <p>{t("analytics.recoveryDescription")}</p>
         </div>
         <div className={styles.filterRow}>
-          <span>Sem retorno há pelo menos</span>
+          <span>{t("analytics.noReturn")}</span>
           <div className={styles.filters} role="group" aria-label="Período sem retorno">
             {([30, 60, 90] as const).map(valor =>
               <button key={valor} type="button" className={filtro === valor ? styles.selected : ""}
-                aria-pressed={filtro === valor} onClick={() => setFiltro(valor)}>{valor} dias</button>)}
+                aria-pressed={filtro === valor} onClick={() => setFiltro(valor)}>{valor} {t("analytics.days")}</button>)}
           </div>
         </div>
-        {carregando ? <LoadingState label="Analisando histórico de clientes" compact/> : erro
+        {carregando ? <LoadingState label={t("analytics.loading")} compact/> : erro
           ? <p className={styles.error} role="alert">{erro}</p>
           : <>
             <div className={styles.metrics}>
-              <div className={styles.metric}><FaUsers aria-hidden="true"/><strong>{clientes.length}</strong><span>Clientes com atendimento concluído</span></div>
-              <div className={styles.metric}><FaClock aria-hidden="true"/><strong>{inativos.length}</strong><span>Sem retorno há {filtro}+ dias</span></div>
+              <div className={styles.metric}><FaUsers aria-hidden="true"/><strong>{clientes.length}</strong><span>{t("analytics.completedCustomers")}</span></div>
+              <div className={styles.metric}><FaClock aria-hidden="true"/><strong>{inativos.length}</strong><span>{t("analytics.inactive")} {filtro}+ {t("analytics.days")}</span></div>
             </div>
-            <div className={styles.listHeader}><span>Cliente</span><span>Último atendimento</span><span>Sem retorno</span></div>
+            <div className={styles.listHeader}><span>{t("analytics.customer")}</span><span>{t("analytics.lastVisit")}</span><span>{t("analytics.noReturnColumn")}</span></div>
             {inativos.length ? <div className={styles.list}>
               {inativos.map(cliente => <div className={styles.client} key={cliente.id}>
-                <div className={styles.clientName}><strong>{cliente.nome}</strong><small>{cliente.visitas} atendimento(s) concluído(s)</small></div>
-                <span>{formatarData(cliente.ultimaVisita)}</span><strong>{cliente.diasSemVisitar} dias</strong>
+                <div className={styles.clientName}><strong>{cliente.nome}</strong><small>{cliente.visitas} {t("analytics.visits")}</small></div>
+                <span>{formatarData(cliente.ultimaVisita, lang)}</span><strong>{cliente.diasSemVisitar} {t("analytics.days")}</strong>
               </div>)}
-            </div> : <div className={styles.empty}>Nenhum cliente identificado nesse período.</div>}
-            <p className={styles.note}>Análise baseada no histórico de atendimentos concluídos disponível no sistema. Clientes sem visita concluída não entram nesta lista.</p>
+            </div> : <div className={styles.empty}>{t("analytics.empty")}</div>}
+            <p className={styles.note}>{t("analytics.note")}</p>
           </>}
       </section>
       <section className={styles.section}>
         <div className={styles.sectionHead}>
-          <div className={styles.sectionName}><FaChartLine aria-hidden="true"/><span>Automações de marketing</span></div>
-          <p>Lembretes, confirmações e campanhas de recuperação de clientes.</p>
+          <div className={styles.sectionName}><FaChartLine aria-hidden="true"/><span>{t("analytics.marketing")}</span></div>
+          <p>{t("analytics.marketingDescription")}</p>
         </div>
-        <div className={styles.comingSoon}><FaBullhorn aria-hidden="true"/><strong>Em planejamento</strong>
-          <span>Recurso desabilitado enquanto avaliamos o custo de envio e um modelo transparente de cobrança.</span>
+        <div className={styles.comingSoon}><FaBullhorn aria-hidden="true"/><strong>{t("analytics.planning")}</strong>
+          <span>{t("analytics.planningDescription")}</span>
         </div>
-        <div className={styles.automation}><FaEnvelope aria-hidden="true"/><div><strong>Confirmação e lembrete de agendamento</strong>
-          <span>Envio automático antes do atendimento.</span></div><span className={styles.disabled}>Indisponível</span></div>
-        <div className={styles.automation}><FaUsers aria-hidden="true"/><div><strong>Reativação de clientes</strong>
-          <span>Campanhas para quem não retorna há algum tempo.</span></div><span className={styles.disabled}>Indisponível</span></div>
-        <p className={styles.note}>Nenhuma mensagem será enviada e nenhuma cobrança adicional será realizada por esta página.</p>
+        <div className={styles.automation}><FaEnvelope aria-hidden="true"/><div><strong>{t("analytics.reminders")}</strong>
+          <span>{t("analytics.remindersDescription")}</span></div><span className={styles.disabled}>{t("analytics.unavailable")}</span></div>
+        <div className={styles.automation}><FaUsers aria-hidden="true"/><div><strong>{t("analytics.reactivation")}</strong>
+          <span>{t("analytics.reactivationDescription")}</span></div><span className={styles.disabled}>Indisponível</span></div>
+        <p className={styles.note}>{t("analytics.noCharges")}</p>
       </section>
     </div>
   </main>;
