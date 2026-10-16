@@ -69,9 +69,9 @@ export default function Servicos() {
       const data = await listarServicosPorEmpresa(ownerId);
       setServicos(data);
     } catch {
-      const message = "Nao foi possivel carregar os servicos.";
+      const message = t("services.loadError");
       setError(message);
-      showNotification({ type: "error", title: "Servicos indisponiveis", message });
+      showNotification({ type: "error", title: t("services.unavailable"), message });
     } finally {
       setLoading(false);
     }
@@ -203,10 +203,10 @@ export default function Servicos() {
         setServicos((current) => current.map((servico) => (
           servico.Id === atualizado.Id ? atualizado : servico
         )));
-        setSuccess("Servico atualizado com sucesso.");
+        setSuccess(t("services.updated"));
         showNotification({
           type: "success",
-          title: "Servico atualizado",
+          title: t("services.updatedTitle"),
           message: "As alteracoes ja estao disponiveis no agendamento.",
         });
       } else {
@@ -217,19 +217,19 @@ export default function Servicos() {
           ...payload,
         });
         setServicos((current) => [...current, criado]);
-        setSuccess("Servico cadastrado com sucesso.");
+        setSuccess(t("services.created"));
         showNotification({
           type: "success",
-          title: "Servico cadastrado",
+          title: t("services.createdTitle"),
           message: "O novo servico foi adicionado a sua lista.",
         });
       }
 
       closeModal();
     } catch {
-      const message = "Nao foi possivel salvar o servico.";
+      const message = t("services.saveError");
       setFormError(message);
-      showNotification({ type: "error", title: "Servico nao salvo", message });
+      showNotification({ type: "error", title: t("services.saveErrorTitle"), message });
     } finally {
       setSaving(false);
     }
