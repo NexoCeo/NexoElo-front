@@ -228,3 +228,12 @@
     height: 29px;
   }
 }
+
+/* A agenda ocupa a altura util do desktop sem encolher botoes no mobile. */
+@media (min-width: 961px) and (max-height: 800px) {
+  .container { padding: 7px; }
+  .header { min-height: 40px; }
+  .weekdays { margin-top: 5px; }
+  .days { margin-top: 3px; }
+  .day, .emptyDay { width: 28px; height: 28px; }
+}
