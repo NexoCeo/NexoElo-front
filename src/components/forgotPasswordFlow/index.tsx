@@ -1,3 +1,4 @@
+import { useLanguage } from "@/context/LanguageContext";
 import { useState } from "react";
 import Step1SolicitarEmail from '@/pages/auth/forgotPassword/SolicitaEmail'; 
 import Step2Codigo from '@/pages/auth/forgotPassword/ValidaCodigo';
@@ -6,6 +7,7 @@ import styles from "./step.module.css";
 import { useNotification } from "@/context/NotificationContext";
 
 export default function ForgotPasswordFlow() {
+  const { t } = useLanguage();
   const { showNotification } = useNotification();
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
@@ -24,8 +26,8 @@ export default function ForgotPasswordFlow() {
   const handlePasswordChanged = () => {
     showNotification({
       type: "success",
-      title: "Senha alterada",
-      message: "Voce ja pode entrar com sua nova senha.",
+      title: t("password.changed"),
+      message: t("password.changedDesc"),
     });
     setStep(1); // Reinicia o fluxo
   };
@@ -33,8 +35,8 @@ export default function ForgotPasswordFlow() {
   const handleStepFailed = () => {
     showNotification({
       type: "error",
-      title: "Nao foi possivel continuar",
-      message: "Confira os dados e tente novamente.",
+      title: t("password.failed"),
+      message: t("password.check"),
     });
   };
 
@@ -42,8 +44,8 @@ export default function ForgotPasswordFlow() {
   const handlePasswordChangeFailed = () => {
       showNotification({
         type: "error",
-        title: "Senha nao alterada",
-        message: "Tente novamente em instantes.",
+        title: t("password.notChanged"),
+        message: t("password.tryAgain"),
       });
       setStep(1); // Opcional: retorna o usuário para a tela inicial
   };
@@ -69,7 +71,7 @@ export default function ForgotPasswordFlow() {
 
   return (
     <div className={styles.mainContainer}>
-      <h2 className={styles.title}>Redefinir Senha</h2>
+      <h2 className={styles.title}>{t("password.reset")}</h2>
       {renderStep()}
     </div>
   );
