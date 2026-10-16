@@ -21,6 +21,7 @@ import Profissionais from "@/pages/others/profissionais";
 import Servicos from "@/pages/others/servicos";
 import Funcionamento from "@/pages/others/funcionamento";
 import Relatorios from "@/pages/others/relatorios";
+import AnaliseDados from "@/pages/others/analise-dados";
 import MinhaAssinatura from "@/pages/others/assinatura";
 import AssinaturaGate from "@/components/assinatura-gate";
 
@@ -143,6 +144,10 @@ export default function SharedRoleRoutes({
             </ProtectedRoute>
           }
         />
+      )}
+
+      {!requireApprovedProfessional && (
+        <Route path="analise-dados" element={<ProtectedRoute><AssinaturaGate><AnaliseDados /></AssinaturaGate></ProtectedRoute>} />
       )}
 
       <Route
