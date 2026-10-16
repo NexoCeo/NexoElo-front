@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import styles from "./style.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 
 type ModalProps = {
   open: boolean;
@@ -11,6 +12,7 @@ type ModalProps = {
 };
 
 export default function Modal({ open, title, children, onClose, actions, busy = false }: ModalProps) {
+  const { t } = useLanguage();
   useEffect(() => {
     if (!open) return;
     const handler = (event: KeyboardEvent) => {
@@ -28,7 +30,7 @@ export default function Modal({ open, title, children, onClose, actions, busy = 
       <section className={styles.dialog} role="dialog" aria-modal="true" aria-label={title}>
         <header className={styles.header}>
           <h2>{title}</h2>
-          <button className={styles.close} type="button" aria-label="Fechar" disabled={busy} onClick={onClose}>×</button>
+          <button className={styles.close} type="button" aria-label={t("common.close")} disabled={busy} onClick={onClose}>×</button>
         </header>
         <div className={styles.body}>{children}</div>
         {actions && <footer className={styles.actions}>{actions}</footer>}
