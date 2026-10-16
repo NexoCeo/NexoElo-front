@@ -23,21 +23,25 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
   const [analyticsExpanded, setAnalyticsExpanded] = useState(false);
   const [relatoriosLiberados, setRelatoriosLiberados] = useState(false);
   const [analiseLiberada, setAnaliseLiberada] = useState(false);
+  const [whatsAppLiberado, setWhatsAppLiberado] = useState(false);
   useEffect(() => {
     if (usuario?.Papel !== "EMPRESA" && usuario?.Papel !== "AUTONOMO") {
       setRelatoriosLiberados(false);
       setAnaliseLiberada(false);
+      setWhatsAppLiberado(false);
       return;
     }
     setRelatoriosLiberados(false);
     setAnaliseLiberada(false);
+    setWhatsAppLiberado(false);
     let active = true;
     consultarAssinatura().then(acesso => {
       if (active) {
         setRelatoriosLiberados(acesso.AcessoAtivo && (acesso.Plano === "GRATIS" || acesso.RelatoriosLiberados));
         setAnaliseLiberada(acesso.AcessoAtivo && (acesso.Plano === "GRATIS" || acesso.Plano === "AVANCADO"));
+        setWhatsAppLiberado(acesso.AcessoAtivo && acesso.Plano === "AVANCADO");
       }
-    }).catch(() => { if (active) { setRelatoriosLiberados(false); setAnaliseLiberada(false); } });
+    }).catch(() => { if (active) { setRelatoriosLiberados(false); setAnaliseLiberada(false); setWhatsAppLiberado(false); } });
     return () => { active = false; };
   }, [usuario?.Papel, usuario?.Id]);
   const basePath = getRoleBasePath(usuario?.Papel);
@@ -145,7 +149,7 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
                 </NavLink>
                 <button type="button" className={styles.expandButton} onClick={() => setAnalyticsExpanded(v => !v)} aria-label="Expandir Análise de dados" aria-expanded={analyticsExpanded}> {analyticsExpanded ? "−" : "+"} </button>
               </div>
-              {analyticsExpanded && <NavLink to={`${analyticsPath}/whatsapp-business`} className={linkClassName} onClick={closeMenu}>
+              {analyticsExpanded && whatsAppLiberado && <NavLink to={`${analyticsPath}/whatsapp-business`} className={linkClassName} onClick={closeMenu}>
                 <FaWhatsapp className={styles.navIcon} aria-hidden="true" />
                 <span>WhatsApp Business</span>
               </NavLink>}
