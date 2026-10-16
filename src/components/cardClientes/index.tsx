@@ -42,6 +42,14 @@ export function Card({
   onStatusChange,
 }: CardProps) {
   const { t } = useLanguage();
+const labelStatus = (status: string) => {
+    const normalizado = status.trim().toUpperCase();
+    if (normalizado === "AGENDADO") return t("status.scheduled");
+    if (normalizado === "CONCLUIDO") return t("status.completed");
+    if (normalizado === "CANCELADO") return t("status.canceled");
+    if (normalizado === "PENDENTE") return t("status.pending");
+    return status;
+  };
   const labels = [t("common.customer"), t("common.service"), t("common.professional"), t("common.time"), t("common.status"), t("common.value"), t("common.actions")];
   const [widths, setWidths] = useState<number[]>([20, 18, 18, 10, 12, 11, 11]);
   const listRef = useRef<HTMLDivElement>(null);
@@ -124,7 +132,7 @@ export function Card({
               <div className={styles.time} data-label="Horário" data-column={3}>{appointment.horario}</div>
               <div data-label="Status" data-column={4}>
                 <span className={`${styles.statusBadge} ${statusClass(appointment.status)}`}>
-                  {appointment.status}
+                  {labelStatus(appointment.status)}
                 </span>
               </div>
               <div className={styles.value} data-label="Valor" data-column={5}>{appointment.valor}</div>
@@ -136,8 +144,8 @@ export function Card({
                       className={`${styles.actionButton} ${styles.cancelAction}`}
                       onClick={() => onStatusChange(appointment.Id, "CANCELADO")}
                       disabled={updatingId === appointment.Id}
-                      title="Cancelar agendamento"
-                      aria-label={`Cancelar agendamento de ${appointment.cliente}`}
+                      title={t("client.cancel")}
+                      aria-label={`${t("client.cancelAlert")} ${appointment.cliente}`}
                     >
                       <FaXmark aria-hidden="true" />
                     </button>
@@ -146,8 +154,8 @@ export function Card({
                       className={`${styles.actionButton} ${styles.completeAction}`}
                       onClick={() => onStatusChange(appointment.Id, "CONCLUIDO")}
                       disabled={updatingId === appointment.Id}
-                      title="Concluir agendamento"
-                      aria-label={`Concluir agendamento de ${appointment.cliente}`}
+                      title={t("client.complete")}
+                      aria-label={`${t("client.completeAlert")} ${appointment.cliente}`}
                     >
                       <FaCheck aria-hidden="true" />
                     </button>
