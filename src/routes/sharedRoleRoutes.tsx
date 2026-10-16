@@ -147,7 +147,7 @@ export default function SharedRoleRoutes({
       )}
 
       {!requireApprovedProfessional && (
-        <Route path="analise-dados" element={<ProtectedRoute><AssinaturaGate><AnaliseDados /></AssinaturaGate></ProtectedRoute>} />
+        <Route path="analise-dados" element={<ProtectedRoute><AssinaturaGate avancado><AnaliseDados /></AssinaturaGate></ProtectedRoute>} />
       )}
 
       <Route
