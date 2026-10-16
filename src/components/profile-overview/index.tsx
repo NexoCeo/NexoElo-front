@@ -1,5 +1,6 @@
 import { FaCamera, FaEnvelope, FaPhoneAlt } from "react-icons/fa";
 import styles from "./style.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 
 type ProfileOverviewProps = {
   name: string;
@@ -14,26 +15,27 @@ type ProfileOverviewProps = {
   photoSaving?: boolean;
 };
 
-function formatPhone(value?: string | null) {
+function formatPhone(value?: string | null, fallback = "Não informado") {
   const digits = value?.replace(/\D/g, "") ?? "";
   if (digits.length === 11) return `(${digits.slice(0,2)}) ${digits.slice(2,7)}-${digits.slice(7)}`;
   if (digits.length === 10) return `(${digits.slice(0,2)}) ${digits.slice(2,6)}-${digits.slice(6)}`;
-  return value || "Não informado";
+  return value || fallback;
 }
 
 export default function ProfileOverview({ name, role, email, phone, avatarUrl, className, action, subtitle, onPhotoChange, photoSaving = false }: ProfileOverviewProps) {
+  const { t } = useLanguage();
   const initial = name.trim().charAt(0).toUpperCase() || "?";
   return (
-    <section className={`${styles.profile} ${className || ""}`} aria-label="Informações do perfil">
+    <section className={`${styles.profile} ${className || ""}`} aria-label={t("profile.info")}>
       <div className={styles.avatar}>
-        {avatarUrl ? <img src={avatarUrl} alt={`Foto de ${name}`} /> : <span aria-hidden="true">{initial}</span>}
+        {avatarUrl ? <img src={avatarUrl} alt={`${t("profile.photo")}: ${name}`} /> : <span aria-hidden="true">{initial}</span>}
         {onPhotoChange && (
-          <label className={styles.cameraButton} title="Alterar foto de perfil" aria-label="Alterar foto de perfil">
+          <label className={styles.cameraButton} title={t("profile.photoUpload")} aria-label={t("profile.photoUpload")}>
             {photoSaving ? <span className={styles.spinner} aria-hidden="true" /> : <FaCamera aria-hidden="true" />}
             <input
               type="file"
               accept="image/png,image/jpeg,image/webp"
-              aria-label="Escolher nova foto de perfil"
+              aria-label={t("profile.choosePhoto")}
               disabled={photoSaving}
               onChange={event => {
                 const file = event.currentTarget.files?.[0];
@@ -50,8 +52,8 @@ export default function ProfileOverview({ name, role, email, phone, avatarUrl, c
         {subtitle && <p>{subtitle}</p>}
       </div>
       <dl className={styles.details}>
-        <div><dt><FaEnvelope aria-hidden="true" /> E-mail</dt><dd>{email || "Não informado"}</dd></div>
-        <div><dt><FaPhoneAlt aria-hidden="true" /> Telefone</dt><dd>{formatPhone(phone)}</dd></div>
+        <div><dt><FaEnvelope aria-hidden="true" /> {t("profile.email")}</dt><dd>{email || t("profile.notProvided")}</dd></div>
+        <div><dt><FaPhoneAlt aria-hidden="true" /> {t("profile.phone")}</dt><dd>{formatPhone(phone, t("profile.notProvided"))}</dd></div>
       </dl>
       {action && <div className={styles.action}>{action}</div>}
     </section>
