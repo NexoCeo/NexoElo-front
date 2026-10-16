@@ -130,10 +130,10 @@ export default function Relatorios() {
 
   function mensagemErro(errorValue: unknown) {
     if (isAxiosError(errorValue) && errorValue.response?.status === 403) {
-      return "Seu perfil nao possui permissao para acessar este relatorio.";
+      return t("reports.forbidden");
     }
 
-    return "Nao foi possivel gerar o relatorio. Tente novamente.";
+    return t("reports.error");
   }
 
   async function visualizarRelatorio(relatorio: RelatorioConfig) {
@@ -148,13 +148,13 @@ export default function Relatorios() {
       setPdfBlob(arquivo);
       showNotification({
         type: "success",
-        title: "Relatorio pronto",
-        message: `${relatorio.titulo} foi gerado para visualizacao.`,
+        title: t("reports.ready"),
+        message: `${relatorio.titulo} ${t("reports.readyDesc")}`,
       });
     } catch (errorValue) {
       const message = mensagemErro(errorValue);
       setError(message);
-      showNotification({ type: "error", title: "Relatorio nao gerado", message });
+      showNotification({ type: "error", title: t("reports.failed"), message });
     } finally {
       setLoadingAction("");
     }
@@ -169,13 +169,13 @@ export default function Relatorios() {
       baixarBlob(arquivo, nomeArquivoRelatorio(relatorio.tipo, ano, mes));
       showNotification({
         type: "success",
-        title: "Download iniciado",
-        message: `${relatorio.titulo} esta sendo baixado em PDF.`,
+        title: t("reports.downloadStarted"),
+        message: `${relatorio.titulo} ${t("reports.downloading")}`,
       });
     } catch (errorValue) {
       const message = mensagemErro(errorValue);
       setError(message);
-      showNotification({ type: "error", title: "Download nao iniciado", message });
+      showNotification({ type: "error", title: t("reports.downloadFailed"), message });
     } finally {
       setLoadingAction("");
     }
@@ -192,8 +192,8 @@ export default function Relatorios() {
     );
     showNotification({
       type: "success",
-      title: "Download iniciado",
-      message: `${relatorioAtivo.titulo} esta sendo baixado em PDF.`,
+      title: t("reports.downloadStarted"),
+      message: `${relatorioAtivo.titulo} ${t("reports.downloading")}`,
     });
   }
 
