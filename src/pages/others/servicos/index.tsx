@@ -11,6 +11,7 @@ import {
 import type { Servico } from "@/types/servico";
 import { getUploadedImageUrl } from "@/components/header/profile-image";
 import styles from "./style.module.css";
+import LoadingState from "@/components/loading-state";
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", {
@@ -251,9 +252,7 @@ export default function Servicos() {
 
       <section className={styles.tableWrap} style={{ backgroundColor: theme.colors.background2 }}>
         {loading ? (
-          <p className={styles.feedback} style={{ color: theme.colors.text }}>
-            Carregando servicos...
-          </p>
+          <LoadingState label="Carregando serviços" variant="table" embedded />
         ) : servicos.length === 0 ? (
           <p className={styles.feedback} style={{ color: theme.colors.inactive }}>
             Nenhum servico cadastrado ainda.
