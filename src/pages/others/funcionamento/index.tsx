@@ -51,8 +51,8 @@ type ApiError =
       errors?: Record<string, string[]>;
     };
 
-function getApiErrorMessage(data?: ApiError) {
-  if (!data) return "Nao foi possivel salvar o funcionamento.";
+function getApiErrorMessage(data?: ApiError, fallback = "Nao foi possivel salvar o funcionamento.") {
+  if (!data) return fallback;
   if (typeof data === "string") return data;
 
   if (data.errors) {
@@ -63,7 +63,7 @@ function getApiErrorMessage(data?: ApiError) {
     if (messages) return messages;
   }
 
-  return data.erro || data.message || data.title || "Nao foi possivel salvar o funcionamento.";
+  return data.erro || data.message || data.title || fallback;
 }
 
 function timeToMinutes(value: string) {
@@ -391,13 +391,13 @@ export default function Funcionamento() {
       setSuccess(t("hours.saved"));
       showNotification({
         type: "success",
-        title: "Funcionamento salvo",
+        title: t("hours.saved"),
         message: t("hours.savedDesc"),
       });
     } catch (err) {
       const message = isAxiosError<ApiError>(err)
-        ? getApiErrorMessage(err.response?.data)
-        : "Nao foi possivel salvar o funcionamento.";
+        ? getApiErrorMessage(err.response?.data, t("hours.saveError"))
+        : t("hours.saveError");
       setError(message);
       showNotification({ type: "error", title: t("hours.saveFailedTitle"), message });
     } finally {
@@ -417,7 +417,7 @@ export default function Funcionamento() {
         <form className={styles.editor} onSubmit={handleSubmit} noValidate>
           {loading || !config ? (
             <section className={styles.card} style={cardStyle}>
-              <LoadingState label="Carregando horários de atendimento" />
+              <LoadingState label={t("hours.loading")} />
             </section>
           ) : (
             <>
@@ -430,7 +430,7 @@ export default function Funcionamento() {
                       <p style={{ color: theme.colors.inactive }}>{t("hours.daysDesc")}</p>
                     </div>
                   </div>
-                  <div className={styles.presets} aria-label="Selecao rapida de dias">
+                  <div className={styles.presets} aria-label={t("hours.quickSelect")}>
                     <button type="button" onClick={() => setDiasSelecionados(DIAS_UTEIS)}>{t("hours.weekdays")}</button>
                     <button type="button" onClick={() => setDiasSelecionados(new Set(DIAS.map((dia) => dia.key)))}>{t("hours.allDays")}</button>
                     <button type="button" onClick={() => setDiasSelecionados(new Set())}>{t("hours.none")}</button>
@@ -447,7 +447,7 @@ export default function Funcionamento() {
                         className={`${styles.dayButton} ${active ? styles.dayButtonActive : ""}`}
                         onClick={() => toggleDia(dia.key)}
                         aria-pressed={active}
-                        aria-label={`${[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)]}: ${active ? "selecionado" : "nao selecionado"}`}
+                        aria-label={`${[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)]}: ${active ? t("hours.selected") : t("hours.notSelected")}`}
                         style={{
                           borderColor: active ? theme.colors.primary : theme.colors.bottom,
                           color: active ? theme.colors.text : theme.colors.inactive,
@@ -695,7 +695,7 @@ export default function Funcionamento() {
                 ))}
               </div>
             ) : (
-              <small style={{ color: theme.colors.inactive }}>Atendimento sem interrupcoes</small>
+              <small style={{ color: theme.colors.inactive }}>{t("hours.continuous")}</small>
             )}
           </div>
         </aside>
