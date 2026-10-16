@@ -29,7 +29,7 @@ export default function MinhaAssinatura() {
     let active = true;
     consultarAssinatura()
       .then(data => { if (active) setAssinatura(data); })
-      .catch(() => { if (active) showNotification({ type: "error", title: "Assinatura", message: "Não foi possível carregar sua assinatura." }); })
+      .catch(() => { if (active) showNotification({ type: "error", title: t("subscription.title"), message: t("subscription.failedLoad") }); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [showNotification]);
@@ -41,8 +41,8 @@ export default function MinhaAssinatura() {
       const response = isAxiosError<{ Erro?: string; erro?: string; message?: string }>(error)
         ? error.response?.data : undefined;
       const message = response?.Erro || response?.erro || response?.message ||
-        "Não foi possível abrir a cobrança. Tente novamente.";
-      showNotification({ type: "error", title: "Assinatura", message });
+        t("subscription.errorOpen");
+      showNotification({ type: "error", title: t("subscription.title"), message });
     } finally { setPending(""); }
   }
 
@@ -72,7 +72,7 @@ export default function MinhaAssinatura() {
         await confirmarTroca(plano, undefined, undefined);
       }
     } catch {
-      showNotification({ type: "error", title: "Assinatura", message: "Não foi possível carregar os serviços e profissionais." });
+      showNotification({ type: "error", title: t("subscription.title"), message: t("subscription.errorResources") });
     } finally { setCarregandoRecursos(false); }
   }
 
@@ -83,7 +83,7 @@ export default function MinhaAssinatura() {
         await atualizarRecursosAtivos(usuario.Id, plano, servicos, profissionais);
         setDestino(null);
         setEditandoRecursos(false);
-        showNotification({ type: "success", title: "Recursos atualizados", message: "Sua seleção de recursos ativos foi salva." });
+        showNotification({ type: "success", title: t("subscription.resourcesUpdated"), message: t("subscription.resourcesSaved") });
       });
       return;
     }
@@ -99,7 +99,7 @@ export default function MinhaAssinatura() {
       setDestino(null);
       setConfirmacao(null);
       setEditandoRecursos(false);
-      showNotification({ type: "success", title: "Plano alterado", message: "Recursos atualizados. Próxima renovação com o novo preço." });
+      showNotification({ type: "success", title: t("subscription.planChanged"), message: t("subscription.nextPrice") });
     });
   }
 
@@ -117,7 +117,7 @@ export default function MinhaAssinatura() {
       setEditandoRecursos(true);
       setDestino(assinatura.Plano);
     } catch {
-      showNotification({ type: "error", title: "Assinatura", message: "Não foi possível carregar os recursos." });
+      showNotification({ type: "error", title: t("subscription.title"), message: t("subscription.loadResources") });
     } finally { setCarregandoRecursos(false); }
   }
 
