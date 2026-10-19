@@ -1,7 +1,7 @@
 .shell {
   --sidebar-width: 260px;
   --shared-header-height: 60px;
-  --shared-header-clearance: 20px;
+  --shared-header-clearance: 10px;
   min-height: 100dvh;
   width: 100%;
   overflow-x: hidden;
