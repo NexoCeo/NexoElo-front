@@ -1,6 +1,6 @@
 .container {
   width: 100%;
-  min-height: 100dvh;
+  min-height: 0;
   padding: 0 40px 44px;
   color: var(--theme-text);
   font-family: Inter, "Segoe UI", Arial, sans-serif;
