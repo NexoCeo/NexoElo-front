@@ -17,7 +17,7 @@ interface SidebarProps {
 export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
   const { theme } = useTheme();
   const { t, lang } = useLanguage();
-  const footerEnglish = lang === "en" || (typeof navigator !== "undefined" && navigator.language.toLowerCase().startsWith("en"));
+  const footerEnglish = lang === "en";
   const { usuario } = useUser();
   const navRef = useRef<HTMLElement>(null);
   const location = useLocation();
