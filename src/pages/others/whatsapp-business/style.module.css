@@ -1,18 +1,88 @@
-.page { color: var(--wh-text); padding: 24px; max-width: 1200px; margin: 0 auto; }
-.header { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 24px; }
-.title { margin: 4px 0 8px; font-size: clamp(22px, 2.5vw, 32px); }
-.muted { color: var(--wh-muted); }
-.grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,280px),1fr)); gap: 16px; }
-.card { background: var(--wh-panel); border: 1px solid var(--wh-border); border-radius: 12px; padding: 20px; margin-bottom: 18px; }
-.card h2 { margin: 0 0 12px; font-size: 19px; }
-.label { display: block; margin: 16px 0 7px; font-weight: 600; }
-.input { width: 100%; box-sizing: border-box; border: 1px solid var(--wh-border); border-radius: 8px; background: var(--wh-panel); color: var(--wh-text); padding: 11px; }
-.toggle { display: flex; gap: 12px; align-items: center; margin: 15px 0; }
-.button { border: 0; background: var(--wh-primary); color: white; font-weight: 700; border-radius: 8px; cursor: pointer; padding: 12px 18px; }
-.button:disabled { opacity: .55; cursor: not-allowed; }
-.secondary { border: 1px solid var(--wh-border); background: transparent; color: var(--wh-text); font-weight: 700; border-radius: 8px; padding: 11px 15px; cursor: pointer; }
-.notice { border: 1px solid var(--wh-border); padding: 14px; border-radius: 9px; margin: 15px 0; }
-.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.metric { font-size: 25px; display: block; margin-top: 8px; font-weight: 800; }
-.error { color: #c64b4b; }
-@media (max-width: 600px) { .page { padding: 14px; } .header { flex-direction: column; } }
+.page{--wh-green:#1fb879;--wh-green-soft:rgba(31,184,121,.12);max-width:1250px;width:100%;box-sizing:border-box;margin:0 auto;padding:28px 26px 52px;color:var(--wh-text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.55}
+.page *{box-sizing:border-box}
+.page h1,.page h2,.page p{font-family:inherit}
+.muted{color:var(--wh-muted);margin:0}
+.hero{display:flex;justify-content:space-between;align-items:center;gap:24px;margin-bottom:22px;padding:6px 0 16px;border-bottom:1px solid var(--wh-border)}
+.heroContent{display:flex;align-items:center;gap:20px;min-width:0}
+.heroIcon{width:68px;height:68px;border-radius:19px;display:grid;place-items:center;flex-shrink:0;background:var(--wh-green-soft);color:var(--wh-green);font-size:34px}
+.heroText{min-width:0}
+.eyebrow,.sectionKicker{font-size:10px;font-weight:800;letter-spacing:.11em;color:var(--wh-muted)}
+.eyebrow span{padding:0 6px;opacity:.5}
+.title{font-size:clamp(25px,3vw,34px);line-height:1.18;letter-spacing:-.035em;margin:6px 0}
+.heroText .muted{max-width:620px}
+.heroAside{flex-shrink:0}
+.connected,.disconnected{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--wh-border);background:var(--wh-panel);border-radius:999px;padding:8px 13px;font-weight:700;font-size:12px;white-space:nowrap}
+.connected{color:var(--wh-green)}
+.statusDot{width:8px;height:8px;flex-shrink:0;border-radius:50%;background:#eaa752}
+.connected .statusDot{background:var(--wh-green)}
+.notice,.feedback{display:flex;align-items:flex-start;gap:11px;padding:13px 16px;border:1px solid rgba(232,174,74,.28);background:rgba(232,174,74,.07);border-radius:12px;margin-bottom:16px;color:var(--wh-text)}
+.notice svg{color:#daa04d;flex-shrink:0;margin-top:3px}
+.feedback{border-color:var(--wh-border);background:var(--wh-panel)}
+.feedback svg{color:var(--wh-green);flex-shrink:0;margin-top:3px}
+.connectCard,.card,.metricCard,.billingCard{background:var(--wh-panel);border:1px solid var(--wh-border);box-shadow:0 5px 24px rgba(0,0,0,.025)}
+.connectCard{border-radius:19px;padding:27px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px;position:relative;overflow:hidden;margin-bottom:29px}
+.connectCard:before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:3px;border-radius:0 3px 3px 0;background:var(--wh-green)}
+.connectCopy{max-width:680px}
+.connectCopy h2{font-size:clamp(19px,2.1vw,24px);line-height:1.3;letter-spacing:-.02em;margin:7px 0 9px}
+.connectCopy p{max-width:630px}
+.connectActions{display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0}
+.button,.secondary,.billingLink{font:inherit;font-weight:750;display:inline-flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;border-radius:11px;padding:12px 18px;cursor:pointer;transition:filter .15s,transform .15s;white-space:nowrap}
+.button{border:1px solid transparent;background:var(--wh-primary);color:#fff;min-height:45px}
+.button:hover:not(:disabled){filter:brightness(1.12);transform:translateY(-1px)}
+.button:disabled,.secondary:disabled{opacity:.5;cursor:not-allowed}
+.button:focus-visible,.secondary:focus-visible,.billingLink:focus-visible,.input:focus-visible{outline:2px solid var(--wh-green);outline-offset:3px}
+.secondary{border:1px solid var(--wh-border);color:var(--wh-text);background:transparent}
+.microCopy{font-size:11px;color:var(--wh-muted)}
+.phoneInfo{display:flex;align-items:center;gap:12px;margin-top:16px}
+.phoneInfo svg{color:var(--wh-green);font-size:22px}
+.phoneInfo strong,.phoneInfo small{display:block}
+.phoneInfo small{color:var(--wh-muted)}
+.sectionHeading{display:flex;align-items:end;justify-content:space-between;gap:15px;margin:0 0 14px}
+.sectionHeading h2{margin:3px 0 0;font-size:20px;letter-spacing:-.02em}
+.sectionHeading small{font-size:12px}
+.metricGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:25px}
+.metricCard{min-height:145px;border-radius:16px;padding:20px;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.metricIcon{width:36px;height:36px;border-radius:10px;background:var(--wh-green-soft);color:var(--wh-green);display:grid;place-items:center;font-size:15px;margin-bottom:5px}
+.metricLabel{font-size:12px;color:var(--wh-muted);font-weight:650}
+.metricValue{font-size:clamp(23px,2.5vw,31px);line-height:1.2;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.settingsGrid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:17px;margin-bottom:18px}
+.card{border-radius:17px;padding:24px;min-width:0}
+.cardTop{display:flex;align-items:flex-start;gap:12px;margin-bottom:21px}
+.cardTopIcon{display:grid;place-items:center;background:var(--wh-green-soft);color:var(--wh-green);border-radius:11px;width:38px;height:38px;flex-shrink:0}
+.cardTop h2{font-size:19px;letter-spacing:-.015em;margin:3px 0 5px}
+.cardTop p{font-size:12px}
+.automationList{display:flex;flex-direction:column;gap:10px}
+.automationRow{display:flex;align-items:center;gap:12px;border:1px solid var(--wh-border);padding:14px;border-radius:12px;min-width:0;cursor:pointer}
+.automationIcon{display:grid;place-items:center;color:var(--wh-green);background:var(--wh-green-soft);width:34px;height:34px;border-radius:9px;flex-shrink:0}
+.automationText{flex:1;min-width:0}
+.automationText strong,.automationText small{display:block}
+.automationText strong{font-size:12px;line-height:1.4}
+.automationText small{font-size:11px;color:var(--wh-muted);margin-top:3px}
+.switch{position:relative;display:inline-flex;width:40px;height:24px;flex-shrink:0}
+.switch input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:1}
+.switchTrack{width:40px;height:24px;border-radius:999px;background:var(--wh-border);position:relative;transition:background .2s}
+.switchTrack:after{content:"";width:18px;height:18px;border-radius:50%;background:white;position:absolute;top:3px;left:3px;box-shadow:0 1px 3px #0003;transition:transform .2s}
+.switch input:checked+.switchTrack{background:var(--wh-green)}
+.switch input:checked+.switchTrack:after{transform:translateX(16px)}
+.switch input:disabled{cursor:not-allowed}
+.switch input:disabled+.switchTrack{opacity:.45}
+.switch input:focus-visible+.switchTrack{outline:2px solid var(--wh-green);outline-offset:2px}
+.inlineNotice{margin-top:17px;display:flex;align-items:flex-start;gap:8px;font-size:11px;line-height:1.5;color:var(--wh-muted)}
+.inlineNotice svg{flex-shrink:0;margin-top:2px}
+.formFields{display:flex;flex-direction:column}
+.label{font-size:12px;font-weight:700;margin:6px 0 7px}
+.label span{color:var(--wh-muted);font-weight:500}
+.input{width:100%;min-height:44px;padding:10px 13px;border-radius:10px;border:1px solid var(--wh-border);background:transparent;color:var(--wh-text);font:inherit;margin-bottom:16px}
+.input:disabled{opacity:.5}
+.helperText{color:var(--wh-muted);font-size:11px;line-height:1.6;margin:0 0 16px}
+.formFields .button{align-self:flex-start}
+.billingCard{border-radius:16px;padding:22px 24px;display:flex;align-items:center;gap:16px}
+.billingIcon{width:44px;height:44px;border-radius:12px;background:var(--wh-green-soft);display:grid;place-items:center;color:var(--wh-green);flex-shrink:0;font-size:19px}
+.billingContent{flex:1;min-width:0}
+.billingContent h2{font-size:16px;margin:0 0 5px}
+.billingContent p{font-size:12px;max-width:770px}
+.billingLink{background:transparent;color:var(--wh-text);border:1px solid var(--wh-border);font-size:12px;flex-shrink:0}
+.billingLink:hover{border-color:var(--wh-green)}
+@media(max-width:1000px){.settingsGrid{grid-template-columns:1fr}.connectCard{align-items:flex-start}.sectionHeading{align-items:flex-start}.sectionHeading small{max-width:230px;text-align:right}}
+@media(max-width:760px){.page{padding:18px 14px 36px}.hero{align-items:flex-start;flex-direction:column;gap:12px}.heroContent{align-items:flex-start;gap:12px}.heroIcon{width:49px;height:49px;border-radius:14px;font-size:25px}.metricGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.connectCard{flex-direction:column;padding:22px 19px}.connectActions{width:100%;align-items:stretch}.sectionHeading{flex-direction:column;gap:4px}.sectionHeading small{text-align:left;max-width:none}.billingCard{flex-wrap:wrap}.billingLink{width:100%}}
+@media(max-width:420px){.metricGrid{gap:10px}.metricCard{padding:15px;min-height:132px}.metricValue{font-size:23px}.card{padding:17px}.automationRow{padding:11px;gap:9px}.automationIcon{width:29px;height:29px}.billingCard{padding:18px}}
