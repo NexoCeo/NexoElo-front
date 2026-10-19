@@ -1,4 +1,4 @@
-.page{box-sizing:border-box;max-width:1140px!important;margin:0 auto;padding:0 22px 24px;min-height:100dvh;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--theme-text,#f8fafc)}
+.page{box-sizing:border-box;max-width:1140px!important;margin:0 auto;padding:0 22px 24px;min-height:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--theme-text,#f8fafc)}
 .page *{box-sizing:border-box}
 .heading{display:flex;justify-content:space-between;align-items:start;gap:14px;margin-bottom:16px}
 .title{font-size:clamp(22px,2.2vw,30px);line-height:1.18;font-weight:750;letter-spacing:-.03em;margin:0 0 5px}
