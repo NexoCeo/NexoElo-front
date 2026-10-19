@@ -665,7 +665,7 @@ export default function Funcionamento() {
             <strong style={{ color: theme.colors.text }}>
               {diasSelecionados.length > 0
                 ? diasSelecionados.map(dia => [t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item => item.key===dia.key)].slice(0,3)).join(", ")
-                : "Nenhum dia"}
+                : t("hours.emptyDays")}
             </strong>
           </div>
 
@@ -680,7 +680,7 @@ export default function Funcionamento() {
                   {[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)].slice(0,3)}<span style={{ color: theme.colors.inactive }}>{inicio} – {fim}</span>
                 </small>;
               })}
-              {!diasSelecionados.length && <small>Escolha os dias de atendimento.</small>}
+              {!diasSelecionados.length && <small>{t("hours.selectDays")}</small>}
             </div>
           </div>
 
