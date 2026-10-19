@@ -1,7 +1,7 @@
 .container {
   width: 100%;
   min-height: 100dvh;
-  padding: 96px 40px 44px;
+  padding: 0 40px 44px;
   color: var(--theme-text);
   font-family: Inter, "Segoe UI", Arial, sans-serif;
 }
@@ -200,7 +200,7 @@
 
 @media (max-width: 480px) {
   .container {
-    padding: 82px 14px 28px;
+    padding: 0 14px 28px;
   }
 
   .header {
