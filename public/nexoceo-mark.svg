@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="NexoCeo">
-<defs><linearGradient id="a" x1="0%" y1="20%" x2="100%" y2="80%"><stop offset="0%" stop-color="#17cba5"/><stop offset="50%" stop-color="#1dc3b1"/><stop offset="100%" stop-color="#2861ef"/></linearGradient></defs>
-<g fill="none" stroke="url(#a)" stroke-width="15" stroke-linecap="round" stroke-linejoin="round">
-<path d="M35 77 V133"/><path d="M65 65 L118 118"/><path d="M160 65 V133"/>
-<circle cx="35" cy="36" r="28"/><circle cx="35" cy="164" r="28"/><circle cx="160" cy="164" r="28"/>
-</g><circle cx="160" cy="36" r="28" fill="#2861ef"/>
-</svg>

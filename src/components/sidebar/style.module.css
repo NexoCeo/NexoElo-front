@@ -194,4 +194,9 @@ button.analyticsAnchor > span:nth-child(2) { flex: 1; }
   font: 750 15px/1.2 Inter, system-ui, sans-serif;
   letter-spacing: -.02em;
 }
-.brandIdentity img { width: 29px; height: 29px; object-fit: contain; display: block; }
+.brandIdentity img { 
+  width: 20px; 
+  height: 20px; 
+  object-fit: contain; 
+  display: block; 
+}

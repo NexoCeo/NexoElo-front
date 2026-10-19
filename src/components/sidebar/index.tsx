@@ -8,6 +8,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
 import { getRoleBasePath } from "@/routes/role-paths";
 import { consultarAssinatura } from "@/services/assinatura-service";
+import logoNexoCeo from "@/assets/logoNexoCeo.png";
 
 interface SidebarProps {
   isMenuOpen: boolean;
@@ -174,7 +175,10 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
       <div className={styles.brandFooter} aria-label={footerEnglish ? "Developed by NexoCeo" : "Desenvolvido por NexoCeo"}>
         <span className={styles.brandCaption}>{footerEnglish ? "Developed by" : "Desenvolvido por"}</span>
         <div className={styles.brandIdentity}>
-          <img src="/nexoceo-mark.svg" alt="" width="29" height="29" />
+          <img
+            src={logoNexoCeo}
+            alt="NexoCeo"
+          />
           <span>NexoCeo</span>
         </div>
       </div>
