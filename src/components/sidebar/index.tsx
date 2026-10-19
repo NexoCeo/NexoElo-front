@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { FaCalendarAlt, FaChartBar, FaChartLine, FaClock, FaHome, FaTimes, FaTools, FaWhatsapp } from "react-icons/fa";
 import { FaPerson } from "react-icons/fa6";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
 import { useTheme } from "@/context/ThemeContext";
@@ -145,7 +146,7 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
               <button type="button" className={`${styles.analyticsAnchor} ${location.pathname.startsWith(analyticsPath) ? styles.groupActive : ""}`} onClick={() => setAnalyticsExpanded(v => !v)} aria-expanded={analyticsExpanded} aria-controls="analytics-submenu">
                 <FaChartLine className={styles.navIcon} aria-hidden="true" />
                 <span>{t("nav.analytics")}</span>
-                <span className={styles.expandChevron} aria-hidden="true">{analyticsExpanded ? "▾" : "▸"}</span>
+                <span className={styles.expandChevron} aria-hidden="true">{analyticsExpanded ? <ChevronDown size={16} /> : <ChevronUp size={16} />}</span>
               </button>
               {analyticsExpanded && <div id="analytics-submenu" className={styles.analyticsChildren}>
                 <NavLink to={`${analyticsPath}/metricas`} end className={linkClassName} onClick={closeMenu}>
