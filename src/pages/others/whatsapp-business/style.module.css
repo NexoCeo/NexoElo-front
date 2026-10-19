@@ -1,4 +1,4 @@
-.page{--wh-green:#1fb879;--wh-green-soft:rgba(31,184,121,.12);max-width:1250px;width:100%;box-sizing:border-box;margin:0 auto;padding:64px 26px 52px;color:var(--wh-text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.55}
+.page{--wh-green:#1fb879;--wh-green-soft:rgba(31,184,121,.12);max-width:1250px;width:100%;box-sizing:border-box;margin:0 auto;padding:28px 26px 52px;color:var(--wh-text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.55}
 .page *{box-sizing:border-box}
 .page h1,.page h2,.page p{font-family:inherit}
 .muted{color:var(--wh-muted);margin:0}
@@ -84,5 +84,5 @@
 .billingLink{background:transparent;color:var(--wh-text);border:1px solid var(--wh-border);font-size:12px;flex-shrink:0}
 .billingLink:hover{border-color:var(--wh-green)}
 @media(max-width:1000px){.settingsGrid{grid-template-columns:1fr}.connectCard{align-items:flex-start}.sectionHeading{align-items:flex-start}.sectionHeading small{max-width:230px;text-align:right}}
-@media(max-width:760px){.page{padding:64px 14px 36px}.hero{align-items:flex-start;flex-direction:column;gap:12px}.heroContent{align-items:flex-start;gap:12px}.heroIcon{width:49px;height:49px;border-radius:14px;font-size:25px}.metricGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.connectCard{flex-direction:column;padding:22px 19px}.connectActions{width:100%;align-items:stretch}.sectionHeading{flex-direction:column;gap:4px}.sectionHeading small{text-align:left;max-width:none}.billingCard{flex-wrap:wrap}.billingLink{width:100%}}
+@media(max-width:760px){.page{padding:18px 14px 36px}.hero{align-items:flex-start;flex-direction:column;gap:12px}.heroContent{align-items:flex-start;gap:12px}.heroIcon{width:49px;height:49px;border-radius:14px;font-size:25px}.metricGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.connectCard{flex-direction:column;padding:22px 19px}.connectActions{width:100%;align-items:stretch}.sectionHeading{flex-direction:column;gap:4px}.sectionHeading small{text-align:left;max-width:none}.billingCard{flex-wrap:wrap}.billingLink{width:100%}}
 @media(max-width:420px){.metricGrid{gap:10px}.metricCard{padding:15px;min-height:132px}.metricValue{font-size:23px}.card{padding:17px}.automationRow{padding:11px;gap:9px}.automationIcon{width:29px;height:29px}.billingCard{padding:18px}}
