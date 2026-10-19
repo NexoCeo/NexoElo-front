@@ -46,7 +46,7 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
   }, [usuario?.Papel, usuario?.Id]);
   const basePath = getRoleBasePath(usuario?.Papel);
   const analyticsPath = `${basePath}/analise-dados`;
-  useEffect(() => { if (location.pathname.startsWith(analyticsPath)) setAnalyticsExpanded(true); }, [location.pathname, analyticsPath]);
+  useEffect(() => { setAnalyticsExpanded(location.pathname === analyticsPath || location.pathname.startsWith(`${analyticsPath}/`)); }, [location.pathname, analyticsPath]);
   const canManageSharedSettings = usuario?.Papel === "EMPRESA" || usuario?.Papel === "AUTONOMO";
   const sidebarStyle = {
     backgroundColor: theme.colors.background2,
