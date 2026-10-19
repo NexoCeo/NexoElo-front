@@ -249,7 +249,7 @@ export default function Perfil() {
       {error && !modalOpen && <p className={styles.error}>{error}</p>}
 
       <div className={styles.profileShell}>
-        {!usuario && loading ? <LoadingState label="Carregando perfil" /> : <ProfileOverview
+        {!usuario && loading ? <LoadingState label={t("profile.loading")} /> : <ProfileOverview
           role={formatRole(usuario?.Papel, lang)}
           name={usuario?.Nome || t("profile.notProvided")}
           email={usuario?.Email}
@@ -298,11 +298,11 @@ export default function Perfil() {
                 {t("profile.photo")}
                 <span className={styles.photoControl}>
                   <span className={styles.photoPreview}>
-                    <img src={fotoPreview} alt="Previa da foto de perfil" />
+                    <img src={fotoPreview} alt={t("profile.photoPreview")} />
                   </span>
                   <span>
                     <strong>{fotoPerfil?.name || t("profile.choosePhoto")}</strong>
-                    <small>JPG, PNG, WEBP · até 30 MB (otimização automática)</small>
+                    <small>{t("profile.photoHelp")}</small>
                   </span>
                   <FaCamera aria-hidden="true" />
                   <input
