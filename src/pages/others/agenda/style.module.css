@@ -4,7 +4,7 @@
   display: grid;
   grid-template-columns: minmax(248px, 292px) minmax(0, 1fr);
   gap: 20px;
-  padding: 92px clamp(16px, 2.4vw, 34px) 8px;
+  padding: 0 clamp(16px, 2.4vw, 34px) 8px;
   align-items: flex-start;
   font-family: Inter, "Segoe UI", Arial, sans-serif;
 }
@@ -355,7 +355,7 @@
 @media (max-width: 640px) {
   .container {
     gap: 24px;
-    padding: 78px 12px 28px;
+    padding: 0 12px 28px;
   }
 
   .sidebar {
