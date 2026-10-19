@@ -10,8 +10,14 @@ type LanguageContextValue = {
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 function detectLanguage(): SupportedLang {
-  // O produto atende prioritariamente ao público brasileiro.
-  // O idioma pode ser alterado manualmente com setLang quando necessário.
+  // Prioriza o idioma configurado no navegador e usa português como fallback.
+  if (typeof navigator === "undefined") return "pt";
+  const languages = navigator.languages?.length ? navigator.languages : [navigator.language];
+  for (const locale of languages) {
+    const language = locale?.toLowerCase().split("-")[0];
+    if (language === "en") return "en";
+    if (language === "pt") return "pt";
+  }
   return "pt";
 }
 
