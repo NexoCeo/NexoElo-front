@@ -16,7 +16,7 @@ interface SidebarProps {
 
 export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
   const { theme } = useTheme();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { usuario } = useUser();
   const navRef = useRef<HTMLElement>(null);
   const location = useLocation();
@@ -170,6 +170,13 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
           </li>
         )}
       </ul>
+      <div className={styles.brandFooter} aria-label={lang === "en" ? "Developed by NexoCeo" : "Desenvolvido por NexoCeo"}>
+        <span className={styles.brandCaption}>{lang === "en" ? "Developed by" : "Desenvolvido por"}</span>
+        <div className={styles.brandIdentity}>
+          <img src="/nexoceo-mark.svg" alt="" width="29" height="29" />
+          <span>NexoCeo</span>
+        </div>
+      </div>
     </nav>
   );
 }
