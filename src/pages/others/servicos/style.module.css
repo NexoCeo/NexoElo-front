@@ -1,6 +1,6 @@
 .container {
   min-height: 100dvh;
-  padding: 96px 24px 32px;
+  padding: 0 24px 32px;
 }
 
 .header {
@@ -374,7 +374,7 @@
 
 @media (max-width: 760px) {
   .container {
-    padding: 84px 12px 24px;
+    padding: 0 12px 24px;
   }
 
   .header {
