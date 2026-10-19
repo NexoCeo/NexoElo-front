@@ -151,7 +151,7 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
               {analyticsExpanded && <div id="analytics-submenu" className={styles.analyticsChildren}>
                 <NavLink to={`${analyticsPath}/metricas`} end className={linkClassName} onClick={closeMenu}>
                   <FaChartBar className={styles.navIcon} aria-hidden="true" />
-                  <span>Métricas</span>
+                  <span>{t("nav.metrics")}</span>
                 </NavLink>
                 {whatsAppLiberado && <NavLink to={`${analyticsPath}/whatsapp-business`} end className={linkClassName} onClick={closeMenu}>
                   <FaWhatsapp className={styles.navIcon} aria-hidden="true" />
