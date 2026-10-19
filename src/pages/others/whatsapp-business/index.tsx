@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { useTheme } from "@/context/ThemeContext";
-import { FaWhatsapp, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
+import { FaWhatsapp, FaCheckCircle, FaExclamationTriangle, FaPaperPlane, FaRegClock, FaBullhorn, FaExternalLinkAlt, FaCog, FaShieldAlt, FaArrowRight } from "react-icons/fa";
 import { buscarStatusWhatsApp, obterConfiguracaoCadastro, concluirCadastro, salvarPreferenciasWhatsApp, desconectarWhatsApp, type WhatsAppStatus, type WhatsAppPreferencias } from "@/services/whatsapp-business-service";
 import styles from "./style.module.css";
 
@@ -86,45 +86,70 @@ export default function WhatsAppBusiness() {
     catch { setMessage("Não foi possível desconectar."); }
     finally { setBusy(false); }
   }
+  const connected = Boolean(status?.conectado);
+  const metrics = [
+    { label: "Mensagens enviadas", value: status?.mensagensEnviadas ?? 0, icon: <FaPaperPlane /> },
+    { label: "Entregues", value: status?.mensagensEntregues ?? 0, icon: <FaCheckCircle /> },
+    { label: "Falhas", value: status?.mensagensFalhas ?? 0, icon: <FaExclamationTriangle /> },
+    { label: "Consumo estimado", value: reais(status?.consumoMes ?? 0), icon: <FaShieldAlt /> }
+  ];
+  const automations = [
+    { key: "confirmacoes", label: "Confirmações de agendamento", detail: "Preferência para informar o cliente sobre novos agendamentos.", icon: <FaCheckCircle /> },
+    { key: "lembretes", label: "Lembretes de atendimento", detail: "Defina com quantas horas de antecedência avisar o cliente.", icon: <FaRegClock /> },
+    { key: "promocoes", label: "Campanhas promocionais", detail: "Somente para contatos com consentimento de marketing.", icon: <FaBullhorn /> }
+  ] as const;
   return <main className={styles.page} style={vars}>
-    <div className={styles.header}>
-      <div><small>ANÁLISE DE DADOS / WHATSAPP BUSINESS</small><h1 className={styles.title}><FaWhatsapp aria-hidden="true" /> WhatsApp Business</h1>
-      <p className={styles.muted}>Gerencie conexão, confirmações, lembretes, promoções e consumo de mensagens da sua empresa.</p></div>
-    </div>
-    {!available && <div role="status" className={styles.notice}><FaExclamationTriangle aria-hidden="true" /> O módulo de WhatsApp Cloud API ainda não foi habilitado para conexões reais. Os envios permanecem desligados até a configuração oficial da Meta.</div>}
-    {message && <p role="status" className={styles.notice}>{message}</p>}
-    <section className={styles.card}>
-      <h2>Conexão com a Meta</h2>
-      {status?.conectado ? <>
-        <p><FaCheckCircle color="#27956c" /> WhatsApp conectado: <strong>{status.numero || "Número autorizado"}</strong></p>
-        <p className={styles.muted}>Nome de exibição: {status.nomeExibicao || "Não informado"} · Situação: {status.status || "Conectado"}</p>
-        <div className={styles.actions}><button className={styles.secondary} type="button" disabled={busy} onClick={disconnect}>Desconectar</button></div>
-      </> : <>
-        <p>Conecte o número comercial usando o cadastro oficial do WhatsApp Embedded Signup. A autenticação ocorre em uma janela segura da Meta.</p>
-        <button className={styles.button} type="button" disabled={busy || !available} onClick={connect}>{busy ? "Aguarde..." : "Conectar WhatsApp Business"}</button>
-        <p className={styles.muted}>O faturamento das mensagens será separado da assinatura NexoElo quando configurado no modelo de cobrança direta da Meta. O cadastro do cartão pode exigir acesso ao ambiente de faturamento da Meta.</p>
-      </>}
+    <header className={styles.hero}>
+      <div className={styles.heroContent}>
+        <div className={styles.heroIcon}><FaWhatsapp aria-hidden="true" /></div>
+        <div className={styles.heroText}>
+          <div className={styles.eyebrow}>INTEGRAÇÕES <span>/</span> COMUNICAÇÃO</div>
+          <h1 className={styles.title}>WhatsApp Business</h1>
+          <p className={styles.muted}>Conecte seu número, gerencie preferências e acompanhe suas mensagens em um só lugar.</p>
+        </div>
+      </div>
+      <div className={styles.heroAside}><span className={connected ? styles.connected : styles.disconnected}><span className={styles.statusDot} /> {connected ? "Número conectado" : "Não conectado"}</span></div>
+    </header>
+    {!available && <div role="status" className={styles.notice}><FaExclamationTriangle aria-hidden="true" /><span><strong>Integração em preparação.</strong> A conexão será liberada após a validação das configurações da Meta e do servidor.</span></div>}
+    {message && <div role="status" className={styles.feedback}><FaCheckCircle aria-hidden="true" /><span>{message}</span></div>}
+    <section className={styles.connectCard} aria-label="Conexão WhatsApp">
+      <div className={styles.connectCopy}>
+        <span className={styles.sectionKicker}>CONEXÃO OFICIAL</span>
+        <h2>{connected ? "Sua conta está vinculada" : "Tudo começa conectando seu WhatsApp"}</h2>
+        <p className={styles.muted}>{connected ? "Seu número está associado a este estabelecimento." : "Autorize sua conta comercial com segurança pelo cadastro oficial da Meta. Não é necessário compartilhar senhas com o NexoElo."}</p>
+        {connected && <div className={styles.phoneInfo}><FaWhatsapp aria-hidden="true" /><div><strong>{status?.numero || "Número autorizado"}</strong><small>{status?.nomeExibicao || "WhatsApp Business"} · {status?.status || "Conectado"}</small></div></div>}
+      </div>
+      <div className={styles.connectActions}>
+        {connected ? <button className={styles.secondary} disabled={busy} onClick={disconnect}>Desconectar número</button> : <button className={styles.button} disabled={busy || !available} onClick={connect}><FaWhatsapp aria-hidden="true" />{busy ? "Conectando..." : "Conectar WhatsApp"}<FaArrowRight aria-hidden="true" /></button>}
+        <span className={styles.microCopy}>Conexão segura com a Meta</span>
+      </div>
     </section>
-    <section className={styles.grid} aria-label="Indicadores de mensagens">
-      {[["Mensagens enviadas", status?.mensagensEnviadas ?? 0],["Entregues",status?.mensagensEntregues ?? 0],["Falhas",status?.mensagensFalhas ?? 0],["Consumo estimado",reais(status?.consumoMes ?? 0)]].map(([label,value]) =>
-        <div className={styles.card} key={label}><span className={styles.muted}>{label}</span><strong className={styles.metric}>{value}</strong></div>)}
+    <section className={styles.metricsSection} aria-labelledby="metrics-title">
+      <div className={styles.sectionHeading}><div><span className={styles.sectionKicker}>VISÃO GERAL</span><h2 id="metrics-title">Resumo de mensagens</h2></div><small className={styles.muted}>Indicadores serão atualizados quando a coleta estiver disponível.</small></div>
+      <div className={styles.metricGrid}>{metrics.map(item => <div className={styles.metricCard} key={item.label}><div className={styles.metricIcon}>{item.icon}</div><span className={styles.metricLabel}>{item.label}</span><strong className={styles.metricValue}>{item.value}</strong></div>)}</div>
     </section>
-    <section className={styles.card}>
-      <h2>Automações de mensagens</h2>
-      <p className={styles.muted}>As mensagens automáticas exigem modelos previamente aprovados pela Meta e consentimento dos destinatários, quando aplicável.</p>
-      {([["confirmacoes","Confirmações de agendamento"],["lembretes","Lembretes antes do atendimento"],["promocoes","Promoções (somente clientes com consentimento)"]] as const).map(([key,label]) =>
-        <label className={styles.toggle} key={key}><input type="checkbox" checked={preferences[key]} disabled={!status?.conectado || busy} onChange={e => setPreferences(old => ({...old,[key]:e.target.checked}))}/><span>{label}</span></label>)}
-      <label className={styles.label} htmlFor="horas">Antecedência do lembrete (horas)</label>
-      <input id="horas" className={styles.input} type="number" min={1} max={168} value={preferences.horasAntecedencia} disabled={!status?.conectado || busy} onChange={e => setPreferences(old => ({...old, horasAntecedencia: Number(e.target.value)}))} />
-      <label className={styles.label} htmlFor="limite">Orçamento mensal máximo autorizado para mensagens (R$)</label>
-      <input id="limite" className={styles.input} type="number" min={0} step={5} value={preferences.limiteMensalReais} disabled={!status?.conectado || busy} onChange={e => setPreferences(old => ({...old, limiteMensalReais: Number(e.target.value)}))} />
-      <p className={styles.muted}>O limite precisa ser aplicado no backend antes de cada envio. Não substitui limites ou cobranças da Meta.</p>
-      <button type="button" className={styles.button} disabled={!status?.conectado || busy} onClick={save}>Salvar configurações</button>
+    <section className={styles.settingsGrid}>
+      <div className={styles.card}>
+        <div className={styles.cardTop}><div className={styles.cardTopIcon}><FaCog aria-hidden="true" /></div><div><span className={styles.sectionKicker}>PREFERÊNCIAS</span><h2>Automações</h2><p className={styles.muted}>Escolha quais recursos deseja habilitar após a ativação do serviço de mensagens.</p></div></div>
+        <div className={styles.automationList}>{automations.map(item => <label className={styles.automationRow} key={item.key}><span className={styles.automationIcon}>{item.icon}</span><span className={styles.automationText}><strong>{item.label}</strong><small>{item.detail}</small></span><span className={styles.switch}><input type="checkbox" checked={preferences[item.key]} disabled={!connected || busy} onChange={e => setPreferences(old => ({...old, [item.key]: e.target.checked}))} /><span className={styles.switchTrack} /></span></label>)}</div>
+        <div className={styles.inlineNotice}><FaExclamationTriangle aria-hidden="true" /> As automações ainda não enviam mensagens; dependem de templates aprovados e do serviço de envio.</div>
+      </div>
+      <div className={styles.card}>
+        <div className={styles.cardTop}><div className={styles.cardTopIcon}><FaRegClock aria-hidden="true" /></div><div><span className={styles.sectionKicker}>CONTROLE</span><h2>Configurações de envio</h2><p className={styles.muted}>Personalize os lembretes e o limite planejado para consumo.</p></div></div>
+        <div className={styles.formFields}>
+          <label className={styles.label} htmlFor="horas">Antecedência dos lembretes <span>(horas)</span></label>
+          <input id="horas" className={styles.input} type="number" min={1} max={168} value={preferences.horasAntecedencia} disabled={!connected || busy} onChange={e => setPreferences(old => ({...old, horasAntecedencia: Number(e.target.value)}))} />
+          <label className={styles.label} htmlFor="limite">Orçamento mensal planejado <span>(R$)</span></label>
+          <input id="limite" className={styles.input} type="number" min={0} step={5} value={preferences.limiteMensalReais} disabled={!connected || busy} onChange={e => setPreferences(old => ({...old, limiteMensalReais: Number(e.target.value)}))} />
+          <p className={styles.helperText}>O orçamento informado ainda não limita cobranças ou envios. A fiscalização de custos precisa ser implementada no servidor.</p>
+          <button type="button" className={styles.button} disabled={!connected || busy} onClick={save}>Salvar preferências <FaArrowRight aria-hidden="true" /></button>
+        </div>
+      </div>
     </section>
-    <section className={styles.card}>
-      <h2>Pagamento e consumo</h2><p>Assinatura NexoElo e mensagens WhatsApp são cobranças independentes quando o estabelecimento utiliza faturamento direto da Meta.</p>
-      <p className={styles.muted}>Para gerenciar cartão, faturas ou pendências, utilize a área de faturamento da conta comercial Meta responsável pelo número. O NexoElo não recebe dados de cartão da Meta.</p>
-      <a href="https://business.facebook.com/" target="_blank" rel="noreferrer">Abrir Meta Business <span aria-hidden="true">↗</span></a>
+    <section className={styles.billingCard}>
+      <div className={styles.billingIcon}><FaShieldAlt aria-hidden="true" /></div>
+      <div className={styles.billingContent}><h2>Pagamento e faturamento</h2><p className={styles.muted}>A assinatura NexoElo é independente das cobranças do WhatsApp. Quando o faturamento direto estiver habilitado, cartões e faturas serão gerenciados na conta comercial da Meta.</p></div>
+      <a className={styles.billingLink} href="https://business.facebook.com/" target="_blank" rel="noreferrer">Abrir Meta Business <FaExternalLinkAlt aria-hidden="true" /></a>
     </section>
   </main>;
 }
