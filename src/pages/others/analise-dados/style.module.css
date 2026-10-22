@@ -95,3 +95,6 @@
 .barCompleted{background:var(--theme-success,#10b981)}
 .barCancelled{background:var(--theme-error,#ef4444)}
 @media(max-width:620px){.chartHeading{align-items:flex-start;flex-wrap:wrap}.chartControls{width:100%;justify-content:flex-start;gap:10px}}
+
+/* Total follows the current theme foreground: white in dark mode, black in light mode. */
+.barAll{background:var(--analysis-text)}
