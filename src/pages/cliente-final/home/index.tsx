@@ -332,9 +332,7 @@ export default function ClienteFinalHome() {
     <div className={styles.container}>
       <header className={styles.topbar}>
         <div className={styles.topbarInner}>
-          {activeSection === "home" && (
-            <h1 className={styles.greeting}>Olá, {cliente?.Nome || "cliente"}</h1>
-          )}
+          <h1 className={styles.greeting}>Olá, {cliente?.Nome || "cliente"}</h1>
           <nav className={styles.navigation} aria-label={t("client.navigation")} role="tablist">
             {navigationItems.map(({ id, Icon }) => (
               <button
