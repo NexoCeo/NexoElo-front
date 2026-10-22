@@ -58,3 +58,15 @@ it("limpa a selecao e atualiza os horarios apos conflito", async () => {
   expect(created).not.toHaveBeenCalled();
   expect(screen.getByRole("button", { name: "Confirmar agendamento" })).toBeDisabled();
 });
+
+it("exibe o formulario completo imediatamente enquanto busca os dados", () => {
+  mocks.clients.mockReturnValue(new Promise(() => {}));
+  mount();
+  expect(screen.getByLabelText("Cliente")).toBeInTheDocument();
+  expect(screen.getByLabelText("Serviço")).toBeInTheDocument();
+  expect(screen.getByLabelText("Data")).toBeInTheDocument();
+  expect(screen.getByLabelText("Horários disponíveis")).toBeInTheDocument();
+  expect(screen.queryByText("Carregando...")).not.toBeInTheDocument();
+  expect(screen.queryByText("Nenhum cliente cadastrado.")).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Confirmar agendamento" })).toBeDisabled();
+});

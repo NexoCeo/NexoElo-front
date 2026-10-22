@@ -105,8 +105,7 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
 
   return <Modal open title={t("booking.new")} onClose={onClose} busy={saving}>
     <form className={styles.form} onSubmit={submit}>
-      {loading ? <p role="status">{t("booking.loading")}</p> : <>
-        <fieldset disabled={saving}>
+        <fieldset disabled={loading || saving} aria-busy={loading}>
           {empresa && profissionais.length > 1 && <label>{t("common.professional")}
             <select required value={profissionalId} onChange={e => { setProfissionalId(Number(e.target.value)); setError(""); }}>
               <option value={0}>{t("booking.select")}</option>
@@ -119,24 +118,23 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
               {clientes.map(c => <option key={c.Id} value={c.Id}>{c.Nome}</option>)}
             </select>
           </label>
-          {clientes.length === 0 && <p>{t("booking.noCustomers")}</p>}
+          {!loading && !error && clientes.length === 0 && <p>{t("booking.noCustomers")}</p>}
           <label>{t("booking.service")}
             <select required value={servicoId} disabled={loadingServices || !responsavelId || (empresa && !profissionalId)} onChange={e => { setServicoId(Number(e.target.value)); setError(""); }}>
-              <option value={0}>{loadingServices ? t("booking.loading") : t("booking.select")}</option>
+              <option value={0}>{t("booking.select")}</option>
               {servicos.map(s => <option key={s.Id} value={s.Id}>{s.NomeServico} · {s.TempoEstimadoMinutos} min</option>)}
             </select>
           </label>
-          {!loadingServices && responsavelId > 0 && (!empresa || profissionalId > 0) && servicos.length === 0 && <p>{t("booking.noServices")}</p>}
+          {!loading && !loadingServices && responsavelId > 0 && (!empresa || profissionalId > 0) && servicos.length === 0 && <p>{t("booking.noServices")}</p>}
           <label>{t("client.date")}<input required type="date" min={formatAgendaDateParam(new Date())} value={day} onChange={e => { setDay(e.target.value); setError(""); }} /></label>
           <label>{t("client.availableSlots")}
             <select required disabled={!servicoId || loadingSlots} value={slot} onChange={e => setSlot(e.target.value)}>
-              <option value="">{loadingSlots ? t("booking.loading") : t("booking.select")}</option>
+              <option value="">{t("booking.select")}</option>
               {slots.map(s => <option key={s.DataAgendamento} value={s.DataAgendamento}>{s.Horario}</option>)}
             </select>
           </label>
           {servicoId > 0 && day && !loadingSlots && slots.length === 0 && <p>{t("client.slotsEmpty")}</p>}
         </fieldset>
-      </>}
       {error && <p role="alert" className={styles.error}>{error}</p>}
       <div className={styles.actions}>
         <button type="button" disabled={saving} onClick={onClose}>{t("common.close")}</button>
