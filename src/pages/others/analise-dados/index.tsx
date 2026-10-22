@@ -155,7 +155,7 @@ export default function AnaliseDados() {
               return <div className={styles.chartMonth} key={item.mes}
                 title={`${nomesMeses[index]} ${anoGrafico}: ${total} ${statusGrafico === "TODOS" ? "agendamentos" : statusGrafico.toLowerCase()}`}>
                 <div className={styles.chartBarTrack}>
-                  <div className={`${styles.chartBar} ${statusGrafico === "CONCLUIDO" ? styles.barCompleted : statusGrafico === "CANCELADO" ? styles.barCancelled : styles.barScheduled}`}
+                  <div className={`${styles.chartBar} ${statusGrafico === "CONCLUIDO" ? styles.barCompleted : statusGrafico === "CANCELADO" ? styles.barCancelled : statusGrafico === "TODOS" ? styles.barAll : styles.barScheduled}`}
                     style={{ height: `${100 * total / maxGrafico}%` }} />
                   
                 </div>
