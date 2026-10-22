@@ -122,7 +122,6 @@ export default function Profissionais() {
   const [modalOpen, setModalOpen] = useState(false);
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
-  const [success, setSuccess] = useState("");
   const [whatsAppShare, setWhatsAppShare] = useState<WhatsAppShare | null>(null);
 
   const [fotoPerfil, setFotoPerfil] = useState<File | null>(null);
@@ -309,7 +308,6 @@ export default function Profissionais() {
     try {
       setSavingServicos(true);
       setServicosError("");
-      setSuccess("");
 
       // O endpoint substitui a lista completa de servicos deste profissional.
       await salvarServicosDoProfissional(
@@ -317,8 +315,6 @@ export default function Profissionais() {
         empresaId,
         servicoIdsSelecionados,
       );
-
-      setSuccess(`Servicos de ${profissionalEmEdicao.Nome} atualizados com sucesso.`);
       showNotification({
         type: "success",
         title: "Servicos atualizados",
@@ -396,11 +392,6 @@ export default function Profissionais() {
         items.filter((item) => item.VinculoId !== solicitacao.VinculoId),
       );
       if (status === "APROVADO") await refreshProfissionais();
-      setSuccess(
-        status === "APROVADO"
-          ? `${solicitacao.Nome} foi vinculado a empresa.`
-          : `Solicitacao de ${solicitacao.Nome} recusada.`,
-      );
       showNotification({
         type: "success",
         title: status === "APROVADO" ? "Vinculo aprovado" : "Solicitacao recusada",
@@ -422,7 +413,6 @@ export default function Profissionais() {
   async function handleCreateProfissional(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError("");
-    setSuccess("");
 
     if (!empresaId || !isEmpresa) {
       const message = "Apenas empresas podem criar profissionais.";
@@ -473,7 +463,6 @@ export default function Profissionais() {
         localizacao: localizacaoPayload,
       });
       await refreshProfissionais(access.profissional);
-      setSuccess("Profissional criado com sucesso.");
 
       const accessEmail = access.profissional.Email || email.trim();
       const accessPhone = access.profissional.Telefone || telefone;
@@ -562,7 +551,6 @@ export default function Profissionais() {
         </div>
       </section>
 
-      {success && <p className={styles.success}>{success}</p>}
       {error && <p className={styles.error}>{error}</p>}
 
       <section className={styles.tableWrap} style={{ backgroundColor: theme.colors.background2 }}>
