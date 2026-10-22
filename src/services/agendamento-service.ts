@@ -73,6 +73,7 @@ function normalizeAgendamento(agendamento: ApiRecord): Agendamento {
     Taxa: pickNumber(agendamento, ["Taxa", "taxa"]),
     ValorServico: pickNumber(agendamento, ["ValorServico", "valorServico"]),
     Status: pickString(agendamento, ["Status", "status"]) || "AGENDADO",
+    MotivoCancelamento: pickString(agendamento, ["MotivoCancelamento", "motivoCancelamento"]) || null,
     ClienteNome: pickString(agendamento, ["ClienteNome", "clienteNome"]),
     ServicoNome: pickString(agendamento, ["ServicoNome", "servicoNome"]),
     ProfissionalNome: pickString(agendamento, ["ProfissionalNome", "profissionalNome"]),
