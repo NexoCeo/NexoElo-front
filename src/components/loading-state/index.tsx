@@ -5,13 +5,14 @@ type LoadingStateProps = {
   compact?: boolean;
   dense?: boolean;
   embedded?: boolean;
-  variant?: "cards" | "table" | "form" | "profile" | "analytics";
+  variant?: "cards" | "table" | "form" | "profile" | "analytics" | "agenda";
 };
 
 function inferVariant(): NonNullable<LoadingStateProps["variant"]> {
   const path = window.location.pathname.toLowerCase();
   if (path.includes("analise-dados") || path.includes("dashboard")) return "analytics";
-  if (path.includes("agenda") || path.includes("relatorios") || path.includes("profissionais")) return "table";
+  if (path.includes("/agenda")) return "agenda";
+  if (path.includes("relatorios") || path.includes("profissionais")) return "table";
   if (path.includes("perfil")) return "profile";
   if (path.includes("funcionamento") || path.includes("register") || path.includes("assinatura")) return "form";
   return "cards";
@@ -26,7 +27,25 @@ export default function LoadingState({ label = "Carregando", compact = false, de
   return (
     <div className={`${styles.loading} ${compact ? styles.compact : ""} ${dense ? styles.dense : ""} ${embedded ? styles.embedded : ""}`} role="status" aria-live="polite" aria-label={label} aria-busy="true">
       <span className={styles.srOnly}>{label}</span>
-      {compact ? <div className={styles.compactLines}><Bar width="65%"/><Bar width="86%"/><Bar width="44%"/></div> : (
+      {!compact && kind === "agenda" ? (
+        <div className={styles.agendaShell}>
+          <aside className={styles.agendaSide} aria-hidden="true">
+            <div className={styles.agendaToggle}><Bar width="45%"/><Bar width="42%"/></div>
+            <div className={styles.agendaCalendar}>
+              <Bar width="100%"/>
+              <div className={styles.agendaDays}>{Array.from({length:35},(_,i)=><Bar key={i} width="65%"/>)}</div>
+            </div>
+            {[0,1,2].map(i=><div key={i} className={styles.agendaAction}><Bar width="68%"/></div>)}
+          </aside>
+          <section className={styles.agendaMain} aria-hidden="true">
+            <div className={styles.agendaHeading}><div><Bar width="65%"/><Bar width="40%"/></div><Bar width="20%"/></div>
+            <div className={styles.agendaTable}>
+              <div className={styles.agendaTableHeader}>{Array.from({length:7},(_,i)=><Bar key={i} width="60%"/>)}</div>
+              <div className={styles.agendaTableBody}>{[0,1,2,3,4].map(i=><div className={styles.agendaTableRow} key={i}>{[0,1,2,3,4,5,6].map(j=><Bar key={j} width={j===0?"75%":"58%"}/>)}</div>)}</div>
+            </div>
+          </section>
+        </div>
+      ) : compact ? <div className={styles.compactLines}><Bar width="65%"/><Bar width="86%"/><Bar width="44%"/></div> : (
         <div className={styles.page}>
           {kind === "profile" ? (
             <div className={styles.profile}>
