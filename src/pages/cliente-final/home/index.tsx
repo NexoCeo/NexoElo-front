@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { createAgendaRealtimeClient } from "@/services/agenda-realtime-service";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FaCalendarAlt,
   FaCheck,
@@ -6,7 +7,6 @@ import {
   FaHome,
   FaPlus,
   FaSignOutAlt,
-  FaSyncAlt,
   FaTimes,
   FaUser,
 } from "react-icons/fa";
@@ -186,31 +186,64 @@ export default function ClienteFinalHome() {
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [statusFeedback, setStatusFeedback] = useState<StatusFeedback | null>(null);
 
-  const loadAppointments = useCallback(async () => {
+  const requestPending = useRef(false);
+  const requestGeneration = useRef(0);
+
+  const loadAppointments = useCallback(async (silent = false) => {
+    if (requestPending.current) return;
     if (!cliente?.Id) {
       setAppointments([]);
       setLoading(false);
       return;
     }
 
-    setLoading(true);
-    setError("");
+    requestPending.current = true;
+    const generation = requestGeneration.current;
+    if (!silent) setLoading(true);
     try {
       const data = await listarHistoricoAgendamentos(cliente.Id);
+      if (generation !== requestGeneration.current) return;
       setAppointments(data);
       setError("");
     } catch {
+      if (generation !== requestGeneration.current) return;
       setError(lang === "pt"
-        ? "Seus agendamentos estão temporariamente indisponíveis. Tente novamente."
-        : "Your appointments are temporarily unavailable. Please try again.");
+        ? "Aguardando conexão para atualizar seus agendamentos automaticamente."
+        : "Waiting for a connection to update your appointments automatically.");
     } finally {
-      setLoading(false);
+      if (generation === requestGeneration.current) {
+        requestPending.current = false;
+        setLoading(false);
+      }
     }
   }, [cliente?.Id, lang]);
 
   useEffect(() => {
     void loadAppointments();
-  }, [loadAppointments]);
+    const refresh = () => {
+      if (document.visibilityState === "visible" && navigator.onLine !== false) {
+        void loadAppointments(true);
+      }
+    };
+    const realtime = cliente?.Id ? createAgendaRealtimeClient({
+      onAgendaUpdated: refresh,
+      onStatusChange: status => { if (status === "connected") refresh(); },
+    }) : null;
+    realtime?.start();
+    const interval = window.setInterval(refresh, 15_000);
+    window.addEventListener("focus", refresh);
+    window.addEventListener("online", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      requestGeneration.current += 1;
+      requestPending.current = false;
+      window.clearInterval(interval);
+      window.removeEventListener("focus", refresh);
+      window.removeEventListener("online", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+      void realtime?.stop();
+    };
+  }, [loadAppointments, cliente?.Id]);
 
   const upcomingAppointments = useMemo(
     () => appointments.filter(isUpcoming).sort(
@@ -376,10 +409,10 @@ export default function ClienteFinalHome() {
 
               {loading ? (
                 <div className={styles.feedback} role="status">{t("client.loading")}</div>
-              ) : error ? (
+              ) : error && appointments.length === 0 ? (
                 <div className={styles.feedback} role="alert">
                   <span>{error}</span>
-                  <button type="button" onClick={() => void loadAppointments()}>{t("client.retry")}</button>
+
                 </div>
               ) : upcomingAppointments[0] ? (
                 <AppointmentCard
@@ -412,23 +445,14 @@ export default function ClienteFinalHome() {
               <div>
                 <h1>{lang === "pt" ? "Histórico de Agendamentos" : "Appointment History"}</h1>
               </div>
-              <button
-                type="button"
-                className={styles.secondaryButton}
-                onClick={() => void loadAppointments()}
-                disabled={loading}
-              >
-                <FaSyncAlt className={loading ? styles.rotating : undefined} aria-hidden="true" />
-                Atualizar
-              </button>
             </header>
 
             {loading ? (
               <div className={styles.feedback} role="status">{t("client.historyLoading")}</div>
-            ) : error ? (
+            ) : error && appointments.length === 0 ? (
               <div className={styles.feedback} role="alert">
                 <span>{error}</span>
-                <button type="button" onClick={() => void loadAppointments()}>{t("client.retry")}</button>
+
               </div>
             ) : appointments.length === 0 ? (
               <div className={styles.emptyState}>
