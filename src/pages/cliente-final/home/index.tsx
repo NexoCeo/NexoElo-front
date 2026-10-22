@@ -298,16 +298,6 @@ export default function ClienteFinalHome() {
     <div className={styles.container}>
       <header className={styles.topbar}>
         <div className={styles.topbarInner}>
-          <button
-            type="button"
-            className={styles.brand}
-            onClick={() => setActiveSection("home")}
-            aria-label={t("client.goHome")}
-          >
-            <span aria-hidden="true">CF</span>
-            <strong>{t("client.account")}</strong>
-          </button>
-
           <nav className={styles.navigation} aria-label={t("client.navigation")} role="tablist">
             {navigationItems.map(({ id, Icon }) => (
               <button
