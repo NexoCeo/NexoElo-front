@@ -188,12 +188,15 @@ export default function MinhaAssinatura() {
                   <span className={plano.relatorios ? "" : styles.off}>{plano.relatorios ? t("subscription.reports") : t("subscription.noReports")}</span>
                 </li>
                 <li className={styles.feature}><FaCheck className={styles.featureIcon} aria-hidden="true" /> {t("subscription.agenda")}</li>
-                {plano.id === "AVANCADO" && (
-                  <li className={styles.feature}>
-                    <FaCheck className={styles.featureIcon} aria-hidden="true" />
-                    <span>{t("subscription.whatsappAutomation")} <span className={styles.comingSoon}>{t("subscription.inDevelopment")}</span></span>
-                  </li>
-                )}
+                <li className={styles.feature}>
+                  {plano.id === "AVANCADO"
+                    ? <FaCheck className={styles.featureIcon} aria-hidden="true" />
+                    : <FaTimes className={styles.off} aria-hidden="true" />}
+                  <span className={plano.id === "AVANCADO" ? "" : styles.off}>
+                    {t("subscription.whatsappAutomation")}
+                    {plano.id === "AVANCADO" && <> <span className={styles.comingSoon}>{t("subscription.inDevelopment")}</span></>}
+                  </span>
+                </li>
               </ul>
               <button className={styles.button} type="button"
                 disabled={loading || carregandoRecursos || Boolean(pending) || !usuario?.Id || atual || !assinatura}
