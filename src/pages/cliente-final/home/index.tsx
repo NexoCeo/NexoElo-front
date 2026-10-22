@@ -23,7 +23,7 @@ import { logout } from "@/services/logout-service";
 import { useNotification } from "@/context/NotificationContext";
 import type { Agendamento } from "@/types/agendamento";
 import styles from "./style.module.css";
-import { formatPersonName, formatEmailDisplay } from "@/utils/person-display";
+import { formatPersonName, formatEmailDisplay } from "@/context/UserContext";
 import ProfileOverview from "@/components/profile-overview";
 import { useLanguage } from "@/context/LanguageContext";
 
