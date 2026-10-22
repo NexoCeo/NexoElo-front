@@ -53,6 +53,16 @@ const navigationItems: Array<{
   { id: "perfil", label: "Perfil", Icon: FaUser },
 ];
 
+function formatDisplayName(value?: string | null) {
+  return (value || "").trim().replace(/\s+/g, " ").toLocaleLowerCase("pt-BR")
+    .replace(/(^|[\s'-])([\p{L}])/gu, (_, separator: string, letter: string) =>
+      separator + letter.toLocaleUpperCase("pt-BR"));
+}
+
+function formatDisplayEmail(value?: string | null) {
+  return value?.trim().toLowerCase() || undefined;
+}
+
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -333,7 +343,7 @@ export default function ClienteFinalHome() {
     <div className={styles.container}>
       <header className={styles.topbar}>
         <div className={styles.topbarInner}>
-          <h1 className={styles.greeting}>Olá, {cliente?.Nome || "cliente"}</h1>
+          <h1 className={styles.greeting}>Olá, {formatDisplayName(cliente?.Nome) || "cliente"}</h1>
           <nav className={styles.navigation} aria-label={t("client.navigation")} role="tablist">
             {navigationItems.map(({ id, Icon }) => (
               <button
@@ -512,9 +522,9 @@ export default function ClienteFinalHome() {
             className={styles.view}
           >
             <ProfileOverview
-              name={cliente?.Nome || "Cliente"}
+              name={formatDisplayName(cliente?.Nome) || "Cliente"}
               role="Cliente"
-              email={cliente?.Email}
+              email={formatDisplayEmail(cliente?.Email)}
               phone={cliente?.Telefone}
             />
           </section>
