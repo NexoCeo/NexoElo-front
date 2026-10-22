@@ -1,6 +1,8 @@
 .listSection {
   /* Reserve a mesma altura nos estados carregando, vazio e com poucos registros. */
   min-height: 390px;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   min-width: 0;
   overflow: hidden;
@@ -190,6 +192,7 @@
 }
 
 .emptyState {
+  flex: 1 0 auto;
   flex-direction: column;
   gap: 7px;
   color: var(--theme-text-muted);
