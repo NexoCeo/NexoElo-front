@@ -547,3 +547,25 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+.scheduleRegion {
+  height: 180px;
+  min-width: 0;
+  overflow: hidden;
+}
+.scheduleRegion .scheduleFieldset {
+  height: 100%;
+  box-sizing: border-box;
+  display: block;
+}
+.scheduleHidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+.scheduleRegion .timeGrid {
+  max-height: 150px;
+  overflow-y: auto;
+  align-content: start;
+  padding: 2px;
+  box-sizing: border-box;
+}
