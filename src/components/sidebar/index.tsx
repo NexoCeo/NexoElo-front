@@ -109,6 +109,15 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
           </NavLink>
         </li>
 
+        {usuario?.Papel === "EMPRESA" && (
+          <li className={styles.navItem}>
+            <NavLink to="/empresa/profissionais" end className={linkClassName} onClick={closeMenu}>
+              <FaPerson className={styles.navIcon} aria-hidden="true" />
+              <span>{t("nav.professionals")}</span>
+            </NavLink>
+          </li>
+        )}
+
         {canManageSharedSettings && (
           <li className={styles.navItem}>
             <NavLink to={`${basePath}/servicos`} end className={linkClassName} onClick={closeMenu}>
@@ -163,14 +172,6 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
           </li>
         )}
 
-        {usuario?.Papel === "EMPRESA" && (
-          <li className={styles.navItem}>
-            <NavLink to="/empresa/profissionais" end className={linkClassName} onClick={closeMenu}>
-              <FaPerson className={styles.navIcon} aria-hidden="true" />
-              <span>{t("nav.professionals")}</span>
-            </NavLink>
-          </li>
-        )}
       </ul>
       <div className={styles.brandFooter} aria-label={footerEnglish ? "Developed by NexoCeo" : "Desenvolvido por NexoCeo"}>
         <span className={styles.brandCaption}>{footerEnglish ? "Developed by" : "Desenvolvido por"}</span>
