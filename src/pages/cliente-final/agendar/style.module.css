@@ -1,6 +1,6 @@
 .container {
   min-height: 100dvh;
-  padding: 16px 32px 104px;
+  padding: 8px 32px 104px;
   box-sizing: border-box;
   background: var(--theme-background);
   color: var(--theme-text);
@@ -8,9 +8,9 @@
 
 .header {
   width: min(100%, 1160px);
-  margin: 0 auto 20px;
+  margin: 0 auto 12px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
 }
@@ -24,6 +24,7 @@
 .header h1 {
   margin: 0;
   font-size: 30px;
+  line-height: 1;
 }
 
 .header a {
@@ -445,17 +446,18 @@
 
 @media (max-width: 760px) {
   .container {
-    padding: 12px 12px 104px;
+    padding: 8px 12px 104px;
   }
 
   .header {
-    align-items: stretch;
-    flex-direction: column;
-    margin-bottom: 16px;
+    align-items: flex-start;
+    flex-direction: row;
+    margin-bottom: 12px;
   }
 
   .header a {
-    width: 100%;
+    width: auto;
+    flex-shrink: 0;
     box-sizing: border-box;
   }
 
