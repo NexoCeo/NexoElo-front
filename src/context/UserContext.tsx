@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useState } from "react";
+import { formatPersonName, formatEmailDisplay } from "@/utils/person-display";
 
 export type Usuario = {
   Id: number;
@@ -19,24 +20,19 @@ type UserContextType = {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-const capitalizeName = (nome: string) => {
-  if (!nome) {
-    return "";
-  }
-
-  return nome
-    .toLowerCase()
-    .split(" ")
-    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-    .join(" ");
-};
+const normalizeUsuario = (value: Usuario): Usuario => ({
+  ...value,
+  Nome: formatPersonName(value.Nome),
+  Email: formatEmailDisplay(value.Email),
+  Papel: value.Papel?.toUpperCase() ?? "",
+});
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [usuario, setUsuarioState] = useState<Usuario | null>(() => {
     if (typeof window === "undefined") return null;
     try {
       const stored = window.sessionStorage.getItem("usuario");
-      return stored ? JSON.parse(stored) as Usuario : null;
+      return stored ? normalizeUsuario(JSON.parse(stored) as Usuario) : null;
     } catch {
       window.sessionStorage.removeItem("usuario");
       return null;
@@ -45,12 +41,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
   const setUsuario = useCallback((novoUsuario: Usuario | null) => {
     if (novoUsuario) {
-      const usuarioFormatado = {
-        ...novoUsuario,
-        Nome: capitalizeName(novoUsuario.Nome),
-        Email: novoUsuario.Email?.toLowerCase() ?? "",
-        Papel: novoUsuario.Papel?.toUpperCase() ?? "",
-      };
+      const usuarioFormatado = normalizeUsuario(novoUsuario);
       setUsuarioState(usuarioFormatado);
       sessionStorage.setItem("usuario", JSON.stringify(usuarioFormatado));
     } else {
