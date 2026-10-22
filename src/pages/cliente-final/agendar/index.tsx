@@ -513,7 +513,6 @@ export default function ClienteFinalAgendar() {
     <main className={styles.container}>
       <header className={styles.header}>
         <div>
-          <span>{t("client.final")}</span>
           <h1>{t("client.booking")}</h1>
         </div>
         <Link to={cliente ? "/cliente-final/home" : loginUrl}>
