@@ -34,3 +34,9 @@
 .chartBar>div{min-height:0}
 .chartMonthLabel{margin-top:7px;font-size:11px;color:var(--analysis-muted);text-transform:capitalize}
 @media(max-width:620px){.chartSection{padding:14px}.chartPlot{grid-template-columns:27px minmax(0,1fr);gap:6px}.chartMonths{gap:3px}.chartMonthLabel{font-size:9px}.chartLegend{gap:9px}.chartHeading .sectionName{font-size:15px}}
+
+/* Recuperação e histórico lado a lado; marketing ocupa a linha seguinte. */
+.grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.appointmentHistory{margin-top:0;padding-top:22px;border-top:1px solid var(--analysis-border)}
+.marketingSection{grid-column:1/-1}
+@media(max-width:960px){.grid{grid-template-columns:1fr}.marketingSection{grid-column:auto}}
