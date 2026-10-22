@@ -213,3 +213,91 @@
     grid-template-columns: 1fr;
   }
 }
+
+.registerContainer {
+  padding: 12px;
+}
+
+.registerPanel {
+  width: min(100%, 400px);
+  padding: 18px;
+  gap: 10px;
+}
+
+.registerPanel .heading {
+  gap: 8px;
+  margin-bottom: 0;
+}
+
+.registerPanel .heading h1 {
+  font-size: 20px;
+}
+
+.registerPanel .mark {
+  width: 32px;
+  height: 32px;
+  font-size: 12px;
+}
+
+.registerPanel .field,
+.registerPanel .photoField {
+  gap: 4px;
+  font-size: 12px;
+}
+
+.registerPanel .photoControl {
+  min-height: 44px;
+  padding: 6px 10px;
+  gap: 8px;
+}
+
+.registerPanel .photoControl strong {
+  font-size: 12px;
+}
+
+.registerPanel .photoPreview {
+  width: 30px;
+  height: 30px;
+  flex-basis: 30px;
+}
+
+.registerPanel .inputWrap {
+  min-height: 36px;
+  padding: 0 10px;
+  gap: 6px;
+}
+
+.registerPanel .inputWrap input {
+  font-size: 13px;
+}
+
+.registerPanel .inputWrap button {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.registerPanel .submit {
+  height: 36px;
+  font-size: 13px;
+}
+
+.registerPanel .link,
+.registerPanel .error {
+  font-size: 12px;
+}
+
+@media (max-width: 520px) {
+  .registerContainer {
+    padding: 8px;
+  }
+
+  .registerPanel {
+    padding: 14px;
+    gap: 8px;
+  }
+
+  .registerPanel .heading h1 {
+    font-size: 18px;
+  }
+}
