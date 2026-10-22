@@ -10,14 +10,9 @@ import { obterStatusVinculoProfissional } from "@/services/vinculo-service";
 import type { HorarioDisponivel, ProfissionalAgendamento, UsuarioAgendamento } from "@/types/agendamento";
 import type { Servico } from "@/types/servico";
 import styles from "./style.module.css";
+import { formatPersonName } from "@/utils/person-display";
 
 type Props = { date: Date; professionalId: number; onClose: () => void; onCreated: (date: string) => void };
-
-function formatClientName(value: string) {
-  return value.trim().replace(/\s+/g, " ").toLocaleLowerCase("pt-BR")
-    .replace(/(^|[\s'-])([\p{L}])/gu, (_, separator: string, letter: string) =>
-      separator + letter.toLocaleUpperCase("pt-BR"));
-}
 
 export default function AgendaBooking({ date, professionalId, onClose, onCreated }: Props) {
   const { usuario } = useUser();
@@ -117,13 +112,13 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
           {empresa && profissionais.length > 1 && <label>{t("common.professional")}
             <select required value={profissionalId} onChange={e => { setProfissionalId(Number(e.target.value)); setError(""); }}>
               <option value={0}>{t("booking.select")}</option>
-              {profissionais.map(p => <option key={p.Id} value={p.Id}>{p.Nome}</option>)}
+              {profissionais.map(p => <option key={p.Id} value={p.Id}>{formatPersonName(p.Nome)}</option>)}
             </select>
           </label>}
           <label>{t("booking.customer")}
             <select required value={clienteId} onChange={e => setClienteId(Number(e.target.value))}>
               <option value={0}>{t("booking.select")}</option>
-              {clientes.map(c => <option key={c.Id} value={c.Id}>{formatClientName(c.Nome)}</option>)}
+              {clientes.map(c => <option key={c.Id} value={c.Id}>{formatPersonName(c.Nome)}</option>)}
             </select>
           </label>
           {!loading && !error && clientes.length === 0 && <p>{t("booking.noCustomers")}</p>}
