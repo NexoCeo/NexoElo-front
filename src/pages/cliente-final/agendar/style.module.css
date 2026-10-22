@@ -459,10 +459,13 @@
     width: auto;
     flex-shrink: 0;
     box-sizing: border-box;
+    height: 32px;
+    padding: 0 12px;
+    font-size: 12px;
   }
 
   .header h1 {
-    font-size: 26px;
+    font-size: 20px;
   }
 
   .form {
@@ -526,6 +529,20 @@
 }
 
 @media (max-width: 420px) {
+  .header {
+    gap: 8px;
+  }
+
+  .header h1 {
+    font-size: 18px;
+  }
+
+  .header a {
+    height: 30px;
+    padding: 0 10px;
+    font-size: 11px;
+  }
+
   .optionGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
