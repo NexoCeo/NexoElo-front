@@ -46,8 +46,8 @@ export default function ClienteFinalRegister() {
   }, [fotoPerfil]);
 
   return (
-    <main className={styles.container}>
-      <form className={styles.panel} onSubmit={handleSubmit}>
+    <main className={`${styles.container} ${styles.registerContainer}`}>
+      <form className={`${styles.panel} ${styles.registerPanel}`} onSubmit={handleSubmit}>
         <div className={styles.heading}>
           <span className={styles.mark}>CF</span>
           <h1>{t("auth.createAccount")}</h1>
