@@ -1,3 +1,4 @@
+import { formatPersonName } from "@/utils/person-display";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { FaBullhorn, FaChartLine, FaClock, FaEnvelope, FaUserClock, FaUsers } from "react-icons/fa";
 import { useTheme } from "@/context/ThemeContext";
@@ -32,7 +33,7 @@ function agruparClientes(agendamentos: Agendamento[], referencia: Date): Cliente
     if (!Number.isFinite(data.getTime()) || data > referencia) continue;
     const anterior = clientes.get(agendamento.ClienteId);
     clientes.set(agendamento.ClienteId, {
-      nome: agendamento.ClienteNome || anterior?.nome || "Cliente #" + agendamento.ClienteId,
+      nome: formatPersonName(agendamento.ClienteNome) || anterior?.nome || "Cliente #" + agendamento.ClienteId,
       ultimaVisita: anterior && anterior.ultimaVisita > data ? anterior.ultimaVisita : data,
       visitas: (anterior?.visitas || 0) + 1,
     });
