@@ -65,6 +65,13 @@ export default function AnaliseDados() {
 
   const clientes = useMemo(() => agruparClientes(historico, new Date()), [historico]);
   const inativos = useMemo(() => clientes.filter(cliente => cliente.diasSemVisitar >= filtro), [clientes, filtro]);
+  const todosAgendamentos = useMemo(() => [...historico].sort((a, b) =>
+    new Date(b.DataAgendamento).getTime() - new Date(a.DataAgendamento).getTime()), [historico]);
+  const contagens = useMemo(() => ({
+    agendado: historico.filter(item => item.Status.toUpperCase() === "AGENDADO").length,
+    concluido: historico.filter(item => item.Status.toUpperCase() === "CONCLUIDO").length,
+    cancelado: historico.filter(item => item.Status.toUpperCase() === "CANCELADO").length,
+  }), [historico]);
   const cssVars = {
     "--analysis-panel": theme.colors.background2,
     "--analysis-text": theme.colors.text,
@@ -104,6 +111,42 @@ export default function AnaliseDados() {
               </div>)}
             </div> : <div className={styles.empty}>{t("analytics.empty")}</div>}
             <p className={styles.note}>{t("analytics.note")}</p>
+            <div className={styles.appointmentHistory}>
+              <div className={styles.sectionName}>{lang === "pt" ? "Todos os agendamentos" : "All appointments"}</div>
+              <p className={styles.historySummary}>
+                {lang === "pt"
+                  ? `Total: ${historico.length} · Agendados: ${contagens.agendado} · Concluídos: ${contagens.concluido} · Cancelados: ${contagens.cancelado}`
+                  : `Total: ${historico.length} · Scheduled: ${contagens.agendado} · Completed: ${contagens.concluido} · Cancelled: ${contagens.cancelado}`}
+              </p>
+              <div className={styles.historyHeader}>
+                <span>{t("analytics.customer")}</span>
+                <span>{lang === "pt" ? "Serviço e data" : "Service and date"}</span>
+                <span>Status</span>
+                <span>{lang === "pt" ? "Motivo do cancelamento" : "Cancellation reason"}</span>
+              </div>
+              <div className={styles.historyList}>
+                {todosAgendamentos.map(item => {
+                  const data = new Date(item.DataAgendamento);
+                  const status = item.Status.toUpperCase();
+                  return <div className={styles.historyItem} key={item.Id}>
+                    <strong>{formatPersonName(item.ClienteNome) || `Cliente #${item.ClienteId}`}</strong>
+                    <span><strong>{item.ServicoNome}</strong><small>{Number.isFinite(data.getTime())
+                      ? new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US", { dateStyle: "short", timeStyle: "short" }).format(data)
+                      : item.DataAgendamento}</small></span>
+                    <span className={styles.historyStatus}>{status === "CONCLUIDO"
+                      ? (lang === "pt" ? "Concluído" : "Completed")
+                      : status === "CANCELADO" ? (lang === "pt" ? "Cancelado" : "Cancelled")
+                      : status === "AGENDADO" ? (lang === "pt" ? "Agendado" : "Scheduled") : status}</span>
+                    <span>{status === "CANCELADO"
+                      ? item.MotivoCancelamento || (lang === "pt" ? "Motivo não registrado" : "Reason not recorded")
+                      : "—"}</span>
+                  </div>;
+                })}
+                {!todosAgendamentos.length && <div className={styles.empty}>
+                  {lang === "pt" ? "Nenhum agendamento registrado." : "No appointments recorded."}
+                </div>}
+              </div>
+            </div>
           </>}
       </section>
       <section className={styles.section}>
