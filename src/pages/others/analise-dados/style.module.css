@@ -87,3 +87,11 @@
     height: 490px;
   }
 }
+
+/* O filtro de status substitui a legenda; cada barra representa apenas o recorte selecionado. */
+.chartControls{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-wrap:wrap}
+.chartLegend{justify-content:flex-end}
+.barScheduled{background:var(--analysis-primary)}
+.barCompleted{background:var(--theme-success,#10b981)}
+.barCancelled{background:var(--theme-error,#ef4444)}
+@media(max-width:620px){.chartHeading{align-items:flex-start;flex-wrap:wrap}.chartControls{width:100%;justify-content:flex-start;gap:10px}}
