@@ -1,4 +1,4 @@
-import { formatPersonName } from "@/utils/person-display";
+import { formatPersonName } from "@/context/UserContext";
 import LoadingState from "@/components/loading-state";
 import { useTheme } from "@/context/ThemeContext";
 import { useEffect, useMemo, useState } from "react";
