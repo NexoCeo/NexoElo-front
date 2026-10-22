@@ -1,6 +1,7 @@
 .container {
   min-height: 100dvh;
-  padding: 32px;
+  padding: 32px 32px 104px;
+  box-sizing: border-box;
   background: var(--theme-background);
   color: var(--theme-text);
 }
@@ -400,7 +401,13 @@
 }
 
 .submitButton {
-  width: 100%;
+  position: fixed;
+  z-index: 50;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(1160px, calc(100% - 64px));
+  box-sizing: border-box;
   min-height: 52px;
   border: 0;
   border-radius: 8px;
@@ -436,7 +443,7 @@
 
 @media (max-width: 760px) {
   .container {
-    padding: 20px 12px 28px;
+    padding: 20px 12px 104px;
   }
 
   .header {
@@ -568,4 +575,10 @@
   align-content: start;
   padding: 2px;
   box-sizing: border-box;
+}
+
+@media (max-width: 760px) {
+  .submitButton {
+    width: calc(100% - 24px);
+  }
 }
