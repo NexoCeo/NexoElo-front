@@ -33,6 +33,7 @@ export type Agendamento = {
   Taxa: number;
   ValorServico: number;
   Status: string;
+  MotivoCancelamento?: string | null;
   ClienteNome: string;
   ServicoNome: string;
   ProfissionalNome: string;
