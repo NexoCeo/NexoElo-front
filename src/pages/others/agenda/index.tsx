@@ -21,7 +21,7 @@ import {
 import type { Agendamento } from "@/types/agendamento";
 import type { Profissional } from "@/types/profissional";
 import styles from "./style.module.css";
-import { formatPersonName } from "@/utils/person-display";
+import { formatPersonName } from "@/context/UserContext";
 import { useLanguage } from "@/context/LanguageContext";
 
 const REFRESH_INTERVAL_MS = 15_000;
