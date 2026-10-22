@@ -34,11 +34,6 @@ type ApiError = {
   title?: string;
 };
 
-type ActionFeedback = {
-  kind: "success" | "error";
-  text: string;
-};
-
 function getApiError(error: unknown, fallback: string) {
   if (!axios.isAxiosError<ApiError>(error)) return fallback;
   const data = error.response?.data;
@@ -109,7 +104,6 @@ export default function Agenda() {
 
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [closingDay, setClosingDay] = useState(false);
-  const [actionFeedback, setActionFeedback] = useState<ActionFeedback | null>(null);
 
   const selectedDateKeyRef =
     useRef(selectedDateKey);
@@ -399,19 +393,12 @@ export default function Agenda() {
     status: "CANCELADO" | "CONCLUIDO",
   ) {
     setUpdatingId(agendamentoId);
-    setActionFeedback(null);
 
     try {
       const updated = await atualizarStatusAgendamento(agendamentoId, status);
       setAgendamentos((items) => items.map((item) => (
         item.Id === agendamentoId ? { ...item, ...updated } : item
       )));
-      setActionFeedback({
-        kind: "success",
-        text: status === "CANCELADO"
-          ? t("agenda.canceled")
-          : t("agenda.completed"),
-      });
       showNotification({
         type: "success",
         title: status === "CANCELADO" ? t("agenda.canceledTitle") : t("agenda.completedTitle"),
@@ -419,10 +406,6 @@ export default function Agenda() {
       });
     } catch (actionError) {
       const message = getApiError(actionError, t("agenda.updateFailed"));
-      setActionFeedback({
-        kind: "error",
-        text: message,
-      });
       showNotification({ type: "error", title: "Status não atualizado", message });
     } finally {
       setUpdatingId(null);
@@ -431,7 +414,6 @@ export default function Agenda() {
 
   async function handleCloseCurrentDay() {
     setClosingDay(true);
-    setActionFeedback(null);
 
     try {
       const quantidade = await concluirAgendamentosDoDiaAtual();
@@ -439,12 +421,6 @@ export default function Agenda() {
       const alreadyShowingToday = isToday(selectedDate);
 
       setSelectedDate(today);
-      setActionFeedback({
-        kind: "success",
-        text: quantidade === 0
-          ? t("agenda.nonePending")
-          : `${quantidade} ${quantidade === 1 ? "agendamento concluído" : "agendamentos concluídos"}.`,
-      });
       showNotification({
         type: quantidade === 0 ? "warning" : "success",
         title: quantidade === 0 ? t("agenda.dayCurrent") : t("agenda.completedAll"),
@@ -458,10 +434,6 @@ export default function Agenda() {
       }
     } catch (actionError) {
       const message = getApiError(actionError, t("agenda.closeFailed"));
-      setActionFeedback({
-        kind: "error",
-        text: message,
-      });
       showNotification({ type: "error", title: t("agenda.closeErrorTitle"), message });
     } finally {
       setClosingDay(false);
@@ -711,15 +683,6 @@ export default function Agenda() {
             </button>
           </div>
         </header>
-
-        {actionFeedback && (
-          <div
-            className={`${styles.actionFeedback} ${styles[actionFeedback.kind]}`}
-            role={actionFeedback.kind === "error" ? "alert" : "status"}
-          >
-            {actionFeedback.text}
-          </div>
-        )}
 
         <Card
           agendamentos={agendaItems}
