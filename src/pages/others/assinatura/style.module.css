@@ -42,3 +42,5 @@
 .modalActions{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:18px}
 .modalActions .button{width:auto;padding:10px 16px}
 @media(max-width:500px){.modal{padding:15px}.modalActions{flex-wrap:wrap}.modalActions .button{flex:1}}
+
+.comingSoon{display:inline-block;margin-left:5px;padding:3px 7px;border:1px solid var(--theme-primary,#3b82f6);border-radius:999px;background:var(--theme-primary-soft,rgba(59,130,246,.12));color:var(--theme-primary-text,#60a5fa);font-size:10px;font-weight:700;line-height:1.2;white-space:nowrap;vertical-align:middle}
