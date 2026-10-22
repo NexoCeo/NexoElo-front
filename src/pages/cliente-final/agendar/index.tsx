@@ -1,3 +1,4 @@
+import { useTheme } from "@/context/ThemeContext";
 import { useEffect, useMemo, useState } from "react";
 import { isAxiosError } from "axios";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
@@ -149,6 +150,7 @@ function ServicePhoto({ source, name }: { source?: string; name: string }) {
 }
 
 export default function ClienteFinalAgendar() {
+  const { themeName } = useTheme();
   const { t } = useLanguage();
   const { username } = useParams();
   const location = useLocation();
@@ -694,6 +696,7 @@ export default function ClienteFinalAgendar() {
                   <input
                     id="booking-date"
                     type="date"
+                    style={{ colorScheme: themeName === "dark" ? "dark" : "light" }}
                     min={minDate}
                     value={dataSelecionada}
                     onChange={(event) => handleDataChange(event.target.value)}
@@ -701,11 +704,10 @@ export default function ClienteFinalAgendar() {
                   />
                 </label>
 
-                <fieldset className={styles.scheduleFieldset} disabled={!dataSelecionada || loadingHorarios}>
+                <div className={styles.scheduleRegion}>
+                <fieldset className={`${styles.scheduleFieldset} ${!dataSelecionada ? styles.scheduleHidden : ""}`} aria-hidden={!dataSelecionada} disabled={!dataSelecionada || loadingHorarios}>
                   <legend>{t("client.availableSlots")}</legend>
-                  {!dataSelecionada ? (
-                    <p className={styles.scheduleFeedback}>{t("client.chooseDate")}</p>
-                  ) : loadingHorarios ? (
+                  {loadingHorarios ? (
                     <p className={styles.scheduleFeedback}>{t("client.slotsLoading")}</p>
                   ) : horariosDisponiveis.length === 0 ? (
                     <p className={styles.scheduleFeedback}>{t("client.slotsEmpty")}</p>
@@ -733,6 +735,7 @@ export default function ClienteFinalAgendar() {
                     </div>
                   )}
                 </fieldset>
+                </div>
               </div>
             )}
           </fieldset>
