@@ -39,7 +39,6 @@ export default function Servicos() {
   const [imagemPreviewUrl, setImagemPreviewUrl] = useState("");
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
-  const [success, setSuccess] = useState("");
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   const ownerId = usuario?.Id ?? 0;
@@ -132,7 +131,6 @@ export default function Servicos() {
 
   function openCreateModal() {
     resetForm();
-    setSuccess("");
     setFormError("");
     setModalOpen(true);
   }
@@ -143,7 +141,6 @@ export default function Servicos() {
     setValor(String(servico.Valor).replace(".", ","));
     setTempoEstimadoMinutos(String(servico.TempoEstimadoMinutos));
     setImagemServico(null);
-    setSuccess("");
     setFormError("");
     setOpenMenuId(null);
     setModalOpen(true);
@@ -157,7 +154,6 @@ export default function Servicos() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError("");
-    setSuccess("");
 
     if (!nomeServico.trim()) {
       const message = "Informe o nome do servico.";
@@ -203,7 +199,6 @@ export default function Servicos() {
         setServicos((current) => current.map((servico) => (
           servico.Id === atualizado.Id ? atualizado : servico
         )));
-        setSuccess(t("services.updated"));
         showNotification({
           type: "success",
           title: t("services.updatedTitle"),
@@ -217,7 +212,6 @@ export default function Servicos() {
           ...payload,
         });
         setServicos((current) => [...current, criado]);
-        setSuccess(t("services.created"));
         showNotification({
           type: "success",
           title: t("services.createdTitle"),
@@ -249,7 +243,6 @@ export default function Servicos() {
         </button>
       </section>
 
-      {success && <p className={styles.success}>{success}</p>}
       {error && <p className={styles.error}>{error}</p>}
 
       <section className={styles.tableWrap} style={{ backgroundColor: theme.colors.background2 }}>
