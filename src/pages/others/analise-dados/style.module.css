@@ -10,3 +10,27 @@
 .historyItem small{color:var(--analysis-muted)}
 .historyStatus{font-weight:700}
 @media(max-width:560px){.historyHeader,.historyItem{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.historyHeader span:nth-child(n+3){display:none}.historyItem>span:nth-child(3),.historyItem>span:nth-child(4){grid-column:span 1}}
+
+/* Gráfico mensal integrado ao tema e ao contêiner já existente. */
+.chartSection{min-width:0;margin-bottom:18px;padding:22px;border:1px solid var(--analysis-border);border-radius:12px;background:var(--analysis-panel)}
+.chartHeading{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.chartHeading p{margin:5px 0 0;font-size:12px;color:var(--analysis-muted)}
+.chartHeading .sectionName svg{color:var(--analysis-primary)}
+.yearControl{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--analysis-muted)}
+.yearControl select{border:1px solid var(--analysis-border);border-radius:7px;background:var(--analysis-panel);color:var(--analysis-text);padding:8px 10px;font:inherit;cursor:pointer}
+.chartLegend{display:flex;align-items:center;flex-wrap:wrap;gap:10px 20px;margin:18px 0 16px;font-size:12px;color:var(--analysis-muted)}
+.chartLegend>span{display:flex;align-items:center;gap:6px}
+.chartLegend i{display:inline-block;width:10px;height:10px;border-radius:3px}
+.legendScheduled,.chartScheduled{background:var(--analysis-primary)}
+.legendCompleted,.chartCompleted{background:var(--theme-success,#10b981)}
+.legendCancelled,.chartCancelled{background:var(--theme-error,#ef4444)}
+.chartLegend>strong{margin-left:auto;color:var(--analysis-text)}
+.chartPlot{display:grid;grid-template-columns:40px minmax(0,1fr);height:235px;gap:10px}
+.chartScale{height:204px;display:flex;flex-direction:column;justify-content:space-between;text-align:right;font-size:10px;color:var(--analysis-muted)}
+.chartMonths{min-width:0;height:100%;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:8px;background:repeating-linear-gradient(to bottom,var(--analysis-border) 0 1px,transparent 1px 51px) left top / 100% 204px no-repeat}
+.chartMonth{height:100%;min-width:0;display:flex;flex-direction:column;align-items:center}
+.chartBarTrack{width:100%;height:204px;display:flex;align-items:flex-end;justify-content:center}
+.chartBar{width:min(100%,36px);min-height:0;display:flex;flex-direction:column;overflow:hidden;border-radius:4px 4px 0 0}
+.chartBar>div{min-height:0}
+.chartMonthLabel{margin-top:7px;font-size:11px;color:var(--analysis-muted);text-transform:capitalize}
+@media(max-width:620px){.chartSection{padding:14px}.chartPlot{grid-template-columns:27px minmax(0,1fr);gap:6px}.chartMonths{gap:3px}.chartMonthLabel{font-size:9px}.chartLegend{gap:9px}.chartHeading .sectionName{font-size:15px}}
