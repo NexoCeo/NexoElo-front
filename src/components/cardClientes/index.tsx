@@ -1,6 +1,7 @@
 import { useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { FaCalendarXmark, FaCheck, FaXmark } from "react-icons/fa6";
 import styles from "./style.module.css";
+import LoadingState from "@/components/loading-state";
 import { useLanguage } from "@/context/LanguageContext";
 
 export type AgendaCardItem = {
@@ -113,10 +114,7 @@ const labelStatus = (status: string) => {
       </div>
 
       {loading ? (
-        <div className={styles.feedback} role="status">
-          <span className={styles.loader} aria-hidden="true" />
-          {t("common.loading")}
-        </div>
+        <LoadingState variant="table" embedded label={t("common.loading")} />
       ) : error ? (
         <div className={styles.error} role="alert">{error}</div>
       ) : agendamentos.length > 0 ? (
