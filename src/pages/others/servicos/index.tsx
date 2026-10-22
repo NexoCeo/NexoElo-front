@@ -247,7 +247,7 @@ export default function Servicos() {
 
       <section className={styles.tableWrap} style={{ backgroundColor: theme.colors.background2 }}>
         {loading ? (
-          <LoadingState label={t("services.loading")} variant="table" embedded />
+          <LoadingState label={t("services.loading")} variant="services" embedded />
         ) : servicos.length === 0 ? (
           <p className={styles.feedback} style={{ color: theme.colors.inactive }}>
             {t("services.empty")}
