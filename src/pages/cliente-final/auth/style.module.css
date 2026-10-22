@@ -124,6 +124,23 @@
   font: inherit;
 }
 
+.inputWrap input:-webkit-autofill,
+.inputWrap input:-webkit-autofill:hover,
+.inputWrap input:-webkit-autofill:focus,
+.inputWrap input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--theme-surface-muted) inset !important;
+  box-shadow: 0 0 0 1000px var(--theme-surface-muted) inset !important;
+  -webkit-text-fill-color: var(--theme-text) !important;
+  caret-color: var(--theme-text);
+}
+
+.inputWrap input:autofill {
+  background: var(--theme-surface-muted);
+  color: var(--theme-text);
+  box-shadow: 0 0 0 1000px var(--theme-surface-muted) inset;
+  caret-color: var(--theme-text);
+}
+
 .inputWrap select {
   appearance: none;
   cursor: pointer;
