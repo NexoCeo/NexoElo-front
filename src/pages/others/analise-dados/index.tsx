@@ -73,6 +73,7 @@ export default function AnaliseDados() {
     cancelado: historico.filter(item => item.Status.toUpperCase() === "CANCELADO").length,
   }), [historico]);
   const [anoGrafico, setAnoGrafico] = useState(() => new Date().getFullYear());
+  const [statusGrafico, setStatusGrafico] = useState<"TODOS" | "AGENDADO" | "CONCLUIDO" | "CANCELADO">("TODOS");
   const anosDisponiveis = useMemo(() => Array.from(new Set([
     new Date().getFullYear(),
     ...historico.map(item => new Date(item.DataAgendamento).getFullYear())
@@ -92,10 +93,16 @@ export default function AnaliseDados() {
     }
     return meses;
   }, [historico, anoGrafico]);
-  const maxGrafico = Math.max(1, ...dadosMensais.map(item =>
-    item.agendado + item.concluido + item.cancelado));
-  const totalGrafico = dadosMensais.reduce((total, item) =>
-    total + item.agendado + item.concluido + item.cancelado, 0);
+  const valorGrafico = (item: (typeof dadosMensais)[number]) => {
+    switch (statusGrafico) {
+      case "AGENDADO": return item.agendado;
+      case "CONCLUIDO": return item.concluido;
+      case "CANCELADO": return item.cancelado;
+      default: return item.agendado + item.concluido + item.cancelado;
+    }
+  };
+  const maxGrafico = Math.max(1, ...dadosMensais.map(valorGrafico));
+  const totalGrafico = dadosMensais.reduce((total, item) => total + valorGrafico(item), 0);
   const nomesMeses = useMemo(() => Array.from({ length: 12 }, (_, mes) =>
     new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US", { month: "short" })
       .format(new Date(2024, mes, 1)).replace(".", "")), [lang]);
@@ -115,17 +122,25 @@ export default function AnaliseDados() {
           <div className={styles.sectionName}><FaChartLine aria-hidden="true"/><span>{lang === "pt" ? "Agendamentos por mês" : "Appointments by month"}</span></div>
           <p>{lang === "pt" ? "Distribuição mensal por status" : "Monthly distribution by status"}</p>
         </div>
-        <label className={styles.yearControl}>
-          <span>{lang === "pt" ? "Ano" : "Year"}</span>
-          <select value={anoGrafico} onChange={event => setAnoGrafico(Number(event.target.value))}>
-            {anosDisponiveis.map(ano => <option key={ano} value={ano}>{ano}</option>)}
-          </select>
-        </label>
+        <div className={styles.chartControls}>
+          <label className={styles.yearControl}>
+            <span>Status</span>
+            <select value={statusGrafico} onChange={event => setStatusGrafico(event.target.value as typeof statusGrafico)}>
+              <option value="TODOS">{lang === "pt" ? "Todos" : "All"}</option>
+              <option value="AGENDADO">{lang === "pt" ? "Agendados" : "Scheduled"}</option>
+              <option value="CONCLUIDO">{lang === "pt" ? "Concluídos" : "Completed"}</option>
+              <option value="CANCELADO">{lang === "pt" ? "Cancelados" : "Cancelled"}</option>
+            </select>
+          </label>
+          <label className={styles.yearControl}>
+            <span>{lang === "pt" ? "Ano" : "Year"}</span>
+            <select value={anoGrafico} onChange={event => setAnoGrafico(Number(event.target.value))}>
+              {anosDisponiveis.map(ano => <option key={ano} value={ano}>{ano}</option>)}
+            </select>
+          </label>
+        </div>
       </div>
       <div className={styles.chartLegend}>
-        <span><i className={styles.legendScheduled}/>{lang === "pt" ? "Agendados" : "Scheduled"}</span>
-        <span><i className={styles.legendCompleted}/>{lang === "pt" ? "Concluídos" : "Completed"}</span>
-        <span><i className={styles.legendCancelled}/>{lang === "pt" ? "Cancelados" : "Cancelled"}</span>
         <strong>{lang === "pt" ? "Total" : "Total"}: {totalGrafico}</strong>
       </div>
       {carregando ? <LoadingState compact label={t("analytics.loading")} /> : erro
@@ -136,15 +151,13 @@ export default function AnaliseDados() {
           </div>
           <div className={styles.chartMonths}>
             {dadosMensais.map((item, index) => {
-              const total = item.agendado + item.concluido + item.cancelado;
+              const total = valorGrafico(item);
               return <div className={styles.chartMonth} key={item.mes}
-                title={`${nomesMeses[index]} ${anoGrafico}: ${total} | ${item.agendado} agendados, ${item.concluido} concluídos, ${item.cancelado} cancelados`}>
+                title={`${nomesMeses[index]} ${anoGrafico}: ${total} ${statusGrafico === "TODOS" ? "agendamentos" : statusGrafico.toLowerCase()}`}>
                 <div className={styles.chartBarTrack}>
-                  <div className={styles.chartBar} style={{ height: `${100 * total / maxGrafico}%` }}>
-                    {item.cancelado > 0 && <div className={styles.chartCancelled} style={{ flex: item.cancelado }}/>}
-                    {item.concluido > 0 && <div className={styles.chartCompleted} style={{ flex: item.concluido }}/>}
-                    {item.agendado > 0 && <div className={styles.chartScheduled} style={{ flex: item.agendado }}/>}
-                  </div>
+                  <div className={`${styles.chartBar} ${statusGrafico === "CONCLUIDO" ? styles.barCompleted : statusGrafico === "CANCELADO" ? styles.barCancelled : styles.barScheduled}`}
+                    style={{ height: `${100 * total / maxGrafico}%` }} />
+                  
                 </div>
                 <span className={styles.chartMonthLabel}>{nomesMeses[index]}</span>
               </div>;
