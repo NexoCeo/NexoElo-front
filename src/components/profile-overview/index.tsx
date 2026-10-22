@@ -1,6 +1,6 @@
 import { FaCamera, FaEnvelope, FaPhoneAlt } from "react-icons/fa";
 import styles from "./style.module.css";
-import { formatPersonName, formatEmailDisplay } from "@/utils/person-display";
+import { formatPersonName, formatEmailDisplay } from "@/context/UserContext";
 import { useLanguage } from "@/context/LanguageContext";
 
 type ProfileOverviewProps = {
