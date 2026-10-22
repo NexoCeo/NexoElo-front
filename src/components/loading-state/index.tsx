@@ -5,13 +5,14 @@ type LoadingStateProps = {
   compact?: boolean;
   dense?: boolean;
   embedded?: boolean;
-  variant?: "cards" | "table" | "form" | "profile" | "analytics" | "agenda";
+  variant?: "cards" | "table" | "form" | "profile" | "analytics" | "agenda" | "services";
 };
 
 function inferVariant(): NonNullable<LoadingStateProps["variant"]> {
   const path = window.location.pathname.toLowerCase();
   if (path.includes("analise-dados") || path.includes("dashboard")) return "analytics";
   if (path.includes("/agenda")) return "agenda";
+  if (path.includes("/servicos")) return "services";
   if (path.includes("relatorios") || path.includes("profissionais")) return "table";
   if (path.includes("perfil")) return "profile";
   if (path.includes("funcionamento") || path.includes("register") || path.includes("assinatura")) return "form";
@@ -27,7 +28,22 @@ export default function LoadingState({ label = "Carregando", compact = false, de
   return (
     <div className={`${styles.loading} ${compact ? styles.compact : ""} ${dense ? styles.dense : ""} ${embedded ? styles.embedded : ""}`} role="status" aria-live="polite" aria-label={label} aria-busy="true">
       <span className={styles.srOnly}>{label}</span>
-      {!compact && kind === "agenda" ? (
+      {!compact && kind === "services" ? (
+        <div className={`${styles.servicesShell} ${embedded ? styles.servicesEmbedded : ""}`} aria-hidden="true">
+          {!embedded && <div className={styles.servicesToolbar}><Bar width="100%"/></div>}
+          <div className={styles.servicesTable}>
+            <div className={styles.servicesColumns}>
+              {[0,1,2,3,4].map(i => <Bar key={i} width={i===0?"60%":"50%"} />)}
+            </div>
+            {[0,1,2].map(i => (
+              <div className={styles.servicesRow} key={i}>
+                <div className={styles.servicesIdentity}><span className={styles.servicesImage}/><Bar width="65%"/></div>
+                <Bar width="34%"/><Bar width="40%"/><Bar width="65%"/><Bar width="34%"/>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : !compact && kind === "agenda" ? (
         <div className={styles.agendaShell}>
           <aside className={styles.agendaSide} aria-hidden="true">
             <div className={styles.agendaToggle}><Bar width="45%"/><Bar width="42%"/></div>
