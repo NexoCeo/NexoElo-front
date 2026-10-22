@@ -4,6 +4,7 @@ import Modal from "@/components/modal";
 import { useUser } from "@/context/UserContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useNotification } from "@/context/NotificationContext";
 import { criarAgendamento, formatAgendaDateParam, listarClientesAgendamento, listarHorariosDisponiveis, listarProfissionaisAgendamento } from "@/services/agendamento-service";
 import { listarServicosPorEmpresa, listarServicosPorProfissional } from "@/services/servico-service";
 import { obterStatusVinculoProfissional } from "@/services/vinculo-service";
@@ -17,6 +18,7 @@ type Props = { date: Date; professionalId: number; onClose: () => void; onCreate
 export default function AgendaBooking({ date, professionalId, onClose, onCreated }: Props) {
   const { usuario } = useUser();
   const { t } = useLanguage();
+  const { showNotification } = useNotification();
   const { themeName } = useTheme();
   const [responsavelId, setResponsavelId] = useState(0);
   const [profissionalId, setProfissionalId] = useState(0);
@@ -33,7 +35,7 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [saving, setSaving] = useState(false);
   const [revision, setRevision] = useState(0);
-  const [error, setError] = useState("");
+
   const empresa = usuario?.Papel === "EMPRESA";
 
   useEffect(() => {
@@ -55,14 +57,14 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
         setProfissionalId(context ? usuario.Id : professionals.some(p => p.Id === professionalId) ? professionalId : professionals.length === 1 ? professionals[0].Id : 0);
         setResponsavelId(owner);
       } catch {
-        if (active) setError(t("booking.loadFailed"));
+        if (active) showNotification({ type: "error", title: t("booking.new"), message: t("booking.loadFailed") });
       } finally {
         if (active) setLoading(false);
       }
     }
     void load();
     return () => { active = false; };
-  }, [usuario, empresa, professionalId, t]);
+  }, [usuario, empresa, professionalId, t, showNotification]);
 
   useEffect(() => {
     let active = true;
@@ -73,10 +75,10 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
       ? listarServicosPorProfissional(profissionalId, responsavelId)
       : listarServicosPorEmpresa(responsavelId);
     void request.then(items => { if (active) setServicos(items); })
-      .catch(() => { if (active) setError(t("booking.loadFailed")); })
+      .catch(() => { if (active) showNotification({ type: "error", title: t("booking.new"), message: t("booking.loadFailed") }); })
       .finally(() => { if (active) setLoadingServices(false); });
     return () => { active = false; };
-  }, [responsavelId, profissionalId, empresa, t]);
+  }, [responsavelId, profissionalId, empresa, t, showNotification]);
 
   useEffect(() => {
     let active = true;
@@ -85,20 +87,20 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
     setLoadingSlots(true);
     void listarHorariosDisponiveis({ responsavelId, profissionalId: profissionalId || undefined, servicoId, data: day })
       .then(items => { if (active) setSlots(items); })
-      .catch(() => { if (active) setError(t("booking.loadFailed")); })
+      .catch(() => { if (active) showNotification({ type: "error", title: t("booking.new"), message: t("booking.loadFailed") }); })
       .finally(() => { if (active) setLoadingSlots(false); });
     return () => { active = false; };
-  }, [responsavelId, profissionalId, servicoId, day, revision, t]);
+  }, [responsavelId, profissionalId, servicoId, day, revision, t, showNotification]);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (saving || loading || loadingServices || loadingSlots || !clienteId || !servicoId || !slots.some(s => s.DataAgendamento === slot)) return;
-    setSaving(true); setError("");
+    setSaving(true); 
     try {
       await criarAgendamento({ ClienteId: clienteId, ResponsavelId: responsavelId, ProfissionalId: profissionalId || undefined, ServicoId: servicoId, DataAgendamento: slot });
     } catch (err) {
       const data = axios.isAxiosError<{ erro?: string }>(err) ? err.response?.data : undefined;
-      setError(data?.erro || t("booking.saveFailed"));
+      showNotification({ type: "error", title: t("booking.new"), message: data?.erro || t("booking.saveFailed") });
       setRevision(value => value + 1);
       setSaving(false);
       return;
@@ -110,7 +112,7 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
     <form className={styles.form} onSubmit={submit}>
         <fieldset disabled={loading || saving} aria-busy={loading}>
           {empresa && profissionais.length > 1 && <label>{t("common.professional")}
-            <select required value={profissionalId} onChange={e => { setProfissionalId(Number(e.target.value)); setError(""); }}>
+            <select required value={profissionalId} onChange={e => { setProfissionalId(Number(e.target.value));  }}>
               <option value={0}>{t("booking.select")}</option>
               {profissionais.map(p => <option key={p.Id} value={p.Id}>{formatPersonName(p.Nome)}</option>)}
             </select>
@@ -121,15 +123,15 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
               {clientes.map(c => <option key={c.Id} value={c.Id}>{formatPersonName(c.Nome)}</option>)}
             </select>
           </label>
-          {!loading && !error && clientes.length === 0 && <p>{t("booking.noCustomers")}</p>}
+          {!loading && clientes.length === 0 && <p>{t("booking.noCustomers")}</p>}
           <label>{t("booking.service")}
-            <select required value={servicoId} disabled={loadingServices || !responsavelId || (empresa && !profissionalId)} onChange={e => { setServicoId(Number(e.target.value)); setError(""); }}>
+            <select required value={servicoId} disabled={loadingServices || !responsavelId || (empresa && !profissionalId)} onChange={e => { setServicoId(Number(e.target.value));  }}>
               <option value={0}>{t("booking.select")}</option>
               {servicos.map(s => <option key={s.Id} value={s.Id}>{s.NomeServico} · {s.TempoEstimadoMinutos} min</option>)}
             </select>
           </label>
           {!loading && !loadingServices && responsavelId > 0 && (!empresa || profissionalId > 0) && servicos.length === 0 && <p>{t("booking.noServices")}</p>}
-          <label>{t("client.date")}<input required type="date" style={{ colorScheme: themeName === "dark" ? "dark" : "light" }} min={formatAgendaDateParam(new Date())} value={day} onChange={e => { setDay(e.target.value); setError(""); }} /></label>
+          <label>{t("client.date")}<input required type="date" style={{ colorScheme: themeName === "dark" ? "dark" : "light" }} min={formatAgendaDateParam(new Date())} value={day} onChange={e => { setDay(e.target.value);  }} /></label>
           <label>{t("client.availableSlots")}
             <select required disabled={!servicoId || loadingSlots} value={slot} onChange={e => setSlot(e.target.value)}>
               <option value="">{t("booking.select")}</option>
@@ -138,7 +140,6 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
           </label>
           {servicoId > 0 && day && !loadingSlots && slots.length === 0 && <p>{t("client.slotsEmpty")}</p>}
         </fieldset>
-      {error && <p role="alert" className={styles.error}>{error}</p>}
       <div className={styles.actions}>
         <button type="button" disabled={saving} onClick={onClose}>{t("common.close")}</button>
         <button type="submit" disabled={loading || loadingServices || loadingSlots || saving || !clienteId || !servicoId || !slot}>{saving ? t("booking.saving") : t("booking.confirm")}</button>
