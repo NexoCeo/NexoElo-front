@@ -151,7 +151,7 @@ function ServicePhoto({ source, name }: { source?: string; name: string }) {
 
 export default function ClienteFinalAgendar() {
   const { themeName } = useTheme();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { username } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -681,7 +681,9 @@ export default function ClienteFinalAgendar() {
             <StepLegend
               number={scheduleStep}
               title={t("client.dateTimeStep")}
-              summary={selectedHorario?.Horario || dataSelecionada}
+              summary={dataSelecionada
+                ? `${new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US").format(new Date(dataSelecionada + "T12:00:00"))}${selectedHorario ? ` · ${selectedHorario.Horario}` : ""}`
+                : undefined}
               expanded={expandedSection === "horario"}
               disabled={!servicoId}
               controls="horario-options"
@@ -723,6 +725,7 @@ export default function ClienteFinalAgendar() {
                             aria-pressed={selected}
                             onClick={() => {
                               setDataAgendamento(horario.DataAgendamento);
+                              setExpandedSection(null);
                               setError("");
                               setSuccess("");
                             }}
