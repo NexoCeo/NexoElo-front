@@ -1,4 +1,4 @@
-import { formatPersonName } from "@/utils/person-display";
+import { formatPersonName } from "@/context/UserContext";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { FaBullhorn, FaChartLine, FaClock, FaEnvelope, FaUserClock, FaUsers } from "react-icons/fa";
 import { useTheme } from "@/context/ThemeContext";
