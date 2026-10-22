@@ -23,6 +23,7 @@ import { logout } from "@/services/logout-service";
 import { useNotification } from "@/context/NotificationContext";
 import type { Agendamento } from "@/types/agendamento";
 import styles from "./style.module.css";
+import { formatPersonName, formatEmailDisplay } from "@/utils/person-display";
 import ProfileOverview from "@/components/profile-overview";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -52,16 +53,6 @@ const navigationItems: Array<{
   { id: "historico", label: "Histórico", Icon: FaHistory },
   { id: "perfil", label: "Perfil", Icon: FaUser },
 ];
-
-function formatDisplayName(value?: string | null) {
-  return (value || "").trim().replace(/\s+/g, " ").toLocaleLowerCase("pt-BR")
-    .replace(/(^|[\s'-])([\p{L}])/gu, (_, separator: string, letter: string) =>
-      separator + letter.toLocaleUpperCase("pt-BR"));
-}
-
-function formatDisplayEmail(value?: string | null) {
-  return value?.trim().toLowerCase() || undefined;
-}
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", {
@@ -147,7 +138,7 @@ function AppointmentCard({
 
       <div className={styles.appointmentMain}>
         <strong>{appointment.ServicoNome || `Serviço #${appointment.ServicoId}`}</strong>
-        <span>{appointment.ProfissionalNome || "Profissional não informado"}</span>
+        <span>{formatPersonName(appointment.ProfissionalNome) || "Profissional não informado"}</span>
       </div>
 
       <div className={styles.appointmentMeta}>
@@ -343,7 +334,7 @@ export default function ClienteFinalHome() {
     <div className={styles.container}>
       <header className={styles.topbar}>
         <div className={styles.topbarInner}>
-          <h1 className={styles.greeting}>Olá, {formatDisplayName(cliente?.Nome) || "cliente"}</h1>
+          <h1 className={styles.greeting}>Olá, {formatPersonName(cliente?.Nome) || "cliente"}</h1>
           <nav className={styles.navigation} aria-label={t("client.navigation")} role="tablist">
             {navigationItems.map(({ id, Icon }) => (
               <button
@@ -522,9 +513,9 @@ export default function ClienteFinalHome() {
             className={styles.view}
           >
             <ProfileOverview
-              name={formatDisplayName(cliente?.Nome) || "Cliente"}
+              name={formatPersonName(cliente?.Nome) || "Cliente"}
               role="Cliente"
-              email={formatDisplayEmail(cliente?.Email)}
+              email={formatEmailDisplay(cliente?.Email)}
               phone={cliente?.Telefone}
             />
           </section>
