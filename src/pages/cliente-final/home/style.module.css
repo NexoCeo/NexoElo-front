@@ -669,7 +669,10 @@
   }
 
   .pageHeader h1 {
-    font-size: 27px;
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
   }
 
   .primaryButton,
@@ -710,9 +713,27 @@
   }
 
   .emptyState {
+    min-height: 108px;
+    padding: 16px;
+    gap: 12px;
     align-items: flex-start;
     flex-direction: column;
     text-align: left;
+  }
+
+  .emptyState strong {
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  .emptyState span {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .emptyState > svg {
+    width: 24px;
+    height: 24px;
   }
 
   .emptyState button {
