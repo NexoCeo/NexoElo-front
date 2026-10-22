@@ -1,3 +1,4 @@
+import { formatPersonName } from "@/utils/person-display";
 import LoadingState from "@/components/loading-state";
 import { useTheme } from "@/context/ThemeContext";
 import { useEffect, useMemo, useState } from "react";
@@ -605,7 +606,7 @@ export default function ClienteFinalAgendar() {
                           >
                             <ProfilePhoto source={profissional.FotoPerfil} name={profissional.Nome} />
                             <span className={styles.optionText}>
-                              <strong>{profissional.Nome}</strong>
+                              <strong>{formatPersonName(profissional.Nome)}</strong>
                               <small><FaUser aria-hidden="true" /> {t("client.professional")}</small>
                             </span>
                             {selected && <FaCheck className={styles.selectedIcon} aria-hidden="true" />}
