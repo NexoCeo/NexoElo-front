@@ -25,6 +25,10 @@
   gap: 24px;
 }
 
+.mobileGreeting {
+  display: none;
+}
+
 .brand,
 .logoutButton,
 .navigation button,
@@ -588,6 +592,24 @@
 }
 
 @media (max-width: 560px) {
+  .mobileGreeting {
+    display: block;
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+    margin: 0;
+    padding-right: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 18px;
+    line-height: 1.2;
+  }
+
+  .desktopGreeting {
+    display: none;
+  }
+
   .topbar {
     height: 116px;
   }
