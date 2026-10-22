@@ -332,6 +332,9 @@ export default function ClienteFinalHome() {
     <div className={styles.container}>
       <header className={styles.topbar}>
         <div className={styles.topbarInner}>
+          {activeSection === "home" && (
+            <h1 className={styles.mobileGreeting}>Olá, {cliente?.Nome || "cliente"}</h1>
+          )}
           <nav className={styles.navigation} aria-label={t("client.navigation")} role="tablist">
             {navigationItems.map(({ id, Icon }) => (
               <button
@@ -375,7 +378,7 @@ export default function ClienteFinalHome() {
             className={styles.view}
           >
             <header className={styles.pageHeader}>
-              <div>
+              <div className={styles.desktopGreeting}>
                 <h1>Olá, {cliente?.Nome || "cliente"}</h1>
               </div>
               <button type="button" className={styles.primaryButton} onClick={() => navigate("/cliente-final/agendar")}>
