@@ -181,7 +181,10 @@ export default function AnaliseDados() {
               </div>)}
             </div> : <div className={styles.empty}>{t("analytics.empty")}</div>}
             <p className={styles.note}>{t("analytics.note")}</p>
-            <div className={styles.appointmentHistory}>
+
+          </>}
+      </section>
+      <section className={`${styles.section} ${styles.appointmentHistory}`}>
               <div className={styles.sectionName}>{lang === "pt" ? "Todos os agendamentos" : "All appointments"}</div>
               <p className={styles.historySummary}>
                 {lang === "pt"
@@ -217,9 +220,8 @@ export default function AnaliseDados() {
                 </div>}
               </div>
             </div>
-          </>}
-      </section>
-      <section className={styles.section}>
+
+      <section className={`${styles.section} ${styles.marketingSection}`}>
         <div className={styles.sectionHead}>
           <div className={styles.sectionName}><FaChartLine aria-hidden="true"/><span>{t("analytics.marketing")}</span></div>
           <p>{t("analytics.marketingDescription")}</p>
