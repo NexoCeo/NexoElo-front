@@ -76,3 +76,27 @@
 .servicesImage{width:44px;height:44px;flex:0 0 44px;border-radius:6px;background:linear-gradient(100deg,var(--theme-background2,#182237) 15%,var(--theme-glass-strong,#344054) 45%,var(--theme-background2,#182237) 75%);background-size:220% 100%;animation:shimmer 1.6s ease-in-out infinite}
 @media(max-width:700px){.servicesShell{padding:0 14px 20px}.servicesEmbedded{padding:0}.servicesToolbar{height:68px}.servicesColumns{display:none}.servicesRow{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;min-height:116px;padding:14px}.servicesIdentity{grid-column:1/-1}}
 @media(prefers-reduced-motion:reduce){.servicesImage{animation:none}}
+
+/* Horários: skeleton com a mesma grelha do editor e resumo, sem padding genérico. */
+.hoursShell{box-sizing:border-box;width:100%;padding:0 24px 40px;min-height:0}
+.hoursEmbedded{padding:0}
+.hoursIntro{width:min(100%,1180px);margin:0 auto 16px;display:grid;gap:7px}
+.hoursIntro .bar:first-child{height:17px}
+.hoursColumns{width:min(100%,1180px);margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
+.hoursEmbedded .hoursColumns{width:100%;grid-template-columns:minmax(0,1fr)}
+.hoursEditor{display:grid;gap:16px;min-width:0}
+.hoursPanel,.hoursSummary{box-sizing:border-box;min-width:0;border:1px solid var(--theme-bottom,#334155);border-radius:8px;padding:20px;background:var(--theme-surface,#111827)}
+.hoursHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.hoursHead .bar{height:17px}
+.hoursDays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.hoursDay{box-sizing:border-box;height:76px;border:1px solid var(--theme-bottom,#334155);border-radius:8px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:9px;padding:8px}
+.hoursDay .bar{height:10px}
+.hoursInputs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.hoursInputs .bar{height:46px}
+.hoursLine{display:flex;justify-content:space-between;gap:20px;padding:12px 0;border-bottom:1px solid var(--theme-bottom,#334155)}
+.hoursLine:last-child{border-bottom:0}
+.hoursSummary{display:grid;gap:18px}
+.hoursSummaryRow{padding-top:15px;border-top:1px solid var(--theme-bottom,#334155);display:grid;gap:12px}
+@media(max-width:980px){.hoursColumns{grid-template-columns:1fr}.hoursSummary{grid-template-columns:repeat(3,minmax(0,1fr))}.hoursSummary>.bar{grid-column:1/-1}}
+@media(max-width:760px){.hoursDays{grid-template-columns:repeat(4,minmax(0,1fr))}.hoursSummary{grid-template-columns:1fr}}
+@media(max-width:560px){.hoursShell{padding:0 12px 28px}.hoursEmbedded{padding:0}.hoursPanel,.hoursSummary{padding:14px}.hoursDays{grid-template-columns:repeat(2,minmax(0,1fr))}}
