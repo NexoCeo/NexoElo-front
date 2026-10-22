@@ -72,6 +72,33 @@ export default function AnaliseDados() {
     concluido: historico.filter(item => item.Status.toUpperCase() === "CONCLUIDO").length,
     cancelado: historico.filter(item => item.Status.toUpperCase() === "CANCELADO").length,
   }), [historico]);
+  const [anoGrafico, setAnoGrafico] = useState(() => new Date().getFullYear());
+  const anosDisponiveis = useMemo(() => Array.from(new Set([
+    new Date().getFullYear(),
+    ...historico.map(item => new Date(item.DataAgendamento).getFullYear())
+      .filter(ano => Number.isFinite(ano)),
+  ])).sort((a, b) => b - a), [historico]);
+  const dadosMensais = useMemo(() => {
+    const meses = Array.from({ length: 12 }, (_, mes) => ({
+      mes, agendado: 0, concluido: 0, cancelado: 0,
+    }));
+    for (const item of historico) {
+      const data = new Date(item.DataAgendamento);
+      if (!Number.isFinite(data.getTime()) || data.getFullYear() !== anoGrafico) continue;
+      const status = item.Status?.toUpperCase();
+      if (status === "AGENDADO") meses[data.getMonth()].agendado++;
+      else if (status === "CONCLUIDO") meses[data.getMonth()].concluido++;
+      else if (status === "CANCELADO") meses[data.getMonth()].cancelado++;
+    }
+    return meses;
+  }, [historico, anoGrafico]);
+  const maxGrafico = Math.max(1, ...dadosMensais.map(item =>
+    item.agendado + item.concluido + item.cancelado));
+  const totalGrafico = dadosMensais.reduce((total, item) =>
+    total + item.agendado + item.concluido + item.cancelado, 0);
+  const nomesMeses = useMemo(() => Array.from({ length: 12 }, (_, mes) =>
+    new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US", { month: "short" })
+      .format(new Date(2024, mes, 1)).replace(".", "")), [lang]);
   const cssVars = {
     "--analysis-panel": theme.colors.background2,
     "--analysis-text": theme.colors.text,
@@ -82,6 +109,49 @@ export default function AnaliseDados() {
 
   if (!permitido) return <main className={styles.container}>{t("analytics.notAllowed")}</main>;
   return <main className={styles.container} style={cssVars}>
+    <section className={styles.chartSection} aria-label={lang === "pt" ? "Agendamentos por mês" : "Appointments by month"}>
+      <div className={styles.chartHeading}>
+        <div>
+          <div className={styles.sectionName}><FaChartLine aria-hidden="true"/><span>{lang === "pt" ? "Agendamentos por mês" : "Appointments by month"}</span></div>
+          <p>{lang === "pt" ? "Distribuição mensal por status" : "Monthly distribution by status"}</p>
+        </div>
+        <label className={styles.yearControl}>
+          <span>{lang === "pt" ? "Ano" : "Year"}</span>
+          <select value={anoGrafico} onChange={event => setAnoGrafico(Number(event.target.value))}>
+            {anosDisponiveis.map(ano => <option key={ano} value={ano}>{ano}</option>)}
+          </select>
+        </label>
+      </div>
+      <div className={styles.chartLegend}>
+        <span><i className={styles.legendScheduled}/>{lang === "pt" ? "Agendados" : "Scheduled"}</span>
+        <span><i className={styles.legendCompleted}/>{lang === "pt" ? "Concluídos" : "Completed"}</span>
+        <span><i className={styles.legendCancelled}/>{lang === "pt" ? "Cancelados" : "Cancelled"}</span>
+        <strong>{lang === "pt" ? "Total" : "Total"}: {totalGrafico}</strong>
+      </div>
+      {carregando ? <LoadingState compact label={t("analytics.loading")} /> : erro
+        ? <p className={styles.error} role="alert">{erro}</p>
+        : <div className={styles.chartPlot}>
+          <div className={styles.chartScale} aria-hidden="true">
+            {[1,.75,.5,.25,0].map(p => <span key={p}>{Math.ceil(maxGrafico * p)}</span>)}
+          </div>
+          <div className={styles.chartMonths}>
+            {dadosMensais.map((item, index) => {
+              const total = item.agendado + item.concluido + item.cancelado;
+              return <div className={styles.chartMonth} key={item.mes}
+                title={`${nomesMeses[index]} ${anoGrafico}: ${total} | ${item.agendado} agendados, ${item.concluido} concluídos, ${item.cancelado} cancelados`}>
+                <div className={styles.chartBarTrack}>
+                  <div className={styles.chartBar} style={{ height: `${100 * total / maxGrafico}%` }}>
+                    {item.cancelado > 0 && <div className={styles.chartCancelled} style={{ flex: item.cancelado }}/>}
+                    {item.concluido > 0 && <div className={styles.chartCompleted} style={{ flex: item.concluido }}/>}
+                    {item.agendado > 0 && <div className={styles.chartScheduled} style={{ flex: item.agendado }}/>}
+                  </div>
+                </div>
+                <span className={styles.chartMonthLabel}>{nomesMeses[index]}</span>
+              </div>;
+            })}
+          </div>
+        </div>}
+    </section>
     <div className={styles.grid}>
       <section className={styles.section}>
         <div className={styles.sectionHead}>
