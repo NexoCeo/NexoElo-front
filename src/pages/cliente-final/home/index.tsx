@@ -343,7 +343,6 @@ export default function ClienteFinalHome() {
           >
             <header className={styles.pageHeader}>
               <div>
-                <span>{t("client.final")}</span>
                 <h1>Olá, {cliente?.Nome || "cliente"}</h1>
               </div>
               <button type="button" className={styles.primaryButton} onClick={() => navigate("/cliente-final/agendar")}>
@@ -366,7 +365,6 @@ export default function ClienteFinalHome() {
             <section className={styles.sectionBlock} aria-labelledby="next-appointment-title">
               <div className={styles.sectionHeading}>
                 <div>
-                  <span>Agenda</span>
                   <h2 id="next-appointment-title">{t("client.nextAppointment")}</h2>
                 </div>
                 {upcomingAppointments.length > 1 && (
