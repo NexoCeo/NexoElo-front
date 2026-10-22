@@ -33,7 +33,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 18px;
+  font-size: 14px;
+  font-weight: 600;
   line-height: 1.2;
 }
 
@@ -606,7 +607,7 @@
 @media (max-width: 560px) {
   .topbarInner .greeting {
     padding-right: 12px;
-    font-size: 15px;
+    font-size: 13px;
   }
 
   .topbar {
