@@ -425,7 +425,6 @@ export default function ClienteFinalHome() {
                     <strong>{t("client.emptyUpcoming")}</strong>
                     <span>{t("client.emptyUpcomingNote")}</span>
                   </div>
-                  <button type="button" onClick={() => navigate("/cliente-final/agendar")}>{t("client.book")}</button>
                 </div>
               )}
             </section>
