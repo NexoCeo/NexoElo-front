@@ -1,4 +1,6 @@
 .listSection {
+  /* Reserve a mesma altura nos estados carregando, vazio e com poucos registros. */
+  min-height: 390px;
   width: 100%;
   min-width: 0;
   overflow: hidden;
@@ -264,6 +266,7 @@
 @media(min-width:761px){.listSection{overflow:hidden}.listHeader,.listItem{width:100%;min-width:0}}
 @media (max-width: 760px) {
   .listSection {
+    min-height: 350px;
     border-radius: 7px;
   }
 
