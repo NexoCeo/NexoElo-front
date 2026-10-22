@@ -21,6 +21,7 @@ import {
 import type { Agendamento } from "@/types/agendamento";
 import type { Profissional } from "@/types/profissional";
 import styles from "./style.module.css";
+import { formatPersonName } from "@/utils/person-display";
 import { useLanguage } from "@/context/LanguageContext";
 
 const REFRESH_INTERVAL_MS = 15_000;
@@ -342,7 +343,7 @@ export default function Agenda() {
             Id: agendamento.Id,
 
             cliente:
-              agendamento.ClienteNome ||
+              formatPersonName(agendamento.ClienteNome) ||
               `Cliente #${agendamento.ClienteId}`,
 
             servico:
@@ -350,7 +351,7 @@ export default function Agenda() {
               `Serviço #${agendamento.ServicoId}`,
 
             profissional:
-              agendamento.ProfissionalNome ||
+              formatPersonName(agendamento.ProfissionalNome) ||
               `Profissional #${
                 agendamento.ProfissionalId ??
                 "-"
