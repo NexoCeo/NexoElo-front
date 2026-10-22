@@ -3,6 +3,7 @@ import {
   lazy,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type CSSProperties,
   type ReactNode,
@@ -10,6 +11,8 @@ import {
 import { isAxiosError } from "axios";
 import {
   FaCalendarAlt,
+  FaChevronLeft,
+  FaChevronRight,
   FaChartBar,
   FaDownload,
   FaEye,
@@ -87,6 +90,12 @@ export default function Relatorios() {
   const { usuario } = useUser();
   const { showNotification } = useNotification();
   const [periodo, setPeriodo] = useState(mesAtual);
+  const [pickerAberto, setPickerAberto] = useState(false);
+  const [anoVisivel, setAnoVisivel] = useState(() => new Date().getFullYear());
+  const pickerRef = useRef<HTMLDivElement>(null);
+  const meses = useMemo(() => Array.from({ length: 12 }, (_, index) =>
+    new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US", { month: "short" }).format(new Date(2024, index, 1))
+  ), [lang]);
   const [modalOpen, setModalOpen] = useState(false);
   const [relatorioAtivo, setRelatorioAtivo] = useState<RelatorioConfig | null>(null);
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
@@ -103,6 +112,21 @@ export default function Relatorios() {
     () => periodo.split("-").map((value) => Number(value)),
     [periodo],
   );
+  useEffect(() => {
+    if (!pickerAberto) return;
+    const fechar = (event: PointerEvent) => {
+      if (event.target instanceof Node && !pickerRef.current?.contains(event.target)) setPickerAberto(false);
+    };
+    const escapar = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setPickerAberto(false);
+    };
+    document.addEventListener("pointerdown", fechar);
+    document.addEventListener("keydown", escapar);
+    return () => {
+      document.removeEventListener("pointerdown", fechar);
+      document.removeEventListener("keydown", escapar);
+    };
+  }, [pickerAberto]);
   const rolePermitida = usuario?.Papel === "EMPRESA" || usuario?.Papel === "AUTONOMO";
   const pageStyle = {
     "--reports-bg": theme.colors.background,
@@ -218,19 +242,41 @@ export default function Relatorios() {
   return (
     <main className={styles.container} style={pageStyle}>
       <section className={styles.pageHeader}>
-        <label className={styles.periodField}>
+        <div className={styles.periodField} ref={pickerRef}>
           <span>{t("reports.reference")}</span>
-          <span className={styles.periodControl}>
+          <button type="button" className={styles.periodControl} aria-haspopup="dialog"
+            aria-expanded={pickerAberto} onClick={() => {
+              setAnoVisivel(ano);
+              setPickerAberto(value => !value);
+            }}>
             <FaCalendarAlt aria-hidden="true" />
-            <input
-              type="month"
-              min="2000-01"
-              max="2100-12"
-              value={periodo}
-              onChange={(event) => setPeriodo(event.target.value || mesAtual())}
-            />
-          </span>
-        </label>
+            <span>{new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US", { month: "long", year: "numeric" }).format(new Date(ano, mes - 1, 1))}</span>
+          </button>
+          {pickerAberto && (
+            <div className={styles.monthPicker} role="dialog" aria-label={t("reports.reference")}>
+              <div className={styles.monthPickerHeader}>
+                <button type="button" aria-label={lang === "pt" ? "Ano anterior" : "Previous year"}
+                  disabled={anoVisivel <= 2000} onClick={() => setAnoVisivel(value => value - 1)}><FaChevronLeft /></button>
+                <strong>{anoVisivel}</strong>
+                <button type="button" aria-label={lang === "pt" ? "Próximo ano" : "Next year"}
+                  disabled={anoVisivel >= 2100} onClick={() => setAnoVisivel(value => value + 1)}><FaChevronRight /></button>
+              </div>
+              <div className={styles.monthPickerGrid}>
+                {meses.map((nome, index) => (
+                  <button type="button" key={index} aria-pressed={anoVisivel === ano && index + 1 === mes}
+                    className={anoVisivel === ano && index + 1 === mes ? styles.selectedMonth : ""}
+                    onClick={() => {
+                      setPeriodo(`${anoVisivel}-${String(index + 1).padStart(2, "0")}`);
+                      setPickerAberto(false);
+                    }}>{nome}</button>
+                ))}
+              </div>
+              <button type="button" className={styles.currentMonthButton} onClick={() => {
+                setPeriodo(mesAtual()); setPickerAberto(false);
+              }}>{lang === "pt" ? "Este mês" : "This month"}</button>
+            </div>
+          )}
+        </div>
       </section>
 
       {error && !modalOpen && (
