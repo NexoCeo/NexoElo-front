@@ -33,7 +33,6 @@ export default function LoadingState({ label = "Carregando", compact = false, de
       {!compact && kind === "reports" ? (
         <div className={styles.reportsShell} aria-hidden="true">
           <div className={styles.reportsHeader}>
-            <div className={styles.reportsHeading}><Bar width="52%"/><Bar width="75%"/></div>
             <div className={styles.reportsPeriod}><Bar width="62%"/><Bar width="100%"/></div>
           </div>
           <div className={styles.reportsGrid}>
