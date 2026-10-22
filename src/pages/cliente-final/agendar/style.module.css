@@ -177,8 +177,8 @@
   min-height: 0;
   box-sizing: border-box;
   overflow: hidden;
-  padding: 7px 20px 7px 8px;
-  grid-template-columns: 36px minmax(0, 1fr);
+  padding: 0 20px 0 0;
+  grid-template-columns: 40px minmax(0, 1fr);
   gap: 7px;
 }
 
@@ -214,11 +214,14 @@
 }
 
 .profilePhoto {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  align-self: stretch;
   overflow: hidden;
-  border: 2px solid var(--theme-border-strong);
-  border-radius: 50%;
+  border: 0;
+  border-radius: 7px 0 0 7px;
   background: var(--theme-surface-muted);
 }
 
@@ -227,6 +230,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .servicePhoto {
@@ -486,14 +490,14 @@
 
   .identityOption {
     height: 60px;
-    grid-template-columns: 36px minmax(0, 1fr);
+    grid-template-columns: 34px minmax(0, 1fr);
     gap: 7px;
-    padding: 6px 17px 6px 6px;
+    padding: 0 17px 0 0;
   }
 
   .profilePhoto {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 100%;
   }
 
   .serviceGrid {
@@ -531,7 +535,7 @@
 
   .profilePhoto {
     width: 30px;
-    height: 30px;
+    height: 100%;
   }
 
   .identityOption .optionText strong {
