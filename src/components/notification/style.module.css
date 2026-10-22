@@ -48,7 +48,7 @@
 
 .warning {
   background: var(--theme-warning);
-  color: var(--theme-warning-text);
+  color: var(--theme-white);
 }
 
 .error {
