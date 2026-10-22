@@ -3,6 +3,7 @@ import axios from "axios";
 import Modal from "@/components/modal";
 import { useUser } from "@/context/UserContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useTheme } from "@/context/ThemeContext";
 import { criarAgendamento, formatAgendaDateParam, listarClientesAgendamento, listarHorariosDisponiveis, listarProfissionaisAgendamento } from "@/services/agendamento-service";
 import { listarServicosPorEmpresa, listarServicosPorProfissional } from "@/services/servico-service";
 import { obterStatusVinculoProfissional } from "@/services/vinculo-service";
@@ -15,6 +16,7 @@ type Props = { date: Date; professionalId: number; onClose: () => void; onCreate
 export default function AgendaBooking({ date, professionalId, onClose, onCreated }: Props) {
   const { usuario } = useUser();
   const { t } = useLanguage();
+  const { themeName } = useTheme();
   const [responsavelId, setResponsavelId] = useState(0);
   const [profissionalId, setProfissionalId] = useState(0);
   const [profissionais, setProfissionais] = useState<ProfissionalAgendamento[]>([]);
@@ -126,7 +128,7 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
             </select>
           </label>
           {!loading && !loadingServices && responsavelId > 0 && (!empresa || profissionalId > 0) && servicos.length === 0 && <p>{t("booking.noServices")}</p>}
-          <label>{t("client.date")}<input required type="date" min={formatAgendaDateParam(new Date())} value={day} onChange={e => { setDay(e.target.value); setError(""); }} /></label>
+          <label>{t("client.date")}<input required type="date" style={{ colorScheme: themeName === "dark" ? "dark" : "light" }} min={formatAgendaDateParam(new Date())} value={day} onChange={e => { setDay(e.target.value); setError(""); }} /></label>
           <label>{t("client.availableSlots")}
             <select required disabled={!servicoId || loadingSlots} value={slot} onChange={e => setSlot(e.target.value)}>
               <option value="">{t("booking.select")}</option>
