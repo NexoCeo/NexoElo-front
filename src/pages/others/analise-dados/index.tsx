@@ -219,7 +219,7 @@ export default function AnaliseDados() {
                   {lang === "pt" ? "Nenhum agendamento registrado." : "No appointments recorded."}
                 </div>}
               </div>
-            </div>
+      </section>
 
       <section className={`${styles.section} ${styles.marketingSection}`}>
         <div className={styles.sectionHead}>
