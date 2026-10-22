@@ -45,13 +45,13 @@
 .form {
   min-width: 0;
   display: grid;
-  gap: 24px;
+  gap: 16px;
 }
 
 .selectionGroup {
   min-width: 0;
   margin: 0;
-  padding: 0 0 24px;
+  padding: 0 0 16px;
   border: 0;
   border-bottom: 1px solid var(--theme-border);
   transition: padding 160ms ease;
@@ -59,7 +59,7 @@
 
 .selectionGroup > legend {
   width: 100%;
-  margin: 0 0 16px;
+  margin: 0 0 10px;
   padding: 0;
   color: var(--theme-text);
   font-size: 18px;
@@ -148,12 +148,12 @@
 
 .optionGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 8px;
 }
 
 .serviceGrid {
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
 }
 
 .identityOption,
@@ -167,21 +167,21 @@
   cursor: pointer;
   display: grid;
   align-items: center;
-  gap: 14px;
+  gap: 9px;
   text-align: left;
   transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .identityOption {
-  min-height: 86px;
-  padding: 12px 44px 12px 12px;
-  grid-template-columns: 60px minmax(0, 1fr);
+  min-height: 64px;
+  padding: 8px 28px 8px 9px;
+  grid-template-columns: 42px minmax(0, 1fr);
 }
 
 .serviceOption {
-  min-height: 116px;
-  padding: 10px 44px 10px 10px;
-  grid-template-columns: 118px minmax(0, 1fr);
+  min-height: 82px;
+  padding: 8px 28px 8px 9px;
+  grid-template-columns: 76px minmax(0, 1fr);
 }
 
 .identityOption:hover,
@@ -207,8 +207,8 @@
 }
 
 .profilePhoto {
-  width: 60px;
-  height: 60px;
+  width: 42px;
+  height: 42px;
   overflow: hidden;
   border: 2px solid var(--theme-border-strong);
   border-radius: 50%;
@@ -224,8 +224,8 @@
 
 .servicePhoto {
   position: relative;
-  width: 118px;
-  height: 92px;
+  width: 76px;
+  height: 60px;
   overflow: hidden;
   border-radius: 6px;
   background: var(--theme-primary-soft);
@@ -243,7 +243,7 @@
 .optionText {
   min-width: 0;
   display: grid;
-  gap: 6px;
+  gap: 3px;
 }
 
 .optionText strong,
@@ -252,7 +252,8 @@
 }
 
 .optionText strong {
-  font-size: 15px;
+  font-size: 13px;
+  line-height: 1.25;
 }
 
 .optionText small {
@@ -270,10 +271,10 @@
 
 .selectedIcon {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 8px;
+  right: 8px;
   color: var(--theme-primary-text);
-  font-size: 16px;
+  font-size: 13px;
 }
 
 .optionFeedback,
@@ -432,11 +433,11 @@
   }
 
   .form {
-    gap: 20px;
+    gap: 14px;
   }
 
   .selectionGroup {
-    padding-bottom: 20px;
+    padding-bottom: 14px;
   }
 
   .selectionGroupCollapsed {
@@ -456,19 +457,38 @@
     font-size: 12px;
   }
 
-  .optionGrid,
+  .optionGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .scheduleLayout {
     grid-template-columns: 1fr;
   }
 
+  .identityOption {
+    min-height: 60px;
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 7px;
+    padding: 7px 24px 7px 8px;
+  }
+
+  .profilePhoto {
+    width: 36px;
+    height: 36px;
+  }
+
+  .serviceGrid {
+    grid-template-columns: 1fr;
+  }
+
   .serviceOption {
-    min-height: 104px;
-    grid-template-columns: 92px minmax(0, 1fr);
+    min-height: 76px;
+    grid-template-columns: 64px minmax(0, 1fr);
   }
 
   .servicePhoto {
-    width: 92px;
-    height: 78px;
+    width: 64px;
+    height: 52px;
   }
 
   .timeGrid {
@@ -476,23 +496,18 @@
   }
 }
 
-@media (max-width: 380px) {
-  .identityOption {
-    grid-template-columns: 52px minmax(0, 1fr);
-  }
-
-  .profilePhoto {
-    width: 52px;
-    height: 52px;
+@media (max-width: 420px) {
+  .optionGrid {
+    grid-template-columns: 1fr;
   }
 
   .serviceOption {
-    grid-template-columns: 76px minmax(0, 1fr);
+    grid-template-columns: 60px minmax(0, 1fr);
   }
 
   .servicePhoto {
-    width: 76px;
-    height: 68px;
+    width: 60px;
+    height: 48px;
   }
 
   .timeGrid {
