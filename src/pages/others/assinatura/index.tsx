@@ -6,6 +6,7 @@ import { useNotification } from "@/context/NotificationContext";
 import { consultarAssinatura, iniciarCheckout, alterarPlano, atualizarRecursosAtivos, listarRecursosPlano, abrirPortal, planos, type AssinaturaAtual, type RecursoPlano } from "@/services/assinatura-service";
 import styles from "./style.module.css";
 import Modal from "@/components/modal";
+import LoadingState from "@/components/loading-state";
 import { useLanguage } from "@/context/LanguageContext";
 
 
@@ -128,7 +129,11 @@ export default function MinhaAssinatura() {
   const limite = (valor: number) => valor === 2147483647 ? t("subscription.unlimited") : String(valor);
   return (
     <main className={styles.page}>
-      {loading ? <section className={styles.status}>{t("subscription.loading")}</section> : assinatura && (
+      {loading ? (
+        <section className={`${styles.status} ${styles.statusLoading}`}>
+          <LoadingState compact label={t("subscription.loading")} />
+        </section>
+      ) : assinatura && (
         <section className={styles.status} aria-label={t("subscription.current")}>
           <div>
             <h2 className={styles.statusTitle}>{t("subscription.current")}: {nomes[assinatura.Plano] ?? assinatura.Plano}</h2>
