@@ -176,7 +176,7 @@ function AppointmentCard({
 
 export default function ClienteFinalHome() {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { showNotification } = useNotification();
   const cliente = getClienteFinalUser();
   const [activeSection, setActiveSection] = useState<HomeSection>("home");
@@ -194,18 +194,19 @@ export default function ClienteFinalHome() {
     }
 
     setLoading(true);
+    setError("");
     try {
       const data = await listarHistoricoAgendamentos(cliente.Id);
       setAppointments(data);
       setError("");
     } catch {
-      const message = "Não foi possível carregar seus agendamentos.";
-      setError(message);
-      showNotification({ type: "error", title: "Histórico indisponível", message });
+      setError(lang === "pt"
+        ? "Seus agendamentos estão temporariamente indisponíveis. Tente novamente."
+        : "Your appointments are temporarily unavailable. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, [cliente?.Id, showNotification]);
+  }, [cliente?.Id, lang]);
 
   useEffect(() => {
     void loadAppointments();
