@@ -86,7 +86,17 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
     if (!responsavelId || !servicoId || !day) { setLoadingSlots(false); return; }
     setLoadingSlots(true);
     void listarHorariosDisponiveis({ responsavelId, profissionalId: profissionalId || undefined, servicoId, data: day })
-      .then(items => { if (active) setSlots(items); })
+      .then(items => {
+        if (!active) return;
+        setSlots(items);
+        if (items.length === 0) {
+          showNotification({
+            type: "warning",
+            title: t("client.availableSlots"),
+            message: t("client.slotsEmpty"),
+          });
+        }
+      })
       .catch(() => { if (active) showNotification({ type: "error", title: t("booking.new"), message: t("booking.loadFailed") }); })
       .finally(() => { if (active) setLoadingSlots(false); });
     return () => { active = false; };
@@ -138,7 +148,7 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
               {slots.map(s => <option key={s.DataAgendamento} value={s.DataAgendamento}>{s.Horario}</option>)}
             </select>
           </label>
-          {servicoId > 0 && day && !loadingSlots && slots.length === 0 && <p>{t("client.slotsEmpty")}</p>}
+          
         </fieldset>
       <div className={styles.actions}>
         <button type="button" disabled={saving} onClick={onClose}>{t("common.close")}</button>
