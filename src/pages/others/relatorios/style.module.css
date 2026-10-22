@@ -429,3 +429,21 @@
     animation: none;
   }
 }
+
+/* Seletor de referência personalizado com navegação de ano. */
+.periodField{position:relative}
+button.periodControl{width:100%;font:inherit;color:var(--reports-text);cursor:pointer;text-align:left}
+button.periodControl:hover{border-color:var(--reports-primary)}
+.periodControl>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.monthPicker{position:absolute;top:calc(100% + 6px);left:0;z-index:60;width:270px;max-width:min(90vw,320px);padding:12px;border:1px solid var(--reports-border);border-radius:10px;background:var(--reports-panel);color:var(--reports-text);box-shadow:0 16px 44px var(--theme-shadow)}
+.monthPickerHeader{display:grid;grid-template-columns:34px minmax(0,1fr) 34px;align-items:center;gap:8px;margin-bottom:12px}
+.monthPickerHeader strong{text-align:center;font-size:15px}
+.monthPickerHeader button{height:34px;border:1px solid var(--reports-border);border-radius:6px;background:transparent;color:var(--reports-text);display:grid;place-items:center;cursor:pointer}
+.monthPickerHeader button:hover:not(:disabled){background:var(--theme-primary-soft);color:var(--reports-primary)}
+.monthPickerHeader button:disabled{opacity:.35;cursor:not-allowed}
+.monthPickerGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.monthPickerGrid button{height:38px;min-width:0;border:0;border-radius:6px;background:transparent;color:var(--reports-text);font:inherit;font-size:12px;cursor:pointer;text-transform:capitalize}
+.monthPickerGrid button:hover{background:var(--theme-primary-soft)}
+.monthPickerGrid button.selectedMonth{background:var(--reports-primary);color:var(--theme-on-primary);font-weight:750}
+.currentMonthButton{width:100%;margin-top:12px;padding:8px;border:1px solid var(--reports-border);border-radius:6px;background:transparent;color:var(--reports-primary);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.monthPicker button:focus-visible{outline:2px solid var(--reports-primary);outline-offset:2px}
