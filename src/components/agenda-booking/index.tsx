@@ -113,20 +113,20 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
         <fieldset disabled={loading || saving} aria-busy={loading}>
           {empresa && profissionais.length > 1 && <label>{t("common.professional")}
             <select required value={profissionalId} onChange={e => { setProfissionalId(Number(e.target.value));  }}>
-              <option value={0}>{t("booking.select")}</option>
+              <option value={0} disabled hidden>{t("booking.select")}</option>
               {profissionais.map(p => <option key={p.Id} value={p.Id}>{formatPersonName(p.Nome)}</option>)}
             </select>
           </label>}
           <label>{t("booking.customer")}
             <select required value={clienteId} onChange={e => setClienteId(Number(e.target.value))}>
-              <option value={0}>{t("booking.select")}</option>
+              <option value={0} disabled hidden>{t("booking.select")}</option>
               {clientes.map(c => <option key={c.Id} value={c.Id}>{formatPersonName(c.Nome)}</option>)}
             </select>
           </label>
           {!loading && clientes.length === 0 && <p>{t("booking.noCustomers")}</p>}
           <label>{t("booking.service")}
             <select required value={servicoId} disabled={loadingServices || !responsavelId || (empresa && !profissionalId)} onChange={e => { setServicoId(Number(e.target.value));  }}>
-              <option value={0}>{t("booking.select")}</option>
+              <option value={0} disabled hidden>{t("booking.select")}</option>
               {servicos.map(s => <option key={s.Id} value={s.Id}>{s.NomeServico} · {s.TempoEstimadoMinutos} min</option>)}
             </select>
           </label>
@@ -134,7 +134,7 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
           <label>{t("client.date")}<input required type="date" style={{ colorScheme: themeName === "dark" ? "dark" : "light" }} min={formatAgendaDateParam(new Date())} value={day} onChange={e => { setDay(e.target.value);  }} /></label>
           <label>{t("client.availableSlots")}
             <select required disabled={!servicoId || loadingSlots} value={slot} onChange={e => setSlot(e.target.value)}>
-              <option value="">{t("booking.select")}</option>
+              <option value="" disabled hidden>{t("booking.select")}</option>
               {slots.map(s => <option key={s.DataAgendamento} value={s.DataAgendamento}>{s.Horario}</option>)}
             </select>
           </label>
