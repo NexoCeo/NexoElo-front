@@ -602,6 +602,11 @@ export default function Agenda() {
           {t("agenda.today")}
         </button>
 
+        {["AUTONOMO", "EMPRESA", "PROFISSIONAL"].includes(usuario?.Papel || "") && (
+          <button type="button" className={styles.newBookingButton} onClick={() => setBookingOpen(true)}>
+            <FaPlus aria-hidden="true" />{t("booking.new")}
+          </button>
+        )}
         {podeGerenciar && (
           <button
             type="button"
@@ -611,11 +616,6 @@ export default function Agenda() {
           >
             <FaCalendarCheck aria-hidden="true" />
             {closingDay ? t("agenda.closing") : t("agenda.closeAll")}
-          </button>
-        )}
-        {["AUTONOMO", "EMPRESA", "PROFISSIONAL"].includes(usuario?.Papel || "") && (
-          <button type="button" className={styles.newBookingButton} onClick={() => setBookingOpen(true)}>
-            <FaPlus aria-hidden="true" />{t("booking.new")}
           </button>
         )}
       </aside>
