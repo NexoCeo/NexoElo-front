@@ -1,4 +1,4 @@
-import { formatPersonName } from "@/utils/person-display";
+import { formatPersonName } from "@/context/UserContext";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaArrowRight, FaCalendarDay } from "react-icons/fa6";
