@@ -31,3 +31,8 @@
 .embedded .panel{border:0;background:transparent;padding:0;min-height:230px}
 .embedded .panelHead{padding:12px 16px 18px}
 .embedded .tableRow{padding:16px;border-bottom:1px solid var(--theme-bottom,#263349)}
+
+/* Compact summary skeleton: same shimmer, without increasing the panel height. */
+.dense.compact{min-height:0}
+.dense .compactLines{gap:7px;padding:0}
+.dense .compactLines .bar{height:9px}
