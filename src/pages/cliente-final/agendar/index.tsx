@@ -1,3 +1,4 @@
+import LoadingState from "@/components/loading-state";
 import { useTheme } from "@/context/ThemeContext";
 import { useEffect, useMemo, useState } from "react";
 import { isAxiosError } from "axios";
@@ -535,7 +536,7 @@ export default function ClienteFinalAgendar() {
             {expandedSection === "responsavel" && (
               <div id="responsavel-options">
                 {loadingResponsaveis ? (
-                  <p className={styles.optionFeedback}>{t("client.providersLoading")}</p>
+                  <LoadingState label={t("client.providersLoading")} compact />
                 ) : responsaveis.length === 0 ? (
                   <p className={styles.optionFeedback}>{t("client.providersEmpty")}</p>
                 ) : (
@@ -586,7 +587,7 @@ export default function ClienteFinalAgendar() {
               {expandedSection === "profissional" && (
                 <div id="profissional-options">
                   {loadingProfissionais ? (
-                    <p className={styles.optionFeedback}>{t("client.professionalsLoading")}</p>
+                    <LoadingState label={t("client.professionalsLoading")} compact />
                   ) : profissionais.length === 0 ? (
                     <p className={styles.optionFeedback}>{t("client.professionalsEmpty")}</p>
                   ) : (
@@ -638,7 +639,7 @@ export default function ClienteFinalAgendar() {
             {expandedSection === "servico" && (
               <div id="servico-options">
                 {loadingServicos ? (
-                  <p className={styles.optionFeedback}>{t("client.servicesLoading")}</p>
+                  <LoadingState label={t("client.servicesLoading")} compact />
                 ) : !responsavelId ? (
                   <p className={styles.optionFeedback}>{t("client.chooseProvider")}</p>
                 ) : responsavelEhEmpresa && !profissionalId ? (
@@ -709,7 +710,7 @@ export default function ClienteFinalAgendar() {
                 <fieldset className={`${styles.scheduleFieldset} ${!dataSelecionada ? styles.scheduleHidden : ""}`} aria-hidden={!dataSelecionada} disabled={!dataSelecionada || loadingHorarios}>
                   <legend>{t("client.availableSlots")}</legend>
                   {loadingHorarios ? (
-                    <p className={styles.scheduleFeedback}>{t("client.slotsLoading")}</p>
+                    <LoadingState label={t("client.slotsLoading")} compact />
                   ) : horariosDisponiveis.length === 0 ? (
                     <p className={styles.scheduleFeedback}>{t("client.slotsEmpty")}</p>
                   ) : (
