@@ -148,12 +148,12 @@
 
 .optionGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  grid-template-columns: repeat(auto-fill, 180px);
   gap: 8px;
 }
 
 .serviceGrid {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  grid-template-columns: repeat(auto-fill, 240px);
 }
 
 .identityOption,
@@ -173,13 +173,20 @@
 }
 
 .identityOption {
-  min-height: 64px;
-  padding: 8px 28px 8px 9px;
-  grid-template-columns: 42px minmax(0, 1fr);
+  height: 64px;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 7px 20px 7px 8px;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 7px;
 }
 
 .serviceOption {
-  min-height: 82px;
+  height: 82px;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: hidden;
   padding: 8px 28px 8px 9px;
   grid-template-columns: 76px minmax(0, 1fr);
 }
@@ -207,8 +214,8 @@
 }
 
 .profilePhoto {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   overflow: hidden;
   border: 2px solid var(--theme-border-strong);
   border-radius: 50%;
@@ -248,12 +255,17 @@
 
 .optionText strong,
 .optionText b {
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .optionText strong {
   font-size: 13px;
   line-height: 1.25;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  max-height: 2.5em;
 }
 
 .optionText small {
@@ -261,7 +273,14 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.optionText small svg {
+  flex-shrink: 0;
 }
 
 .optionText b {
@@ -271,8 +290,8 @@
 
 .selectedIcon {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 6px;
+  right: 6px;
   color: var(--theme-primary-text);
   font-size: 13px;
 }
@@ -466,10 +485,10 @@
   }
 
   .identityOption {
-    min-height: 60px;
+    height: 60px;
     grid-template-columns: 36px minmax(0, 1fr);
     gap: 7px;
-    padding: 7px 24px 7px 8px;
+    padding: 6px 17px 6px 6px;
   }
 
   .profilePhoto {
@@ -482,7 +501,7 @@
   }
 
   .serviceOption {
-    min-height: 76px;
+    height: 76px;
     grid-template-columns: 64px minmax(0, 1fr);
   }
 
@@ -498,7 +517,25 @@
 
 @media (max-width: 420px) {
   .optionGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .serviceGrid {
     grid-template-columns: 1fr;
+  }
+
+  .identityOption {
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 5px;
+  }
+
+  .profilePhoto {
+    width: 30px;
+    height: 30px;
+  }
+
+  .identityOption .optionText strong {
+    font-size: 12px;
   }
 
   .serviceOption {
