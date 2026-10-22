@@ -373,18 +373,20 @@
 
 .timeGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 6px;
 }
 
 .timeButton {
-  min-height: 46px;
+  min-height: 32px;
+  padding: 4px 6px;
   border: 1px solid var(--theme-border-strong);
   border-radius: 8px;
   background: var(--theme-surface);
   color: var(--theme-text);
   cursor: pointer;
   font: inherit;
+  font-size: 12px;
   font-weight: 800;
   transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
 }
@@ -517,7 +519,7 @@
 
 
   .timeGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
   }
 }
 
@@ -551,17 +553,16 @@
 
 
   .timeGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
   }
 }
 
 .scheduleRegion {
-  height: 180px;
+  min-height: 180px;
   min-width: 0;
-  overflow: hidden;
 }
 .scheduleRegion .scheduleFieldset {
-  height: 100%;
+  min-height: 180px;
   box-sizing: border-box;
   display: block;
 }
@@ -570,8 +571,8 @@
   pointer-events: none;
 }
 .scheduleRegion .timeGrid {
-  max-height: 150px;
-  overflow-y: auto;
+  max-height: none;
+  overflow: visible;
   align-content: start;
   padding: 2px;
   box-sizing: border-box;
