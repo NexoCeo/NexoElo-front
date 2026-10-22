@@ -1,4 +1,4 @@
-import { formatPersonName, formatEmailDisplay } from "@/utils/person-display";
+import { formatPersonName, formatEmailDisplay } from "@/context/UserContext";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { isAxiosError } from "axios";
