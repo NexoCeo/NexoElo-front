@@ -416,9 +416,7 @@ export default function Funcionamento() {
       <div className={styles.content}>
         <form className={styles.editor} onSubmit={handleSubmit} noValidate>
           {loading || !config ? (
-            <section className={styles.card} style={cardStyle}>
-              <LoadingState label={t("hours.loading")} />
-            </section>
+            <LoadingState label={t("hours.loading")} variant="hours" embedded />
           ) : (
             <>
               <section className={styles.card} style={cardStyle}>
