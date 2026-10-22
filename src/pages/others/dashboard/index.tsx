@@ -1,3 +1,4 @@
+import { formatPersonName } from "@/utils/person-display";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaArrowRight, FaCalendarDay } from "react-icons/fa6";
@@ -37,9 +38,9 @@ function toCardItem(appointment: Agendamento, includeDate: boolean): AgendaCardI
 
   return {
     Id: appointment.Id,
-    cliente: appointment.ClienteNome || `Cliente #${appointment.ClienteId}`,
+    cliente: formatPersonName(appointment.ClienteNome) || `Cliente #${appointment.ClienteId}`,
     servico: appointment.ServicoNome || `Servico #${appointment.ServicoId}`,
-    profissional: appointment.ProfissionalNome || "Profissional",
+    profissional: formatPersonName(appointment.ProfissionalNome) || "Profissional",
     horario: `${prefix}${time}`,
     status: appointment.Status || "AGENDADO",
     valor: new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
