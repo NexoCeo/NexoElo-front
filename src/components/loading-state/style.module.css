@@ -36,3 +36,26 @@
 .dense.compact{min-height:0}
 .dense .compactLines{gap:7px;padding:0}
 .dense .compactLines .bar{height:9px}
+
+/* Skeleton da verificação de assinatura: mesmas colunas e alturas da agenda final. */
+.agendaShell{box-sizing:border-box;display:grid;grid-template-columns:minmax(248px,292px) minmax(0,1fr);gap:20px;padding:0 clamp(16px,2.4vw,34px) 8px;width:100%;align-items:start}
+.agendaSide{min-width:0;display:grid;gap:8px}
+.agendaToggle,.agendaCalendar,.agendaAction{box-sizing:border-box;border:1px solid var(--theme-bottom);border-radius:8px;background:var(--theme-surface);min-width:0}
+.agendaToggle{height:64px;display:flex;align-items:center;justify-content:space-around;padding:8px}
+.agendaCalendar{height:221px;padding:8px;display:flex;flex-direction:column;gap:10px}
+.agendaCalendar>.bar{height:40px;flex:0 0 40px}
+.agendaDays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:repeat(5,1fr);gap:8px;flex:1;align-items:center;justify-items:center;min-height:0}
+.agendaDays .bar{height:8px}
+.agendaAction{height:38px;display:flex;align-items:center;justify-content:center}
+.agendaMain{min-width:0}
+.agendaHeading{height:84px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding-top:3px;box-sizing:border-box}
+.agendaHeading>div{width:75%;max-width:640px;display:grid;gap:13px}
+.agendaHeading>div .bar:first-child{height:24px}
+.agendaHeading>.bar{height:38px;max-width:160px}
+.agendaTable{box-sizing:border-box;height:390px;border:1px solid var(--theme-bottom);border-radius:8px;background:var(--theme-surface);overflow:hidden}
+.agendaTableHeader,.agendaTableRow{display:grid;grid-template-columns:20fr 18fr 18fr 10fr 12fr 11fr 11fr;align-items:center;padding:0 12px;gap:0;box-sizing:border-box}
+.agendaTableHeader{height:50px;background:var(--theme-surface-muted)}
+.agendaTableRow{height:65px;border-bottom:1px solid var(--theme-bottom)}
+.agendaTableHeader .bar,.agendaTableRow .bar{height:12px;margin-left:5px}
+@media(max-width:960px){.agendaShell{grid-template-columns:minmax(0,1fr);gap:26px}.agendaSide{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.agendaCalendar{grid-row:span 4}.agendaMain{width:100%}}
+@media(max-width:640px){.agendaShell{gap:24px;padding:0 12px 28px}.agendaSide{grid-template-columns:1fr}.agendaCalendar{grid-row:auto}.agendaHeading{height:110px}.agendaTableHeader{display:none}.agendaTable{height:350px}.agendaTableRow{height:65px}}
