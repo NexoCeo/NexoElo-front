@@ -1,5 +1,6 @@
 import { FaCamera, FaEnvelope, FaPhoneAlt } from "react-icons/fa";
 import styles from "./style.module.css";
+import { formatPersonName, formatEmailDisplay } from "@/utils/person-display";
 import { useLanguage } from "@/context/LanguageContext";
 
 type ProfileOverviewProps = {
@@ -24,11 +25,12 @@ function formatPhone(value?: string | null, fallback = "Não informado") {
 
 export default function ProfileOverview({ name, role, email, phone, avatarUrl, className, action, subtitle, onPhotoChange, photoSaving = false }: ProfileOverviewProps) {
   const { t } = useLanguage();
-  const initial = name.trim().charAt(0).toUpperCase() || "?";
+  const displayName = formatPersonName(name);
+  const initial = displayName.charAt(0) || "?";
   return (
     <section className={`${styles.profile} ${className || ""}`} aria-label={t("profile.info")}>
       <div className={styles.avatar}>
-        {avatarUrl ? <img src={avatarUrl} alt={`${t("profile.photo")}: ${name}`} /> : <span aria-hidden="true">{initial}</span>}
+        {avatarUrl ? <img src={avatarUrl} alt={`${t("profile.photo")}: ${displayName}`} /> : <span aria-hidden="true">{initial}</span>}
         {onPhotoChange && (
           <label className={styles.cameraButton} title={t("profile.photoUpload")} aria-label={t("profile.photoUpload")}>
             {photoSaving ? <span className={styles.spinner} aria-hidden="true" /> : <FaCamera aria-hidden="true" />}
@@ -47,12 +49,12 @@ export default function ProfileOverview({ name, role, email, phone, avatarUrl, c
         )}
       </div>
       <div className={styles.heading}>
-        <h2>{name}</h2>
+        <h2>{displayName}</h2>
         <span className={styles.role}>{role}</span>
         {subtitle && <p>{subtitle}</p>}
       </div>
       <dl className={styles.details}>
-        <div><dt><FaEnvelope aria-hidden="true" /> {t("profile.email")}</dt><dd>{email || t("profile.notProvided")}</dd></div>
+        <div><dt><FaEnvelope aria-hidden="true" /> {t("profile.email")}</dt><dd>{formatEmailDisplay(email) || t("profile.notProvided")}</dd></div>
         <div><dt><FaPhoneAlt aria-hidden="true" /> {t("profile.phone")}</dt><dd>{formatPhone(phone, t("profile.notProvided"))}</dd></div>
       </dl>
       {action && <div className={styles.action}>{action}</div>}
