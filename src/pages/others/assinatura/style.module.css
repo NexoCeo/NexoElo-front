@@ -4,6 +4,9 @@
 .title{font-size:clamp(22px,2.2vw,30px);line-height:1.18;font-weight:750;letter-spacing:-.03em;margin:0 0 5px}
 .subtitle{font-size:13px;color:var(--theme-text-muted,#9ca3af);line-height:1.4;margin:0}
 .status{border:1px solid var(--theme-bottom,#334155);background:var(--theme-background2,#111827);border-radius:14px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.statusLoading{overflow:hidden;min-height:78px;justify-content:flex-start}
+.statusLoading > :first-child{flex:1;min-width:0}
+.status{min-height:78px}
 .statusTitle{font-size:14px;font-weight:750;margin:0 0 4px;text-transform:capitalize}
 .statusMeta{display:flex;flex-wrap:wrap;gap:5px 15px;font-size:12px;color:var(--theme-text-muted,#94a3b8)}
 .active{color:#4ade80}.inactive{color:#fca5a5}
