@@ -1,3 +1,4 @@
+import { formatPersonName, formatEmailDisplay } from "@/utils/person-display";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { isAxiosError } from "axios";
@@ -578,10 +579,10 @@ export default function Profissionais() {
                 <tr key={profissional.Id || profissional.Email || profissional.Nome}>
                   <td data-label="Profissional">
                     <strong style={{ color: theme.colors.text }}>
-                      {profissional.Nome || t("services.unnamed")}
+                      {formatPersonName(profissional.Nome) || t("services.unnamed")}
                     </strong>
                   </td>
-                  <td data-label="Email">{profissional.Email || t("pros.notProvided")}</td>
+                  <td data-label="Email">{formatEmailDisplay(profissional.Email) || t("pros.notProvided")}</td>
                   <td data-label="Telefone">{profissional.Telefone || t("pros.notProvided")}</td>
                   <td data-label="Status">
                     <span className={styles.status}>
@@ -783,7 +784,7 @@ export default function Profissionais() {
                   <article className={styles.requestItem} key={solicitacao.VinculoId}>
                     <div>
                       <strong>{solicitacao.Nome}</strong>
-                      <span>{solicitacao.Email || solicitacao.Telefone || t("pros.contactMissing")}</span>
+                      <span>{formatEmailDisplay(solicitacao.Email) || solicitacao.Telefone || t("pros.contactMissing")}</span>
                     </div>
                     <div className={styles.requestActions}>
                       <button
