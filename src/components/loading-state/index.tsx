@@ -5,7 +5,7 @@ type LoadingStateProps = {
   compact?: boolean;
   dense?: boolean;
   embedded?: boolean;
-  variant?: "cards" | "table" | "form" | "profile" | "analytics" | "agenda" | "services";
+  variant?: "cards" | "table" | "form" | "profile" | "analytics" | "agenda" | "services" | "hours";
 };
 
 function inferVariant(): NonNullable<LoadingStateProps["variant"]> {
@@ -13,6 +13,7 @@ function inferVariant(): NonNullable<LoadingStateProps["variant"]> {
   if (path.includes("analise-dados") || path.includes("dashboard")) return "analytics";
   if (path.includes("/agenda")) return "agenda";
   if (path.includes("/servicos")) return "services";
+  if (path.includes("/funcionamento")) return "hours";
   if (path.includes("relatorios") || path.includes("profissionais")) return "table";
   if (path.includes("perfil")) return "profile";
   if (path.includes("funcionamento") || path.includes("register") || path.includes("assinatura")) return "form";
@@ -28,7 +29,23 @@ export default function LoadingState({ label = "Carregando", compact = false, de
   return (
     <div className={`${styles.loading} ${compact ? styles.compact : ""} ${dense ? styles.dense : ""} ${embedded ? styles.embedded : ""}`} role="status" aria-live="polite" aria-label={label} aria-busy="true">
       <span className={styles.srOnly}>{label}</span>
-      {!compact && kind === "services" ? (
+      {!compact && kind === "hours" ? (
+        <div className={`${styles.hoursShell} ${embedded ? styles.hoursEmbedded : ""}`} aria-hidden="true">
+          {!embedded && <div className={styles.hoursIntro}><Bar width="32%"/><Bar width="58%"/></div>}
+          <div className={styles.hoursColumns}>
+            <div className={styles.hoursEditor}>
+              <div className={styles.hoursPanel}>
+                <div className={styles.hoursHead}><Bar width="45%"/><Bar width="30%"/></div>
+                <div className={styles.hoursDays}>{Array.from({length:7},(_,i)=><div key={i} className={styles.hoursDay}><Bar width="60%"/><Bar width="75%"/></div>)}</div>
+              </div>
+              <div className={styles.hoursPanel}><div className={styles.hoursHead}><Bar width="40%"/><Bar width="20%"/></div><div className={styles.hoursInputs}><Bar width="100%"/><Bar width="100%"/></div></div>
+              <div className={styles.hoursPanel}><div className={styles.hoursHead}><Bar width="48%"/></div>{[0,1,2].map(i=><div className={styles.hoursLine} key={i}><Bar width="34%"/><Bar width="40%"/></div>)}</div>
+              <div className={styles.hoursPanel}><div className={styles.hoursHead}><Bar width="38%"/><Bar width="18%"/></div><Bar width="55%"/></div>
+            </div>
+            {!embedded && <aside className={styles.hoursSummary}><Bar width="65%"/>{[0,1,2].map(i=><div className={styles.hoursSummaryRow} key={i}><Bar width="50%"/><Bar width="76%"/></div>)}</aside>}
+          </div>
+        </div>
+      ) : !compact && kind === "services" ? (
         <div className={`${styles.servicesShell} ${embedded ? styles.servicesEmbedded : ""}`} aria-hidden="true">
           {!embedded && <div className={styles.servicesToolbar}><Bar width="100%"/></div>}
           <div className={styles.servicesTable}>
