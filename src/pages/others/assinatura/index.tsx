@@ -131,7 +131,7 @@ export default function MinhaAssinatura() {
     <main className={styles.page}>
       {loading ? (
         <section className={`${styles.status} ${styles.statusLoading}`}>
-          <LoadingState compact label={t("subscription.loading")} />
+          <LoadingState compact dense label={t("subscription.loading")} />
         </section>
       ) : assinatura && (
         <section className={styles.status} aria-label={t("subscription.current")}>
