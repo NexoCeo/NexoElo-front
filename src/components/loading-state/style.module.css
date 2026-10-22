@@ -103,9 +103,7 @@
 
 /* Relatórios: skeleton nos limites reais do cabeçalho, período e três cards. */
 .reportsShell{box-sizing:border-box;width:100%;padding:0 24px 40px;min-height:0}
-.reportsHeader{box-sizing:border-box;width:min(100%,1120px);margin:0 auto 28px;display:flex;justify-content:space-between;align-items:flex-end;gap:24px;min-height:80px}
-.reportsHeading{width:min(100%,520px);display:grid;gap:9px}
-.reportsHeading .bar:first-child{height:28px}
+.reportsHeader{box-sizing:border-box;width:min(100%,1120px);margin:0 auto 28px;display:flex;align-items:flex-end;justify-content:flex-start;gap:24px;min-height:0}
 .reportsPeriod{width:220px;flex:0 0 220px;display:grid;gap:7px}
 .reportsPeriod .bar:last-child{height:44px}
 .reportsGrid{width:min(100%,1120px);margin:0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
