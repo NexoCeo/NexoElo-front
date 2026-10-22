@@ -13,6 +13,12 @@ import styles from "./style.module.css";
 
 type Props = { date: Date; professionalId: number; onClose: () => void; onCreated: (date: string) => void };
 
+function formatClientName(value: string) {
+  return value.trim().replace(/\s+/g, " ").toLocaleLowerCase("pt-BR")
+    .replace(/(^|[\s'-])([\p{L}])/gu, (_, separator: string, letter: string) =>
+      separator + letter.toLocaleUpperCase("pt-BR"));
+}
+
 export default function AgendaBooking({ date, professionalId, onClose, onCreated }: Props) {
   const { usuario } = useUser();
   const { t } = useLanguage();
@@ -117,7 +123,7 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
           <label>{t("booking.customer")}
             <select required value={clienteId} onChange={e => setClienteId(Number(e.target.value))}>
               <option value={0}>{t("booking.select")}</option>
-              {clientes.map(c => <option key={c.Id} value={c.Id}>{c.Nome}</option>)}
+              {clientes.map(c => <option key={c.Id} value={c.Id}>{formatClientName(c.Nome)}</option>)}
             </select>
           </label>
           {!loading && !error && clientes.length === 0 && <p>{t("booking.noCustomers")}</p>}
