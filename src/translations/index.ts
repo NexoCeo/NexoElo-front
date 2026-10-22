@@ -2,6 +2,19 @@ export type SupportedLang = "pt" | "en";
 
 export const translations = {
   pt: {
+    "booking.new": "Novo agendamento",
+    "booking.loadFailed": "Não foi possível carregar os dados. Feche e tente novamente.",
+    "booking.saveFailed": "Não foi possível criar o agendamento.",
+    "booking.loading": "Carregando...",
+    "booking.select": "Selecione",
+    "booking.customer": "Cliente",
+    "booking.service": "Serviço",
+    "booking.noCustomers": "Nenhum cliente cadastrado.",
+    "booking.noServices": "Nenhum serviço disponível.",
+    "booking.saving": "Agendando...",
+    "booking.created": "Agendamento criado",
+    "booking.createdMessage": "O novo agendamento já está disponível na agenda.",
+
     "nav.metrics": "Métricas",
     "profile.photoHelp": "JPG, PNG, WEBP · até 30 MB (otimização automática)",
     "profile.photoPreview": "Prévia da foto de perfil",
@@ -587,6 +600,19 @@ export const translations = {
     "dashboard.today": "Agendamentos de hoje",
   },
   en: {
+    "booking.new": "New appointment",
+    "booking.loadFailed": "Could not load the data. Close and try again.",
+    "booking.saveFailed": "Could not create the appointment.",
+    "booking.loading": "Loading...",
+    "booking.select": "Select",
+    "booking.customer": "Customer",
+    "booking.service": "Service",
+    "booking.noCustomers": "No registered customers.",
+    "booking.noServices": "No services available.",
+    "booking.saving": "Booking...",
+    "booking.created": "Appointment created",
+    "booking.createdMessage": "The new appointment is now available in the calendar.",
+
     "nav.metrics": "Metrics",
     "profile.photoHelp": "JPG, PNG, WEBP · up to 30 MB (automatic optimization)",
     "profile.photoPreview": "Profile photo preview",

@@ -403,3 +403,6 @@
   .professionalFilter select { min-height: 34px; }
   .todayButton, .closeAllButton { min-height: 36px; }
 }
+
+.newBookingButton{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:38px;padding:9px 12px;border:1px solid #2563eb;border-radius:6px;background:#2563eb;color:#fff;font:inherit;font-weight:700;cursor:pointer}
+.newBookingButton:hover{background:#1d4ed8}.newBookingButton:focus-visible{outline:2px solid currentColor;outline-offset:3px}

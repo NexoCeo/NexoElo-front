@@ -1,5 +1,6 @@
+import AgendaBooking from "@/components/agenda-booking";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FaCalendarCheck, FaCalendarDay, FaRotate } from "react-icons/fa6";
+import { FaPlus, FaCalendarCheck, FaCalendarDay, FaRotate } from "react-icons/fa6";
 import axios from "axios";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
@@ -74,6 +75,7 @@ export default function Agenda() {
   const { usuario } = useUser();
   const { showNotification } = useNotification();
 
+  const [bookingOpen, setBookingOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("month");
 
@@ -611,6 +613,11 @@ export default function Agenda() {
             {closingDay ? t("agenda.closing") : t("agenda.closeAll")}
           </button>
         )}
+        {["AUTONOMO", "EMPRESA", "PROFISSIONAL"].includes(usuario?.Papel || "") && (
+          <button type="button" className={styles.newBookingButton} onClick={() => setBookingOpen(true)}>
+            <FaPlus aria-hidden="true" />{t("booking.new")}
+          </button>
+        )}
       </aside>
 
       <section
@@ -722,6 +729,14 @@ export default function Agenda() {
           onStatusChange={podeGerenciar ? handleStatusChange : undefined}
         />
       </section>
+      {bookingOpen && <AgendaBooking date={selectedDate} professionalId={profissionalId}
+        onClose={() => setBookingOpen(false)}
+        onCreated={day => {
+          setBookingOpen(false);
+          setSelectedDate(new Date(day + "T12:00:00"));
+          if (day === selectedDateKey) void loadAgenda(true);
+          showNotification({ type: "success", title: t("booking.created"), message: t("booking.createdMessage") });
+        }} />}
     </main>
   );
 }
