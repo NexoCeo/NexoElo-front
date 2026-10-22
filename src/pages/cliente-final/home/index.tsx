@@ -410,8 +410,7 @@ export default function ClienteFinalHome() {
           >
             <header className={styles.pageHeader}>
               <div>
-                <span>{t("client.appointments")}</span>
-                <h1>{t("client.history")}</h1>
+                <h1>{lang === "pt" ? "Histórico de Agendamentos" : "Appointment History"}</h1>
               </div>
               <button
                 type="button"
