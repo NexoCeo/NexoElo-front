@@ -10,7 +10,7 @@ import { obterStatusVinculoProfissional } from "@/services/vinculo-service";
 import type { HorarioDisponivel, ProfissionalAgendamento, UsuarioAgendamento } from "@/types/agendamento";
 import type { Servico } from "@/types/servico";
 import styles from "./style.module.css";
-import { formatPersonName } from "@/utils/person-display";
+import { formatPersonName } from "@/context/UserContext";
 
 type Props = { date: Date; professionalId: number; onClose: () => void; onCreated: (date: string) => void };
 
