@@ -210,3 +210,8 @@ export async function concluirAgendamentosDoDiaAtual() {
 
   return pickNumber(response.data, ["quantidade", "Quantidade"]);
 }
+
+export async function listarClientesAgendamento() {
+  const response = await api.get<ApiRecord[]>("/Agendamento/clientes");
+  return Array.isArray(response.data) ? response.data.map(normalizeUsuario) : [];
+}
