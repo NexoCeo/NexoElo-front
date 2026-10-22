@@ -333,7 +333,7 @@ export default function ClienteFinalHome() {
       <header className={styles.topbar}>
         <div className={styles.topbarInner}>
           {activeSection === "home" && (
-            <h1 className={styles.mobileGreeting}>Olá, {cliente?.Nome || "cliente"}</h1>
+            <h1 className={styles.greeting}>Olá, {cliente?.Nome || "cliente"}</h1>
           )}
           <nav className={styles.navigation} aria-label={t("client.navigation")} role="tablist">
             {navigationItems.map(({ id, Icon }) => (
@@ -377,10 +377,7 @@ export default function ClienteFinalHome() {
             aria-labelledby="tab-home"
             className={styles.view}
           >
-            <header className={styles.pageHeader}>
-              <div className={styles.desktopGreeting}>
-                <h1>Olá, {cliente?.Nome || "cliente"}</h1>
-              </div>
+            <header className={`${styles.pageHeader} ${styles.bookingHeader}`}>
               <button type="button" className={styles.primaryButton} onClick={() => navigate("/cliente-final/agendar")}>
                 <FaPlus aria-hidden="true" />
                 Novo agendamento
