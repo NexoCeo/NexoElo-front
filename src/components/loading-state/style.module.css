@@ -59,3 +59,20 @@
 .agendaTableHeader .bar,.agendaTableRow .bar{height:12px;margin-left:5px}
 @media(max-width:960px){.agendaShell{grid-template-columns:minmax(0,1fr);gap:26px}.agendaSide{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.agendaCalendar{grid-row:span 4}.agendaMain{width:100%}}
 @media(max-width:640px){.agendaShell{gap:24px;padding:0 12px 28px}.agendaSide{grid-template-columns:1fr}.agendaCalendar{grid-row:auto}.agendaHeading{height:110px}.agendaTableHeader{display:none}.agendaTable{height:350px}.agendaTableRow{height:65px}}
+
+/* Services skeleton follows the real toolbar and five-column table instead of page-level cards. */
+.servicesShell{box-sizing:border-box;padding:0 24px 32px;width:100%;min-height:0}
+.servicesEmbedded{padding:0}
+.servicesToolbar{width:min(100%,1120px);height:68px;margin:0 auto 0;display:flex;align-items:flex-start}
+.servicesToolbar .bar{width:190px!important;max-width:190px;height:44px}
+.servicesTable{width:min(100%,1120px);margin:0 auto;overflow:hidden;border-radius:8px;background:var(--theme-background2,#111827)}
+.servicesColumns,.servicesRow{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,1fr) minmax(0,1.1fr) minmax(0,1.25fr) 72px;align-items:center;gap:12px;padding:0 16px;box-sizing:border-box}
+.servicesColumns{height:50px;border-bottom:1px solid var(--theme-glass-strong,#334155)}
+.servicesRow{min-height:76px;border-bottom:1px solid var(--theme-glass-strong,#334155)}
+.servicesRow:last-child{border-bottom:0}
+.servicesColumns .bar,.servicesRow .bar{height:12px}
+.servicesIdentity{display:flex;align-items:center;gap:12px;min-width:0}
+.servicesIdentity .bar{flex:1}
+.servicesImage{width:44px;height:44px;flex:0 0 44px;border-radius:6px;background:linear-gradient(100deg,var(--theme-background2,#182237) 15%,var(--theme-glass-strong,#344054) 45%,var(--theme-background2,#182237) 75%);background-size:220% 100%;animation:shimmer 1.6s ease-in-out infinite}
+@media(max-width:700px){.servicesShell{padding:0 14px 20px}.servicesEmbedded{padding:0}.servicesToolbar{height:68px}.servicesColumns{display:none}.servicesRow{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;min-height:116px;padding:14px}.servicesIdentity{grid-column:1/-1}}
+@media(prefers-reduced-motion:reduce){.servicesImage{animation:none}}
