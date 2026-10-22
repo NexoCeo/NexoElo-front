@@ -1,3 +1,4 @@
+import LoadingState from "@/components/loading-state";
 import { createAgendaRealtimeClient } from "@/services/agenda-realtime-service";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -406,7 +407,7 @@ export default function ClienteFinalHome() {
               </div>
 
               {loading ? (
-                <div className={styles.feedback} role="status">{t("client.loading")}</div>
+                <LoadingState label={t("client.loading")} variant="table" embedded />
               ) : error && appointments.length === 0 ? (
                 <div className={styles.feedback} role="alert">
                   <span>{error}</span>
@@ -445,7 +446,7 @@ export default function ClienteFinalHome() {
             </header>
 
             {loading ? (
-              <div className={styles.feedback} role="status">{t("client.historyLoading")}</div>
+              <LoadingState label={t("client.historyLoading")} variant="table" embedded />
             ) : error && appointments.length === 0 ? (
               <div className={styles.feedback} role="alert">
                 <span>{error}</span>
