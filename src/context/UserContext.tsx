@@ -1,5 +1,19 @@
 import React, { createContext, useCallback, useContext, useState } from "react";
-import { formatPersonName, formatEmailDisplay } from "@/utils/person-display";
+
+
+/** Formatação de exibição para usuários, clientes e profissionais. */
+// eslint-disable-next-line react-refresh/only-export-components
+export function formatPersonName(value?: string | null): string {
+  if (!value) return "";
+  return value.trim().replace(/\s+/g, " ").toLocaleLowerCase("pt-BR")
+    .replace(/(^|[\s'’\-])([\p{L}])/gu, (_, separator: string, initial: string) =>
+      separator + initial.toLocaleUpperCase("pt-BR"));
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+export function formatEmailDisplay(value?: string | null): string {
+  return value?.trim().toLowerCase() ?? "";
+}
 
 export type Usuario = {
   Id: number;
