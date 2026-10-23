@@ -6,7 +6,6 @@ import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
 import { consultarAssinatura, iniciarCheckout, alterarPlano, atualizarRecursosAtivos, listarRecursosPlano, abrirPortal, planos, type AssinaturaAtual, type RecursoPlano } from "@/services/assinatura-service";
 import styles from "./style.module.css";
-import mgmt from "./management.module.css";
 import Modal from "@/components/modal";
 import LoadingState from "@/components/loading-state";
 import { useLanguage } from "@/context/LanguageContext";
@@ -167,18 +166,18 @@ export default function MinhaAssinatura({ publicView = false }: { publicView?: b
         </section>
       ))}
 
-      {!publicView && <section className={mgmt.management} aria-label={texto("Gerenciamento da assinatura", "Subscription management")}>
-        <div className={mgmt.managementHeading}>
+      {!publicView && <section className={styles.management} aria-label={texto("Gerenciamento da assinatura", "Subscription management")}>
+        <div className={styles.managementHeading}>
           <div>
             <h2 className={styles.sectionTitle}>{texto("Gerenciar assinatura", "Manage subscription")}</h2>
             <p className={styles.description}>{texto("Acompanhe seu acesso e gerencie o plano da sua conta.", "Review your access and manage your account plan.")}</p>
           </div>
-          <button type="button" className={mgmt.viewPlansButton} onClick={() => navigate("/planos")}>
+          <button type="button" className={styles.viewPlansButton} onClick={() => navigate("/planos")}>
             {texto("Ver planos", "View plans")}
           </button>
         </div>
-        <div className={mgmt.managementStats}>
-          <div className={mgmt.managementStat}>
+        <div className={styles.managementStats}>
+          <div className={styles.managementStat}>
             <span>{texto("Plano contratado", "Current plan")}</span>
             <strong>{assinatura ? nomes[assinatura.Plano] ?? assinatura.Plano : "—"}</strong>
           </div>
@@ -197,7 +196,7 @@ export default function MinhaAssinatura({ publicView = false }: { publicView?: b
 
       {(publicView || mostrarPlanos) && (
         <section id="subscription-plan-list" className={styles.plansSection}>
-          <div className={mgmt.publicHeading}>
+          <div className={styles.publicHeading}>
             <div><h1>{texto("Encontre o plano ideal para seu negócio", "Find the right plan for your business")}</h1><p>{texto("Compare recursos e escolha conforme sua operação cresce.", "Compare features and choose as your business grows.")}</p></div>
             <button className={styles.secondaryButton} type="button" onClick={() => navigate(-1)}>{texto("Voltar", "Back")}</button>
           </div>
