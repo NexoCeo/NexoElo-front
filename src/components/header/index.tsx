@@ -165,17 +165,6 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
                   <FaUser aria-hidden="true" />
                   <span>{t("header.profile")}</span>
                 </Link>
-                {canShowFindMe && (
-                  <Link
-                    to={`${basePath}/assinatura`}
-                    style={{ color: theme.colors.text }}
-                    onClick={() => setIsProfileMenuOpen(false)}
-                    role="menuitem"
-                  >
-                    <FaCreditCard aria-hidden="true" />
-                    <span>{t("header.subscription")}</span>
-                  </Link>
-                )}
                 <button
                   type="button"
                   onClick={toggleTheme}
@@ -191,6 +180,17 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
                   )}
                   <span>{themeName === "dark" ? t("header.lightTheme") : t("header.darkTheme")}</span>
                 </button>
+                {canShowFindMe && (
+                  <Link
+                    to={`${basePath}/assinatura`}
+                    style={{ color: theme.colors.text }}
+                    onClick={() => setIsProfileMenuOpen(false)}
+                    role="menuitem"
+                  >
+                    <FaCreditCard aria-hidden="true" />
+                    <span>{t("header.subscription")}</span>
+                  </Link>
+                )}
                 <button
                   type="button"
                   onClick={() => void handleLogout()}
