@@ -25,6 +25,8 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
   const [profissionais, setProfissionais] = useState<ProfissionalAgendamento[]>([]);
   const [clientes, setClientes] = useState<UsuarioAgendamento[]>([]);
   const [clienteId, setClienteId] = useState(0);
+  const [buscaCliente, setBuscaCliente] = useState("");
+  const [clientesBusca, setClientesBusca] = useState<UsuarioAgendamento[]>([]);
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [servicoId, setServicoId] = useState(0);
   const [day, setDay] = useState(formatAgendaDateParam(date));
@@ -65,6 +67,20 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
     void load();
     return () => { active = false; };
   }, [usuario, empresa, professionalId, t, showNotification]);
+
+  useEffect(() => {
+    if (buscaCliente.trim().length < 3) {
+      setClientesBusca([]);
+      return;
+    }
+    let active = true;
+    const delay = window.setTimeout(() => {
+      void listarClientesAgendamento(buscaCliente.trim())
+        .then(items => { if (active) setClientesBusca(items); })
+        .catch(() => { if (active) setClientesBusca([]); });
+    }, 350);
+    return () => { active = false; window.clearTimeout(delay); };
+  }, [buscaCliente]);
 
   useEffect(() => {
     let active = true;
@@ -128,12 +144,18 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
             </select>
           </label>}
           <label>{t("booking.customer")}
+            <input type="search" value={buscaCliente} maxLength={80}
+              placeholder="Buscar outro cliente pelo nome (mín. 3 letras)"
+              onChange={event => { setBuscaCliente(event.target.value); setClienteId(0); }} />
             <select required value={clienteId} onChange={e => setClienteId(Number(e.target.value))}>
               <option value={0} disabled hidden>{t("booking.select")}</option>
-              {clientes.map(c => <option key={c.Id} value={c.Id}>{formatPersonName(c.Nome)}</option>)}
+              {(buscaCliente.trim().length >= 3 ? clientesBusca : clientes).map(c => (
+                <option key={c.Id} value={c.Id}>{formatPersonName(c.Nome)}</option>
+              ))}
             </select>
           </label>
-          {!loading && clientes.length === 0 && <p>{t("booking.noCustomers")}</p>}
+          {!loading && clientes.length === 0 && buscaCliente.trim().length < 3 &&
+            <p>Nenhum cliente recorrente. Pesquise pelo nome para encontrar outros clientes.</p>}
           <label>{t("booking.service")}
             <select required value={servicoId} disabled={loadingServices || !responsavelId || (empresa && !profissionalId)} onChange={e => { setServicoId(Number(e.target.value));  }}>
               <option value={0} disabled hidden>{t("booking.select")}</option>
