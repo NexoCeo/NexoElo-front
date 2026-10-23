@@ -353,7 +353,7 @@ export default function Servicos() {
                       )}
                     </div>
                   </div>
-                </tr>
+                </div>
               ))}
             </div>
           </div>
