@@ -677,7 +677,7 @@ export default function Profissionais() {
                       )}
                     </div>
                   </div>
-                </tr>
+                </div>
               ))}
             </div>
           </div>
