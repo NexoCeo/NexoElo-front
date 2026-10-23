@@ -7,6 +7,8 @@ import UpgradePlanModal from "@/components/upgrade-plan-modal";
 import {
   FaEnvelope,
   FaPen,
+  FaEllipsisV,
+  FaLink,
   FaPhoneAlt,
   FaPlus,
   FaSave,
@@ -22,6 +24,7 @@ import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
 import {
   criarProfissionalEmpresa,
+  atualizarProfissionalEmpresa,
   listarProfissionaisEmpresa,
 } from "@/services/profissional-service";
 import {
@@ -123,6 +126,8 @@ export default function Profissionais() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [editingProfessional, setEditingProfessional] = useState<Profissional | null>(null);
   const [upgradePlan, setUpgradePlan] = useState<{ plan: "BASICO" | "INTERMEDIARIO"; limit: number } | null>(null);
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
@@ -152,7 +157,7 @@ export default function Profissionais() {
     nome.trim().length >= 3 &&
     validateEmail(email) &&
     validatePhone(telefone) &&
-    Boolean(fotoPerfil) &&
+    (Boolean(fotoPerfil) || Boolean(editingProfessional)) &&
     !saving;
 
   useEffect(() => {
@@ -262,12 +267,24 @@ export default function Profissionais() {
   }, [empresaId, profissionalEmEdicao, servicosModalOpen, showNotification]);
 
   function resetForm() {
+    setEditingProfessional(null);
     setFotoPerfil(null);
     setNome("");
     setEmail("");
     setTelefone("");
     localizacao.reset();
     setFormError("");
+  }
+
+  function openEditModal(profissional: Profissional) {
+    setOpenMenuId(null);
+    setEditingProfessional(profissional);
+    setNome(profissional.Nome);
+    setEmail(profissional.Email);
+    setTelefone(profissional.Telefone ?? "");
+    setFotoPerfil(null);
+    setFormError("");
+    setModalOpen(true);
   }
 
   async function openCreateModal() {
@@ -459,7 +476,7 @@ export default function Profissionais() {
       return;
     }
 
-    if (!fotoPerfil) {
+    if (!fotoPerfil && !editingProfessional) {
       const message = "Selecione uma foto de perfil.";
       setFormError(message);
       showNotification({ type: "warning", title: "Foto obrigatoria", message });
@@ -468,6 +485,15 @@ export default function Profissionais() {
 
     try {
       setSaving(true);
+      if (editingProfessional) {
+        const atualizado = await atualizarProfissionalEmpresa(editingProfessional.Id, {
+          Nome: nome.trim(), Email: email.trim(), Telefone: telefone.trim(),
+        });
+        setProfissionais(current => current.map(item => item.Id === atualizado.Id ? { ...item, ...atualizado, VinculoStatus: item.VinculoStatus } : item));
+        closeModal();
+        showNotification({ type: "success", title: "Profissional atualizado", message: "Os dados do profissional foram salvos." });
+        return;
+      }
       const localizacaoPayload =
         localizacao.payload ?? await localizacao.usarLocalizacaoAtual();
 
@@ -571,7 +597,7 @@ export default function Profissionais() {
           <button
             type="button"
             className={styles.primaryButton}
-            onClick={() => void openCreateModal()}
+            onClick={() => { setEditingProfessional(null); void openCreateModal(); }}
             style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
           >
             <FaUserPlus />
@@ -618,16 +644,26 @@ export default function Profissionais() {
                     </span>
                   </td>
                   <td className={styles.actionsCell} data-label="Acoes">
-                    <button
-                      type="button"
-                      className={styles.iconButton}
-                      onClick={() => openServicosModal(profissional)}
-                      aria-label={`Editar servicos de ${profissional.Nome}`}
-                      title={`Editar servicos de ${profissional.Nome}`}
-                      style={{ color: theme.colors.primary }}
-                    >
-                      <FaPen />
-                    </button>
+                    <div className={styles.actionsMenu}>
+                      <button type="button" className={styles.menuTrigger}
+                        aria-label={`Opções de ${profissional.Nome}`} aria-haspopup="menu"
+                        aria-expanded={openMenuId === profissional.Id}
+                        onClick={() => setOpenMenuId(current => current === profissional.Id ? null : profissional.Id)}>
+                        <FaEllipsisV aria-hidden="true" />
+                      </button>
+                      {openMenuId === profissional.Id && (
+                        <div className={styles.menuPopover} role="menu">
+                          <button type="button" role="menuitem" onClick={() => openEditModal(profissional)}>
+                            <FaPen aria-hidden="true" /> Editar
+                          </button>
+                          <button type="button" role="menuitem" onClick={() => {
+                            setOpenMenuId(null); openServicosModal(profissional);
+                          }}>
+                            <FaLink aria-hidden="true" /> Vincular serviços
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -645,9 +681,9 @@ export default function Profissionais() {
           <section className={styles.modal} style={{ backgroundColor: theme.colors.background2 }}>
             <header className={styles.modalHeader}>
               <div>
-                <h2 style={{ color: theme.colors.text }}>{t("pros.new")}</h2>
+                <h2 style={{ color: theme.colors.text }}>{editingProfessional ? "Editar profissional" : t("pros.new")}</h2>
                 <p style={{ color: theme.colors.inactive }}>
-                  {t("pros.registerDesc")}
+                  {editingProfessional ? "Atualize os dados do profissional vinculado." : t("pros.registerDesc")}
                 </p>
               </div>
               <button type="button" onClick={closeModal} aria-label="Fechar modal">
@@ -718,7 +754,7 @@ export default function Profissionais() {
                 disabled={!canSubmit}
                 style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
               >
-                {saving ? t("pros.creating") : t("pros.create")}
+                {saving ? t("pros.creating") : editingProfessional ? "Salvar alterações" : t("pros.create")}
               </button>
             </form>
           </section>
