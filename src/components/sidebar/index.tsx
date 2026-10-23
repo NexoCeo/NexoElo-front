@@ -41,7 +41,7 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
       if (active) {
         setRelatoriosLiberados(acesso.AcessoAtivo && (acesso.Plano === "GRATIS" || acesso.RelatoriosLiberados));
         setAnaliseLiberada(acesso.AcessoAtivo && (acesso.Plano === "GRATIS" || acesso.Plano === "AVANCADO"));
-        setWhatsAppLiberado(acesso.AcessoAtivo && acesso.Plano === "AVANCADO");
+        setWhatsAppLiberado(acesso.AcessoAtivo && (acesso.Plano === "GRATIS" || acesso.Plano === "AVANCADO"));
       }
     }).catch(() => { if (active) { setRelatoriosLiberados(false); setAnaliseLiberada(false); setWhatsAppLiberado(false); } });
     return () => { active = false; };
