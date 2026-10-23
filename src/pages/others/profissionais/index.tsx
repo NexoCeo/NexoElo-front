@@ -588,28 +588,6 @@ export default function Profissionais() {
 
   return (
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
-      <section className={styles.header}>
-        <div className={styles.headerActions}>
-          <button
-            type="button"
-            className={styles.secondaryHeaderButton}
-            onClick={openSolicitacoesModal}
-          >
-            <FaUserClock />
-            {t("pros.linkRequests")}
-          </button>
-          <button
-            type="button"
-            className={styles.primaryButton}
-            onClick={() => { setEditingProfessional(null); void openCreateModal(); }}
-            style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
-          >
-            <FaUserPlus />
-            {t("pros.new")}
-          </button>
-        </div>
-      </section>
-
       {error && <p className={styles.error}>{error}</p>}
 
       <section className={styles.tableWrap}>
@@ -990,6 +968,28 @@ export default function Profissionais() {
           </section>
         </div>
       )}
+      <section className={styles.floatingActions}>
+        <div className={styles.headerActions}>
+          <button
+            type="button"
+            className={styles.secondaryHeaderButton}
+            onClick={openSolicitacoesModal}
+          >
+            <FaUserClock />
+            {t("pros.linkRequests")}
+          </button>
+          <button
+            type="button"
+            className={styles.primaryButton}
+            onClick={() => { setEditingProfessional(null); void openCreateModal(); }}
+            style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
+          >
+            <FaUserPlus />
+            {t("pros.new")}
+          </button>
+        </div>
+      </section>
+
     </main>
   );
 }
