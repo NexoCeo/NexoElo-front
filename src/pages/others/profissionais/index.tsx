@@ -2,6 +2,8 @@ import { formatPersonName, formatEmailDisplay } from "@/context/UserContext";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { isAxiosError } from "axios";
+import { consultarAssinatura } from "@/services/assinatura-service";
+import UpgradePlanModal from "@/components/upgrade-plan-modal";
 import {
   FaEnvelope,
   FaPen,
@@ -121,6 +123,7 @@ export default function Profissionais() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [upgradePlan, setUpgradePlan] = useState<{ plan: "BASICO" | "INTERMEDIARIO"; limit: number } | null>(null);
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
   const [whatsAppShare, setWhatsAppShare] = useState<WhatsAppShare | null>(null);
@@ -265,6 +268,19 @@ export default function Profissionais() {
     setTelefone("");
     localizacao.reset();
     setFormError("");
+  }
+
+  async function openCreateModal() {
+    try {
+      const assinatura = await consultarAssinatura();
+      if (assinatura.AcessoAtivo &&
+          (assinatura.Plano === "BASICO" || assinatura.Plano === "INTERMEDIARIO") &&
+          assinatura.ProfissionaisVinculados >= assinatura.LimiteProfissionais) {
+        setUpgradePlan({ plan: assinatura.Plano, limit: assinatura.LimiteProfissionais });
+        return;
+      }
+    } catch { /* O backend continua responsável por validar os limites. */ }
+    setModalOpen(true);
   }
 
   function closeModal() {
@@ -503,6 +519,18 @@ export default function Profissionais() {
           message: err.message,
         });
       } else if (isAxiosError<ApiError>(err)) {
+        if ([400, 403, 409].includes(err.response?.status ?? 0)) {
+          try {
+            const assinatura = await consultarAssinatura();
+            if (assinatura.AcessoAtivo &&
+                (assinatura.Plano === "BASICO" || assinatura.Plano === "INTERMEDIARIO") &&
+                assinatura.ProfissionaisVinculados >= assinatura.LimiteProfissionais) {
+              closeModal();
+              setUpgradePlan({ plan: assinatura.Plano, limit: assinatura.LimiteProfissionais });
+              return;
+            }
+          } catch { /* Exibe a mensagem original quando não for possível verificar o limite. */ }
+        }
         const message = getApiErrorMessage(err.response?.data);
         setFormError(message);
         showNotification({ type: "error", title: "Profissional nao criado", message });
@@ -543,7 +571,7 @@ export default function Profissionais() {
           <button
             type="button"
             className={styles.primaryButton}
-            onClick={() => setModalOpen(true)}
+            onClick={() => void openCreateModal()}
             style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
           >
             <FaUserPlus />
@@ -608,6 +636,10 @@ export default function Profissionais() {
         )}
       </section>
 
+      {upgradePlan && <UpgradePlanModal open={true} plan={upgradePlan.plan}
+        resource="PROFISSIONAL" limit={upgradePlan.limit}
+        onClose={() => setUpgradePlan(null)}
+        onViewPlans={() => window.location.assign("/empresa/assinatura")} />}
       {modalOpen && (
         <div className={styles.modalBackdrop} role="presentation">
           <section className={styles.modal} style={{ backgroundColor: theme.colors.background2 }}>
