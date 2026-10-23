@@ -691,3 +691,14 @@
     font-size: 10px;
   }
 }
+
+/* Menu de acoes consistente com a pagina de Servicos. */
+.actionsMenu{position:relative;display:inline-flex}
+.menuTrigger{width:36px;height:36px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--theme-text-muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.menuTrigger:hover,.menuTrigger[aria-expanded="true"]{border-color:var(--theme-border-strong);background:var(--theme-surface-hover);color:var(--theme-text)}
+.menuPopover{position:absolute;top:calc(100% + 6px);right:0;z-index:30;min-width:175px;padding:6px;border:1px solid var(--theme-border-strong);border-radius:7px;background:var(--theme-surface);box-shadow:0 12px 30px var(--theme-shadow)}
+.menuPopover button{width:100%;min-height:36px;padding:0 10px;border:0;border-radius:5px;background:transparent;color:var(--theme-text);cursor:pointer;font-weight:700;display:flex;align-items:center;gap:9px;text-align:left;white-space:nowrap}
+.menuPopover button:hover{background:var(--theme-primary-soft);color:var(--theme-primary-text)}
+.menuTrigger:focus-visible,.menuPopover button:focus-visible{outline:2px solid var(--theme-primary-text);outline-offset:2px}
+.tableWrap{overflow:visible}
+@media(max-width:760px){.menuPopover{top:0;right:calc(100% + 7px)}}
