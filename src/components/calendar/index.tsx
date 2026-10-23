@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
@@ -39,6 +39,12 @@ export function Calendar({ selectedDate, setSelectedDate }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(
     new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1),
   );
+
+  // Keep the visible month in sync when the parent selects another date,
+  // including the "Ir para hoje" action in the agenda.
+  useEffect(() => {
+    setCurrentDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1));
+  }, [selectedDate]);
 
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
