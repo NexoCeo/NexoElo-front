@@ -4,6 +4,8 @@ import { FaBell, FaCheck, FaInbox, FaTimes, FaUserClock } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/context/UserContext";
 import { listarSolicitacoesVinculo, type SolicitacaoVinculo } from "@/services/vinculo-service";
+import { listarNotificacoesAgendamento, marcarNotificacaoAgendamentoLida, marcarTodasNotificacoesAgendamentoLidas, type NotificacaoAgendamento } from "@/services/notificacoes-agendamento-service";
+import { FaCalendarCheck } from "react-icons/fa";
 import styles from "./style.module.css";
 
 type Tab = "all" | "unread";
@@ -21,7 +23,9 @@ export default function NotificationBell() {
   const { usuario } = useUser();
   const navigate = useNavigate();
   const empresaId = usuario?.Papel?.toUpperCase() === "EMPRESA" ? usuario.Id : 0;
+  const notificationsUserId = ["EMPRESA","AUTONOMO","PROFISSIONAL"].includes(usuario?.Papel?.toUpperCase() || "") ? usuario?.Id || 0 : 0;
   const [items, setItems] = useState<SolicitacaoVinculo[]>([]);
+  const [appointments, setAppointments] = useState<NotificacaoAgendamento[]>([]);
   const [readIds, setReadIds] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("all");
@@ -48,6 +52,23 @@ export default function NotificationBell() {
   }, [empresaId]);
 
   useEffect(() => {
+    setAppointments([]);
+    if (!notificationsUserId) return;
+    let alive = true;
+    const refresh = async () => {
+      try {
+        const result = await listarNotificacoesAgendamento();
+        if (alive) setAppointments(result);
+      } catch { /* Other notification types remain available if this endpoint fails. */ }
+    };
+    void refresh();
+    const timer = window.setInterval(() => { if (document.visibilityState === "visible") void refresh(); }, 30000);
+    const focus = () => { void refresh(); };
+    window.addEventListener("focus", focus);
+    return () => { alive = false; window.clearInterval(timer); window.removeEventListener("focus", focus); };
+  }, [notificationsUserId]);
+
+  useEffect(() => {
     if (!open) return;
     const handleOutside = (event: MouseEvent) => {
       if (panelRef.current && !panelRef.current.contains(event.target as Node)) setOpen(false);
@@ -59,7 +80,10 @@ export default function NotificationBell() {
   }, [open]);
 
   const unread = items.filter(item => !readIds.includes(notificationId(item)));
+  const appointmentUnread = appointments.filter(item => !item.Lida);
+  const unreadCount = unread.length + appointmentUnread.length;
   const visible = tab === "unread" ? unread : items;
+  const visibleAppointments = tab === "unread" ? appointmentUnread : appointments;
   function persistRead(next: string[]) {
     setReadIds(next);
     if (empresaId) localStorage.setItem(STORAGE_PREFIX + empresaId, JSON.stringify(next));
@@ -69,34 +93,61 @@ export default function NotificationBell() {
     setOpen(false);
     navigate("/empresa/profissionais?solicitacoes=1");
   }
+  function openAppointment(item: NotificacaoAgendamento) {
+    setOpen(false);
+    setAppointments(current => current.map(n => n.Id === item.Id ? { ...n, Lida: true } : n));
+    void marcarNotificacaoAgendamentoLida(item.Id).catch(() => {
+      setAppointments(current => current.map(n => n.Id === item.Id ? { ...n, Lida: false } : n));
+    });
+    const date = item.DataAgendamento.slice(0, 10);
+    const prefix = usuario?.Papel?.toUpperCase() === "EMPRESA" ? "/empresa" :
+      usuario?.Papel?.toUpperCase() === "PROFISSIONAL" ? "/profissional" : "/autonomo";
+    navigate(`${prefix}/agenda?data=${encodeURIComponent(date)}&agendamento=${item.AgendamentoId}`);
+  }
+  function markAllRead() {
+    persistRead([...new Set([...readIds, ...unread.map(notificationId)])]);
+    setAppointments(current => current.map(n => ({ ...n, Lida: true })));
+    void marcarTodasNotificacoesAgendamentoLidas().catch(() => {});
+  }
   return <div className={styles.wrapper} ref={panelRef}>
     <button type="button" className={styles.bellButton}
       onClick={() => setOpen(value => !value)}
-      aria-label={unread.length ? `${t("notification.title")}: ${unread.length} ${t("notification.unreadCount")}` : t("notification.open")}
+      aria-label={unreadCount ? `${t("notification.title")}: ${unreadCount} ${t("notification.unreadCount")}` : t("notification.open")}
       aria-expanded={open} aria-haspopup="dialog">
       <span className={styles.bellIconWrap}>
         <FaBell aria-hidden="true" />
-        {unread.length > 0 && <span className={styles.badge}>{unread.length > 99 ? "99+" : unread.length}</span>}
+        {unreadCount > 0 && <span className={styles.badge}>{unreadCount > 99 ? "99+" : unreadCount}</span>}
       </span>
     </button>
     {open && <section className={styles.panel} role="dialog" aria-label={t("notification.title")}>
       <div className={styles.heading}>
-        <strong>{t("notification.title")} ({unread.length})</strong>
+        <strong>{t("notification.title")} ({unreadCount})</strong>
         <button type="button" onClick={() => setOpen(false)} aria-label={t("notification.close")}><FaTimes /></button>
       </div>
       <div className={styles.tabs}>
         <button type="button" className={tab === "all" ? styles.active : ""} onClick={() => setTab("all")}>{t("notification.all")}</button>
         <button type="button" className={tab === "unread" ? styles.active : ""} onClick={() => setTab("unread")}>{t("notification.unread")}</button>
-        <button type="button" className={styles.clear} disabled={!unread.length}
-          onClick={() => persistRead([...new Set([...readIds, ...unread.map(notificationId)])])}>{t("notification.markRead")}</button>
+        <button type="button" className={styles.clear} disabled={!unreadCount}
+          onClick={markAllRead}>{t("notification.markRead")}</button>
       </div>
       <div className={styles.content}>
         {error && <p className={styles.feedback} role="status">{t("notification.error")}</p>}
-        {!visible.length && <div className={styles.empty}>
+        {!visible.length && !visibleAppointments.length && <div className={styles.empty}>
           <FaInbox aria-hidden="true"/>
           <strong>{tab === "unread" ? t("notification.emptyUnread") : t("notification.emptyAll")}</strong>
           <span>{t("notification.empty")}</span>
         </div>}
+        {visibleAppointments.map(item => <button type="button" className={styles.item}
+          key={`agendamento:${item.Id}`} onClick={() => openAppointment(item)}>
+          <span className={styles.itemIcon}><FaCalendarCheck /></span>
+          <span className={styles.itemText}>
+            <strong>{item.Titulo}</strong>
+            <span>{item.Mensagem}</span>
+            <small>{t("notification.view")}</small>
+          </span>
+          {item.Lida ? <FaCheck className={styles.read} aria-label={t("notification.read")} /> :
+            <span className={styles.unreadDot} aria-label={t("notification.unreadOne")} />}
+        </button>)}
         {visible.map(item => <button type="button" className={styles.item}
             key={item.VinculoId} onClick={() => openRequest(item)}>
           <span className={styles.itemIcon}><FaUserClock /></span>
