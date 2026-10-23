@@ -725,3 +725,8 @@
 .professionalName{grid-area:name}.professionalEmail{grid-area:email}.professionalPhone{grid-area:phone}.professionalStatus{grid-area:status}.cardActions{grid-area:actions}
 .professionalStatus{justify-self:end}.professionalEmail{font-size:13px}
 }
+
+/* Cabecalho de largura integral, compacto, sem card/fundo adicional. */
+.tableWrap {background:transparent;border:0;box-shadow:none;overflow:visible}
+.cardsHeader {box-sizing:border-box;width:100%;min-height:42px;padding:9px 16px;margin:0;gap:14px;background:transparent;border:0;border-bottom:1px solid var(--theme-glass-strong);border-radius:0}
+.cardsBody {padding-top:10px}
