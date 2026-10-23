@@ -126,3 +126,13 @@ export async function criarProfissionalEmpresa(
     senhaTemporaria: pickString(response.data, ["senhaTemporaria", "SenhaTemporaria"]),
   };
 }
+
+export async function atualizarProfissionalEmpresa(
+  profissionalId: number,
+  dados: { Nome: string; Email: string; Telefone: string },
+): Promise<Profissional> {
+  const { data } = await api.put<ApiRecord>(
+    `/Usuario/empresa/profissionais/${profissionalId}`, dados,
+  );
+  return normalizeProfissional(data);
+}
