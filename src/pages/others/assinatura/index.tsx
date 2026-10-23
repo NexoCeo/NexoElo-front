@@ -181,7 +181,7 @@ export default function MinhaAssinatura() {
               </p>
               <ul className={styles.features}>
                 <li className={styles.feature}><FaCheck className={styles.featureIcon} aria-hidden="true" /> {plano.id === "AVANCADO" ? t("subscription.allServices") : `${plano.id === "BASICO" ? 4 : 8} ${t("subscription.services").toLowerCase()}`}</li>
-                <li className={styles.feature}><FaCheck className={styles.featureIcon} aria-hidden="true" /> {plano.id === "AVANCADO" ? t("subscription.allPros") : `${plano.id === "BASICO" ? 2 : 4} ${t("subscription.professionals")}`}</li>
+                <li className={styles.feature}><FaCheck className={styles.featureIcon} aria-hidden="true" /><span>{plano.id === "AVANCADO" ? t("subscription.allPros") : `${plano.id === "BASICO" ? 2 : 4} ${t("subscription.professionals")}`} <span className={styles.comingSoon}>{t("subscription.companyOnly")}</span></span></li>
                 <li className={styles.feature}>
                   {plano.relatorios ? <FaCheck className={styles.featureIcon} aria-hidden="true" /> : <FaTimes className={styles.off} aria-hidden="true" />}
                   <span className={plano.relatorios ? "" : styles.off}>{plano.relatorios ? t("subscription.reports") : t("subscription.noReports")}</span>
