@@ -2,7 +2,8 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useEffect, useRef, useState } from "react";
 import { FaBell, FaCheck, FaInbox, FaTimes, FaUserClock } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "@/context/UserContext";
+import { formatPersonName, useUser } from "@/context/UserContext";
+import { createAgendaRealtimeClient } from "@/services/agenda-realtime-service";
 import { listarSolicitacoesVinculo, type SolicitacaoVinculo } from "@/services/vinculo-service";
 import { listarNotificacoesAgendamento, marcarNotificacaoAgendamentoLida, marcarTodasNotificacoesAgendamentoLidas, type NotificacaoAgendamento } from "@/services/notificacoes-agendamento-service";
 import { FaCalendarCheck } from "react-icons/fa";
@@ -17,6 +18,13 @@ function getRead(empresaId: number): string[] {
   } catch { return []; }
 }
 function notificationId(item: SolicitacaoVinculo) { return "vinculo:" + item.VinculoId; }
+
+function formatBookingNotification(message: string): string {
+  return message.replace(/^(.+?)( agendou )/u, (_, customer: string, verb: string) =>
+    formatPersonName(customer) + verb).replace(/( com )(.+?)( para \d{2}\/\d{2}\/\d{4})/u,
+    (_, prefix: string, professional: string, suffix: string) =>
+      prefix + formatPersonName(professional) + suffix);
+}
 
 export default function NotificationBell() {
   const { t } = useLanguage();
@@ -62,10 +70,20 @@ export default function NotificationBell() {
       } catch { /* Other notification types remain available if this endpoint fails. */ }
     };
     void refresh();
+    const realtime = createAgendaRealtimeClient({
+      onAgendaUpdated: () => { if (alive) void refresh(); },
+      onStatusChange: () => {},
+    });
+    realtime.start();
     const timer = window.setInterval(() => { if (document.visibilityState === "visible") void refresh(); }, 30000);
     const focus = () => { void refresh(); };
     window.addEventListener("focus", focus);
-    return () => { alive = false; window.clearInterval(timer); window.removeEventListener("focus", focus); };
+    return () => {
+      alive = false;
+      window.clearInterval(timer);
+      window.removeEventListener("focus", focus);
+      void realtime.stop();
+    };
   }, [notificationsUserId]);
 
   useEffect(() => {
@@ -142,7 +160,7 @@ export default function NotificationBell() {
           <span className={styles.itemIcon}><FaCalendarCheck /></span>
           <span className={styles.itemText}>
             <strong>{item.Titulo}</strong>
-            <span>{item.Mensagem}</span>
+            <span>{formatBookingNotification(item.Mensagem)}</span>
             <small>{t("notification.view")}</small>
           </span>
           {item.Lida ? <FaCheck className={styles.read} aria-label={t("notification.read")} /> :
