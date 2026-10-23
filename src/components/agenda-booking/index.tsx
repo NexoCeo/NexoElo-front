@@ -27,6 +27,9 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
   const [clienteId, setClienteId] = useState(0);
   const [buscaCliente, setBuscaCliente] = useState("");
   const [clientesBusca, setClientesBusca] = useState<UsuarioAgendamento[]>([]);
+  const [sugestoesAbertas, setSugestoesAbertas] = useState(false);
+  const [buscandoClientes, setBuscandoClientes] = useState(false);
+  const [indiceSugestao, setIndiceSugestao] = useState(-1);
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [servicoId, setServicoId] = useState(0);
   const [day, setDay] = useState(formatAgendaDateParam(date));
@@ -69,15 +72,18 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
   }, [usuario, empresa, professionalId, t, showNotification]);
 
   useEffect(() => {
-    if (buscaCliente.trim().length < 3) {
+    if (clienteId || buscaCliente.trim().length < 3) {
       setClientesBusca([]);
+      setBuscandoClientes(false);
       return;
     }
+    setBuscandoClientes(true);
     let active = true;
     const delay = window.setTimeout(() => {
       void listarClientesAgendamento(buscaCliente.trim())
         .then(items => { if (active) setClientesBusca(items); })
-        .catch(() => { if (active) setClientesBusca([]); });
+        .catch(() => { if (active) setClientesBusca([]); })
+        .finally(() => { if (active) setBuscandoClientes(false); });
     }, 350);
     return () => { active = false; window.clearTimeout(delay); };
   }, [buscaCliente]);
@@ -143,19 +149,67 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
               {profissionais.map(p => <option key={p.Id} value={p.Id}>{formatPersonName(p.Nome)}</option>)}
             </select>
           </label>}
-          <label>{t("booking.customer")}
-            <input type="search" value={buscaCliente} maxLength={80}
-              placeholder="Buscar outro cliente pelo nome (mín. 3 letras)"
-              onChange={event => { setBuscaCliente(event.target.value); setClienteId(0); }} />
-            <select required value={clienteId} onChange={e => setClienteId(Number(e.target.value))}>
-              <option value={0} disabled hidden>{t("booking.select")}</option>
-              {(buscaCliente.trim().length >= 3 ? clientesBusca : clientes).map(c => (
-                <option key={c.Id} value={c.Id}>{formatPersonName(c.Nome)}</option>
-              ))}
-            </select>
-          </label>
-          {!loading && clientes.length === 0 && buscaCliente.trim().length < 3 &&
-            <p>Nenhum cliente recorrente. Pesquise pelo nome para encontrar outros clientes.</p>}
+          <div className={styles.clientField}>
+            <label htmlFor="booking-client-search">{t("booking.customer")}</label>
+            <div className={styles.clientAutocomplete}>
+              <input id="booking-client-search" type="search" autoComplete="off"
+                role="combobox" aria-autocomplete="list" aria-controls="booking-client-options"
+                aria-expanded={sugestoesAbertas} aria-activedescendant={indiceSugestao >= 0 ? `booking-client-option-${indiceSugestao}` : undefined}
+                value={buscaCliente} maxLength={80}
+                placeholder="Digite o nome do cliente"
+                onFocus={() => { if (!clienteId) setSugestoesAbertas(true); }}
+                onBlur={() => window.setTimeout(() => setSugestoesAbertas(false), 120)}
+                onChange={event => {
+                  setBuscaCliente(event.target.value);
+                  setClienteId(0);
+                  setIndiceSugestao(-1);
+                  setSugestoesAbertas(true);
+                }}
+                onKeyDown={event => {
+                  const options = buscaCliente.trim().length >= 3 ? clientesBusca : clientes;
+                  if (event.key === "Escape") setSugestoesAbertas(false);
+                  if (event.key === "ArrowDown" && options.length > 0) {
+                    event.preventDefault();
+                    setSugestoesAbertas(true);
+                    setIndiceSugestao(current => (current + 1) % options.length);
+                  }
+                  if (event.key === "ArrowUp" && options.length > 0) {
+                    event.preventDefault();
+                    setSugestoesAbertas(true);
+                    setIndiceSugestao(current => (current - 1 + options.length) % options.length);
+                  }
+                  if (event.key === "Enter" && sugestoesAbertas && indiceSugestao >= 0 && options[indiceSugestao]) {
+                    event.preventDefault();
+                    const selected = options[indiceSugestao];
+                    setClienteId(selected.Id);
+                    setBuscaCliente(formatPersonName(selected.Nome));
+                    setSugestoesAbertas(false);
+                    setIndiceSugestao(-1);
+                  }
+                }} />
+              {sugestoesAbertas && !clienteId && (
+                <div id="booking-client-options" className={styles.clientOptions} role="listbox">
+                  {buscandoClientes && <div className={styles.clientHint}>Buscando clientes...</div>}
+                  {!buscandoClientes && (buscaCliente.trim().length >= 3 ? clientesBusca : clientes).map((cliente, index) => (
+                    <button type="button" role="option" id={`booking-client-option-${index}`}
+                      aria-selected={index === indiceSugestao}
+                      className={styles.clientOption} key={cliente.Id}
+                      onMouseDown={event => event.preventDefault()}
+                      onClick={() => {
+                        setClienteId(cliente.Id);
+                        setBuscaCliente(formatPersonName(cliente.Nome));
+                        setSugestoesAbertas(false);
+                        setIndiceSugestao(-1);
+                      }}>{formatPersonName(cliente.Nome)}</button>
+                  ))}
+                  {!buscandoClientes && buscaCliente.trim().length >= 3 && clientesBusca.length === 0 &&
+                    <div className={styles.clientHint}>Nenhum cliente encontrado.</div>}
+                  {!buscandoClientes && buscaCliente.trim().length < 3 && clientes.length === 0 &&
+                    <div className={styles.clientHint}>Digite pelo menos 3 letras para buscar clientes.</div>}
+                </div>
+              )}
+            </div>
+          </div>
           <label>{t("booking.service")}
             <select required value={servicoId} disabled={loadingServices || !responsavelId || (empresa && !profissionalId)} onChange={e => { setServicoId(Number(e.target.value));  }}>
               <option value={0} disabled hidden>{t("booking.select")}</option>
