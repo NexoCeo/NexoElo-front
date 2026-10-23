@@ -692,6 +692,7 @@ export default function Profissionais() {
             </header>
 
             <form className={styles.form} onSubmit={handleCreateProfissional}>
+              {!editingProfessional && (
               <label className={styles.photoField}>
                 {t("profile.photo")}
                 <span className={styles.photoControl}>
@@ -706,6 +707,7 @@ export default function Profissionais() {
                   />
                 </span>
               </label>
+              )}
 
               <label>
                 {t("profile.name")}
