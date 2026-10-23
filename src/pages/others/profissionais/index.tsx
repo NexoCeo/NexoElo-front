@@ -614,40 +614,48 @@ export default function Profissionais() {
 
       <section className={styles.tableWrap} style={{ backgroundColor: theme.colors.background2 }}>
         {loading ? (
-          <p className={styles.feedback} style={{ color: theme.colors.text }}>
-            {t("pros.listLoading")}
-          </p>
+          <div className={styles.cardsBody} aria-label={t("pros.listLoading")}>
+            {Array.from({ length: 4 }, (_, index) => (
+              <div className={styles.professionalCard} key={index} aria-hidden="true">
+                <span className={styles.skeletonLine} style={{ width: "65%" }}/>
+                <span className={styles.skeletonLine} style={{ width: "80%" }}/>
+                <span className={styles.skeletonLine} style={{ width: "75%" }}/>
+                <span className={styles.skeletonLine} style={{ width: "75px", height: "24px" }}/>
+                <span className={styles.skeletonLine} style={{ width: "30px", height: "30px" }}/>
+              </div>
+            ))}
+          </div>
         ) : profissionais.length === 0 ? (
           <p className={styles.feedback} style={{ color: theme.colors.inactive }}>
             {t("pros.empty")}
           </p>
         ) : (
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>{t("common.professional")}</th>
-                <th>{t("pros.email")}</th>
-                <th>{t("pros.phone")}</th>
-                <th>{t("common.status")}</th>
-                <th className={styles.actionsHeader}>{t("common.actions")}</th>
-              </tr>
-            </thead>
-            <tbody>
+          <div className={styles.cardList}>
+            <div className={styles.cardsHeader}>
+              <div className={styles.professionalCard}>
+                <span>{t("common.professional")}</span>
+                <span>{t("pros.email")}</span>
+                <span>{t("pros.phone")}</span>
+                <span>{t("common.status")}</span>
+                <span className={styles.actionsHeader}>{t("common.actions")}</span>
+              </div>
+            </div>
+            <div className={styles.cardsBody}>
               {profissionais.map((profissional) => (
-                <tr key={profissional.Id || profissional.Email || profissional.Nome}>
-                  <td data-label="Profissional">
+                <div className={styles.professionalCard} key={profissional.Id || profissional.Email || profissional.Nome}>
+                  <div className={styles.professionalName}>
                     <strong style={{ color: theme.colors.text }}>
                       {formatPersonName(profissional.Nome) || t("services.unnamed")}
                     </strong>
-                  </td>
-                  <td data-label="Email">{formatEmailDisplay(profissional.Email) || t("pros.notProvided")}</td>
-                  <td data-label="Telefone">{profissional.Telefone || t("pros.notProvided")}</td>
-                  <td data-label="Status">
+                  </div>
+                  <div className={styles.professionalEmail}>{formatEmailDisplay(profissional.Email) || t("pros.notProvided")}</div>
+                  <div className={styles.professionalPhone}>{profissional.Telefone || t("pros.notProvided")}</div>
+                  <div className={styles.professionalStatus}>
                     <span className={styles.status}>
                       {profissional.VinculoStatus?.toUpperCase() === "APROVADO" ? t("status.approved") : profissional.VinculoStatus?.toUpperCase() === "PENDENTE" ? t("status.pending") : profissional.VinculoStatus?.toUpperCase() === "RECUSADO" ? t("status.rejected") : t("status.linked")}
                     </span>
-                  </td>
-                  <td className={styles.actionsCell} data-label="Acoes">
+                  </div>
+                  <div className={styles.cardActions}>
                     <div className={styles.actionsMenu}>
                       <button type="button" className={styles.menuTrigger}
                         aria-label={`Opções de ${profissional.Nome}`} aria-haspopup="menu"
@@ -668,11 +676,11 @@ export default function Profissionais() {
                         </div>
                       )}
                     </div>
-                  </td>
+                  </div>
                 </tr>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </div>
         )}
       </section>
 
