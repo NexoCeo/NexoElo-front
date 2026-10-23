@@ -492,3 +492,8 @@
 .cardService{grid-area:service}.cardDuration{grid-area:duration}.cardValue{grid-area:value}.cardActions{grid-area:action}
 .cardValue{text-align:right}
 }
+
+/* Cabecalho de largura integral, compacto, sem card/fundo adicional. */
+.tableWrap {background:transparent;border:0;box-shadow:none;overflow:visible}
+.cardsHeader {box-sizing:border-box;width:100%;min-height:42px;padding:9px 16px;margin:0;gap:14px;background:transparent;border:0;border-bottom:1px solid var(--theme-glass-strong);border-radius:0}
+.cardsBody {padding-top:10px}
