@@ -126,7 +126,6 @@ export default function MinhaAssinatura() {
     setSelecionados(prev=>prev.includes(id)?prev.filter(i=>i!==id):[...prev,id]);
   }
 
-  const limite = (valor: number) => valor === 2147483647 ? t("subscription.unlimited") : String(valor);
   return (
     <main className={styles.page}>
       {loading ? (
