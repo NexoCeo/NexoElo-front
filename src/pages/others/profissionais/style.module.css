@@ -730,3 +730,8 @@
 .tableWrap {background:transparent;border:0;box-shadow:none;overflow:visible}
 .cardsHeader {box-sizing:border-box;width:100%;min-height:42px;padding:9px 16px;margin:0;gap:14px;background:transparent;border:0;border-bottom:1px solid var(--theme-glass-strong);border-radius:0}
 .cardsBody {padding-top:10px}
+
+/* Acoes fixas no canto inferior direito, sem deslocar os cards. */
+.floatingActions{position:fixed;right:clamp(20px,8vw,120px);bottom:24px;z-index:100;display:flex;align-items:center;justify-content:flex-end;gap:10px;width:auto;max-width:calc(100vw - 32px);margin:0;padding:0;background:transparent}
+.floatingActions .headerActions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+@media(max-width:760px){.floatingActions{right:12px;bottom:calc(12px + env(safe-area-inset-bottom));left:12px;max-width:none}.floatingActions .headerActions{width:100%;display:flex;flex-wrap:wrap}.floatingActions .primaryButton,.floatingActions .secondaryHeaderButton{width:auto;min-width:0;flex:1 1 155px}.container{padding-bottom:92px}}
