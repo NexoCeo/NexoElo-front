@@ -27,9 +27,6 @@ export default function UpgradePlanModal({ open, onClose, plan, limit, onViewPla
   if (!open) return null;
   const isPt = lang === "pt";
   const nextPlan = plan === "BASICO" ? "INTERMEDIARIO" : "AVANCADO";
-  const nextName = nextPlan === "INTERMEDIARIO"
-    ? (isPt ? "Intermediário" : "Intermediate")
-    : (isPt ? "Avançado" : "Advanced");
   const nextPrice = nextPlan === "INTERMEDIARIO" ? "R$ 49,99" : "R$ 99,99";
   return (
     <div className={styles.overlay} onMouseDown={event => { if (event.target === event.currentTarget) onClose(); }}>
