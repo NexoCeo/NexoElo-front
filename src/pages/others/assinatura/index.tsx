@@ -16,8 +16,10 @@ export default function MinhaAssinatura() {
   const reais = new Intl.NumberFormat(lang === "pt" ? "pt-BR" : "en-US", { style: "currency", currency: "BRL" });
   const nomes: Record<string,string> = { GRATIS:t("subscription.free"), BASICO:t("subscription.basic"), INTERMEDIARIO:t("subscription.intermediate"), AVANCADO:t("subscription.advanced"), SEM_PLANO:t("subscription.noPlan") };
   const { showNotification } = useNotification();
+  const texto = (pt: string, en: string) => lang === "pt" ? pt : en;
   const [assinatura, setAssinatura] = useState<AssinaturaAtual | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mostrarPlanos, setMostrarPlanos] = useState(false);
   const [pending, setPending] = useState("");
   const [destino, setDestino] = useState<"BASICO" | "INTERMEDIARIO" | "AVANCADO" | null>(null);
   const [recursos, setRecursos] = useState<RecursoPlano[]>([]);
@@ -161,8 +163,39 @@ export default function MinhaAssinatura() {
         </section>
       )}
 
-      <h2 className={styles.sectionTitle}>{t("subscription.choose")}</h2>
-      <section className={styles.grid} aria-label={t("subscription.available")}>
+      <section className={styles.management} aria-label={texto("Gerenciamento da assinatura", "Subscription management")}>
+        <div className={styles.managementHeading}>
+          <div>
+            <h2 className={styles.sectionTitle}>{texto("Gerenciar assinatura", "Manage subscription")}</h2>
+            <p className={styles.description}>{texto("Acompanhe seu acesso e gerencie o plano da sua conta.", "Review your access and manage your account plan.")}</p>
+          </div>
+          <button type="button" className={styles.viewPlansButton} onClick={() => setMostrarPlanos(value => !value)}
+            aria-expanded={mostrarPlanos} aria-controls="subscription-plan-list">
+            {mostrarPlanos ? texto("Ocultar planos", "Hide plans") : texto("Ver planos", "View plans")}
+          </button>
+        </div>
+        <div className={styles.managementStats}>
+          <div className={styles.managementStat}>
+            <span>{texto("Plano contratado", "Current plan")}</span>
+            <strong>{assinatura ? nomes[assinatura.Plano] ?? assinatura.Plano : "—"}</strong>
+          </div>
+          <div className={styles.managementStat}>
+            <span>{texto("Situação do acesso", "Access status")}</span>
+            <strong className={assinatura?.AcessoAtivo ? styles.active : styles.inactive}>
+              {assinatura ? (assinatura.AcessoAtivo ? t("subscription.active") : t("subscription.suspended")) : "—"}
+            </strong>
+          </div>
+          <div className={styles.managementStat}>
+            <span>{texto("Válido até", "Valid until")}</span>
+            <strong>{assinatura?.DataFim ? new Date(assinatura.DataFim).toLocaleDateString(lang === "pt" ? "pt-BR" : "en-US") : "—"}</strong>
+          </div>
+        </div>
+      </section>
+
+      {mostrarPlanos && (
+        <section id="subscription-plan-list" className={styles.plansSection}>
+          <h2 className={styles.sectionTitle}>{t("subscription.choose")}</h2>
+          <div className={styles.grid} aria-label={t("subscription.available")}>
         {planos.map(plano => {
           const atual = assinatura?.Plano === plano.id;
           return (
@@ -212,7 +245,10 @@ export default function MinhaAssinatura() {
             </article>
           );
         })}
-      </section>
+          </div>
+          <p className={styles.note}>{t("subscription.freeNote")}</p>
+        </section>
+      )}
       {destino && (() => {
         const limiteServicos = destino === "BASICO" ? 4 : destino === "INTERMEDIARIO" ? 8 : Infinity;
         const limiteProfissionais = destino === "BASICO" ? 2 : destino === "INTERMEDIARIO" ? 4 : Infinity;
@@ -257,7 +293,6 @@ export default function MinhaAssinatura() {
         {assinatura?.Status === "CANCELAMENTO_PENDENTE" && <p><strong>{t("subscription.renewal")}:</strong> {t("subscription.renewalNotice")}</p>}
         <p>{t("subscription.chargeNotice")}</p>
       </Modal>
-      <p className={styles.note}>{t("subscription.freeNote")}</p>
     </main>
   );
 }
