@@ -279,7 +279,6 @@ export default function Servicos() {
             <thead>
               <tr>
                 <th>{t("common.service")}</th>
-                <th>{t("common.code")}</th>
                 <th>{t("common.duration")}</th>
                 <th className={styles.valueHeader}>{t("common.value")}</th>
                 <th className={styles.actionsHeader}>{t("common.actions")}</th>
@@ -305,7 +304,6 @@ export default function Servicos() {
                       </strong>
                     </div>
                   </td>
-                  <td data-label={t("common.code")}>{servico.Id || t("services.newCode")}</td>
                   <td data-label={t("common.duration")}>{servico.TempoEstimadoMinutos || 0} min</td>
                   <td className={styles.valueCell} data-label={t("common.value")}>
                     <strong style={{ color: theme.colors.primary }}>
