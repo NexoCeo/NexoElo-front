@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 
 import GlobalRoutes from "./routes/globalRoutes";
+import MinhaAssinatura from "./pages/others/assinatura";
 import EmpresaRoutes from "./routes/empresaRoutes";
 import AutonomoRoutes from "./routes/autonomoRoutes";
 import ProfissionalRoutes from "./routes/profissionalRoutes";
@@ -52,6 +53,9 @@ export default function App() {
           />
         }
       />
+
+      {/* Comparação de planos disponível publicamente */}
+      <Route path="/planos" element={<MinhaAssinatura publicView />} />
 
       {/* Rotas globais */}
       <Route
