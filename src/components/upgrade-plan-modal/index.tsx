@@ -7,13 +7,14 @@ import styles from "./style.module.css";
 type Props = {
   open: boolean;
   onClose: () => void;
-  plan: "BASICO" | "INTERMEDIARIO";
-  limit: number;
+  plan?: "BASICO" | "INTERMEDIARIO";
+  limit?: number;
+  variant?: "LIMIT" | "TRIAL_EXPIRED";
   resource?: "SERVICO" | "PROFISSIONAL";
   onViewPlans: () => void;
 };
 
-export default function UpgradePlanModal({ open, onClose, plan, limit, resource = "SERVICO", onViewPlans }: Props) {
+export default function UpgradePlanModal({ open, onClose, plan = "BASICO", limit = 0, variant = "LIMIT", resource = "SERVICO", onViewPlans }: Props) {
   const { lang } = useLanguage();
   const { theme } = useTheme();
   useEffect(() => {
@@ -28,6 +29,7 @@ export default function UpgradePlanModal({ open, onClose, plan, limit, resource 
   if (!open) return null;
   const isPt = lang === "pt";
   const isProfessional = resource === "PROFISSIONAL";
+  const trialExpired = variant === "TRIAL_EXPIRED";
   const nextPlan = plan === "BASICO" ? "INTERMEDIARIO" : "AVANCADO";
   const nextPrice = nextPlan === "INTERMEDIARIO" ? "R$ 49,99" : "R$ 99,99";
   return (
@@ -40,9 +42,17 @@ export default function UpgradePlanModal({ open, onClose, plan, limit, resource 
         <div className={styles.closeRow}><button type="button" className={styles.close} aria-label={isPt ? "Fechar" : "Close"} onClick={onClose}><FaTimes /></button></div>
         <div className={styles.top}>
           <span className={styles.icon}><FaRocket aria-hidden="true" /></span>
-          <span className={styles.plan}>{isPt ? "Plano" : "Plan"} {plan === "BASICO" ? (isPt ? "Básico" : "Basic") : nextPlan === "AVANCADO" ? (isPt ? "Intermediário" : "Intermediate") : plan}</span>
+          <span className={styles.plan}>{trialExpired ? (isPt ? "30 dias concluídos" : "30 days completed") : <>{isPt ? "Plano" : "Plan"} {plan === "BASICO" ? (isPt ? "Básico" : "Basic") : nextPlan === "AVANCADO" ? (isPt ? "Intermediário" : "Intermediate") : plan}</>}</span>
         </div>
-                <h2 id="upgrade-title">{isPt ? "Pronto para expandir seus atendimentos?" : "Ready to grow your bookings?"}</h2>
+                {trialExpired ? (
+          <>
+            <h2 id="upgrade-title">{isPt ? "Seu período gratuito chegou ao fim!" : "Your free trial has ended!"}</h2>
+            <p>{isPt ? "Seus 30 dias de acesso gratuito terminaram. Obrigado por experimentar o NexoElo." : "Your 30-day free trial has ended. Thank you for trying NexoElo."}</p>
+            <p>{isPt ? "Seus serviços, clientes e agendamentos estão preservados. Escolha um plano para continuar gerenciando seu negócio." : "Your services, clients and appointments are preserved. Choose a plan to continue managing your business."}</p>
+          </>
+        ) : (
+          <>
+        <h2 id="upgrade-title">{isPt ? "Pronto para expandir seus atendimentos?" : "Ready to grow your bookings?"}</h2>
         <p>{isPt ? `Você atingiu o limite de ${limit} ${isProfessional ? "profissionais" : "serviços"} do seu plano atual.` : `You reached your current plan's limit of ${limit} ${isProfessional ? "professionals" : "services"}.`}</p>
         <p>{nextPlan === "INTERMEDIARIO"
           ? (isPt ? `Com o plano Intermediário, você pode cadastrar até ${isProfessional ? 4 : 8} ${isProfessional ? "profissionais" : "serviços"} e continuar expandindo seu negócio.` : `With the Intermediate plan, you can register up to ${isProfessional ? 4 : 8} ${isProfessional ? "professionals" : "services"} and keep growing your business.`)
@@ -51,6 +61,8 @@ export default function UpgradePlanModal({ open, onClose, plan, limit, resource 
         <p className={styles.benefit}>{nextPlan === "INTERMEDIARIO"
           ? (isPt ? `Mais ${isProfessional ? 2 : 4} ${isProfessional ? "profissionais" : "serviços"} disponíveis no plano Intermediário.` : `${isProfessional ? 2 : 4} additional ${isProfessional ? "professionals" : "services"} with the Intermediate plan.`)
           : (isPt ? `${isProfessional ? "Profissionais" : "Serviços"} ilimitados disponíveis no plano Avançado.` : `Unlimited ${isProfessional ? "professionals" : "services"} with the Advanced plan.`)}</p>
+          </>
+        )}
         <button className={styles.cta} type="button" onClick={onViewPlans}>
           {isPt ? "Conhecer outros planos" : "Explore other plans"} <FaArrowRight aria-hidden="true" />
         </button>
