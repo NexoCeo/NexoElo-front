@@ -122,7 +122,7 @@ const labelStatus = (status: string) => {
           {agendamentos.map((appointment) => (
             <article key={appointment.Id} className={styles.listItem}>
               <div className={styles.patient} data-label="Cliente" data-column={0}>
-                <span className={styles.statusDot} aria-hidden="true" />
+                <span className={`${styles.statusDot} ${statusClass(appointment.status)}`} aria-hidden="true" />
                 <strong>{appointment.cliente}</strong>
               </div>
               <div data-label="Serviço" data-column={1}>{appointment.servico}</div>
