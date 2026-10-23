@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { formatPersonName, formatEmailDisplay } from "@/context/UserContext";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -127,6 +128,7 @@ export default function Profissionais() {
   const [saving, setSaving] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
   const [editingProfessional, setEditingProfessional] = useState<Profissional | null>(null);
   const [upgradePlan, setUpgradePlan] = useState<{ plan: "BASICO" | "INTERMEDIARIO"; limit: number } | null>(null);
   const [error, setError] = useState("");
@@ -637,11 +639,19 @@ export default function Profissionais() {
                       <button type="button" className={styles.menuTrigger}
                         aria-label={`Opções de ${profissional.Nome}`} aria-haspopup="menu"
                         aria-expanded={openMenuId === profissional.Id}
-                        onClick={() => setOpenMenuId(current => current === profissional.Id ? null : profissional.Id)}>
+                        onClick={(event) => {
+                          const rect = event.currentTarget.getBoundingClientRect();
+                          const menuHeight = 90;
+                          setMenuPosition({
+                            top: rect.bottom + menuHeight + 8 > window.innerHeight ? Math.max(8, rect.top - menuHeight - 6) : rect.bottom + 6,
+                            right: Math.max(8, window.innerWidth - rect.right),
+                          });
+                          setOpenMenuId(current => current === profissional.Id ? null : profissional.Id);
+                        }}>
                         <FaEllipsisV aria-hidden="true" />
                       </button>
                       {openMenuId === profissional.Id && (
-                        <div className={styles.menuPopover} role="menu">
+                        createPortal(<div className={styles.menuPopover} role="menu" onMouseDown={event => event.stopPropagation()} style={{ position: "fixed", top: menuPosition.top, right: menuPosition.right, zIndex: 5000 }}>
                           <button type="button" role="menuitem" onClick={() => openEditModal(profissional)}>
                             <FaPen aria-hidden="true" /> Editar
                           </button>
@@ -650,7 +660,7 @@ export default function Profissionais() {
                           }}>
                             <FaLink aria-hidden="true" /> Vincular serviços
                           </button>
-                        </div>
+                        </div>, document.body)
                       )}
                     </div>
                   </div>
