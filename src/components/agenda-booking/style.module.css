@@ -8,3 +8,17 @@
 .clientOption:last-child{border-bottom:0}
 .clientOption:hover,.clientOption[aria-selected="true"]{background:var(--theme-primary,#2563eb);color:#fff}
 .clientHint{padding:12px;color:var(--theme-text-muted,#9ca3af);font-weight:400;font-size:13px}
+
+/* Exibe até dez sugestões completas; as demais permanecem no scroll interno. */
+.clientOptions{
+  max-height:440px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-width:thin;
+  scrollbar-color:var(--theme-primary,#2563eb) transparent;
+}
+.clientOptions::-webkit-scrollbar{width:6px}
+.clientOptions::-webkit-scrollbar-track{background:transparent}
+.clientOptions::-webkit-scrollbar-thumb{background:var(--theme-primary,#2563eb);border-radius:999px}
+.clientOption{min-height:44px;box-sizing:border-box}
+@media(max-height:680px){.clientOptions{max-height:min(440px,45dvh)}}
