@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaBars, FaCreditCard, FaMoon, FaSignOutAlt, FaSun, FaTimes, FaUser } from "react-icons/fa";
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
@@ -9,6 +9,8 @@ import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
 import { getRoleBasePath } from "@/routes/role-paths";
 import QrCode from "@/components/qrCode";
+import UpgradePlanModal from "@/components/upgrade-plan-modal";
+import { consultarAssinatura } from "@/services/assinatura-service";
 import NotificationBell from "@/components/notificationBell";
 import { logout as endSession } from "@/services/logout-service";
 import { defaultProfileImg, getProfileImageUrl } from "./profile-image";
@@ -22,11 +24,13 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
   const { theme, themeName, toggleTheme } = useTheme();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const { usuario, logout: clearUser } = useUser();
   const { showNotification } = useNotification();
   const basePath = getRoleBasePath(usuario?.Papel);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isFindMeOpen, setIsFindMeOpen] = useState(false);
+  const [trialExpiredOpen, setTrialExpiredOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const fotoUrl = getProfileImageUrl(usuario?.FotoPerfil);
   const primeiroNome = usuario?.Nome?.trim().split(/\s+/)[0] || t("header.account");
@@ -57,6 +61,21 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
 
     return () => document.removeEventListener("keydown", handleEscape);
   }, [isFindMeOpen]);
+
+  useEffect(() => {
+    if (!usuario?.Id || !canShowFindMe || location.pathname.endsWith("/assinatura")) return;
+    const key = `nexoelo-trial-expired-shown-${usuario.Id}`;
+    if (sessionStorage.getItem(key) === "1") return;
+    let active = true;
+    consultarAssinatura().then(assinatura => {
+      if (!active) return;
+      if (assinatura.Plano === "SEM_PLANO" && !assinatura.AcessoAtivo) {
+        sessionStorage.setItem(key, "1");
+        setTrialExpiredOpen(true);
+      }
+    }).catch(() => { /* Falha de rede não deve ser interpretada como vencimento. */ });
+    return () => { active = false; };
+  }, [usuario?.Id, canShowFindMe, location.pathname]);
 
   async function handleLogout() {
     let remoteLogoutFailed = false;
@@ -188,6 +207,9 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
         </div>
       </header>
 
+      <UpgradePlanModal open={trialExpiredOpen} variant="TRIAL_EXPIRED"
+        onClose={() => setTrialExpiredOpen(false)}
+        onViewPlans={() => { setTrialExpiredOpen(false); navigate(`${basePath}/assinatura`); }} />
       {isFindMeOpen &&
         createPortal(
           <div className={styles.modalOverlay}>
