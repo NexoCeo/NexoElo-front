@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { isAxiosError } from "axios";
 import { consultarAssinatura, type AssinaturaAtual } from "@/services/assinatura-service";
 import UpgradePlanModal from "@/components/upgrade-plan-modal";
@@ -38,6 +39,7 @@ export default function Servicos() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingServico, setEditingServico] = useState<Servico | null>(null);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
   const [imagemPreviewUrl, setImagemPreviewUrl] = useState("");
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
@@ -319,14 +321,20 @@ export default function Servicos() {
                         aria-label={`${t("services.options")} ${servico.NomeServico}`}
                         aria-haspopup="menu"
                         aria-expanded={openMenuId === servico.Id}
-                        onClick={() => setOpenMenuId((current) => (
-                          current === servico.Id ? null : servico.Id
-                        ))}
+                        onClick={(event) => {
+                          const rect = event.currentTarget.getBoundingClientRect();
+                          const menuHeight = 48;
+                          setMenuPosition({
+                            top: rect.bottom + menuHeight + 8 > window.innerHeight ? Math.max(8, rect.top - menuHeight - 6) : rect.bottom + 6,
+                            right: Math.max(8, window.innerWidth - rect.right),
+                          });
+                          setOpenMenuId(current => current === servico.Id ? null : servico.Id);
+                        }}
                       >
                         <FaEllipsisV aria-hidden="true" />
                       </button>
                       {openMenuId === servico.Id && (
-                        <div className={styles.menuPopover} role="menu">
+                        createPortal(<div className={styles.menuPopover} role="menu" onMouseDown={event => event.stopPropagation()} style={{ position: "fixed", top: menuPosition.top, right: menuPosition.right, zIndex: 5000 }}>
                           <button
                             type="button"
                             role="menuitem"
@@ -335,7 +343,7 @@ export default function Servicos() {
                             <FaPen aria-hidden="true" />
                             {t("common.edit")}
                           </button>
-                        </div>
+                        </div>, document.body)
                       )}
                     </div>
                   </div>
