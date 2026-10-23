@@ -1,3 +1,4 @@
+import { useSearchParams } from "react-router-dom";
 import AgendaBooking from "@/components/agenda-booking";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaPlus, FaCalendarCheck, FaCalendarDay, FaRotate } from "react-icons/fa6";
@@ -72,7 +73,23 @@ export default function Agenda() {
   const { showNotification } = useNotification();
 
   const [bookingOpen, setBookingOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [searchParams] = useSearchParams();
+  const requestedDate = searchParams.get("data");
+  const requestedAppointmentId = Number(searchParams.get("agendamento") || "0");
+  const [selectedDate, setSelectedDate] = useState(() => {
+    if (requestedDate && /^\d{4}-\d{2}-\d{2}$/.test(requestedDate)) {
+      const date = new Date(requestedDate + "T12:00:00");
+      if (!Number.isNaN(date.getTime()) && date.getFullYear() === Number(requestedDate.slice(0, 4)) &&
+          date.getMonth() + 1 === Number(requestedDate.slice(5, 7)) &&
+          date.getDate() === Number(requestedDate.slice(8, 10))) return date;
+    }
+    return new Date();
+  });
+  useEffect(() => {
+    if (!requestedDate || !/^\d{4}-\d{2}-\d{2}$/.test(requestedDate)) return;
+    const date = new Date(requestedDate + "T12:00:00");
+    if (!Number.isNaN(date.getTime())) setSelectedDate(date);
+  }, [requestedDate]);
   const [viewMode, setViewMode] = useState<ViewMode>("month");
 
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
