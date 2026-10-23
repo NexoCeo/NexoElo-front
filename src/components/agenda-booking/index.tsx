@@ -159,20 +159,20 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
                 aria-expanded={sugestoesAbertas} aria-activedescendant={indiceSugestao >= 0 ? `booking-client-option-${indiceSugestao}` : undefined}
                 value={buscaCliente} maxLength={80}
                 placeholder="Digite o nome do cliente"
-                onFocus={() => { if (!clienteId) setSugestoesAbertas(true); }}
+                onFocus={() => { if (!clienteId && buscaCliente.trim().length > 0) setSugestoesAbertas(true); }}
                 onBlur={() => window.setTimeout(() => setSugestoesAbertas(false), 120)}
                 onChange={event => {
                   setBuscaCliente(event.target.value);
                   setClienteId(0);
                   setIndiceSugestao(-1);
-                  setSugestoesAbertas(true);
+                  setSugestoesAbertas(event.target.value.trim().length > 0);
                 }}
                 onKeyDown={event => {
-                  const options = buscaCliente.trim().length >= 3 ? clientesBusca : clientes;
+                  const options = buscaCliente.trim().length >= 3 ? clientesBusca : clientes.filter(c => formatPersonName(c.Nome).toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(buscaCliente.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
                   if (event.key === "Escape") setSugestoesAbertas(false);
                   if (event.key === "ArrowDown" && options.length > 0) {
                     event.preventDefault();
-                    setSugestoesAbertas(true);
+                    setSugestoesAbertas(buscaCliente.trim().length > 0);
                     setIndiceSugestao(current => (current + 1) % options.length);
                   }
                   if (event.key === "ArrowUp" && options.length > 0) {
@@ -189,10 +189,10 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
                     setIndiceSugestao(-1);
                   }
                 }} />
-              {sugestoesAbertas && !clienteId && (
+              {sugestoesAbertas && !clienteId && buscaCliente.trim().length > 0 && (
                 <div id="booking-client-options" className={styles.clientOptions} role="listbox">
                   {buscandoClientes && <div className={styles.clientHint}>Buscando clientes...</div>}
-                  {!buscandoClientes && (buscaCliente.trim().length >= 3 ? clientesBusca : clientes).map((cliente, index) => (
+                  {!buscandoClientes && (buscaCliente.trim().length >= 3 ? clientesBusca : clientes.filter(c => formatPersonName(c.Nome).toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(buscaCliente.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "")))).map((cliente, index) => (
                     <button type="button" role="option" id={`booking-client-option-${index}`}
                       aria-selected={index === indiceSugestao}
                       className={styles.clientOption} key={cliente.Id}
