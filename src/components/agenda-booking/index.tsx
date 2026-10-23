@@ -29,6 +29,7 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
   const [clientesBusca, setClientesBusca] = useState<UsuarioAgendamento[]>([]);
   const [sugestoesAbertas, setSugestoesAbertas] = useState(false);
   const [buscandoClientes, setBuscandoClientes] = useState(false);
+  const [erroBuscaClientes, setErroBuscaClientes] = useState(false);
   const [indiceSugestao, setIndiceSugestao] = useState(-1);
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [servicoId, setServicoId] = useState(0);
@@ -78,11 +79,12 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
       return;
     }
     setBuscandoClientes(true);
+    setErroBuscaClientes(false);
     let active = true;
     const delay = window.setTimeout(() => {
       void listarClientesAgendamento(buscaCliente.trim())
-        .then(items => { if (active) setClientesBusca(items); })
-        .catch(() => { if (active) setClientesBusca([]); })
+        .then(items => { if (active) { setClientesBusca(items); setErroBuscaClientes(false); } })
+        .catch(() => { if (active) { setClientesBusca([]); setErroBuscaClientes(true); } })
         .finally(() => { if (active) setBuscandoClientes(false); });
     }, 350);
     return () => { active = false; window.clearTimeout(delay); };
@@ -202,7 +204,8 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
                         setIndiceSugestao(-1);
                       }}>{formatPersonName(cliente.Nome)}</button>
                   ))}
-                  {!buscandoClientes && buscaCliente.trim().length >= 3 && clientesBusca.length === 0 &&
+                  {!buscandoClientes && erroBuscaClientes && <div className={styles.clientHint}>Não foi possível consultar clientes. Tente novamente.</div>}
+                  {!buscandoClientes && !erroBuscaClientes && buscaCliente.trim().length >= 3 && clientesBusca.length === 0 &&
                     <div className={styles.clientHint}>Nenhum cliente encontrado.</div>}
                   {!buscandoClientes && buscaCliente.trim().length < 3 && clientes.length === 0 &&
                     <div className={styles.clientHint}>Digite pelo menos 3 letras para buscar clientes.</div>}
