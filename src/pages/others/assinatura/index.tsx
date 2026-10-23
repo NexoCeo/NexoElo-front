@@ -1,16 +1,19 @@
 import { isAxiosError } from "axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaCheck, FaTimes } from "react-icons/fa";
 import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
 import { consultarAssinatura, iniciarCheckout, alterarPlano, atualizarRecursosAtivos, listarRecursosPlano, abrirPortal, planos, type AssinaturaAtual, type RecursoPlano } from "@/services/assinatura-service";
 import styles from "./style.module.css";
+import mgmt from "./management.module.css";
 import Modal from "@/components/modal";
 import LoadingState from "@/components/loading-state";
 import { useLanguage } from "@/context/LanguageContext";
 
 
-export default function MinhaAssinatura() {
+export default function MinhaAssinatura({ publicView = false }: { publicView?: boolean }) {
+  const navigate = useNavigate();
   const { usuario } = useUser();
   const { lang, t } = useLanguage();
   const reais = new Intl.NumberFormat(lang === "pt" ? "pt-BR" : "en-US", { style: "currency", currency: "BRL" });
@@ -19,7 +22,7 @@ export default function MinhaAssinatura() {
   const texto = (pt: string, en: string) => lang === "pt" ? pt : en;
   const [assinatura, setAssinatura] = useState<AssinaturaAtual | null>(null);
   const [loading, setLoading] = useState(true);
-  const [mostrarPlanos, setMostrarPlanos] = useState(false);
+  const [mostrarPlanos] = useState(publicView);
   const [pending, setPending] = useState("");
   const [destino, setDestino] = useState<"BASICO" | "INTERMEDIARIO" | "AVANCADO" | null>(null);
   const [recursos, setRecursos] = useState<RecursoPlano[]>([]);
@@ -30,12 +33,13 @@ export default function MinhaAssinatura() {
 
   useEffect(() => {
     let active = true;
+    if (publicView && !usuario?.Id) { setLoading(false); return; }
     consultarAssinatura()
       .then(data => { if (active) setAssinatura(data); })
       .catch(() => { if (active) showNotification({ type: "error", title: t("subscription.title"), message: t("subscription.failedLoad") }); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [showNotification]);
+  }, [showNotification, publicView, usuario?.Id]);
 
   async function executar(chave: string, acao: () => Promise<void>) {
     setPending(chave);
@@ -130,7 +134,7 @@ export default function MinhaAssinatura() {
 
   return (
     <main className={styles.page}>
-      {loading ? (
+      {!publicView && (loading ? (
         <section className={`${styles.status} ${styles.statusLoading}`}>
           <LoadingState compact dense label={t("subscription.loading")} />
         </section>
@@ -161,21 +165,20 @@ export default function MinhaAssinatura() {
             </button>
           )}
         </section>
-      )}
+      ))}
 
-      <section className={styles.management} aria-label={texto("Gerenciamento da assinatura", "Subscription management")}>
-        <div className={styles.managementHeading}>
+      {!publicView && <section className={mgmt.management} aria-label={texto("Gerenciamento da assinatura", "Subscription management")}>
+        <div className={mgmt.managementHeading}>
           <div>
             <h2 className={styles.sectionTitle}>{texto("Gerenciar assinatura", "Manage subscription")}</h2>
             <p className={styles.description}>{texto("Acompanhe seu acesso e gerencie o plano da sua conta.", "Review your access and manage your account plan.")}</p>
           </div>
-          <button type="button" className={styles.viewPlansButton} onClick={() => setMostrarPlanos(value => !value)}
-            aria-expanded={mostrarPlanos} aria-controls="subscription-plan-list">
-            {mostrarPlanos ? texto("Ocultar planos", "Hide plans") : texto("Ver planos", "View plans")}
+          <button type="button" className={mgmt.viewPlansButton} onClick={() => navigate("/planos")}>
+            {texto("Ver planos", "View plans")}
           </button>
         </div>
-        <div className={styles.managementStats}>
-          <div className={styles.managementStat}>
+        <div className={mgmt.managementStats}>
+          <div className={mgmt.managementStat}>
             <span>{texto("Plano contratado", "Current plan")}</span>
             <strong>{assinatura ? nomes[assinatura.Plano] ?? assinatura.Plano : "—"}</strong>
           </div>
@@ -190,11 +193,14 @@ export default function MinhaAssinatura() {
             <strong>{assinatura?.DataFim ? new Date(assinatura.DataFim).toLocaleDateString(lang === "pt" ? "pt-BR" : "en-US") : "—"}</strong>
           </div>
         </div>
-      </section>
+      </section>}
 
-      {mostrarPlanos && (
+      {(publicView || mostrarPlanos) && (
         <section id="subscription-plan-list" className={styles.plansSection}>
-          <h2 className={styles.sectionTitle}>{t("subscription.choose")}</h2>
+          <div className={mgmt.publicHeading}>
+            <div><h1>{texto("Encontre o plano ideal para seu negócio", "Find the right plan for your business")}</h1><p>{texto("Compare recursos e escolha conforme sua operação cresce.", "Compare features and choose as your business grows.")}</p></div>
+            <button className={styles.secondaryButton} type="button" onClick={() => navigate(-1)}>{texto("Voltar", "Back")}</button>
+          </div>
           <div className={styles.grid} aria-label={t("subscription.available")}>
         {planos.map(plano => {
           const atual = assinatura?.Plano === plano.id;
@@ -237,9 +243,9 @@ export default function MinhaAssinatura() {
                 </li>
               </ul>
               <button className={styles.button} type="button"
-                disabled={loading || carregandoRecursos || Boolean(pending) || !usuario?.Id || atual || !assinatura}
-                onClick={() => void selecionarPlano(plano.id)}>
-                {atual ? t("subscription.currentLabel") : pending === plano.id ? t("subscription.processing") :
+                disabled={carregandoRecursos || Boolean(pending) || (Boolean(usuario?.Id) && (loading || !assinatura || atual))}
+                onClick={() => { if (!usuario?.Id) navigate("/global/login"); else void selecionarPlano(plano.id); }}>
+                {atual && usuario?.Id ? t("subscription.currentLabel") : !usuario?.Id ? texto("Entrar para contratar", "Sign in to subscribe") : pending === plano.id ? t("subscription.processing") :
                  assinatura?.AcessoAtivo && assinatura.Plano !== "GRATIS" && assinatura.Plano !== "SEM_PLANO" ? t("subscription.change") : t("subscription.select")}
               </button>
             </article>
