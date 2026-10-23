@@ -269,25 +269,37 @@ export default function Servicos() {
 
       <section className={styles.tableWrap} style={{ backgroundColor: theme.colors.background2 }}>
         {loading ? (
-          <LoadingState label={t("services.loading")} variant="services" embedded />
+          <div className={styles.cardList} aria-label={t("services.loading")}>
+            {Array.from({ length: 4 }, (_, index) => (
+              <div className={styles.serviceCard} key={index} aria-hidden="true">
+                <div className={styles.cardService}>
+                  <span className={styles.skeletonThumb}/>
+                  <span className={styles.skeletonLine} style={{ width: "48%" }}/>
+                </div>
+                <span className={styles.skeletonLine} style={{ width: "62px" }}/>
+                <span className={styles.skeletonLine} style={{ width: "80px" }}/>
+                <span className={styles.skeletonThumb} style={{ width: "34px", height: "34px" }}/>
+              </div>
+            ))}
+          </div>
         ) : servicos.length === 0 ? (
           <p className={styles.feedback} style={{ color: theme.colors.inactive }}>
             {t("services.empty")}
           </p>
         ) : (
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>{t("common.service")}</th>
-                <th>{t("common.duration")}</th>
-                <th className={styles.valueHeader}>{t("common.value")}</th>
-                <th className={styles.actionsHeader}>{t("common.actions")}</th>
-              </tr>
-            </thead>
-            <tbody>
+          <div className={styles.cardList}>
+            <div className={styles.cardsHeader}>
+              <div className={styles.serviceCard}>
+                <span>{t("common.service")}</span>
+                <span>{t("common.duration")}</span>
+                <span className={styles.valueHeader}>{t("common.value")}</span>
+                <span className={styles.actionsHeader}>{t("common.actions")}</span>
+              </div>
+            </div>
+            <div className={styles.cardsBody}>
               {servicos.map((servico) => (
-                <tr key={servico.Id || servico.NomeServico}>
-                  <td data-label={t("common.service")}>
+                <div className={styles.serviceCard} key={servico.Id || servico.NomeServico}>
+                  <div className={styles.cardService}>
                     <div className={styles.serviceIdentity}>
                       <span className={styles.serviceThumbnail} aria-hidden="true">
                         <FaImage />
@@ -303,14 +315,14 @@ export default function Servicos() {
                         {servico.NomeServico || t("services.unnamed")}
                       </strong>
                     </div>
-                  </td>
-                  <td data-label={t("common.duration")}>{servico.TempoEstimadoMinutos || 0} min</td>
-                  <td className={styles.valueCell} data-label={t("common.value")}>
+                  </div>
+                  <div className={styles.cardDuration}>{servico.TempoEstimadoMinutos || 0} min</div>
+                  <div className={styles.cardValue}>
                     <strong style={{ color: theme.colors.primary }}>
                       {formatCurrency(servico.Valor)}
                     </strong>
-                  </td>
-                  <td className={styles.actionsCell} data-label={t("common.actions")}>
+                  </div>
+                  <div className={styles.cardActions}>
                     <div
                       className={styles.actionsMenu}
                       ref={openMenuId === servico.Id ? menuRef : undefined}
@@ -340,11 +352,11 @@ export default function Servicos() {
                         </div>
                       )}
                     </div>
-                  </td>
+                  </div>
                 </tr>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </div>
         )}
       </section>
 
