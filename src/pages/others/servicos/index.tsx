@@ -252,18 +252,6 @@ export default function Servicos() {
 
   return (
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
-      <section className={styles.header}>
-        <button
-          type="button"
-          className={styles.primaryButton}
-          onClick={openCreateModal}
-          style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
-        >
-          <FaPlus aria-hidden="true" />
-          {t("services.new")}
-        </button>
-      </section>
-
       {error && <p className={styles.error}>{error}</p>}
 
       <section className={styles.tableWrap}>
@@ -459,6 +447,18 @@ export default function Servicos() {
           </section>
         </div>
       )}
+      <section className={styles.floatingActions}>
+        <button
+          type="button"
+          className={styles.primaryButton}
+          onClick={openCreateModal}
+          style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
+        >
+          <FaPlus aria-hidden="true" />
+          {t("services.new")}
+        </button>
+      </section>
+
     </main>
   );
 }
