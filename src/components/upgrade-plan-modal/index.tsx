@@ -35,12 +35,12 @@ export default function UpgradePlanModal({ open, onClose, plan, limit, onViewPla
           "--upgrade-bg": theme.colors.background2, "--upgrade-border": theme.colors.bottom,
           "--upgrade-accent": theme.colors.primary, "--upgrade-button": theme.colors.text,
           "--upgrade-button-text": theme.colors.background2 } as CSSProperties}>
+        <div className={styles.closeRow}><button type="button" className={styles.close} aria-label={isPt ? "Fechar" : "Close"} onClick={onClose}><FaTimes /></button></div>
         <div className={styles.top}>
           <span className={styles.icon}><FaRocket aria-hidden="true" /></span>
           <span className={styles.plan}>{isPt ? "Plano" : "Plan"} {plan === "BASICO" ? (isPt ? "Básico" : "Basic") : nextPlan === "AVANCADO" ? (isPt ? "Intermediário" : "Intermediate") : plan}</span>
         </div>
-        <button type="button" className={styles.close} aria-label={isPt ? "Fechar" : "Close"} onClick={onClose}><FaTimes /></button>
-        <h2 id="upgrade-title">{isPt ? "Pronto para expandir seus atendimentos?" : "Ready to grow your bookings?"}</h2>
+                <h2 id="upgrade-title">{isPt ? "Pronto para expandir seus atendimentos?" : "Ready to grow your bookings?"}</h2>
         <p>{isPt ? `Você atingiu o limite de ${limit} serviços do seu plano atual.` : `You reached your current plan's limit of ${limit} services.`}</p>
         <p>{nextPlan === "INTERMEDIARIO"
           ? (isPt ? "Com o plano Intermediário, você pode cadastrar até 8 serviços e continuar expandindo seu negócio." : "With the Intermediate plan, you can register up to 8 services and keep growing your business.")
