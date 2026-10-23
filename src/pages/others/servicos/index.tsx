@@ -1,3 +1,6 @@
+import { isAxiosError } from "axios";
+import { consultarAssinatura, type AssinaturaAtual } from "@/services/assinatura-service";
+import UpgradePlanModal from "@/components/upgrade-plan-modal";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaEllipsisV, FaImage, FaPen, FaPlus, FaTimes } from "react-icons/fa";
 import { useTheme } from "@/context/ThemeContext";
@@ -39,6 +42,7 @@ export default function Servicos() {
   const [imagemPreviewUrl, setImagemPreviewUrl] = useState("");
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
+  const [upgradePlan, setUpgradePlan] = useState<{ plan: "BASICO" | "INTERMEDIARIO"; limit: number } | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   const ownerId = usuario?.Id ?? 0;
@@ -129,7 +133,15 @@ export default function Servicos() {
     setFormError("");
   }
 
-  function openCreateModal() {
+  async function openCreateModal() {
+    try {
+      const assinatura = await consultarAssinatura();
+      if (assinatura.AcessoAtivo && assinatura.Plano !== "AVANCADO" && assinatura.Plano !== "GRATIS" && assinatura.Plano !== "SEM_PLANO" && Number.isFinite(assinatura.LimiteServicos) && assinatura.ServicosCadastrados >= assinatura.LimiteServicos) {
+        setUpgradePlan({ plan: assinatura.Plano, limit: assinatura.LimiteServicos });
+        return;
+      }
+    } catch { /* A API aplica os limites mesmo quando a consulta da assinatura falha. */ }
+
     resetForm();
     setFormError("");
     setModalOpen(true);
@@ -220,7 +232,17 @@ export default function Servicos() {
       }
 
       closeModal();
-    } catch {
+    } catch (error) {
+      if (!editingServico && isAxiosError(error) && (error.response?.status === 403 || error.response?.status === 409 || error.response?.status === 400)) {
+        try {
+          const assinatura: AssinaturaAtual = await consultarAssinatura();
+          if (assinatura.AcessoAtivo && (assinatura.Plano === "BASICO" || assinatura.Plano === "INTERMEDIARIO") && assinatura.ServicosCadastrados >= assinatura.LimiteServicos) {
+            setModalOpen(false);
+            setUpgradePlan({ plan: assinatura.Plano, limit: assinatura.LimiteServicos });
+            return;
+          }
+        } catch { /* Erro original continua visível na notificação. */ }
+      }
       const message = t("services.saveError");
       setFormError(message);
       showNotification({ type: "error", title: t("services.saveErrorTitle"), message });
@@ -328,6 +350,9 @@ export default function Servicos() {
         )}
       </section>
 
+      {upgradePlan && <UpgradePlanModal open={true} plan={upgradePlan.plan} limit={upgradePlan.limit}
+        onClose={() => setUpgradePlan(null)}
+        onViewPlans={() => { window.location.assign(`/${isEmpresa ? "empresa" : "autonomo"}/assinatura`); }} />}
       {modalOpen && (
         <div className={styles.modalBackdrop} role="presentation">
           <section
