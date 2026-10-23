@@ -142,7 +142,6 @@ export default function MinhaAssinatura() {
                 {assinatura.AcessoAtivo ? `● ${t("subscription.active")}` : `● ${t("subscription.suspended")}`}
               </span>
               {assinatura.DataFim && <span>{t("subscription.validUntil")} {new Date(assinatura.DataFim).toLocaleDateString(lang === "pt" ? "pt-BR" : "en-US")}</span>}
-              {usuario?.Papel === "EMPRESA" && <span>{t("subscription.professionalsLabel")}: {assinatura.ProfissionaisVinculados} / {limite(assinatura.LimiteProfissionais)}</span>}
             </div>
             {assinatura.ServicosCadastrados > assinatura.LimiteServicos && <p className={styles.note}>{t("subscription.overServices")}</p>}
             {usuario?.Papel === "EMPRESA" && assinatura.ProfissionaisVinculados > assinatura.LimiteProfissionais && <p className={styles.note}>{t("subscription.overPros")}</p>}
