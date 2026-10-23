@@ -155,7 +155,7 @@ export default function SharedRoleRoutes({
       )}
 
       {!requireApprovedProfessional && (
-        <Route path="analise-dados/whatsapp-business" element={<ProtectedRoute><AssinaturaGate avancado><WhatsAppBusiness /></AssinaturaGate></ProtectedRoute>} />
+        <Route path="analise-dados/whatsapp-business" element={<ProtectedRoute><AssinaturaGate whatsappOnly><WhatsAppBusiness /></AssinaturaGate></ProtectedRoute>} />
       )}
 
       <Route
