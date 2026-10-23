@@ -15,7 +15,6 @@ import type { Servico } from "@/types/servico";
 import { getUploadedImageUrl } from "@/components/header/profile-image";
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
-import LoadingState from "@/components/loading-state";
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", {
