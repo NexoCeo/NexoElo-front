@@ -367,3 +367,8 @@
     padding-inline: 14px;
   }
 }
+
+/* A bolinha do cliente acompanha a cor semântica do status. */
+.statusDot.scheduled { background: var(--theme-primary); }
+.statusDot.completed { background: var(--theme-success); }
+.statusDot.cancelled { background: var(--theme-error); }
