@@ -703,6 +703,7 @@ export default function Agenda() {
 
         <Card
           agendamentos={agendaItems}
+          focusAppointmentId={Number.isSafeInteger(requestedAppointmentId) && requestedAppointmentId > 0 ? requestedAppointmentId : undefined}
           loading={loading}
           error={error}
           selectedDateLabel={selectedPeriodLabel}
