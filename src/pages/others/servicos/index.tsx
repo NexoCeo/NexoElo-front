@@ -266,7 +266,7 @@ export default function Servicos() {
 
       {error && <p className={styles.error}>{error}</p>}
 
-      <section className={styles.tableWrap} style={{ backgroundColor: theme.colors.background2 }}>
+      <section className={styles.tableWrap}>
         {loading ? (
           <div className={styles.cardList} aria-label={t("services.loading")}>
             {Array.from({ length: 4 }, (_, index) => (
@@ -288,12 +288,11 @@ export default function Servicos() {
         ) : (
           <div className={styles.cardList}>
             <div className={styles.cardsHeader}>
-              <div className={styles.serviceCard}>
+              
                 <span>{t("common.service")}</span>
                 <span>{t("common.duration")}</span>
                 <span className={styles.valueHeader}>{t("common.value")}</span>
                 <span className={styles.actionsHeader}>{t("common.actions")}</span>
-              </div>
             </div>
             <div className={styles.cardsBody}>
               {servicos.map((servico) => (
