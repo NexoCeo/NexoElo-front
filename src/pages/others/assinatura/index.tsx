@@ -193,6 +193,14 @@ export default function MinhaAssinatura() {
                     ? <FaCheck className={styles.featureIcon} aria-hidden="true" />
                     : <FaTimes className={styles.off} aria-hidden="true" />}
                   <span className={plano.id === "AVANCADO" ? "" : styles.off}>
+                    {t("subscription.metrics")}
+                  </span>
+                </li>
+                <li className={styles.feature}>
+                  {plano.id === "AVANCADO"
+                    ? <FaCheck className={styles.featureIcon} aria-hidden="true" />
+                    : <FaTimes className={styles.off} aria-hidden="true" />}
+                  <span className={plano.id === "AVANCADO" ? "" : styles.off}>
                     {t("subscription.whatsappAutomation")}
                     {plano.id === "AVANCADO" && <> <span className={styles.comingSoon}>{t("subscription.inDevelopment")}</span></>}
                   </span>
