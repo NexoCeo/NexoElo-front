@@ -212,7 +212,7 @@ export async function concluirAgendamentosDoDiaAtual() {
   return pickNumber(response.data, ["quantidade", "Quantidade"]);
 }
 
-export async function listarClientesAgendamento() {
-  const response = await api.get<ApiRecord[]>("/Agendamento/clientes");
+export async function listarClientesAgendamento(busca?: string) {
+  const response = await api.get<ApiRecord[]>("/Agendamento/clientes", { params: busca ? { busca } : undefined });
   return Array.isArray(response.data) ? response.data.map(normalizeUsuario) : [];
 }
