@@ -133,48 +133,23 @@ export default function MinhaAssinatura({ publicView = false }: { publicView?: b
 
   return (
     <main className={styles.page}>
-      {!publicView && (loading ? (
-        <section className={`${styles.status} ${styles.statusLoading}`}>
-          <LoadingState compact dense label={t("subscription.loading")} />
-        </section>
-      ) : assinatura && (
-        <section className={styles.status} aria-label={t("subscription.current")}>
-          <div>
-            <h2 className={styles.statusTitle}>{t("subscription.current")}: {nomes[assinatura.Plano] ?? assinatura.Plano}</h2>
-            <div className={styles.statusMeta}>
-              <span className={assinatura.AcessoAtivo ? styles.active : styles.inactive}>
-                {assinatura.AcessoAtivo ? `● ${t("subscription.active")}` : `● ${t("subscription.suspended")}`}
-              </span>
-              {assinatura.DataFim && <span>{t("subscription.validUntil")} {new Date(assinatura.DataFim).toLocaleDateString(lang === "pt" ? "pt-BR" : "en-US")}</span>}
-            </div>
-            {assinatura.ServicosCadastrados > assinatura.LimiteServicos && <p className={styles.note}>{t("subscription.overServices")}</p>}
-            {usuario?.Papel === "EMPRESA" && assinatura.ProfissionaisVinculados > assinatura.LimiteProfissionais && <p className={styles.note}>{t("subscription.overPros")}</p>}
-          </div>
-          {assinatura.AcessoAtivo && (assinatura.Plano === "BASICO" || assinatura.Plano === "INTERMEDIARIO") &&
-            (assinatura.ServicosCadastrados > assinatura.LimiteServicos ||
-              (usuario?.Papel === "EMPRESA" && assinatura.ProfissionaisVinculados > assinatura.LimiteProfissionais)) && (
-            <button className={styles.secondaryButton} type="button" onClick={()=>void editarSelecao()} disabled={Boolean(pending)||carregandoRecursos}>
-              Gerenciar recursos ativos
-            </button>
-          )}
-          {(assinatura.Plano === "BASICO" || assinatura.Plano === "INTERMEDIARIO" || assinatura.Plano === "AVANCADO") && (
-            <button className={styles.secondaryButton} type="button" disabled={Boolean(pending)}
-              onClick={() => usuario?.Id && executar("portal", () => abrirPortal(usuario.Id))}>
-              {t("subscription.manage")}
-            </button>
-          )}
-        </section>
-      ))}
-
       {!publicView && <section className={styles.management} aria-label={texto("Gerenciamento da assinatura", "Subscription management")}>
         <div className={styles.managementHeading}>
           <div>
             <h2 className={styles.sectionTitle}>{texto("Gerenciar assinatura", "Manage subscription")}</h2>
             <p className={styles.description}>{texto("Acompanhe seu acesso e gerencie o plano da sua conta.", "Review your access and manage your account plan.")}</p>
           </div>
-          <button type="button" className={styles.viewPlansButton} onClick={() => navigate("/planos")}>
-            {texto("Ver planos", "View plans")}
-          </button>
+          <div className={styles.managementActions}>
+            {(assinatura?.Plano === "BASICO" || assinatura?.Plano === "INTERMEDIARIO" || assinatura?.Plano === "AVANCADO") && (
+              <button className={styles.secondaryButton} type="button" disabled={Boolean(pending)}
+                onClick={() => usuario?.Id && executar("portal", () => abrirPortal(usuario.Id))}>
+                {t("subscription.manage")}
+              </button>
+            )}
+            <button type="button" className={styles.viewPlansButton} onClick={() => navigate("/planos")}>
+              {texto("Ver planos", "View plans")}
+            </button>
+          </div>
         </div>
         <div className={styles.managementStats}>
           <div className={styles.managementStat}>
