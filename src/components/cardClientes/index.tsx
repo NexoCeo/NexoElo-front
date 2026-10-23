@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { FaCalendarXmark, FaCheck, FaXmark } from "react-icons/fa6";
 import styles from "./style.module.css";
 import LoadingState from "@/components/loading-state";
@@ -20,6 +20,7 @@ interface CardProps {
   error: string;
   selectedDateLabel: string;
   updatingId?: number | null;
+  focusAppointmentId?: number;
   onStatusChange?: (agendamentoId: number, status: "CANCELADO" | "CONCLUIDO") => void;
 }
 
@@ -40,6 +41,7 @@ export function Card({
   error,
   selectedDateLabel,
   updatingId,
+  focusAppointmentId,
   onStatusChange,
 }: CardProps) {
   const { t } = useLanguage();
@@ -54,6 +56,11 @@ const labelStatus = (status: string) => {
   const labels = [t("common.customer"), t("common.service"), t("common.professional"), t("common.time"), t("common.status"), t("common.value"), t("common.actions")];
   const [widths, setWidths] = useState<number[]>([20, 18, 18, 10, 12, 11, 11]);
   const listRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!focusAppointmentId || loading || !agendamentos.some(item => item.Id === focusAppointmentId)) return;
+    const target = listRef.current?.querySelector(`[data-agendamento-id="${focusAppointmentId}"]`);
+    target?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [focusAppointmentId, loading, agendamentos]);
   const resizing = useRef<{ index: number; x: number; widths: number[]; containerWidth: number } | null>(null);
   const gridStyle = { "--agenda-columns": widths.map(value => "minmax(0, " + value + "fr)").join(" ") } as CSSProperties;
   function resizePair(index: number, deltaPercent: number, original: number[]) {
@@ -120,7 +127,7 @@ const labelStatus = (status: string) => {
       ) : agendamentos.length > 0 ? (
         <div className={styles.listBody}>
           {agendamentos.map((appointment) => (
-            <article key={appointment.Id} className={styles.listItem}>
+            <article key={appointment.Id} data-agendamento-id={appointment.Id} className={`${styles.listItem} ${appointment.Id === focusAppointmentId ? styles.focusedAppointment : ""}`}>
               <div className={styles.patient} data-label="Cliente" data-column={0}>
                 <span className={`${styles.statusDot} ${statusClass(appointment.status)}`} aria-hidden="true" />
                 <strong>{appointment.cliente}</strong>
