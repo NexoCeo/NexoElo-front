@@ -513,3 +513,13 @@
 .cardsBody::-webkit-scrollbar-thumb{background:var(--theme-primary);border-radius:999px}
 .cardsBody::-webkit-scrollbar-thumb:hover{background:var(--theme-primary-text)}
 @media(max-width:760px){.cardList{max-height:calc(100dvh - 185px)}.cardsBody{padding-right:5px}}
+
+/* Keep header and rows aligned; prevent empty grid space and phantom scrollbar. */
+.cardList{width:100%;min-width:0}
+.cardsHeader{width:100%;box-sizing:border-box;padding:9px 16px;min-height:42px;gap:14px}
+.cardsBody{display:grid;grid-auto-rows:max-content;align-content:start;row-gap:10px;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:auto;padding:10px 0 0;scrollbar-width:thin;scrollbar-color:var(--theme-primary) transparent}
+.cardsBody::-webkit-scrollbar{width:5px}
+.cardsBody::-webkit-scrollbar-track{background:transparent}
+.cardsBody::-webkit-scrollbar-thumb{background:var(--theme-primary);border-radius:999px}
+.cardsHeader .actionsHeader{text-align:right}.cardsHeader .valueHeader{text-align:right}
+@media(max-width:760px){.cardsHeader{display:none}.cardsBody{padding:8px 0 0;row-gap:10px}}
