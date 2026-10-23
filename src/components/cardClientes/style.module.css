@@ -372,3 +372,6 @@
 .statusDot.scheduled { background: var(--theme-primary); }
 .statusDot.completed { background: var(--theme-success); }
 .statusDot.cancelled { background: var(--theme-error); }
+
+/* Highlight an appointment opened from the global notification inbox. */
+.focusedAppointment{box-shadow:inset 3px 0 0 var(--theme-primary);background:var(--theme-primary-soft)}
