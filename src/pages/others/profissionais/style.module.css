@@ -756,3 +756,40 @@
 .cardsBody::-webkit-scrollbar-thumb{background:var(--theme-primary);border-radius:999px}
 .cardsHeader .actionsHeader{text-align:right}.professionalCard .cardActions{justify-content:flex-end}
 @media(max-width:760px){.cardsHeader{display:none}.cardsBody{padding:8px 0 0;row-gap:10px}}
+
+/* O modal de vinculo preserva a mesma altura durante carregamento e exibicao. */
+.servicesModal{
+  box-sizing:border-box;
+  height:min(450px,calc(100dvh - 24px));
+  max-height:calc(100dvh - 24px);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.servicesModal .modalHeader{flex:0 0 auto}
+.servicesForm{
+  display:flex;
+  flex:1 1 auto;
+  flex-direction:column;
+  min-height:0;
+  gap:14px;
+}
+.servicesForm .servicesSummary{flex:0 0 auto}
+.servicesForm .servicesList{
+  flex:1 1 auto;
+  min-height:0;
+  max-height:none;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+.servicesForm .servicesFeedback{
+  flex:1 1 auto;
+  min-height:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.servicesForm .modalActions{flex:0 0 auto;margin-top:auto}
+@media(max-width:560px){
+  .servicesModal{height:min(450px,calc(100dvh - 24px))}
+}
