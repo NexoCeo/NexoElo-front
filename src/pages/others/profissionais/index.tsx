@@ -612,7 +612,7 @@ export default function Profissionais() {
 
       {error && <p className={styles.error}>{error}</p>}
 
-      <section className={styles.tableWrap} style={{ backgroundColor: theme.colors.background2 }}>
+      <section className={styles.tableWrap}>
         {loading ? (
           <div className={styles.cardsBody} aria-label={t("pros.listLoading")}>
             {Array.from({ length: 4 }, (_, index) => (
@@ -632,13 +632,12 @@ export default function Profissionais() {
         ) : (
           <div className={styles.cardList}>
             <div className={styles.cardsHeader}>
-              <div className={styles.professionalCard}>
+              
                 <span>{t("common.professional")}</span>
                 <span>{t("pros.email")}</span>
                 <span>{t("pros.phone")}</span>
                 <span>{t("common.status")}</span>
                 <span className={styles.actionsHeader}>{t("common.actions")}</span>
-              </div>
             </div>
             <div className={styles.cardsBody}>
               {profissionais.map((profissional) => (
