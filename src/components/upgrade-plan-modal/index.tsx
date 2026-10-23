@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, type CSSProperties } from "react";
 import { FaArrowRight, FaRocket, FaTimes } from "react-icons/fa";
 import { useLanguage } from "@/context/LanguageContext";
 import { useTheme } from "@/context/ThemeContext";
@@ -37,7 +37,7 @@ export default function UpgradePlanModal({ open, onClose, plan, limit, onViewPla
         style={{ "--upgrade-text": theme.colors.text, "--upgrade-muted": theme.colors.inactive,
           "--upgrade-bg": theme.colors.background2, "--upgrade-border": theme.colors.bottom,
           "--upgrade-accent": theme.colors.primary, "--upgrade-button": theme.colors.text,
-          "--upgrade-button-text": theme.colors.background2 } as React.CSSProperties}>
+          "--upgrade-button-text": theme.colors.background2 } as CSSProperties}>
         <div className={styles.top}>
           <span className={styles.icon}><FaRocket aria-hidden="true" /></span>
           <span className={styles.plan}>{isPt ? "Plano" : "Plan"} {plan === "BASICO" ? (isPt ? "Básico" : "Basic") : nextPlan === "AVANCADO" ? (isPt ? "Intermediário" : "Intermediate") : plan}</span>
