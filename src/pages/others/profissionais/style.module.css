@@ -735,3 +735,14 @@
 .floatingActions{position:fixed;right:clamp(20px,8vw,120px);bottom:24px;z-index:100;display:flex;align-items:center;justify-content:flex-end;gap:10px;width:auto;max-width:calc(100vw - 32px);margin:0;padding:0;background:transparent}
 .floatingActions .headerActions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
 @media(max-width:760px){.floatingActions{right:12px;bottom:calc(12px + env(safe-area-inset-bottom));left:12px;max-width:none}.floatingActions .headerActions{width:100%;display:flex;flex-wrap:wrap}.floatingActions .primaryButton,.floatingActions .secondaryHeaderButton{width:auto;min-width:0;flex:1 1 155px}.container{padding-bottom:92px}}
+
+/* Rolagem apenas dos cards: cabecalho e acoes permanecem fora da area rolavel. */
+.tableWrap{overflow:visible;min-height:0}
+.cardList{display:flex;flex-direction:column;min-height:0;max-height:calc(100dvh - 235px)}
+.cardsHeader{flex:0 0 auto}
+.cardsBody{flex:0 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--theme-primary) transparent;scrollbar-gutter:stable;padding-right:7px}
+.cardsBody::-webkit-scrollbar{width:6px}
+.cardsBody::-webkit-scrollbar-track{background:transparent}
+.cardsBody::-webkit-scrollbar-thumb{background:var(--theme-primary);border-radius:999px}
+.cardsBody::-webkit-scrollbar-thumb:hover{background:var(--theme-primary-text)}
+@media(max-width:760px){.cardList{max-height:calc(100dvh - 185px)}.cardsBody{padding-right:5px}}
