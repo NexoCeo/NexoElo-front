@@ -9,10 +9,11 @@ type Props = {
   onClose: () => void;
   plan: "BASICO" | "INTERMEDIARIO";
   limit: number;
+  resource?: "SERVICO" | "PROFISSIONAL";
   onViewPlans: () => void;
 };
 
-export default function UpgradePlanModal({ open, onClose, plan, limit, onViewPlans }: Props) {
+export default function UpgradePlanModal({ open, onClose, plan, limit, resource = "SERVICO", onViewPlans }: Props) {
   const { lang } = useLanguage();
   const { theme } = useTheme();
   useEffect(() => {
@@ -26,6 +27,7 @@ export default function UpgradePlanModal({ open, onClose, plan, limit, onViewPla
 
   if (!open) return null;
   const isPt = lang === "pt";
+  const isProfessional = resource === "PROFISSIONAL";
   const nextPlan = plan === "BASICO" ? "INTERMEDIARIO" : "AVANCADO";
   const nextPrice = nextPlan === "INTERMEDIARIO" ? "R$ 49,99" : "R$ 99,99";
   return (
@@ -41,14 +43,14 @@ export default function UpgradePlanModal({ open, onClose, plan, limit, onViewPla
           <span className={styles.plan}>{isPt ? "Plano" : "Plan"} {plan === "BASICO" ? (isPt ? "Básico" : "Basic") : nextPlan === "AVANCADO" ? (isPt ? "Intermediário" : "Intermediate") : plan}</span>
         </div>
                 <h2 id="upgrade-title">{isPt ? "Pronto para expandir seus atendimentos?" : "Ready to grow your bookings?"}</h2>
-        <p>{isPt ? `Você atingiu o limite de ${limit} serviços do seu plano atual.` : `You reached your current plan's limit of ${limit} services.`}</p>
+        <p>{isPt ? `Você atingiu o limite de ${limit} ${isProfessional ? "profissionais" : "serviços"} do seu plano atual.` : `You reached your current plan's limit of ${limit} ${isProfessional ? "professionals" : "services"}.`}</p>
         <p>{nextPlan === "INTERMEDIARIO"
-          ? (isPt ? "Com o plano Intermediário, você pode cadastrar até 8 serviços e continuar expandindo seu negócio." : "With the Intermediate plan, you can register up to 8 services and keep growing your business.")
-          : (isPt ? "Com o plano Avançado, você pode cadastrar serviços ilimitados e continuar expandindo seu negócio." : "With the Advanced plan, you can register unlimited services and keep growing your business.")}</p>
+          ? (isPt ? `Com o plano Intermediário, você pode cadastrar até ${isProfessional ? 4 : 8} ${isProfessional ? "profissionais" : "serviços"} e continuar expandindo seu negócio.` : `With the Intermediate plan, you can register up to ${isProfessional ? 4 : 8} ${isProfessional ? "professionals" : "services"} and keep growing your business.`)
+          : (isPt ? `Com o plano Avançado, você pode cadastrar ${isProfessional ? "profissionais" : "serviços"} ilimitados e continuar expandindo seu negócio.` : `With the Advanced plan, you can register unlimited ${isProfessional ? "professionals" : "services"} and keep growing your business.`)}</p>
         <div className={styles.price}><strong>{nextPrice}</strong><span>{isPt ? "/mês" : "/month"}</span></div>
         <p className={styles.benefit}>{nextPlan === "INTERMEDIARIO"
-          ? (isPt ? "4 serviços adicionais disponíveis no plano Intermediário." : "4 additional services with the Intermediate plan.")
-          : (isPt ? "Serviços ilimitados disponíveis no plano Avançado." : "Unlimited services with the Advanced plan.")}</p>
+          ? (isPt ? `Mais ${isProfessional ? 2 : 4} ${isProfessional ? "profissionais" : "serviços"} disponíveis no plano Intermediário.` : `${isProfessional ? 2 : 4} additional ${isProfessional ? "professionals" : "services"} with the Intermediate plan.`)
+          : (isPt ? `${isProfessional ? "Profissionais" : "Serviços"} ilimitados disponíveis no plano Avançado.` : `Unlimited ${isProfessional ? "professionals" : "services"} with the Advanced plan.`)}</p>
         <button className={styles.cta} type="button" onClick={onViewPlans}>
           {isPt ? "Conhecer outros planos" : "Explore other plans"} <FaArrowRight aria-hidden="true" />
         </button>
