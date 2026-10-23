@@ -494,6 +494,10 @@ export default function Profissionais() {
         showNotification({ type: "success", title: "Profissional atualizado", message: "Os dados do profissional foram salvos." });
         return;
       }
+      if (!fotoPerfil) {
+        showNotification({ type: "warning", title: "Foto obrigatória", message: "Selecione uma foto de perfil." });
+        return;
+      }
       const localizacaoPayload =
         localizacao.payload ?? await localizacao.usarLocalizacaoAtual();
 
