@@ -7,7 +7,6 @@ import { useNotification } from "@/context/NotificationContext";
 import { consultarAssinatura, iniciarCheckout, alterarPlano, atualizarRecursosAtivos, listarRecursosPlano, abrirPortal, planos, type AssinaturaAtual, type RecursoPlano } from "@/services/assinatura-service";
 import styles from "./style.module.css";
 import Modal from "@/components/modal";
-import LoadingState from "@/components/loading-state";
 import { useLanguage } from "@/context/LanguageContext";
 
 
@@ -107,24 +106,6 @@ export default function MinhaAssinatura({ publicView = false }: { publicView?: b
       setEditandoRecursos(false);
       showNotification({ type: "success", title: t("subscription.planChanged"), message: t("subscription.nextPrice") });
     });
-  }
-
-  async function editarSelecao() {
-    if (!assinatura || assinatura.Plano === "GRATIS" || assinatura.Plano === "SEM_PLANO") return;
-    setCarregandoRecursos(true);
-    try {
-      const itens = await listarRecursosPlano();
-      const limites = assinatura.Plano === "BASICO" ? [4,2] : assinatura.Plano === "INTERMEDIARIO" ? [8,4] : [Infinity,Infinity];
-      setRecursos(itens);
-      setSelecionados([
-        ...itens.filter(x=>x.Tipo==="SERVICO" && x.Ativo).slice(0,limites[0]).map(x=>`${x.Tipo}:${x.Id}`),
-        ...itens.filter(x=>x.Tipo==="PROFISSIONAL" && x.Ativo).slice(0,limites[1]).map(x=>`${x.Tipo}:${x.Id}`)
-      ]);
-      setEditandoRecursos(true);
-      setDestino(assinatura.Plano);
-    } catch {
-      showNotification({ type: "error", title: t("subscription.title"), message: t("subscription.loadResources") });
-    } finally { setCarregandoRecursos(false); }
   }
 
   function alternarRecurso(id: string) {
