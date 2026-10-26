@@ -159,6 +159,11 @@ export default function SharedRoleRoutes({
       )}
 
       <Route
+        path="assinatura/planos"
+        element={<ProtectedRoute><MinhaAssinatura /></ProtectedRoute>}
+      />
+
+      <Route
         path="assinatura"
         element={<ProtectedRoute><MinhaAssinatura /></ProtectedRoute>}
       />
