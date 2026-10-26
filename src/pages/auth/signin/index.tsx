@@ -1,6 +1,6 @@
 import { useLanguage } from "@/context/LanguageContext";
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '@/context/ThemeContext';
 import styles from './style.module.css';
 import { SubmitButton } from '@/components/auth/submitButton';
@@ -11,6 +11,9 @@ import logo from '@/assets/logo.png';
 
 export default function Login() {
   const { t } = useLanguage();
+  const location = useLocation();
+  const plan = new URLSearchParams(location.search).get("plano");
+  const selectedPlan = plan && ["BASICO","INTERMEDIARIO","AVANCADO"].includes(plan) ? plan : null;
   const { theme } = useTheme();
   const {
     email,
@@ -53,6 +56,7 @@ export default function Login() {
           />
         </div>    
 
+        {selectedPlan && <p style={{textAlign:"center",fontSize:13,color:theme.colors.text}}>Entre para contratar o plano {selectedPlan === "BASICO" ? "Básico" : selectedPlan === "INTERMEDIARIO" ? "Intermediário" : "Avançado"}.</p>}
         <form onSubmit={handleLogin} className={styles.form}>
           <div className={styles.inputWrapper}>
             <div className={styles.inputGroup} style={{ backgroundColor: theme.colors.background }}>
@@ -84,7 +88,7 @@ export default function Login() {
 
             {/* Links */}
             <div className={styles.forgot}>
-              <Link to="/global/register" className={styles.link} style={{ color: theme.colors.inactive }}>{t("auth.createAccount")}</Link>
+              <Link to={"/global/register" + (selectedPlan ? "?plano=" + selectedPlan : "")} className={styles.link} style={{ color: theme.colors.inactive }}>{t("auth.createAccount")}</Link>
             </div>
             <div className={styles.forgot}>
               <a href="/global/recuperarSenha" className={styles.link} style={{ color: theme.colors.inactive }}>{t("auth.forgot")}</a>
