@@ -1,6 +1,6 @@
 import { isAxiosError } from "axios";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FaCheck, FaTimes } from "react-icons/fa";
 import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
@@ -12,6 +12,9 @@ import { useLanguage } from "@/context/LanguageContext";
 
 export default function MinhaAssinatura({ publicView = false }: { publicView?: boolean }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const internalPlans = !publicView && location.pathname.endsWith("/planos");
+  const roleBase = location.pathname.startsWith("/empresa/") ? "/empresa" : "/autonomo";
   const { usuario } = useUser();
   const { lang, t } = useLanguage();
   const reais = new Intl.NumberFormat(lang === "pt" ? "pt-BR" : "en-US", { style: "currency", currency: "BRL" });
@@ -20,7 +23,7 @@ export default function MinhaAssinatura({ publicView = false }: { publicView?: b
   const texto = (pt: string, en: string) => lang === "pt" ? pt : en;
   const [assinatura, setAssinatura] = useState<AssinaturaAtual | null>(null);
   const [loading, setLoading] = useState(true);
-  const [mostrarPlanos] = useState(publicView);
+  const mostrarPlanos = publicView || internalPlans;
   const [pending, setPending] = useState("");
   const [destino, setDestino] = useState<"BASICO" | "INTERMEDIARIO" | "AVANCADO" | null>(null);
   const [recursos, setRecursos] = useState<RecursoPlano[]>([]);
@@ -114,7 +117,7 @@ export default function MinhaAssinatura({ publicView = false }: { publicView?: b
 
   return (
     <main className={styles.page}>
-      {!publicView && <section className={styles.management} aria-label={texto("Gerenciamento da assinatura", "Subscription management")}>
+      {!publicView && !internalPlans && <section className={styles.management} aria-label={texto("Gerenciamento da assinatura", "Subscription management")}>
         <div className={styles.managementHeading}>
           <div>
             <h2 className={styles.sectionTitle}>{texto("Gerenciar assinatura", "Manage subscription")}</h2>
@@ -127,7 +130,7 @@ export default function MinhaAssinatura({ publicView = false }: { publicView?: b
                 {texto("Gerenciar pagamentos", "Manage payments")}
               </button>
             )}
-            <button type="button" className={styles.viewPlansButton} onClick={() => navigate("/planos")}>
+            <button type="button" className={styles.viewPlansButton} onClick={() => navigate(roleBase + "/assinatura/planos")}>
               {texto("Ver planos", "View plans")}
             </button>
           </div>
@@ -150,11 +153,11 @@ export default function MinhaAssinatura({ publicView = false }: { publicView?: b
         </div>
       </section>}
 
-      {(publicView || mostrarPlanos) && (
+      {mostrarPlanos && (
         <section id="subscription-plan-list" className={styles.plansSection}>
           <div className={styles.publicHeading}>
             <div><h1>{texto("Encontre o plano ideal para seu negócio", "Find the right plan for your business")}</h1><p>{texto("Compare recursos e escolha conforme sua operação cresce.", "Compare features and choose as your business grows.")}</p></div>
-            <button className={styles.secondaryButton} type="button" onClick={() => navigate(-1)}>{texto("Voltar", "Back")}</button>
+            <button className={styles.secondaryButton} type="button" onClick={() => navigate(publicView ? (usuario?.Id ? roleBase + "/assinatura" : "/global/login") : roleBase + "/assinatura")}>{texto("Voltar", "Back")}</button>
           </div>
           <div className={styles.grid} aria-label={t("subscription.available")}>
         {planos.map(plano => {
@@ -199,8 +202,8 @@ export default function MinhaAssinatura({ publicView = false }: { publicView?: b
               </ul>
               <button className={styles.button} type="button"
                 disabled={carregandoRecursos || Boolean(pending) || (Boolean(usuario?.Id) && (loading || !assinatura || atual))}
-                onClick={() => { if (!usuario?.Id) navigate("/global/login"); else void selecionarPlano(plano.id); }}>
-                {atual && usuario?.Id ? t("subscription.currentLabel") : !usuario?.Id ? texto("Entrar para contratar", "Sign in to subscribe") : pending === plano.id ? t("subscription.processing") :
+                onClick={() => { if (!usuario?.Id) navigate("/global/register?plano=" + plano.id); else void selecionarPlano(plano.id); }}>
+                {atual && usuario?.Id ? t("subscription.currentLabel") : !usuario?.Id ? texto("Começar com " + (nomes[plano.id] ?? plano.nome), "Choose " + (nomes[plano.id] ?? plano.nome)) : pending === plano.id ? t("subscription.processing") :
                  assinatura?.AcessoAtivo && assinatura.Plano !== "GRATIS" && assinatura.Plano !== "SEM_PLANO" ? t("subscription.change") : t("subscription.select")}
               </button>
             </article>
