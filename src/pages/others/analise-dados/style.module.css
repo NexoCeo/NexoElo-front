@@ -136,3 +136,6 @@
 .chartBarTooltip strong{font-size:11px}
 .chartBarTooltip small{font-size:10px;opacity:.92}
 .chartMonth:hover .chartBarTooltip,.chartMonth:focus-visible .chartBarTooltip{opacity:1;visibility:visible}
+
+.detailBack{width:auto;min-width:82px;height:36px;padding:0 15px;font:600 12px Inter,system-ui,sans-serif;white-space:nowrap}
+.detailBack:hover{border-color:var(--analysis-primary);color:var(--analysis-primary)}
