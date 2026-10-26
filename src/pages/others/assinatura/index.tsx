@@ -143,7 +143,7 @@ export default function MinhaAssinatura({ publicView = false }: { publicView?: b
             {(assinatura?.Plano === "BASICO" || assinatura?.Plano === "INTERMEDIARIO" || assinatura?.Plano === "AVANCADO") && (
               <button className={styles.secondaryButton} type="button" disabled={Boolean(pending)}
                 onClick={() => usuario?.Id && executar("portal", () => abrirPortal(usuario.Id))}>
-                {t("subscription.manage")}
+                {texto("Gerenciar pagamentos", "Manage payments")}
               </button>
             )}
             <button type="button" className={styles.viewPlansButton} onClick={() => navigate("/planos")}>
