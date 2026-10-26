@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { isAxiosError } from "axios";
 
 import { Register } from "@/services/register-service";
@@ -54,6 +54,9 @@ function getApiErrorMessage(data?: ValidationErrorResponse) {
 
 export function useRegisterForm() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const selectedPlan = new URLSearchParams(location.search).get("plano");
+  const planQuery = selectedPlan && ["BASICO","INTERMEDIARIO","AVANCADO"].includes(selectedPlan) ? "?plano=" + selectedPlan : "";
   const { showNotification } = useNotification();
   const localizacao = useCadastroLocalizacao();
   const localizacaoModo = localizacao.modo;
@@ -356,7 +359,7 @@ export function useRegisterForm() {
       });
 
       navigate(
-        getRoleLoginPath(papelEnum),
+        getRoleLoginPath(papelEnum) + (papelEnum === "PROFISSIONAL" ? "" : planQuery),
         {
           state:
             papelEnum === "PROFISSIONAL"
