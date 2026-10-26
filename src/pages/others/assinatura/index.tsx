@@ -14,6 +14,8 @@ export default function MinhaAssinatura({ publicView = false }: { publicView?: b
   const navigate = useNavigate();
   const location = useLocation();
   const internalPlans = !publicView && location.pathname.endsWith("/planos");
+  const requestedPlan = new URLSearchParams(location.search).get("plano");
+  const validRequestedPlan = requestedPlan && ["BASICO", "INTERMEDIARIO", "AVANCADO"].includes(requestedPlan) ? requestedPlan : null;
   const roleBase = location.pathname.startsWith("/empresa/") ? "/empresa" : "/autonomo";
   const { usuario } = useUser();
   const { lang, t } = useLanguage();
@@ -159,6 +161,7 @@ export default function MinhaAssinatura({ publicView = false }: { publicView?: b
             <div><h1>{texto("Encontre o plano ideal para seu negócio", "Find the right plan for your business")}</h1><p>{texto("Compare recursos e escolha conforme sua operação cresce.", "Compare features and choose as your business grows.")}</p></div>
             <button className={styles.secondaryButton} type="button" onClick={() => navigate(publicView ? (usuario?.Id ? roleBase + "/assinatura" : "/global/login") : roleBase + "/assinatura")}>{texto("Voltar", "Back")}</button>
           </div>
+          {internalPlans && validRequestedPlan && <p className={styles.description} style={{marginBottom:14}}>Você selecionou o plano <strong>{nomes[validRequestedPlan]}</strong>. Confira os benefícios e confirme a contratação abaixo.</p>}
           <div className={styles.grid} aria-label={t("subscription.available")}>
         {planos.map(plano => {
           const atual = assinatura?.Plano === plano.id;
@@ -202,8 +205,8 @@ export default function MinhaAssinatura({ publicView = false }: { publicView?: b
               </ul>
               <button className={styles.button} type="button"
                 disabled={carregandoRecursos || Boolean(pending) || (Boolean(usuario?.Id) && (loading || !assinatura || atual))}
-                onClick={() => { if (!usuario?.Id) navigate("/global/register?plano=" + plano.id); else void selecionarPlano(plano.id); }}>
-                {atual && usuario?.Id ? t("subscription.currentLabel") : !usuario?.Id ? texto("Começar com " + (nomes[plano.id] ?? plano.nome), "Choose " + (nomes[plano.id] ?? plano.nome)) : pending === plano.id ? t("subscription.processing") :
+                onClick={() => { if (publicView) navigate(usuario?.Id ? roleBase + "/assinatura/planos?plano=" + plano.id : "/global/register?plano=" + plano.id); else if (!usuario?.Id) navigate("/global/register?plano=" + plano.id); else void selecionarPlano(plano.id); }}>
+                {atual && usuario?.Id ? t("subscription.currentLabel") : publicView ? texto("Escolher " + (nomes[plano.id] ?? plano.nome), "Choose " + (nomes[plano.id] ?? plano.nome)) : !usuario?.Id ? texto("Começar com " + (nomes[plano.id] ?? plano.nome), "Choose " + (nomes[plano.id] ?? plano.nome)) : pending === plano.id ? t("subscription.processing") :
                  assinatura?.AcessoAtivo && assinatura.Plano !== "GRATIS" && assinatura.Plano !== "SEM_PLANO" ? t("subscription.change") : t("subscription.select")}
               </button>
             </article>
