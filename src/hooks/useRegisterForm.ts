@@ -3,6 +3,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { isAxiosError } from "axios";
 
 import { Register } from "@/services/register-service";
+import { Login } from "@/services/auth-service";
+import { iniciarCheckout } from "@/services/assinatura-service";
+import { useUser } from "@/context/UserContext";
 import { getRoleLoginPath } from "@/routes/role-paths";
 
 import {
@@ -58,6 +61,7 @@ export function useRegisterForm() {
   const selectedPlan = new URLSearchParams(location.search).get("plano");
   const planQuery = selectedPlan && ["BASICO","INTERMEDIARIO","AVANCADO"].includes(selectedPlan) ? "?plano=" + selectedPlan : "";
   const { showNotification } = useNotification();
+  const { setUsuario } = useUser();
   const localizacao = useCadastroLocalizacao();
   const localizacaoModo = localizacao.modo;
   const usarLocalizacaoAtual = localizacao.usarLocalizacaoAtual;
@@ -349,6 +353,24 @@ export function useRegisterForm() {
           ? empresaId
           : undefined
       );
+
+      if (planQuery && papelEnum !== "PROFISSIONAL") {
+        // A conta já existe: uma eventual falha no Stripe não deve repetir o cadastro.
+        try {
+          const session = await Login(email.trim(), senha);
+          setUsuario(session.usuario);
+          if (session.usuario.Id > 0) {
+            await iniciarCheckout(session.usuario.Id, selectedPlan as "BASICO" | "INTERMEDIARIO" | "AVANCADO");
+            return;
+          }
+          throw new Error("Não foi possível identificar a conta cadastrada.");
+        } catch (checkoutError) {
+          console.error("Não foi possível iniciar a contratação após o cadastro:", checkoutError);
+          showNotification({ type: "warning", title: "Cadastro realizado", message: "Sua conta foi criada, mas o pagamento não foi iniciado. Entre para concluir a assinatura." });
+          navigate(getRoleLoginPath(papelEnum) + planQuery, { replace: true });
+          return;
+        }
+      }
 
       showNotification({
         type: "success",
