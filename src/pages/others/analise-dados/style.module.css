@@ -128,3 +128,11 @@
 .detailTable th{position:sticky;top:0;text-align:left;background:var(--analysis-primary);color:#fff;padding:12px}
 .detailTable td{border-top:1px solid var(--analysis-border);padding:12px;overflow-wrap:anywhere}
 @media(max-width:620px){.detailOverlay,.detailNestedOverlay{padding:10px}.detailDialog,.detailDialogLarge{padding:15px;max-height:90dvh}.detailTotals{grid-template-columns:1fr}.detailTotals>div{padding:10px}.detailHeading h2{font-size:17px}}
+
+/* Etiqueta compacta nas barras: hover, teclado e toque com foco. */
+.chartBarTrack{position:relative}
+.chartBarTooltip{position:absolute;left:50%;transform:translateX(-50%);z-index:5;pointer-events:none;display:flex;flex-direction:column;gap:2px;min-width:124px;max-width:185px;padding:8px 10px;border-radius:6px;background:var(--analysis-primary);color:#fff;font-size:11px;line-height:1.3;text-align:left;box-shadow:0 5px 16px #0005;opacity:0;visibility:hidden;transition:opacity .15s ease;white-space:nowrap}
+.chartBarTooltip:after{content:"";position:absolute;top:100%;left:calc(50% - 5px);border:5px solid transparent;border-top-color:var(--analysis-primary)}
+.chartBarTooltip strong{font-size:11px}
+.chartBarTooltip small{font-size:10px;opacity:.92}
+.chartMonth:hover .chartBarTooltip,.chartMonth:focus-visible .chartBarTooltip{opacity:1;visibility:visible}
