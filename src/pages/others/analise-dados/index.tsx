@@ -239,7 +239,7 @@ export default function AnaliseDados() {
         <section className={styles.detailDialogLarge} role="dialog" aria-modal="true" aria-labelledby="service-detail-title">
           <div className={styles.detailHeading}>
             <div><h2 id="service-detail-title">{grupoAberto.nome}</h2><p>{grupoAberto.itens.length} {lang === "pt" ? "agendamentos" : "appointments"} · {nomesMeses[mesDetalhe]} {anoGrafico}</p></div>
-            <button type="button" className={styles.detailClose} onClick={() => setServicoDetalhe(null)} aria-label={lang === "pt" ? "Voltar" : "Back"}><FaTimes /></button>
+            <button type="button" className={`${styles.detailClose} ${styles.detailBack}`} onClick={() => setServicoDetalhe(null)}>{lang === "pt" ? "Voltar" : "Back"}</button>
           </div>
           <div className={styles.detailTotals}>
             <div><span>{lang === "pt" ? "Agendamentos" : "Appointments"}</span><strong>{grupoAberto.itens.length}</strong></div>
