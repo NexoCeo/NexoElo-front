@@ -189,12 +189,22 @@ export default function AnaliseDados() {
           <div className={styles.chartMonths}>
             {dadosMensais.map((item, index) => {
               const total = valorGrafico(item);
+              const registrosBarra = historico.filter(registro => {
+                const data = new Date(registro.DataAgendamento);
+                return Number.isFinite(data.getTime()) && data.getFullYear() === anoGrafico &&
+                  data.getMonth() === item.mes && (statusGrafico === "TODOS" || registro.Status.toUpperCase() === statusGrafico);
+              });
+              const valorBarra = registrosBarra.reduce((valor, registro) => valor + (Number(registro.ValorServico ?? registro.Valor ?? 0) || 0), 0);
               return <button type="button" className={styles.chartMonth} key={item.mes} onClick={() => { setMesDetalhe(item.mes); setServicoDetalhe(null); }} aria-label={(lang === "pt" ? "Ver detalhes de " : "View details for ") + nomesMeses[index] + " " + anoGrafico + ": " + total}
-                title={`${nomesMeses[index]} ${anoGrafico}: ${total} ${statusGrafico === "TODOS" ? "agendamentos" : statusGrafico.toLowerCase()}`}>
+                >
                 <div className={styles.chartBarTrack}>
                   <div className={`${styles.chartBar} ${statusGrafico === "CONCLUIDO" ? styles.barCompleted : statusGrafico === "CANCELADO" ? styles.barCancelled : statusGrafico === "TODOS" ? styles.barAll : styles.barScheduled}`}
                     style={{ height: `${100 * total / maxGrafico}%` }} />
-                  
+                  {total > 0 && <span className={styles.chartBarTooltip} style={{bottom:`calc(${100 * total / maxGrafico}% + 7px)`}} aria-hidden="true">
+                    <strong>{lang === "pt" ? "Valor" : "Value"}: {moeda(valorBarra)}</strong>
+                    <small>{total} {lang === "pt" ? "agendamentos" : "appointments"} · {statusGrafico === "TODOS" ? (lang === "pt" ? "Todos" : "All") : nomeStatus(statusGrafico)}</small>
+                    <small>{nomesMeses[index]} {anoGrafico}</small>
+                  </span>}
                 </div>
                 <span className={styles.chartMonthLabel}>{nomesMeses[index]}</span>
               </button>;
