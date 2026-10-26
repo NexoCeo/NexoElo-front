@@ -1,6 +1,6 @@
 import { useLanguage } from "@/context/LanguageContext";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   FaPlus,
   FaUser,
@@ -17,6 +17,9 @@ import { useRegisterForm } from "@/hooks/useRegisterForm";
 
 function Register() {
   const { t } = useLanguage();
+  const location = useLocation();
+  const plan = new URLSearchParams(location.search).get("plano");
+  const selectedPlan = plan && ["BASICO","INTERMEDIARIO","AVANCADO"].includes(plan) ? plan : null;
   const { theme } = useTheme();
 
   const {
@@ -96,6 +99,7 @@ function Register() {
             theme.colors.surface,
         }}
       >
+        {selectedPlan && <p style={{margin:"0 0 12px",color:theme.colors.text,fontSize:13}}>Plano selecionado: <strong>{selectedPlan === "BASICO" ? "Básico" : selectedPlan === "INTERMEDIARIO" ? "Intermediário" : "Avançado"}</strong>. Após o cadastro, entre para concluir a contratação.</p>}
         <form
           onSubmit={handleSubmit}
           className={styles.form}
@@ -371,7 +375,7 @@ function Register() {
             className={styles.linksRow}
           >
             <Link
-              to="/global/login"
+              to={"/global/login" + (selectedPlan ? "?plano=" + selectedPlan : "")}
               className={styles.link}
               style={{
                 color:
