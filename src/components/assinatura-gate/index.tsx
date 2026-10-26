@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import LoadingState from "@/components/loading-state";
 import { useLanguage } from "@/context/LanguageContext";
 import { consultarAssinatura, type AssinaturaAtual } from "@/services/assinatura-service";
@@ -18,7 +18,8 @@ export default function AssinaturaGate({ children, relatorios = false, avancado 
   }, []);
   if (!state && !erro) return <LoadingState label={t("gate.verifying")} variant={location.pathname.endsWith("/agenda") ? "agenda" : location.pathname.endsWith("/servicos") ? "services" : location.pathname.endsWith("/funcionamento") ? "hours" : location.pathname.endsWith("/relatorios") ? "reports" : undefined} />;
   if (erro || !state) return <p style={{ padding: 24 }}>{t("gate.error")}</p>;
-  if (!state.AcessoAtivo || (relatorios && state.Plano !== "GRATIS" && !state.RelatoriosLiberados) || (avancado && state.Plano !== "AVANCADO" && state.Plano !== "GRATIS") || (whatsappOnly && state.Plano !== "AVANCADO"))
+  if (!state.AcessoAtivo && !erro) return <Navigate to={base + "/assinatura/planos"} replace />;
+  if ((relatorios && state.Plano !== "GRATIS" && !state.RelatoriosLiberados) || (avancado && state.Plano !== "AVANCADO" && state.Plano !== "GRATIS") || (whatsappOnly && state.Plano !== "AVANCADO"))
     return <main style={{ padding: 32 }}>
       <h1>{!state.AcessoAtivo ? t("gate.subscriptionNeeded") : (whatsappOnly || (avancado && state.Plano !== "AVANCADO" && state.Plano !== "GRATIS")) ? t("gate.advancedOnly") : t("gate.intermediateOnly")}</h1>
       <p>{!state.AcessoAtivo
