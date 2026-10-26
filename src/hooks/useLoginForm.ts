@@ -1,6 +1,6 @@
 import { useLanguage } from "@/context/LanguageContext";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { isAxiosError } from "axios";
 import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
@@ -10,6 +10,8 @@ import { getRoleDashboardPath } from "@/routes/role-paths";
 export function useLoginForm() {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
+  const selectedPlan = new URLSearchParams(location.search).get("plano");
 
   const { setUsuario } = useUser();
   const { showNotification } = useNotification();
@@ -118,9 +120,11 @@ export function useLoginForm() {
         message: t("auth.welcome"),
       });
 
-      navigate(
-        getRoleDashboardPath(usuario?.Papel),
-      );
+      const role = String(usuario?.Papel || "").toUpperCase();
+      const plan = selectedPlan && ["BASICO","INTERMEDIARIO","AVANCADO"].includes(selectedPlan) ? selectedPlan : null;
+      navigate(plan && (role === "AUTONOMO" || role === "EMPRESA")
+        ? (role === "EMPRESA" ? "/empresa" : "/autonomo") + "/assinatura/planos?plano=" + plan
+        : getRoleDashboardPath(usuario?.Papel));
     } catch (err) {
       let message =
         "Falha na autenticação. Verifique suas credenciais.";
