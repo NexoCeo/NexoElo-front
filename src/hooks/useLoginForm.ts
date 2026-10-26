@@ -5,6 +5,7 @@ import { isAxiosError } from "axios";
 import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
 import { Login } from "@/services/auth-service";
+import { consultarAssinatura, iniciarCheckout } from "@/services/assinatura-service";
 import { getRoleDashboardPath } from "@/routes/role-paths";
 
 export function useLoginForm() {
@@ -121,10 +122,22 @@ export function useLoginForm() {
       });
 
       const role = String(usuario?.Papel || "").toUpperCase();
-      const plan = selectedPlan && ["BASICO","INTERMEDIARIO","AVANCADO"].includes(selectedPlan) ? selectedPlan : null;
-      navigate(plan && (role === "AUTONOMO" || role === "EMPRESA")
-        ? (role === "EMPRESA" ? "/empresa" : "/autonomo") + "/assinatura/planos?plano=" + plan
-        : getRoleDashboardPath(usuario?.Papel));
+      const plan = selectedPlan && ["BASICO","INTERMEDIARIO","AVANCADO"].includes(selectedPlan) ? selectedPlan as "BASICO" | "INTERMEDIARIO" | "AVANCADO" : null;
+      if (plan && (role === "AUTONOMO" || role === "EMPRESA") && usuario.Id > 0) {
+        try {
+          const subscription = await consultarAssinatura();
+          if (!["BASICO","INTERMEDIARIO","AVANCADO"].includes(subscription.Plano)) {
+            await iniciarCheckout(usuario.Id, plan);
+            return;
+          }
+        } catch (checkoutError) {
+          console.warn("Checkout pendente após login:", checkoutError);
+          showNotification({type:"warning",title:"Pagamento pendente",message:"Entre na assinatura para concluir o pagamento."});
+          navigate((role === "EMPRESA" ? "/empresa" : "/autonomo") + "/assinatura/planos?plano=" + plan);
+          return;
+        }
+      }
+      navigate(getRoleDashboardPath(usuario?.Papel));
     } catch (err) {
       let message =
         "Falha na autenticação. Verifique suas credenciais.";
