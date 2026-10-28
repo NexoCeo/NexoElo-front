@@ -13,3 +13,19 @@
 .submit{flex:0 0 auto}
 .success{flex:1 1 0;min-height:0;justify-content:center;overflow:hidden}
 @media(max-height:530px){.panel{height:calc(100dvh - 88px)}.channelHelp{display:none}}
+
+.history,.messages{flex:1;min-height:0;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px;scrollbar-width:thin}
+.history button{display:flex;flex-direction:column;gap:6px;text-align:left;background:transparent;border:1px solid #60708a60;border-radius:9px;color:inherit;padding:12px;cursor:pointer}
+.history button span{font-size:11px;opacity:.7}
+.history p{font-size:12px;opacity:.7}
+.threadTitle{display:flex;gap:10px;align-items:center;padding:10px 16px;min-height:0;font-size:12px;border-bottom:1px solid #60708a55}
+.threadTitle button{border:0;background:transparent;color:inherit;cursor:pointer;white-space:nowrap}
+.threadTitle strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.clientBubble,.agentBubble{border:1px solid #60708a55;padding:9px 12px;border-radius:12px;max-width:84%;overflow-wrap:anywhere;font-size:12px}
+.clientBubble{align-self:flex-end;background:#4069e033}.agentBubble{align-self:flex-start;background:#68758b24}
+.clientBubble small,.agentBubble small{font-size:10px;opacity:.7}.clientBubble p,.agentBubble p{margin:5px 0 0;white-space:pre-wrap}
+.messageForm{display:flex;align-items:center;gap:8px;padding:12px 14px;border-top:1px solid #60708a55;min-width:0}
+.messageForm input{flex:1;min-width:0;padding:11px;border-radius:8px;border:1px solid #60708a66;color:inherit;background:transparent}
+.messageForm button{background:#4069e0;color:white;border:0;border-radius:8px;padding:11px;cursor:pointer}
+.messageForm button:disabled{opacity:.5}
+.closedHint{padding:10px;font-size:11px;opacity:.7}
