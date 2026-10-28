@@ -15,8 +15,19 @@ export default function SupportWidget(){
  const [draft,setDraft]=useState("");
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState("");
+ const [historyLoading,setHistoryLoading]=useState(false);
+ const [historyFailed,setHistoryFailed]=useState(false);
  async function refreshHistory(){
-  try{const {data}=await api.get<Conversation[]>("suporte/historico");setHistory(data)}catch{setError("Não foi possível carregar seu histórico.")}
+  setHistoryLoading(true);setHistoryFailed(false);setError("");
+  try{
+   const {data}=await api.get<Conversation[]>("suporte/historico");
+   if(!Array.isArray(data))throw new Error("Formato inválido");
+   setHistory(data);
+  }catch(e){
+   setHistoryFailed(true);
+   const status=(e as {response?:{status?:number}})?.response?.status;
+   setError(status===401?"Sua sessão expirou. Entre novamente no NexoElo.":status===503?"O histórico está temporariamente indisponível.":"Não foi possível consultar o histórico. Tente novamente.");
+  }finally{setHistoryLoading(false)}
  }
  async function refreshMessages(id:string){
   try{const {data}=await api.get<Message[]>("suporte/conversas/"+id+"/mensagens");setMessages(data)}catch{setError("Não foi possível carregar as mensagens.")}
@@ -49,7 +60,7 @@ export default function SupportWidget(){
    <button type="button" className={view==="history"?styles.selected:""} onClick={()=>{setView("history");void refreshHistory()}}>Histórico</button>
    <button type="button" className={view==="new"?styles.selected:""} onClick={()=>setView("new")}>Novo atendimento</button>
   </nav>
-  {view==="history"&&<div className={styles.history}>{history.length===0?<p>Nenhum atendimento registrado.</p>:history.map(item=><button key={item.id} type="button" onClick={()=>openConversation(item)}><strong>{item.subject}</strong><span>{item.channel==="chat"?"Chat":"E-mail"} · {item.ended?"Conversa encerrada":item.status==="resolved"?"Resolvido":"Em atendimento"}</span></button>)}</div>}
+  {view==="history"&&<div className={styles.history}>{historyLoading?<p>Carregando atendimentos...</p>:historyFailed?<div className={styles.historyFailure}><p>Não foi possível carregar seus atendimentos.</p><button type="button" onClick={()=>void refreshHistory()}>Tentar novamente</button></div>:history.length===0?<p>Nenhum atendimento registrado.</p>:history.map(item=><button key={item.id} type="button" onClick={()=>openConversation(item)}><strong>{item.subject}</strong><span>{item.channel==="chat"?"Chat":"E-mail"} · {item.ended?"Conversa encerrada":item.status==="resolved"?"Resolvido":"Em atendimento"}</span></button>)}</div>}
   {view==="new"&&<><div className={styles.channelTabs}><button type="button" className={channel==="chat"?styles.selected:""} onClick={()=>setChannel("chat")}>Chat</button><button type="button" className={channel==="email"?styles.selected:""} onClick={()=>setChannel("email")}>E-mail</button></div>
    <form onSubmit={submit} className={styles.form}><label>Assunto<input required maxLength={180} value={subject} onChange={e=>setSubject(e.target.value)} placeholder="Como podemos ajudar?"/></label><label>Mensagem<textarea required maxLength={4000} value={description} onChange={e=>setDescription(e.target.value)} placeholder="Descreva sua solicitação..."/></label><button className={styles.submit} disabled={busy}>{busy?"Enviando...":channel==="chat"?"Iniciar chat":"Registrar e-mail"}</button></form></>}
   {view==="conversation"&&selected&&<><div className={styles.threadTitle}><button type="button" onClick={()=>{setView("history");void refreshHistory()}}>← Voltar</button><strong>{selected.subject}</strong></div><div className={styles.messages}>{messages.map(m=><div key={m.id} className={m.sender==="client"?styles.clientBubble:styles.agentBubble}><small>{m.sender==="client"?"Você":m.senderName}</small><p>{m.body}</p></div>)}</div>{selected.channel==="chat"&&!selected.ended&&selected.status!=="resolved"?<form className={styles.messageForm} onSubmit={send}><input aria-label="Nova mensagem" maxLength={4000} value={draft} onChange={e=>setDraft(e.target.value)} placeholder="Digite sua mensagem..." /><button type="submit" disabled={busy||!draft.trim()}>Enviar</button></form>:<p className={styles.closedHint}>Histórico disponível para consulta.</p>}</>}
