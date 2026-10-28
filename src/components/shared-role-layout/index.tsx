@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Header from "@/components/header";
+import SupportWidget from "@/components/support-widget";
 import Sidebar from "@/components/sidebar";
 import styles from "./style.module.css";
 
@@ -32,6 +33,7 @@ export default function SharedRoleLayout({ children }: SharedRoleLayoutProps) {
       >
         {children}
       </div>
+      <SupportWidget />
     </div>
   );
 }
