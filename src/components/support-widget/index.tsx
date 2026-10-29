@@ -5,6 +5,8 @@ type Conversation={id:string;subject:string;channel:string;status:string;created
 type Message={id:string;sender:"agent"|"client";senderName:string;body:string;createdAt:string};
 export default function SupportWidget(){
  const [open,setOpen]=useState(false);
+ const [widgetSize,setWidgetSize]=useState({width:470,height:745});
+ useEffect(()=>{let active=true;api.get<{width:number;height:number}>("suporte/configuracao-widget").then(({data})=>{if(active&&Number.isFinite(data.width)&&Number.isFinite(data.height))setWidgetSize({width:Math.max(320,Math.min(650,data.width)),height:Math.max(400,Math.min(950,data.height))})}).catch(()=>{});return()=>{active=false}},[]);
  const [view,setView]=useState<"new"|"history"|"conversation">("history");
  const [channel,setChannel]=useState<"chat"|"email">("chat");
  const [subject,setSubject]=useState("");
@@ -54,7 +56,7 @@ export default function SupportWidget(){
  }
  function openConversation(item:Conversation){setSelected(item);setMessages([]);setError("");setView("conversation")}
  return <div className={styles.host}>
- {open&&<section className={styles.panel} role="dialog" aria-label="Suporte NexoElo">
+ {open&&<section className={styles.panel} style={{width:widgetSize.width,height:widgetSize.height}} role="dialog" aria-label="Suporte NexoElo">
   <header className={styles.heading}><div><strong>Suporte NexoElo</strong><span>Atendimento via NexoDesk</span></div><button type="button" onClick={()=>setOpen(false)} aria-label="Fechar">×</button></header>
   <nav className={styles.channelTabs} aria-label="Navegação do suporte">
    <button type="button" className={view==="history"?styles.selected:""} onClick={()=>{setView("history");void refreshHistory()}}>Histórico</button>
