@@ -29,3 +29,26 @@
 .messageForm button{background:#4069e0;color:white;border:0;border-radius:8px;padding:11px;cursor:pointer}
 .messageForm button:disabled{opacity:.5}
 .closedHint{padding:10px;font-size:11px;opacity:.7}
+
+/* Expanded support widget: desktop reference 470 × 745 px.
+   Leave room below for the floating launcher and clamp to viewport. */
+.panel{
+  width:470px;
+  height:745px;
+  max-width:calc(100vw - 28px);
+  max-height:calc(100dvh - 105px);
+  min-height:0;
+  box-sizing:border-box;
+  border-radius:22px;
+}
+@media(max-width:480px){
+  .panel{
+    width:calc(100vw - 28px);
+    height:min(745px,calc(100dvh - 88px));
+    max-height:calc(100dvh - 88px);
+    border-radius:18px;
+  }
+}
+@media(max-height:530px){
+  .panel{height:calc(100dvh - 88px)}
+}
