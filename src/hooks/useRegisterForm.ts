@@ -113,7 +113,7 @@ export function useRegisterForm() {
       validateEmail(email) &&
       validatePassword(senha) &&
       TipoUsuario !== "" &&
-      Boolean(fotoPerfil);
+      Boolean(fotoPerfil && ["image/jpeg", "image/png", "image/webp"].includes(fotoPerfil.type) && fotoPerfil.size <= 5 * 1024 * 1024);
 
     if (!dadosBasicosValidos) {
       return false;
@@ -264,6 +264,13 @@ export function useRegisterForm() {
       const message = "Selecione uma foto de perfil.";
       setError(message);
       showNotification({ type: "warning", title: "Foto obrigatoria", message });
+      return;
+    }
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(fotoPerfil.type) || fotoPerfil.size > 5 * 1024 * 1024) {
+      const message = "A foto deve ser JPG, PNG ou WEBP e ter no máximo 5 MB.";
+      setError(message);
+      showNotification({ type: "warning", title: "Foto inválida", message });
       return;
     }
 
