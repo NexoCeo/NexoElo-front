@@ -93,7 +93,7 @@ export function useCadastroLocalizacao(): CadastroLocalizacaoController {
   const [error, setError] = useState("");
 
   const usarLocalizacaoAtual = useCallback(async () => {
-    if (modo === "automatica" && coordenadas && localizacaoResolvida) {
+    if (modo === "automatica" && coordenadas) {
       return {
         latitude: coordenadas.latitude,
         longitude: coordenadas.longitude,
@@ -105,11 +105,19 @@ export function useCadastroLocalizacao(): CadastroLocalizacaoController {
     setError("");
     try {
       const currentCoordinates = await obterCoordenadas();
-      const resolved = await resolverLocalizacao(currentCoordinates);
+      // Coordenadas válidas são suficientes para o cadastro de autônomos e empresas.
+      // A identificação da cidade é complementar e pode ficar indisponível.
       setCoordenadas(currentCoordinates);
-      setLocalizacaoResolvida(resolved);
-      setCidadeId(resolved.CidadeId);
       setModo("automatica");
+      try {
+        const resolved = await resolverLocalizacao(currentCoordinates);
+        setLocalizacaoResolvida(resolved);
+        setCidadeId(resolved.CidadeId);
+      } catch (resolveError) {
+        console.warn("Não foi possível identificar a cidade pelas coordenadas:", resolveError);
+        setLocalizacaoResolvida(null);
+        setCidadeId(0);
+      }
       return {
         latitude: currentCoordinates.latitude,
         longitude: currentCoordinates.longitude,
