@@ -120,9 +120,9 @@ function Register() {
                 }
                 onChange={(event) => {
                   const selected = event.target.files?.[0] ?? null;
-                  setFotoPerfil(selected && ["image/jpeg", "image/png", "image/webp"].includes(selected.type) && selected.size <= 5 * 1024 * 1024 ? selected : null);
-                  if (selected && (!["image/jpeg", "image/png", "image/webp"].includes(selected.type) || selected.size > 5 * 1024 * 1024)) {
-                    window.alert("A foto deve ser JPG, PNG ou WEBP e ter no máximo 5 MB.");
+                  setFotoPerfil(selected && ["image/jpeg", "image/png", "image/webp"].includes(selected.type) && selected.size <= 20 * 1024 * 1024 ? selected : null);
+                  if (selected && (!["image/jpeg", "image/png", "image/webp"].includes(selected.type) || selected.size > 20 * 1024 * 1024)) {
+                    window.alert("A foto deve ser JPG, PNG ou WEBP e ter no máximo 20 MB.");
                     event.target.value = "";
                   }
                 }}
