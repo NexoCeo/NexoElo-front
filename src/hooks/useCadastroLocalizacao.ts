@@ -149,7 +149,7 @@ export function useCadastroLocalizacao(): CadastroLocalizacaoController {
   }, []);
 
   const payload = useMemo<CadastroLocalizacaoPayload | null>(() => {
-    if (modo === "automatica" && coordenadas && localizacaoResolvida) {
+    if (modo === "automatica" && coordenadas) {
       return {
         latitude: coordenadas.latitude,
         longitude: coordenadas.longitude,
