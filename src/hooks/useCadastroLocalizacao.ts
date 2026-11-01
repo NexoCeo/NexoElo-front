@@ -50,21 +50,35 @@ function obterCoordenadas(): Promise<Coordenadas> {
       return;
     }
 
+    const onSuccess = ({ coords }: GeolocationPosition) =>
+      resolve({ latitude: coords.latitude, longitude: coords.longitude });
+
+    const onFailure = (error: GeolocationPositionError) => {
+      if (error.code === 1) {
+        reject(new Error("Permita o acesso à localização nas configurações do navegador para continuar."));
+        return;
+      }
+
+      // GPS de alta precisão costuma falhar em ambientes internos e navegadores móveis.
+      // Tenta novamente usando a localização aproximada fornecida pela rede.
+      navigator.geolocation.getCurrentPosition(
+        onSuccess,
+        (fallbackError) => {
+          const messages: Record<number, string> = {
+            1: "A permissão de localização foi negada.",
+            2: "A localização do dispositivo está indisponível. Ative a localização e tente novamente.",
+            3: "A busca da localização excedeu o tempo limite. Tente novamente.",
+          };
+          reject(new Error(messages[fallbackError.code] || "Não foi possível obter sua localização."));
+        },
+        { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 },
+      );
+    };
+
     navigator.geolocation.getCurrentPosition(
-      ({ coords }) => resolve({ latitude: coords.latitude, longitude: coords.longitude }),
-      (error) => {
-        const messages: Record<number, string> = {
-          1: "A permissao de localizacao foi negada.",
-          2: "A localizacao do dispositivo esta indisponivel.",
-          3: "A busca da localizacao excedeu o tempo limite.",
-        };
-        reject(new Error(messages[error.code] || "Nao foi possivel obter sua localizacao."));
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 20000,
-        maximumAge: 0,
-      },
+      onSuccess,
+      onFailure,
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 },
     );
   });
 }
