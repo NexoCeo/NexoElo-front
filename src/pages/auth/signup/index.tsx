@@ -113,17 +113,19 @@ function Register() {
             >
               <input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 id="fotoPerfil"
                 className={
                   styles.hiddenFileInput
                 }
-                onChange={(event) =>
-                  setFotoPerfil(
-                    event.target.files?.[0] ??
-                      null
-                  )
-                }
+                onChange={(event) => {
+                  const selected = event.target.files?.[0] ?? null;
+                  setFotoPerfil(selected && ["image/jpeg", "image/png", "image/webp"].includes(selected.type) && selected.size <= 5 * 1024 * 1024 ? selected : null);
+                  if (selected && (!["image/jpeg", "image/png", "image/webp"].includes(selected.type) || selected.size > 5 * 1024 * 1024)) {
+                    window.alert("A foto deve ser JPG, PNG ou WEBP e ter no máximo 5 MB.");
+                    event.target.value = "";
+                  }
+                }}
               />
 
               <label
