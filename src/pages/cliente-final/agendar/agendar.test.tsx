@@ -56,7 +56,16 @@ describe("ClienteFinalAgendar", () => {
   });
 
   it("permite buscar prestadores, escolher servico, horario e confirmar sem alterar o payload", async () => {
-    render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><LanguageProvider><ClienteFinalAgendar /></LanguageProvider></MemoryRouter>);
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/agendar"]}>
+        <LanguageProvider>
+          <Routes>
+            <Route path="/cliente-final/agendar" element={<ClienteFinalAgendar />} />
+            <Route path="/cliente-final/home" element={<div>Pagina inicial do cliente</div>} />
+          </Routes>
+        </LanguageProvider>
+      </MemoryRouter>,
+    );
     expect(await screen.findByRole("button", { name: /Autonomo Teste/i })).toBeInTheDocument();
     fireEvent.change(screen.getByRole("searchbox", { name: "Buscar prestador" }), { target: { value: "outro" } });
     expect(screen.getByText("Nenhum prestador corresponde à sua busca.")).toBeInTheDocument();
@@ -73,7 +82,8 @@ describe("ClienteFinalAgendar", () => {
       ClienteId: 4, ResponsavelId: 7, ProfissionalId: undefined,
       ServicoId: 2, DataAgendamento: "2099-08-20T08:30:00",
     }));
-    expect(await screen.findByText("Agendamento criado com sucesso.")).toBeInTheDocument();
+    expect(await screen.findByText("Pagina inicial do cliente")).toBeInTheDocument();
+    expect(sessionStorage.getItem("nexoelo-booking-draft:4:marketplace")).toBeNull();
   });
 
   it("mostra profissionais de empresa e permite retornar ao catalogo", async () => {
