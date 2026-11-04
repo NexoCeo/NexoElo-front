@@ -553,6 +553,9 @@ export default function ClienteFinalAgendar() {
     <main className={styles.marketplace}>
       {!responsavelId ? (
         <section className={styles.discovery}>
+          <button type="button" className={styles.backToProviders} onClick={() => navigate(cliente ? "/cliente-final/home" : "/cliente-final/login")}>
+            <FaArrowLeft aria-hidden="true" /> Voltar
+          </button>
           <div className={styles.searchPanel}>
             <label className={styles.searchBox}>
               <FaSearch aria-hidden="true" />
