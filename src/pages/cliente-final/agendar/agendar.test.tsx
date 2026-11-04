@@ -21,7 +21,7 @@ vi.mock("@/services/agendamento-service", () => ({
 }));
 
 vi.mock("@/services/agenda-publica-service", () => ({
-  obterAgendaPublica: vi.fn(),
+  obterAgendaPublica: mocks.obterAgendaPublica,
 }));
 
 vi.mock("@/services/cliente-final-auth-token", () => ({
