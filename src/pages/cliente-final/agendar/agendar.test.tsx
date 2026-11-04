@@ -1,10 +1,11 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { render } from "@/test/render-with-notifications";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   criarAgendamento: vi.fn(),
+  obterAgendaPublica: vi.fn(),
   listarHorariosDisponiveis: vi.fn(),
   listarProfissionaisAgendamento: vi.fn(),
   listarResponsaveisAgendamento: vi.fn(),
@@ -118,6 +119,27 @@ describe("ClienteFinalAgendar", () => {
     render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><LanguageProvider><ClienteFinalAgendar /></LanguageProvider></MemoryRouter>);
     expect(await screen.findByRole("heading", { name: "Escolha a data e o horário" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Confirmar agendamento" })).not.toBeInTheDocument();
+  });
+
+  it("volta do slug para a lista geral de prestadores em um unico clique", async () => {
+    mocks.obterAgendaPublica.mockResolvedValue({
+      UsuarioId: 7, Nome: "Autonomo Teste", TipoUsuario: "AUTONOMO",
+      Slug: "autonomo-teste", FotoPerfil: "uploads/autonomo.png",
+    });
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/agendar/autonomo-teste"]}>
+        <LanguageProvider>
+          <Routes>
+            <Route path="/cliente-final/agendar" element={<ClienteFinalAgendar />} />
+            <Route path="/cliente-final/agendar/:username" element={<ClienteFinalAgendar />} />
+          </Routes>
+        </LanguageProvider>
+      </MemoryRouter>,
+    );
+    expect(await screen.findByRole("heading", { name: "Serviços disponíveis" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Voltar" }));
+    expect(await screen.findByRole("heading", { name: "Explore os prestadores" })).toBeInTheDocument();
+    expect(screen.getByRole("searchbox", { name: "Buscar prestador" })).toBeInTheDocument();
   });
 
   it("filtra autonomos e empresas sem chamadas extras de API", async () => {
