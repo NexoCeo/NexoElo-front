@@ -33,6 +33,7 @@ vi.mock("@/services/servico-service", () => ({
 }));
 
 import ClienteFinalAgendar from "./index";
+import { LanguageProvider } from "@/context/LanguageContext";
 
 describe("ClienteFinalAgendar", () => {
   beforeEach(() => {
@@ -54,7 +55,7 @@ describe("ClienteFinalAgendar", () => {
   });
 
   it("permite buscar prestadores, escolher servico, horario e confirmar sem alterar o payload", async () => {
-    render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><ClienteFinalAgendar /></MemoryRouter>);
+    render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><LanguageProvider><ClienteFinalAgendar /></LanguageProvider></MemoryRouter>);
     expect(await screen.findByRole("button", { name: /Autonomo Teste/i })).toBeInTheDocument();
     fireEvent.change(screen.getByRole("searchbox", { name: "Buscar prestador" }), { target: { value: "outro" } });
     expect(screen.getByText("Nenhum prestador corresponde à sua busca.")).toBeInTheDocument();
@@ -83,7 +84,7 @@ describe("ClienteFinalAgendar", () => {
     mocks.listarServicosPorProfissional.mockResolvedValue([
       { Id: 3, NomeServico: "Coloracao", Valor: 120, TempoEstimadoMinutos: 90, ImagemServico: "uploads/coloracao.webp" },
     ]);
-    render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><ClienteFinalAgendar /></MemoryRouter>);
+    render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><LanguageProvider><ClienteFinalAgendar /></LanguageProvider></MemoryRouter>);
     fireEvent.click(await screen.findByRole("button", { name: /Empresa Teste/i }));
     expect(await screen.findByAltText("Foto de Profissional Teste")).toHaveAttribute("src", expect.stringContaining("/uploads/profissional.png"));
     fireEvent.click(screen.getByRole("button", { name: /Profissional Teste/i }));
@@ -98,7 +99,7 @@ describe("ClienteFinalAgendar", () => {
       dataSelecionada: "2099-08-20", dataAgendamento: "2099-08-20T08:30:00",
       expandedSection: "confirmacao",
     }));
-    render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><ClienteFinalAgendar /></MemoryRouter>);
+    render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><LanguageProvider><ClienteFinalAgendar /></LanguageProvider></MemoryRouter>);
     expect(await screen.findByRole("heading", { name: "Revise seu agendamento" })).toBeInTheDocument();
     await waitFor(() => expect(mocks.listarHorariosDisponiveis).toHaveBeenCalledWith({
       responsavelId: 7, profissionalId: undefined, servicoId: 2, data: "2099-08-20",
@@ -113,7 +114,7 @@ describe("ClienteFinalAgendar", () => {
       dataSelecionada: "2099-08-20", dataAgendamento: "2099-08-20T09:00:00",
       expandedSection: "confirmacao",
     }));
-    render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><ClienteFinalAgendar /></MemoryRouter>);
+    render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><LanguageProvider><ClienteFinalAgendar /></LanguageProvider></MemoryRouter>);
     expect(await screen.findByRole("heading", { name: "Escolha a data e o horário" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Confirmar agendamento" })).not.toBeInTheDocument();
   });
@@ -123,7 +124,7 @@ describe("ClienteFinalAgendar", () => {
       { Id: 7, Nome: "Autonomo Teste", TipoUsuario: "AUTONOMO" },
       { Id: 8, Nome: "Empresa Teste", TipoUsuario: "EMPRESA" },
     ]);
-    render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><ClienteFinalAgendar /></MemoryRouter>);
+    render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><LanguageProvider><ClienteFinalAgendar /></LanguageProvider></MemoryRouter>);
     expect(await screen.findByRole("button", { name: /Empresa Teste/i })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Autônomos" }));
     expect(screen.queryByRole("button", { name: /Empresa Teste/i })).not.toBeInTheDocument();
