@@ -63,6 +63,7 @@ describe("ClienteFinalAgendar", () => {
     fireEvent.click(screen.getByRole("button", { name: /Autonomo Teste/i }));
     expect(await screen.findByAltText("Imagem do servico Corte")).toHaveAttribute("src", expect.stringContaining("/uploads/corte.png"));
     fireEvent.click(screen.getByRole("button", { name: /Corte/i }));
+    expect(await screen.findByRole("heading", { name: "Escolha a data e o horário" })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Data"), { target: { value: "2099-08-20" } });
     fireEvent.click(await screen.findByRole("button", { name: "08:30" }));
     expect(screen.getByRole("heading", { name: "Revise seu agendamento" })).toBeInTheDocument();
