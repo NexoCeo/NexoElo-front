@@ -613,6 +613,11 @@ export default function ClienteFinalAgendar() {
                 sessionStorage.removeItem(storageKey);
                 sessionStorage.removeItem(`nexoelo-booking-draft:${cliente?.Id ?? "guest"}:marketplace`);
               } catch { /* Armazenamento opcional. */ }
+              // Esta pagina e reutilizada entre as rotas com e sem slug.
+              // Limpe o estado em memoria ANTES de trocar a URL para que a
+              // tela de descoberta apareca no primeiro clique.
+              handleResponsavelChange(0);
+              setExpandedSection("responsavel");
               navigate("/cliente-final/agendar", { replace: true });
             } else {
               handleResponsavelChange(0);
