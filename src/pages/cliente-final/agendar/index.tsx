@@ -551,11 +551,13 @@ export default function ClienteFinalAgendar() {
 
   return (
     <main className={styles.marketplace}>
+      {!responsavelId && (
+        <button type="button" className={styles.backToProviders} onClick={() => navigate(cliente ? "/cliente-final/home" : "/cliente-final/login")}>
+          <FaArrowLeft aria-hidden="true" /> Voltar
+        </button>
+      )}
       {!responsavelId ? (
         <section className={styles.discovery}>
-          <button type="button" className={styles.backToProviders} onClick={() => navigate(cliente ? "/cliente-final/home" : "/cliente-final/login")}>
-            <FaArrowLeft aria-hidden="true" /> Voltar
-          </button>
           <div className={styles.searchPanel}>
             <label className={styles.searchBox}>
               <FaSearch aria-hidden="true" />
@@ -609,9 +611,10 @@ export default function ClienteFinalAgendar() {
           {username && (
             <button type="button" className={styles.backToProviders} onClick={() => {
               try { sessionStorage.removeItem(storageKey); } catch { /* Storage indisponivel. */ }
-              handleResponsavelChange(0);
-              setExpandedSection("responsavel");
-              navigate("/cliente-final/agendar");
+              // Reutiliza a tela de descoberta existente na rota principal.
+              // Limpa tambem um eventual rascunho anterior dessa rota.
+              try { sessionStorage.removeItem(`nexoelo-booking-draft:${cliente?.Id ?? "guest"}:marketplace`); } catch { /* Storage indisponivel. */ }
+              navigate("/cliente-final/agendar", { replace: true });
             }}>
               <FaArrowLeft aria-hidden="true" /> Explorar outros prestadores
             </button>
