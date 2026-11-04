@@ -69,7 +69,7 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
     let active = true;
     consultarAssinatura().then(assinatura => {
       if (!active) return;
-      if (assinatura.Plano === "SEM_PLANO" && !assinatura.AcessoAtivo) {
+      if (assinatura.Plano === "SEM_PLANO" && !assinatura.AcessoAtivo && assinatura.Status === "TRIAL_EXPIRADO") {
         sessionStorage.setItem(key, "1");
         setTrialExpiredOpen(true);
       }
