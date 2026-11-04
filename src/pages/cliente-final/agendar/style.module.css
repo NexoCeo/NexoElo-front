@@ -723,3 +723,27 @@
 }
 
 .backToProviders { justify-self:start; display:inline-flex; align-items:center; gap:8px; border:0; background:transparent; padding:6px 0; color:var(--theme-primary-text); font:inherit; font-size:13px; font-weight:800; cursor:pointer; }
+
+/* Perfil do prestador compacto: reduz o banner sem alterar o catalogo. */
+.providerHero {
+  min-height: 150px;
+  align-items: center;
+  padding: 18px 22px;
+  border-radius: 18px;
+}
+.heroContent { gap: 16px; }
+.heroContent .profilePhoto {
+  width: 84px;
+  height: 84px;
+  border-width: 3px;
+  border-radius: 18px;
+}
+.heroContent h2 { font-size: clamp(18px, 2.2vw, 24px); margin: 8px 0 4px; }
+.heroBadge { gap: 6px; padding: 5px 10px; font-size: 11px; }
+.heroContent p { gap: 6px; font-size: 12px; }
+@media (max-width: 760px) {
+  .providerHero { min-height: 132px; padding: 14px 16px; }
+  .heroContent { gap: 12px; }
+  .heroContent .profilePhoto { width: 68px; height: 68px; border-radius: 14px; }
+  .heroContent h2 { font-size: 18px; margin: 6px 0 4px; }
+}
