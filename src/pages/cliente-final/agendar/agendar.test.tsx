@@ -37,6 +37,7 @@ import ClienteFinalAgendar from "./index";
 describe("ClienteFinalAgendar", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionStorage.clear();
     mocks.listarResponsaveisAgendamento.mockResolvedValue([
       { Id: 7, Nome: "Autonomo Teste", TipoUsuario: "AUTONOMO", FotoPerfil: "uploads/autonomo.png" },
     ]);
@@ -89,6 +90,32 @@ describe("ClienteFinalAgendar", () => {
     expect(await screen.findByAltText("Imagem do servico Coloracao")).toHaveAttribute("src", expect.stringContaining("/uploads/coloracao.webp"));
     fireEvent.click(screen.getByRole("button", { name: "Trocar profissional" }));
     expect(await screen.findByRole("button", { name: /Profissional Teste/i })).toBeInTheDocument();
+  });
+
+  it("restaura prestador, servico, data e horario da sessao apos recarregar", async () => {
+    sessionStorage.setItem("nexoelo-booking-draft:4:marketplace", JSON.stringify({
+      responsavelId: 7, profissionalId: 0, servicoId: 2,
+      dataSelecionada: "2099-08-20", dataAgendamento: "2099-08-20T08:30:00",
+      expandedSection: "confirmacao",
+    }));
+    render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><ClienteFinalAgendar /></MemoryRouter>);
+    expect(await screen.findByRole("heading", { name: "Revise seu agendamento" })).toBeInTheDocument();
+    await waitFor(() => expect(mocks.listarHorariosDisponiveis).toHaveBeenCalledWith({
+      responsavelId: 7, profissionalId: undefined, servicoId: 2, data: "2099-08-20",
+    }));
+    expect(await screen.findByRole("button", { name: "Confirmar agendamento" })).toBeEnabled();
+    expect(screen.getByText("Corte")).toBeInTheDocument();
+  });
+
+  it("volta aos horarios quando o slot salvo nao esta mais disponivel", async () => {
+    sessionStorage.setItem("nexoelo-booking-draft:4:marketplace", JSON.stringify({
+      responsavelId: 7, profissionalId: 0, servicoId: 2,
+      dataSelecionada: "2099-08-20", dataAgendamento: "2099-08-20T09:00:00",
+      expandedSection: "confirmacao",
+    }));
+    render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><ClienteFinalAgendar /></MemoryRouter>);
+    expect(await screen.findByRole("heading", { name: "Escolha a data e o horário" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Confirmar agendamento" })).not.toBeInTheDocument();
   });
 
   it("filtra autonomos e empresas sem chamadas extras de API", async () => {
