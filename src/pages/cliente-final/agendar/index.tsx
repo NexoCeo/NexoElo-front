@@ -8,11 +8,9 @@ import {
   FaBuilding,
   FaCalendarAlt,
   FaCheck,
-  FaChevronDown,
   FaArrowLeft,
   FaArrowRight,
   FaSearch,
-  FaMapMarkerAlt,
   FaClock,
   FaImage,
   FaUser,
@@ -51,51 +49,6 @@ type ApiError = string | {
 };
 
 type BookingSection = "responsavel" | "profissional" | "servico" | "horario" | "confirmacao";
-
-type StepLegendProps = {
-  number: number;
-  title: string;
-  summary?: string;
-  expanded: boolean;
-  disabled?: boolean;
-  controls: string;
-  onToggle: () => void;
-};
-
-function StepLegend({
-  number,
-  title,
-  summary,
-  expanded,
-  disabled = false,
-  controls,
-  onToggle,
-}: StepLegendProps) {
-  const { t } = useLanguage();
-  return (
-    <legend>
-      <button
-        type="button"
-        className={styles.stepToggle}
-        aria-expanded={expanded}
-        aria-controls={controls}
-        aria-label={`${expanded ? t("client.collapse") : t("client.expand")} ${title}`}
-        disabled={disabled}
-        onClick={onToggle}
-      >
-        <span className={styles.stepTitle}>
-          <span className={styles.stepNumber}>{number}</span>
-          {title}
-        </span>
-        {summary && <span className={styles.stepSummary}>{summary}</span>}
-        <FaChevronDown
-          className={`${styles.stepChevron} ${expanded ? styles.stepChevronOpen : ""}`}
-          aria-hidden="true"
-        />
-      </button>
-    </legend>
-  );
-}
 
 function getApiError(data?: ApiError) {
   if (!data) {
@@ -198,9 +151,6 @@ export default function ClienteFinalAgendar() {
   const minDate = useMemo(() => toDateInputValue(new Date()), []);
   const returnUrl = location.pathname + location.search;
   const loginUrl = "/cliente-final/login?redirectTo=" + encodeURIComponent(returnUrl);
-  const professionalStep = responsavelEhEmpresa ? 2 : 0;
-  const serviceStep = responsavelEhEmpresa ? 3 : 2;
-  const scheduleStep = responsavelEhEmpresa ? 4 : 3;
   const prestadoresFiltrados = responsaveis.filter((item) =>
     item.Nome.toLocaleLowerCase("pt-BR").includes(buscaPrestador.trim().toLocaleLowerCase("pt-BR")) &&
     (filtroPrestador === "TODOS" || item.TipoUsuario === filtroPrestador),
@@ -445,11 +395,6 @@ export default function ClienteFinalAgendar() {
     setDataAgendamento("");
     setError("");
     setSuccess("");
-  }
-
-  function toggleSection(section: BookingSection, enabled = true) {
-    if (!enabled) return;
-    setExpandedSection((current) => current === section ? null : section);
   }
 
   async function handleSubmit(event: React.FormEvent) {
