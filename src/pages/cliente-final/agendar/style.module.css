@@ -747,3 +747,9 @@
   .heroContent .profilePhoto { width: 68px; height: 68px; border-radius: 14px; }
   .heroContent h2 { font-size: 18px; margin: 6px 0 4px; }
 }
+
+/* Hierarquia visual: nome acima da categoria, sem sobreposicao. */
+.heroContent > div { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; min-width: 0; }
+.heroContent h2 { margin: 0; line-height: 1.2; }
+.heroBadge { margin: 0; }
+.heroContent p { margin: 0; }
