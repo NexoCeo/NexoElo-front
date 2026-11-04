@@ -608,8 +608,8 @@ export default function ClienteFinalAgendar() {
             <div className={styles.heroContent}>
               <ProfilePhoto source={selectedResponsavel?.FotoPerfil} name={selectedResponsavel?.Nome ?? "Prestador"} />
               <div>
-                <span className={styles.heroBadge}>{responsavelEhEmpresa ? <><FaBuilding /> Empresa</> : <><FaUser /> Profissional autônomo</>}</span>
                 <h2>{formatPersonName(selectedResponsavel?.Nome ?? "")}</h2>
+                <span className={styles.heroBadge}>{responsavelEhEmpresa ? <><FaBuilding /> Empresa</> : <><FaUser /> Profissional autônomo</>}</span>
                 <p><FaCalendarAlt aria-hidden="true" /> Agendamento online pelo NexoElo</p>
               </div>
             </div>
