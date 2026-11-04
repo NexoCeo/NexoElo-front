@@ -38,23 +38,10 @@ describe("ClienteFinalAgendar", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.listarResponsaveisAgendamento.mockResolvedValue([
-      {
-        Id: 7,
-        Nome: "Autonomo Teste",
-        Email: "",
-        Telefone: "",
-        TipoUsuario: "AUTONOMO",
-        FotoPerfil: "uploads/autonomo.png",
-      },
+      { Id: 7, Nome: "Autonomo Teste", TipoUsuario: "AUTONOMO", FotoPerfil: "uploads/autonomo.png" },
     ]);
     mocks.listarServicosPorEmpresa.mockResolvedValue([
-      {
-        Id: 2,
-        NomeServico: "Corte",
-        Valor: 50,
-        TempoEstimadoMinutos: 30,
-        ImagemServico: "uploads/corte.png",
-      },
+      { Id: 2, NomeServico: "Corte", Valor: 50, TempoEstimadoMinutos: 30, ImagemServico: "uploads/corte.png" },
     ]);
     mocks.listarProfissionaisAgendamento.mockResolvedValue([]);
     mocks.listarServicosPorProfissional.mockResolvedValue([]);
@@ -65,137 +52,55 @@ describe("ClienteFinalAgendar", () => {
     mocks.criarAgendamento.mockResolvedValue({ Id: 42 });
   });
 
-  it("permite agendar somente um horario retornado pelo backend e sem taxa no payload", async () => {
-    const { container } = render(
-      <MemoryRouter initialEntries={["/cliente-final/agendar"]}>
-        <ClienteFinalAgendar />
-      </MemoryRouter>,
-    );
-
-    const autonomoOption = await screen.findByRole("button", { name: /Autonomo Teste/i });
-    expect(screen.getByAltText("Foto de Autonomo Teste")).toHaveAttribute(
-      "src",
-      expect.stringContaining("/uploads/autonomo.png"),
-    );
-    fireEvent.click(autonomoOption);
-
-    expect(screen.getByRole("button", { name: "Expandir Autonomo ou empresa" }))
-      .toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByRole("heading", { name: "Resumo" })).not.toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(mocks.listarServicosPorEmpresa).toHaveBeenCalledWith(7);
-    });
-    const serviceOption = await screen.findByRole("button", { name: /Corte/i });
-    expect(await screen.findByAltText("Imagem do servico Corte")).toHaveAttribute(
-      "src",
-      expect.stringContaining("/uploads/corte.png"),
-    );
-    fireEvent.click(serviceOption);
-    fireEvent.change(screen.getByLabelText("Data"), {
-      target: { value: "2099-08-20" },
-    });
-
-    expect(await screen.findByRole("button", { name: "08:00" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "08:30" })).toBeInTheDocument();
-    expect(container.querySelector('input[type="datetime-local"]')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "08:30" }));
+  it("permite buscar prestadores, escolher servico, horario e confirmar sem alterar o payload", async () => {
+    render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><ClienteFinalAgendar /></MemoryRouter>);
+    expect(await screen.findByRole("button", { name: /Autonomo Teste/i })).toBeInTheDocument();
+    fireEvent.change(screen.getByRole("searchbox", { name: "Buscar prestador" }), { target: { value: "outro" } });
+    expect(screen.getByText("Nenhum prestador corresponde à sua busca.")).toBeInTheDocument();
+    fireEvent.change(screen.getByRole("searchbox", { name: "Buscar prestador" }), { target: { value: "Autonomo" } });
+    fireEvent.click(screen.getByRole("button", { name: /Autonomo Teste/i }));
+    expect(await screen.findByAltText("Imagem do servico Corte")).toHaveAttribute("src", expect.stringContaining("/uploads/corte.png"));
+    fireEvent.click(screen.getByRole("button", { name: /Corte/i }));
+    fireEvent.change(screen.getByLabelText("Data"), { target: { value: "2099-08-20" } });
+    fireEvent.click(await screen.findByRole("button", { name: "08:30" }));
+    expect(screen.getByRole("heading", { name: "Revise seu agendamento" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Confirmar agendamento" }));
-
-    await waitFor(() => {
-      expect(mocks.criarAgendamento).toHaveBeenCalledWith({
-        ClienteId: 4,
-        ResponsavelId: 7,
-        ProfissionalId: undefined,
-        ServicoId: 2,
-        DataAgendamento: "2099-08-20T08:30:00",
-      });
-    });
+    await waitFor(() => expect(mocks.criarAgendamento).toHaveBeenCalledWith({
+      ClienteId: 4, ResponsavelId: 7, ProfissionalId: undefined,
+      ServicoId: 2, DataAgendamento: "2099-08-20T08:30:00",
+    }));
     expect(await screen.findByText("Agendamento criado com sucesso.")).toBeInTheDocument();
   });
 
-  it("exibe as fotos da empresa, do profissional e a imagem do servico", async () => {
+  it("mostra profissionais de empresa e permite retornar ao catalogo", async () => {
     mocks.listarResponsaveisAgendamento.mockResolvedValue([
-      {
-        Id: 7,
-        Nome: "Empresa Teste",
-        Email: "",
-        Telefone: "",
-        TipoUsuario: "EMPRESA",
-        FotoPerfil: "uploads/empresa.png",
-      },
+      { Id: 7, Nome: "Empresa Teste", TipoUsuario: "EMPRESA", FotoPerfil: "uploads/empresa.png" },
     ]);
     mocks.listarProfissionaisAgendamento.mockResolvedValue([
-      {
-        Id: 9,
-        Nome: "Profissional Teste",
-        VinculoStatus: "APROVADO",
-        FotoPerfil: "uploads/profissional.png",
-      },
+      { Id: 9, Nome: "Profissional Teste", VinculoStatus: "APROVADO", FotoPerfil: "uploads/profissional.png" },
     ]);
     mocks.listarServicosPorProfissional.mockResolvedValue([
-      {
-        Id: 3,
-        NomeServico: "Coloracao",
-        Valor: 120,
-        TempoEstimadoMinutos: 90,
-        ImagemServico: "uploads/coloracao.webp",
-      },
+      { Id: 3, NomeServico: "Coloracao", Valor: 120, TempoEstimadoMinutos: 90, ImagemServico: "uploads/coloracao.webp" },
     ]);
-
-    render(
-      <MemoryRouter initialEntries={["/cliente-final/agendar"]}>
-        <ClienteFinalAgendar />
-      </MemoryRouter>,
-    );
-
-    expect(await screen.findByAltText("Foto de Empresa Teste")).toHaveAttribute(
-      "src",
-      expect.stringContaining("/uploads/empresa.png"),
-    );
+    render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><ClienteFinalAgendar /></MemoryRouter>);
     fireEvent.click(await screen.findByRole("button", { name: /Empresa Teste/i }));
-
-    expect(await screen.findByAltText("Foto de Profissional Teste")).toHaveAttribute(
-      "src",
-      expect.stringContaining("/uploads/profissional.png"),
-    );
-    fireEvent.click(await screen.findByRole("button", { name: /Profissional Teste/i }));
-
-    expect(await screen.findByAltText("Imagem do servico Coloracao")).toHaveAttribute(
-      "src",
-      expect.stringContaining("/uploads/coloracao.webp"),
-    );
-    expect(screen.queryByText("Resumo")).not.toBeInTheDocument();
+    expect(await screen.findByAltText("Foto de Profissional Teste")).toHaveAttribute("src", expect.stringContaining("/uploads/profissional.png"));
+    fireEvent.click(screen.getByRole("button", { name: /Profissional Teste/i }));
+    expect(await screen.findByAltText("Imagem do servico Coloracao")).toHaveAttribute("src", expect.stringContaining("/uploads/coloracao.webp"));
+    fireEvent.click(screen.getByRole("button", { name: "Trocar profissional" }));
+    expect(await screen.findByRole("button", { name: /Profissional Teste/i })).toBeInTheDocument();
   });
 
-  it("recolhe a etapa selecionada e permite expandir novamente pelas setas", async () => {
-    render(
-      <MemoryRouter initialEntries={["/cliente-final/agendar"]}>
-        <ClienteFinalAgendar />
-      </MemoryRouter>,
-    );
-
-    const autonomoOption = await screen.findByRole("button", { name: /Autonomo Teste/i });
-    fireEvent.click(autonomoOption);
-
-    const responsavelToggle = screen.getByRole("button", {
-      name: "Expandir Autonomo ou empresa",
-    });
-    expect(responsavelToggle).toHaveAttribute("aria-expanded", "false");
-    expect(await screen.findByRole("button", { name: /Corte/i })).toBeInTheDocument();
-
-    fireEvent.click(responsavelToggle);
-
-    expect(screen.getByRole("button", { name: "Recolher Autonomo ou empresa" }))
-      .toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByRole("button", { name: /Autonomo Teste/i })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
-    expect(screen.queryByRole("button", { name: /Corte/i })).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Expandir Servico" }));
-    expect(await screen.findByRole("button", { name: /Corte/i })).toBeInTheDocument();
+  it("filtra autonomos e empresas sem chamadas extras de API", async () => {
+    mocks.listarResponsaveisAgendamento.mockResolvedValue([
+      { Id: 7, Nome: "Autonomo Teste", TipoUsuario: "AUTONOMO" },
+      { Id: 8, Nome: "Empresa Teste", TipoUsuario: "EMPRESA" },
+    ]);
+    render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><ClienteFinalAgendar /></MemoryRouter>);
+    expect(await screen.findByRole("button", { name: /Empresa Teste/i })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Autônomos" }));
+    expect(screen.queryByRole("button", { name: /Empresa Teste/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Autonomo Teste/i })).toBeInTheDocument();
+    expect(mocks.listarResponsaveisAgendamento).toHaveBeenCalledTimes(1);
   });
 });
