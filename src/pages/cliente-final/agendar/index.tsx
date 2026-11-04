@@ -600,25 +600,26 @@ export default function ClienteFinalAgendar() {
         </section>
       ) : (
         <section className={styles.bookingPage}>
-          {(!username || etapaAtual !== "servico") && (
-            <button type="button" className={styles.backToProviders} onClick={() => {
-              if (etapaAtual === "confirmacao") setExpandedSection("horario");
-              else if (etapaAtual === "horario") setExpandedSection("servico");
-              else if (etapaAtual === "servico" && responsavelEhEmpresa) setExpandedSection("profissional");
-              else handleResponsavelChange(0);
-            }}><FaArrowLeft aria-hidden="true" /> Voltar</button>
-          )}
-          {username && (
-            <button type="button" className={styles.backToProviders} onClick={() => {
-              try { sessionStorage.removeItem(storageKey); } catch { /* Storage indisponivel. */ }
-              // Reutiliza a tela de descoberta existente na rota principal.
-              // Limpa tambem um eventual rascunho anterior dessa rota.
-              try { sessionStorage.removeItem(`nexoelo-booking-draft:${cliente?.Id ?? "guest"}:marketplace`); } catch { /* Storage indisponivel. */ }
+          <button type="button" className={styles.backToProviders} onClick={() => {
+            if (etapaAtual === "confirmacao") {
+              setExpandedSection("horario");
+            } else if (etapaAtual === "horario") {
+              setExpandedSection("servico");
+            } else if (etapaAtual === "servico" && responsavelEhEmpresa) {
+              setExpandedSection("profissional");
+            } else if (username) {
+              // Ao sair de uma pagina acessada por slug, volte a listagem existente.
+              try {
+                sessionStorage.removeItem(storageKey);
+                sessionStorage.removeItem(`nexoelo-booking-draft:${cliente?.Id ?? "guest"}:marketplace`);
+              } catch { /* Armazenamento opcional. */ }
               navigate("/cliente-final/agendar", { replace: true });
-            }}>
-              <FaArrowLeft aria-hidden="true" /> Explorar outros prestadores
-            </button>
-          )}
+            } else {
+              handleResponsavelChange(0);
+            }
+          }}>
+            <FaArrowLeft aria-hidden="true" /> Voltar
+          </button>
           <div className={styles.providerHero}>
             <div className={styles.heroBackdrop} aria-hidden="true" />
             <div className={styles.heroContent}>
