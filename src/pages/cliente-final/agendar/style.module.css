@@ -753,3 +753,38 @@
 .heroContent h2 { margin: 0; line-height: 1.2; }
 .heroBadge { margin: 0; }
 .heroContent p { margin: 0; }
+
+/* Foto maior e alinhamento limpo no cartao do prestador. */
+.providerHero { min-height: 164px; padding: 18px 22px; }
+.heroContent { align-items: center; gap: 20px; }
+.heroContent .profilePhoto {
+  display: block;
+  width: 116px;
+  height: 116px;
+  min-width: 116px;
+  min-height: 116px;
+  box-sizing: border-box;
+  border-radius: 20px;
+}
+.heroContent .profilePhoto img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.heroContent > div { justify-content: center; gap: 8px; }
+@media (max-width: 760px) {
+  .providerHero { min-height: 136px; padding: 14px 16px; }
+  .heroContent { gap: 14px; }
+  .heroContent .profilePhoto {
+    width: 92px;
+    height: 92px;
+    min-width: 92px;
+    min-height: 92px;
+    border-radius: 17px;
+  }
+}
+@media (max-width: 420px) {
+  .heroContent .profilePhoto {
+    width: 80px;
+    height: 80px;
+    min-width: 80px;
+    min-height: 80px;
+  }
+  .heroContent h2 { font-size: 18px; }
+}
