@@ -525,14 +525,19 @@ export default function ClienteFinalAgendar() {
         ServicoId: servicoId,
         DataAgendamento: dataAgendamento,
       });
-      setSuccess("Agendamento criado com sucesso.");
+      // O agendamento foi confirmado pela API: nao manter o rascunho,
+      // nem exibir uma etapa intermediaria de sucesso.
+      try {
+        sessionStorage.removeItem(storageKey);
+      } catch {
+        // O redirecionamento nao depende do armazenamento do navegador.
+      }
       showNotification({
         type: "success",
         title: "Agendamento confirmado",
         message: "Seu novo horario ja aparece no historico.",
       });
-      setDataAgendamento("");
-      setRefreshHorarios((current) => current + 1);
+      navigate("/cliente-final/home", { replace: true });
     } catch (err) {
       if (isAxiosError<ApiError>(err)) {
         const message = getApiError(err.response?.data);
