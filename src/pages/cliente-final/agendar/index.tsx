@@ -50,6 +50,39 @@ type ApiError = string | {
 
 type BookingSection = "responsavel" | "profissional" | "servico" | "horario" | "confirmacao";
 
+type BookingDraft = {
+  responsavelId: number;
+  profissionalId: number;
+  servicoId: number;
+  dataSelecionada: string;
+  dataAgendamento: string;
+  expandedSection: BookingSection;
+};
+
+const bookingSections: BookingSection[] = ["responsavel", "profissional", "servico", "horario", "confirmacao"];
+
+function readBookingDraft(key: string): BookingDraft | null {
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    const saved: unknown = JSON.parse(raw);
+    if (!saved || typeof saved !== "object") return null;
+    const draft = saved as Partial<BookingDraft>;
+    if (![draft.responsavelId, draft.profissionalId, draft.servicoId].every(
+      (value) => typeof value === "number" && Number.isSafeInteger(value) && value >= 0
+    )) return null;
+    if (typeof draft.dataSelecionada !== "string" ||
+        (draft.dataSelecionada !== "" && !/^\d{4}-\d{2}-\d{2}$/.test(draft.dataSelecionada)) ||
+        typeof draft.dataAgendamento !== "string" ||
+        typeof draft.expandedSection !== "string" ||
+        !bookingSections.includes(draft.expandedSection as BookingSection)) return null;
+    return draft as BookingDraft;
+  } catch {
+    return null;
+  }
+}
+
+
 function getApiError(data?: ApiError) {
   if (!data) {
     return "Nao foi possivel criar o agendamento.";
@@ -116,15 +149,17 @@ export default function ClienteFinalAgendar() {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const cliente = getClienteFinalUser();
+  const storageKey = `nexoelo-booking-draft:${cliente?.Id ?? "guest"}:${username ?? "marketplace"}`;
+  const [draft] = useState(() => readBookingDraft(storageKey));
   const [responsaveis, setResponsaveis] = useState<ResponsavelAgendamento[]>([]);
   const [profissionais, setProfissionais] = useState<ProfissionalAgendamento[]>([]);
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [horariosDisponiveis, setHorariosDisponiveis] = useState<HorarioDisponivel[]>([]);
-  const [responsavelId, setResponsavelId] = useState(0);
-  const [profissionalId, setProfissionalId] = useState(0);
-  const [servicoId, setServicoId] = useState(0);
-  const [dataSelecionada, setDataSelecionada] = useState("");
-  const [dataAgendamento, setDataAgendamento] = useState("");
+  const [responsavelId, setResponsavelId] = useState(draft?.responsavelId ?? 0);
+  const [profissionalId, setProfissionalId] = useState(draft?.profissionalId ?? 0);
+  const [servicoId, setServicoId] = useState(draft?.servicoId ?? 0);
+  const [dataSelecionada, setDataSelecionada] = useState(draft?.dataSelecionada ?? "");
+  const [dataAgendamento, setDataAgendamento] = useState(draft?.dataAgendamento ?? "");
   const [refreshHorarios, setRefreshHorarios] = useState(0);
   const [loading, setLoading] = useState(false);
   const [loadingResponsaveis, setLoadingResponsaveis] = useState(false);
@@ -133,7 +168,7 @@ export default function ClienteFinalAgendar() {
   const [loadingHorarios, setLoadingHorarios] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [expandedSection, setExpandedSection] = useState<BookingSection | null>("responsavel");
+  const [expandedSection, setExpandedSection] = useState<BookingSection | null>(draft?.expandedSection ?? "responsavel");
   const [buscaPrestador, setBuscaPrestador] = useState("");
   const [filtroPrestador, setFiltroPrestador] = useState<"TODOS" | "EMPRESA" | "AUTONOMO">("TODOS");
 
@@ -156,6 +191,21 @@ export default function ClienteFinalAgendar() {
     (filtroPrestador === "TODOS" || item.TipoUsuario === filtroPrestador),
   );
   const etapaAtual = expandedSection ?? "confirmacao";
+  useEffect(() => {
+    try {
+      if (success) {
+        sessionStorage.removeItem(storageKey);
+      } else {
+        sessionStorage.setItem(storageKey, JSON.stringify({
+          responsavelId, profissionalId, servicoId, dataSelecionada,
+          dataAgendamento, expandedSection: etapaAtual,
+        } satisfies BookingDraft));
+      }
+    } catch {
+      // O agendamento continua funcionando mesmo com armazenamento indisponivel.
+    }
+  }, [storageKey, responsavelId, profissionalId, servicoId, dataSelecionada, dataAgendamento, etapaAtual, success]);
+
   const dataFormatada = dataSelecionada ? new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(dataSelecionada + "T12:00:00")) : "";
 
   useEffect(() => {
@@ -180,8 +230,21 @@ export default function ClienteFinalAgendar() {
         if (active) {
           setResponsaveis(data);
           if (username && data[0]) {
-            setResponsavelId(data[0].Id);
-            setExpandedSection(data[0].TipoUsuario === "EMPRESA" ? "profissional" : "servico");
+            if (draft?.responsavelId !== data[0].Id) {
+              setResponsavelId(data[0].Id);
+              setProfissionalId(0);
+              setServicoId(0);
+              setDataSelecionada("");
+              setDataAgendamento("");
+              setExpandedSection(data[0].TipoUsuario === "EMPRESA" ? "profissional" : "servico");
+            }
+          } else if (draft?.responsavelId && !data.some(item => item.Id === draft.responsavelId)) {
+            setResponsavelId(0);
+            setProfissionalId(0);
+            setServicoId(0);
+            setDataSelecionada("");
+            setDataAgendamento("");
+            setExpandedSection("responsavel");
           }
         }
       } catch {
@@ -208,7 +271,6 @@ export default function ClienteFinalAgendar() {
     let active = true;
 
     setProfissionais([]);
-    setProfissionalId(0);
 
     if (!responsavelId || !responsavelEhEmpresa) {
       setLoadingProfissionais(false);
@@ -225,6 +287,13 @@ export default function ClienteFinalAgendar() {
 
         if (active) {
           setProfissionais(data);
+          if (profissionalId && !data.some(item => item.Id === profissionalId)) {
+            setProfissionalId(0);
+            setServicoId(0);
+            setDataSelecionada("");
+            setDataAgendamento("");
+            setExpandedSection("profissional");
+          }
         }
       } catch {
         if (active) {
@@ -250,7 +319,6 @@ export default function ClienteFinalAgendar() {
     let active = true;
 
     setServicos([]);
-    setServicoId(0);
 
     if (!responsavelId || (responsavelEhEmpresa && !profissionalId)) {
       setLoadingServicos(false);
@@ -270,6 +338,12 @@ export default function ClienteFinalAgendar() {
 
         if (active) {
           setServicos(data);
+          if (servicoId && !data.some(item => item.Id === servicoId)) {
+            setServicoId(0);
+            setDataSelecionada("");
+            setDataAgendamento("");
+            setExpandedSection("servico");
+          }
         }
       } catch {
         if (active) {
@@ -295,7 +369,6 @@ export default function ClienteFinalAgendar() {
     let active = true;
 
     setHorariosDisponiveis([]);
-    setDataAgendamento("");
 
     if (
       !responsavelId ||
@@ -322,6 +395,10 @@ export default function ClienteFinalAgendar() {
 
         if (active) {
           setHorariosDisponiveis(data);
+          if (dataAgendamento && !data.some(item => item.DataAgendamento === dataAgendamento)) {
+            setDataAgendamento("");
+            setExpandedSection("horario");
+          }
         }
       } catch {
         if (active) {
