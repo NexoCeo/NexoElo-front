@@ -6,6 +6,7 @@ import {
   loginClienteFinal,
 } from "@/services/cliente-final-auth-service";
 import { useNotification } from "@/context/NotificationContext";
+import { transferGuestBookingDraft } from "@/services/cliente-final-auth-token";
 
 export function useClienteFinalLoginForm() {
   const navigate = useNavigate();
@@ -42,7 +43,8 @@ export function useClienteFinalLoginForm() {
 
     try {
       setLoading(true);
-      await loginClienteFinal({ login, senha });
+      const { cliente } = await loginClienteFinal({ login, senha });
+      transferGuestBookingDraft(safeRedirectTo, cliente.Id);
       showNotification({
         type: "success",
         title: "Acesso realizado",
