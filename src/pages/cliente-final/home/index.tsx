@@ -361,10 +361,10 @@ export default function ClienteFinalHome() {
       </header>
 
       <main className={styles.content}>
-        {statusFeedback && (
+        {statusFeedback?.kind === "success" && (
           <div
-            className={`${styles.statusFeedback} ${styles[statusFeedback.kind]}`}
-            role={statusFeedback.kind === "error" ? "alert" : "status"}
+            className={`${styles.statusFeedback} ${styles.success}`}
+            role="status"
           >
             {statusFeedback.text}
           </div>
