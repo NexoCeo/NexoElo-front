@@ -320,7 +320,7 @@ export default function ClienteFinalAgendar() {
 
     setServicos([]);
 
-    if (!responsavelId || (responsavelEhEmpresa && !profissionalId)) {
+    if (!responsavelId || !selectedResponsavel || (responsavelEhEmpresa && (!profissionalId || !selectedProfissional))) {
       setLoadingServicos(false);
       return () => {
         active = false;
@@ -363,7 +363,7 @@ export default function ClienteFinalAgendar() {
     return () => {
       active = false;
     };
-  }, [profissionalId, responsavelEhEmpresa, responsavelId, showNotification]);
+  }, [profissionalId, responsavelEhEmpresa, responsavelId, selectedResponsavel, selectedProfissional, showNotification]);
 
   useEffect(() => {
     let active = true;
@@ -372,7 +372,9 @@ export default function ClienteFinalAgendar() {
 
     if (
       !responsavelId ||
+      !selectedResponsavel ||
       !servicoId ||
+      !selectedServico ||
       !dataSelecionada ||
       (responsavelEhEmpresa && !profissionalId)
     ) {
@@ -424,6 +426,8 @@ export default function ClienteFinalAgendar() {
     refreshHorarios,
     responsavelEhEmpresa,
     responsavelId,
+    selectedResponsavel,
+    selectedServico,
     servicoId,
     showNotification,
   ]);
