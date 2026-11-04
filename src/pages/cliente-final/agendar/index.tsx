@@ -514,7 +514,14 @@ export default function ClienteFinalAgendar() {
         </section>
       ) : (
         <section className={styles.bookingPage}>
-          {!username && <button type="button" className={styles.backToProviders} onClick={() => handleResponsavelChange(0)}><FaArrowLeft aria-hidden="true" /> Voltar aos prestadores</button>}
+          {(!username || etapaAtual !== "servico") && (
+            <button type="button" className={styles.backToProviders} onClick={() => {
+              if (etapaAtual === "confirmacao") setExpandedSection("horario");
+              else if (etapaAtual === "horario") setExpandedSection("servico");
+              else if (etapaAtual === "servico" && responsavelEhEmpresa) setExpandedSection("profissional");
+              else handleResponsavelChange(0);
+            }}><FaArrowLeft aria-hidden="true" /> Voltar</button>
+          )}
           <div className={styles.providerHero}>
             <div className={styles.heroBackdrop} aria-hidden="true" />
             <div className={styles.heroContent}>
@@ -640,9 +647,6 @@ export default function ClienteFinalAgendar() {
 
             {(etapaAtual === "horario" || etapaAtual === "confirmacao") && !success && (
               <div className={styles.bookingFooter}>
-                <button type="button" className={styles.footerBack} onClick={() => setExpandedSection(etapaAtual === "confirmacao" ? "horario" : "servico")}>
-                  <FaArrowLeft aria-hidden="true" /> Voltar
-                </button>
                 {etapaAtual === "confirmacao" && <button type="submit" className={styles.footerConfirm}
                   disabled={loading || loadingHorarios || !dataAgendamento || !selectedHorario}>
                   {loading ? "Agendando..." : cliente ? "Confirmar agendamento" : "Entrar para agendar"}
