@@ -9,6 +9,10 @@ import {
   FaCalendarAlt,
   FaCheck,
   FaChevronDown,
+  FaArrowLeft,
+  FaArrowRight,
+  FaSearch,
+  FaMapMarkerAlt,
   FaClock,
   FaImage,
   FaUser,
@@ -46,7 +50,7 @@ type ApiError = string | {
   title?: string;
 };
 
-type BookingSection = "responsavel" | "profissional" | "servico" | "horario";
+type BookingSection = "responsavel" | "profissional" | "servico" | "horario" | "confirmacao";
 
 type StepLegendProps = {
   number: number;
@@ -177,6 +181,8 @@ export default function ClienteFinalAgendar() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [expandedSection, setExpandedSection] = useState<BookingSection | null>("responsavel");
+  const [buscaPrestador, setBuscaPrestador] = useState("");
+  const [filtroPrestador, setFiltroPrestador] = useState<"TODOS" | "EMPRESA" | "AUTONOMO">("TODOS");
 
   const selectedResponsavel = responsaveis.find(
     (responsavel) => responsavel.Id === responsavelId,
@@ -195,6 +201,12 @@ export default function ClienteFinalAgendar() {
   const professionalStep = responsavelEhEmpresa ? 2 : 0;
   const serviceStep = responsavelEhEmpresa ? 3 : 2;
   const scheduleStep = responsavelEhEmpresa ? 4 : 3;
+  const prestadoresFiltrados = responsaveis.filter((item) =>
+    item.Nome.toLocaleLowerCase("pt-BR").includes(buscaPrestador.trim().toLocaleLowerCase("pt-BR")) &&
+    (filtroPrestador === "TODOS" || item.TipoUsuario === filtroPrestador),
+  );
+  const etapaAtual = expandedSection ?? "confirmacao";
+  const dataFormatada = dataSelecionada ? new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(dataSelecionada + "T12:00:00")) : "";
 
   useEffect(() => {
     let active = true;
@@ -512,261 +524,214 @@ export default function ClienteFinalAgendar() {
   }
 
   return (
-    <main className={styles.container}>
-      <header className={styles.header}>
-        <div>
-          <h1>{t("client.booking")}</h1>
+    <main className={styles.marketplace}>
+      <header className={styles.marketHeader}>
+        <div className={styles.marketHeading}>
+          {responsavelId && (
+            <button type="button" className={styles.iconBack} aria-label="Voltar à lista de prestadores" onClick={() => {
+              if (username) {
+                setExpandedSection("servico");
+              } else {
+                handleResponsavelChange(0);
+                setExpandedSection("responsavel");
+              }
+            }}><FaArrowLeft /></button>
+          )}
+          <div>
+            <p className={styles.eyebrow}>NexoElo • Agendamentos</p>
+            <h1>{!responsavelId ? "Encontre seu próximo atendimento" : selectedResponsavel?.Nome ?? t("client.booking")}</h1>
+            <p className={styles.subtitle}>{!responsavelId
+              ? "Descubra profissionais e empresas e agende em poucos passos."
+              : "Escolha seu serviço e encontre um horário ideal para você."}</p>
+          </div>
         </div>
-        <Link to={cliente ? "/cliente-final/home" : loginUrl}>
-          {cliente ? "Voltar" : "Entrar"}
+        <Link className={styles.homeLink} to={cliente ? "/cliente-final/home" : loginUrl}>
+          {cliente ? "Meus agendamentos" : "Entrar"}
         </Link>
       </header>
 
-      <section className={styles.content}>
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <fieldset className={`${styles.selectionGroup} ${expandedSection !== "responsavel" ? styles.selectionGroupCollapsed : ""}`}>
-            <StepLegend
-              number={1}
-              title={t("client.providerStep")}
-              summary={selectedResponsavel?.Nome}
-              expanded={expandedSection === "responsavel"}
-              controls="responsavel-options"
-              onToggle={() => toggleSection("responsavel")}
-            />
-
-            {expandedSection === "responsavel" && (
-              <div id="responsavel-options">
-                {loadingResponsaveis ? (
-                  <LoadingState label={t("client.providersLoading")} compact />
-                ) : responsaveis.length === 0 ? (
-                  <p className={styles.optionFeedback}>{t("client.providersEmpty")}</p>
-                ) : (
-                  <div className={styles.optionGrid}>
-                    {responsaveis.map((responsavel) => {
-                      const selected = responsavel.Id === responsavelId;
-
-                      return (
-                        <button
-                          key={responsavel.Id}
-                          type="button"
-                          className={`${styles.identityOption} ${selected ? styles.optionSelected : ""}`}
-                          aria-pressed={selected}
-                          onClick={() => handleResponsavelChange(responsavel.Id)}
-                        >
-                          <ProfilePhoto source={responsavel.FotoPerfil} name={responsavel.Nome} />
-                          <span className={styles.optionText}>
-                            <strong>{responsavel.Nome}</strong>
-                            <small>
-                              {responsavel.TipoUsuario === "EMPRESA" ? (
-                                <><FaBuilding aria-hidden="true" /> {t("client.business")}</>
-                              ) : (
-                                <><FaUser aria-hidden="true" /> {t("client.independent")}</>
-                              )}
-                            </small>
-                          </span>
-                          {selected && <FaCheck className={styles.selectedIcon} aria-hidden="true" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+      {!responsavelId ? (
+        <section className={styles.discovery}>
+          <div className={styles.searchPanel}>
+            <label className={styles.searchBox}>
+              <FaSearch aria-hidden="true" />
+              <span className={styles.visuallyHidden}>Buscar prestador</span>
+              <input type="search" placeholder="Busque pelo nome do estabelecimento ou profissional" value={buscaPrestador}
+                onChange={(event) => setBuscaPrestador(event.target.value)} />
+            </label>
+            <div className={styles.filterPills} role="group" aria-label="Filtrar prestadores">
+              {([
+                ["TODOS", "Todos"],
+                ["AUTONOMO", "Autônomos"],
+                ["EMPRESA", "Empresas"],
+              ] as const).map(([tipo, label]) => (
+                <button type="button" key={tipo} className={filtroPrestador === tipo ? styles.filterSelected : ""}
+                  aria-pressed={filtroPrestador === tipo} onClick={() => setFiltroPrestador(tipo)}>{label}</button>
+              ))}
+            </div>
+          </div>
+          <div className={styles.sectionHeading}>
+            <div><h2>Explore os prestadores</h2><p>Encontre o atendimento que combina com você</p></div>
+            {!loadingResponsaveis && <span>{prestadoresFiltrados.length} {prestadoresFiltrados.length === 1 ? "resultado" : "resultados"}</span>}
+          </div>
+          {loadingResponsaveis ? <LoadingState label={t("client.providersLoading")} compact /> :
+            responsaveis.length === 0 ? <p className={styles.emptyState}>{t("client.providersEmpty")}</p> :
+            prestadoresFiltrados.length === 0 ? <p className={styles.emptyState}>Nenhum prestador corresponde à sua busca.</p> :
+            <div className={styles.providerList}>
+              {prestadoresFiltrados.map((responsavel) => (
+                <button type="button" key={responsavel.Id} className={styles.providerCard}
+                  onClick={() => handleResponsavelChange(responsavel.Id)}>
+                  <ProfilePhoto source={responsavel.FotoPerfil} name={responsavel.Nome} />
+                  <span className={styles.providerDetails}>
+                    <strong>{formatPersonName(responsavel.Nome)}</strong>
+                    <small>{responsavel.TipoUsuario === "EMPRESA" ? <><FaBuilding /> Empresa</> : <><FaUser /> Autônomo</>}</small>
+                    <span className={styles.providerHint}>Conhecer serviços e horários</span>
+                  </span>
+                  <FaArrowRight className={styles.providerArrow} aria-hidden="true" />
+                </button>
+              ))}
+            </div>}
+        </section>
+      ) : (
+        <section className={styles.bookingPage}>
+          <div className={styles.providerHero}>
+            <div className={styles.heroBackdrop} aria-hidden="true" />
+            <div className={styles.heroContent}>
+              <ProfilePhoto source={selectedResponsavel?.FotoPerfil} name={selectedResponsavel?.Nome ?? "Prestador"} />
+              <div>
+                <span className={styles.heroBadge}>{responsavelEhEmpresa ? <><FaBuilding /> Empresa</> : <><FaUser /> Profissional autônomo</>}</span>
+                <h2>{formatPersonName(selectedResponsavel?.Nome ?? "")}</h2>
+                <p><FaCalendarAlt aria-hidden="true" /> Agendamento online pelo NexoElo</p>
               </div>
+            </div>
+          </div>
+
+          <nav className={styles.bookingProgress} aria-label="Etapas do agendamento">
+            <span className={etapaAtual === "profissional" || etapaAtual === "servico" ? styles.progressCurrent : ""}>1. {responsavelEhEmpresa ? "Profissional" : "Serviço"}</span>
+            <span className={etapaAtual === "horario" ? styles.progressCurrent : ""}>2. {responsavelEhEmpresa ? "Serviço e horário" : "Data e horário"}</span>
+            <span className={etapaAtual === "confirmacao" ? styles.progressCurrent : ""}>3. Confirmar</span>
+          </nav>
+
+          <form className={styles.bookingForm} onSubmit={handleSubmit}>
+            {responsavelEhEmpresa && etapaAtual === "profissional" && (
+              <section className={styles.bookingPanel}>
+                <div className={styles.sectionHeading}><div><h2>Com quem deseja agendar?</h2><p>Selecione o profissional que vai atender você.</p></div></div>
+                {loadingProfissionais ? <LoadingState label={t("client.professionalsLoading")} compact /> :
+                  profissionais.length === 0 ? <p className={styles.emptyState}>{t("client.professionalsEmpty")}</p> :
+                  <div className={styles.providerList}>
+                    {profissionais.map((profissional) => (
+                      <button type="button" key={profissional.Id} className={styles.providerCard} onClick={() => handleProfissionalChange(profissional.Id)}>
+                        <ProfilePhoto source={profissional.FotoPerfil} name={profissional.Nome} />
+                        <span className={styles.providerDetails}><strong>{formatPersonName(profissional.Nome)}</strong><small>Profissional</small></span>
+                        <FaArrowRight aria-hidden="true" className={styles.providerArrow} />
+                      </button>
+                    ))}
+                  </div>}
+              </section>
             )}
-          </fieldset>
 
-          {responsavelEhEmpresa && (
-            <fieldset className={`${styles.selectionGroup} ${expandedSection !== "profissional" ? styles.selectionGroupCollapsed : ""}`}>
-              <StepLegend
-                number={professionalStep}
-                title={t("client.professionalStep")}
-                summary={selectedProfissional?.Nome}
-                expanded={expandedSection === "profissional"}
-                controls="profissional-options"
-                onToggle={() => toggleSection("profissional")}
-              />
-
-              {expandedSection === "profissional" && (
-                <div id="profissional-options">
-                  {loadingProfissionais ? (
-                    <LoadingState label={t("client.professionalsLoading")} compact />
-                  ) : profissionais.length === 0 ? (
-                    <p className={styles.optionFeedback}>{t("client.professionalsEmpty")}</p>
-                  ) : (
-                    <div className={styles.optionGrid}>
-                      {profissionais.map((profissional) => {
-                        const selected = profissional.Id === profissionalId;
-
-                        return (
-                          <button
-                            key={profissional.Id}
-                            type="button"
-                            className={`${styles.identityOption} ${selected ? styles.optionSelected : ""}`}
-                            aria-pressed={selected}
-                            onClick={() => handleProfissionalChange(profissional.Id)}
-                          >
-                            <ProfilePhoto source={profissional.FotoPerfil} name={profissional.Nome} />
-                            <span className={styles.optionText}>
-                              <strong>{formatPersonName(profissional.Nome)}</strong>
-                              <small><FaUser aria-hidden="true" /> {t("client.professional")}</small>
-                            </span>
-                            {selected && <FaCheck className={styles.selectedIcon} aria-hidden="true" />}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
+            {etapaAtual === "servico" && (
+              <section className={styles.bookingPanel}>
+                <div className={styles.sectionHeading}>
+                  <div><h2>Serviços disponíveis</h2><p>Escolha o atendimento que você procura.</p></div>
+                  {responsavelEhEmpresa && <button type="button" className={styles.textAction} onClick={() => setExpandedSection("profissional")}>Trocar profissional</button>}
                 </div>
-              )}
-            </fieldset>
-          )}
-
-          <fieldset
-            className={`${styles.selectionGroup} ${expandedSection !== "servico" ? styles.selectionGroupCollapsed : ""}`}
-            disabled={!responsavelId || (responsavelEhEmpresa && !profissionalId)}
-          >
-            <StepLegend
-              number={serviceStep}
-              title={t("client.serviceStep")}
-              summary={selectedServico?.NomeServico}
-              expanded={expandedSection === "servico"}
-              disabled={!responsavelId || (responsavelEhEmpresa && !profissionalId)}
-              controls="servico-options"
-              onToggle={() => toggleSection(
-                "servico",
-                Boolean(responsavelId && (!responsavelEhEmpresa || profissionalId)),
-              )}
-            />
-
-            {expandedSection === "servico" && (
-              <div id="servico-options">
-                {loadingServicos ? (
-                  <LoadingState label={t("client.servicesLoading")} compact />
-                ) : !responsavelId ? (
-                  <p className={styles.optionFeedback}>{t("client.chooseProvider")}</p>
-                ) : responsavelEhEmpresa && !profissionalId ? (
-                  <p className={styles.optionFeedback}>{t("client.chooseProfessional")}</p>
-                ) : servicos.length === 0 ? (
-                  <p className={styles.optionFeedback}>{t("client.servicesEmpty")}</p>
-                ) : (
-                  <div className={`${styles.optionGrid} ${styles.serviceGrid}`}>
-                    {servicos.map((servico) => {
-                      const selected = servico.Id === servicoId;
-
-                      return (
-                        <button
-                          key={servico.Id}
-                          type="button"
-                          className={`${styles.serviceOption} ${selected ? styles.optionSelected : ""}`}
-                          aria-pressed={selected}
-                          onClick={() => handleServicoChange(servico.Id)}
-                        >
-                          <ServicePhoto source={servico.ImagemServico} name={servico.NomeServico} />
-                          <span className={styles.optionText}>
-                            <strong>{servico.NomeServico}</strong>
-                            <small><FaClock aria-hidden="true" /> {servico.TempoEstimadoMinutos} min</small>
-                            <b>{formatCurrency(servico.Valor)}</b>
-                          </span>
-                          {selected && <FaCheck className={styles.selectedIcon} aria-hidden="true" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+                {responsavelEhEmpresa && selectedProfissional && <p className={styles.selectedProfessional}>Com {formatPersonName(selectedProfissional.Nome)}</p>}
+                {loadingServicos ? <LoadingState label={t("client.servicesLoading")} compact /> :
+                  servicos.length === 0 ? <p className={styles.emptyState}>{t("client.servicesEmpty")}</p> :
+                  <div className={styles.serviceList}>
+                    {servicos.map((servico) => (
+                      <button type="button" key={servico.Id} className={styles.catalogService} onClick={() => handleServicoChange(servico.Id)}>
+                        <ServicePhoto source={servico.ImagemServico} name={servico.NomeServico} />
+                        <span className={styles.serviceDetails}>
+                          <strong>{servico.NomeServico}</strong>
+                          <small><FaClock aria-hidden="true" /> {servico.TempoEstimadoMinutos} min</small>
+                          <b>{formatCurrency(servico.Valor)}</b>
+                        </span>
+                        <span className={styles.serviceAction}>Agendar <FaArrowRight aria-hidden="true" /></span>
+                      </button>
+                    ))}
+                  </div>}
+              </section>
             )}
-          </fieldset>
 
-          <fieldset
-            className={`${styles.selectionGroup} ${styles.scheduleGroup} ${expandedSection !== "horario" ? styles.selectionGroupCollapsed : ""}`}
-            disabled={!servicoId}
-          >
-            <StepLegend
-              number={scheduleStep}
-              title={t("client.dateTimeStep")}
-              summary={dataSelecionada
-                ? `${new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US").format(new Date(dataSelecionada + "T12:00:00"))}${selectedHorario ? ` · ${selectedHorario.Horario}` : ""}`
-                : undefined}
-              expanded={expandedSection === "horario"}
-              disabled={!servicoId}
-              controls="horario-options"
-              onToggle={() => toggleSection("horario", Boolean(servicoId))}
-            />
-
-            {expandedSection === "horario" && (
-              <div id="horario-options" className={styles.scheduleLayout}>
-                <label className={styles.dateField} htmlFor="booking-date">
-                  <span><FaCalendarAlt aria-hidden="true" /> {t("client.date")}</span>
-                  <input
-                    id="booking-date"
-                    type="date"
-                    style={{ colorScheme: themeName === "dark" ? "dark" : "light" }}
-                    min={minDate}
-                    value={dataSelecionada}
-                    onChange={(event) => handleDataChange(event.target.value)}
-                    disabled={!servicoId}
-                  />
-                </label>
-
-                <div className={styles.scheduleRegion}>
-                <fieldset className={`${styles.scheduleFieldset} ${!dataSelecionada ? styles.scheduleHidden : ""}`} aria-hidden={!dataSelecionada} disabled={!dataSelecionada || loadingHorarios}>
-                  <legend>{t("client.availableSlots")}</legend>
-                  {loadingHorarios ? (
-                    <LoadingState label={t("client.slotsLoading")} compact />
-                  ) : horariosDisponiveis.length === 0 ? (
-                    <p className={styles.scheduleFeedback}>{t("client.slotsEmpty")}</p>
-                  ) : (
-                    <div className={styles.timeGrid}>
-                      {horariosDisponiveis.map((horario) => {
-                        const selected = horario.DataAgendamento === dataAgendamento;
-
-                        return (
-                          <button
-                            key={horario.DataAgendamento}
-                            type="button"
-                            className={`${styles.timeButton} ${selected ? styles.timeButtonSelected : ""}`}
-                            aria-pressed={selected}
-                            onClick={() => {
-                              setDataAgendamento(horario.DataAgendamento);
-                              setExpandedSection(null);
-                              setError("");
-                              setSuccess("");
-                            }}
-                          >
-                            {horario.Horario}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </fieldset>
+            {etapaAtual === "horario" && (
+              <section className={styles.bookingPanel}>
+                <div className={styles.sectionHeading}><div><h2>Escolha a data e o horário</h2><p>Horários atualizados conforme a disponibilidade do prestador.</p></div></div>
+                <div className={styles.selectionSummary}>
+                  <span><strong>{selectedServico?.NomeServico}</strong> · {selectedServico ? formatCurrency(selectedServico.Valor) : ""}</span>
+                  <button type="button" className={styles.textAction} onClick={() => setExpandedSection("servico")}>Alterar serviço</button>
                 </div>
+                <div className={styles.scheduleLayout}>
+                  <label className={styles.dateField} htmlFor="booking-date">
+                    <span><FaCalendarAlt aria-hidden="true" /> {t("client.date")}</span>
+                    <input id="booking-date" type="date" min={minDate} value={dataSelecionada}
+                      style={{ colorScheme: themeName === "dark" ? "dark" : "light" }}
+                      onChange={(event) => handleDataChange(event.target.value)} />
+                  </label>
+                  <div className={styles.scheduleRegion}>
+                    {!dataSelecionada ? <p className={styles.emptyState}>Escolha uma data para consultar os horários disponíveis.</p> :
+                      <fieldset className={styles.scheduleFieldset} disabled={loadingHorarios}>
+                        <legend>{t("client.availableSlots")}</legend>
+                        {loadingHorarios ? <LoadingState label={t("client.slotsLoading")} compact /> :
+                          horariosDisponiveis.length === 0 ? <p className={styles.scheduleFeedback}>{t("client.slotsEmpty")}</p> :
+                          <div className={styles.timeGrid}>
+                            {horariosDisponiveis.map((horario) => (
+                              <button key={horario.DataAgendamento} type="button" className={dataAgendamento === horario.DataAgendamento ? styles.timeButtonSelected : styles.timeButton}
+                                aria-pressed={dataAgendamento === horario.DataAgendamento} onClick={() => {
+                                  setDataAgendamento(horario.DataAgendamento);
+                                  setExpandedSection("confirmacao");
+                                  setError("");
+                                  setSuccess("");
+                                }}>{horario.Horario}</button>
+                            ))}
+                          </div>}
+                      </fieldset>}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {etapaAtual === "confirmacao" && (
+              <section className={styles.bookingPanel}>
+                {success ? (
+                  <div className={styles.successPanel}><FaCheck aria-hidden="true" /><h2>Agendamento realizado!</h2><p>{success}</p>
+                    <Link to="/cliente-final/home">Ver meus agendamentos</Link></div>
+                ) : (
+                  <>
+                    <div className={styles.sectionHeading}><div><h2>Revise seu agendamento</h2><p>Confira as informações antes de confirmar.</p></div></div>
+                    <div className={styles.reviewList}>
+                      <div><span>Prestador</span><strong>{formatPersonName(selectedResponsavel?.Nome ?? "")}</strong></div>
+                      {responsavelEhEmpresa && <div><span>Profissional</span><strong>{formatPersonName(selectedProfissional?.Nome ?? "")}</strong></div>}
+                      <div><span>Serviço</span><strong>{selectedServico?.NomeServico}</strong></div>
+                      <div><span>Duração</span><strong>{selectedServico?.TempoEstimadoMinutos} min</strong></div>
+                      <div><span>Data e horário</span><strong>{dataFormatada} · {selectedHorario?.Horario}</strong></div>
+                      <div className={styles.reviewTotal}><span>Valor do serviço</span><strong>{selectedServico ? formatCurrency(selectedServico.Valor) : ""}</strong></div>
+                    </div>
+                    <button type="button" className={styles.textAction} onClick={() => setExpandedSection("horario")}>Alterar data ou horário</button>
+                  </>
+                )}
+              </section>
+            )}
+
+            {error && <p role="alert" className={styles.error}>{error}</p>}
+            {success && etapaAtual !== "confirmacao" && <p className={styles.success}>{success}</p>}
+
+            {(etapaAtual === "horario" || etapaAtual === "confirmacao") && !success && (
+              <div className={styles.bookingFooter}>
+                <button type="button" className={styles.footerBack} onClick={() => setExpandedSection(etapaAtual === "confirmacao" ? "horario" : "servico")}>
+                  <FaArrowLeft aria-hidden="true" /> Voltar
+                </button>
+                {etapaAtual === "confirmacao" && <button type="submit" className={styles.footerConfirm}
+                  disabled={loading || loadingHorarios || !dataAgendamento || !selectedHorario}>
+                  {loading ? "Agendando..." : cliente ? "Confirmar agendamento" : "Entrar para agendar"}
+                </button>}
+                {etapaAtual === "horario" && <span className={styles.footerHint}>Selecione um horário para continuar</span>}
               </div>
             )}
-          </fieldset>
-
-          {error && <p className={styles.error}>{error}</p>}
-          {success && <p className={styles.success}>{success}</p>}
-
-          <button
-            type="submit"
-            className={styles.submitButton}
-            disabled={
-              loading ||
-              loadingResponsaveis ||
-              loadingProfissionais ||
-              loadingServicos ||
-              loadingHorarios ||
-              !dataAgendamento
-            }
-          >
-            {loading
-              ? "Agendando..."
-              : cliente
-                ? "Confirmar agendamento"
-                : "Entrar para agendar"}
-          </button>
-        </form>
-      </section>
+          </form>
+        </section>
+      )}
     </main>
   );
 }
