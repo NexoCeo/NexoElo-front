@@ -162,9 +162,7 @@ describe("ClienteFinalHome", () => {
     expect(await screen.findByText("Corte")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Cancelar agendamento de Corte" }));
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Limite de prazo atingido, o agendamento não pode ser cancelado.",
-    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(screen.getByText("Prazo de cancelamento encerrado")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cancelar agendamento de Corte" })).toBeInTheDocument();
     expect(mocks.atualizarStatusAgendamento).not.toHaveBeenCalled();
