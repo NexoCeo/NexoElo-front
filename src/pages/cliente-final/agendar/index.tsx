@@ -470,31 +470,6 @@ export default function ClienteFinalAgendar() {
 
   return (
     <main className={styles.marketplace}>
-      <header className={styles.marketHeader}>
-        <div className={styles.marketHeading}>
-          {responsavelId && (
-            <button type="button" className={styles.iconBack} aria-label="Voltar à lista de prestadores" onClick={() => {
-              if (username) {
-                setExpandedSection("servico");
-              } else {
-                handleResponsavelChange(0);
-                setExpandedSection("responsavel");
-              }
-            }}><FaArrowLeft /></button>
-          )}
-          <div>
-            <p className={styles.eyebrow}>NexoElo • Agendamentos</p>
-            <h1>{!responsavelId ? "Encontre seu próximo atendimento" : selectedResponsavel?.Nome ?? t("client.booking")}</h1>
-            <p className={styles.subtitle}>{!responsavelId
-              ? "Descubra profissionais e empresas e agende em poucos passos."
-              : "Escolha seu serviço e encontre um horário ideal para você."}</p>
-          </div>
-        </div>
-        <Link className={styles.homeLink} to={cliente ? "/cliente-final/home" : loginUrl}>
-          {cliente ? "Meus agendamentos" : "Entrar"}
-        </Link>
-      </header>
-
       {!responsavelId ? (
         <section className={styles.discovery}>
           <div className={styles.searchPanel}>
@@ -539,6 +514,7 @@ export default function ClienteFinalAgendar() {
         </section>
       ) : (
         <section className={styles.bookingPage}>
+          {!username && <button type="button" className={styles.backToProviders} onClick={() => handleResponsavelChange(0)}><FaArrowLeft aria-hidden="true" /> Voltar aos prestadores</button>}
           <div className={styles.providerHero}>
             <div className={styles.heroBackdrop} aria-hidden="true" />
             <div className={styles.heroContent}>
