@@ -721,3 +721,5 @@
   .reviewList > div { flex-direction:column; gap:5px; }
   .reviewList strong { text-align:left; }
 }
+
+.backToProviders { justify-self:start; display:inline-flex; align-items:center; gap:8px; border:0; background:transparent; padding:6px 0; color:var(--theme-primary-text); font:inherit; font-size:13px; font-weight:800; cursor:pointer; }
