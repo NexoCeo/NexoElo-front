@@ -603,6 +603,16 @@ export default function ClienteFinalAgendar() {
               else handleResponsavelChange(0);
             }}><FaArrowLeft aria-hidden="true" /> Voltar</button>
           )}
+          {username && (
+            <button type="button" className={styles.backToProviders} onClick={() => {
+              try { sessionStorage.removeItem(storageKey); } catch { /* Storage indisponivel. */ }
+              handleResponsavelChange(0);
+              setExpandedSection("responsavel");
+              navigate("/cliente-final/agendar");
+            }}>
+              <FaArrowLeft aria-hidden="true" /> Explorar outros prestadores
+            </button>
+          )}
           <div className={styles.providerHero}>
             <div className={styles.heroBackdrop} aria-hidden="true" />
             <div className={styles.heroContent}>
