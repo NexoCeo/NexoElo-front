@@ -610,7 +610,6 @@ export default function ClienteFinalAgendar() {
               <div>
                 <h2>{formatPersonName(selectedResponsavel?.Nome ?? "")}</h2>
                 <span className={styles.heroBadge}>{responsavelEhEmpresa ? <><FaBuilding /> Empresa</> : <><FaUser /> Profissional autônomo</>}</span>
-                <p><FaCalendarAlt aria-hidden="true" /> Agendamento online pelo NexoElo</p>
               </div>
             </div>
           </div>
