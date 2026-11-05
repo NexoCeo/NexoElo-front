@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import styles from "./style.module.css";
 
-const SIZE = 320;
 const OUTPUT_SIZE = 640;
 
 type Props = {
@@ -13,6 +13,9 @@ type Props = {
 
 export default function ServiceImageCrop({ source, filename, onApply, onCancel }: Props) {
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
+  const [viewportSize, setViewportSize] = useState(280);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const [zoom, setZoom] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [error, setError] = useState("");
@@ -27,13 +30,43 @@ export default function ServiceImageCrop({ source, filename, onApply, onCancel }
     setError("");
   }, [source]);
 
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const updateSize = () => setViewportSize(viewport.clientWidth || 280);
+    updateSize();
+    const observer = new ResizeObserver(updateSize);
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const oldOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus();
+    return () => { document.body.style.overflow = oldOverflow; };
+  }, []);
+
+  useEffect(() => {
+    setPosition(current => {
+      const scale = imageSize.width && imageSize.height
+        ? Math.max(viewportSize / imageSize.width, viewportSize / imageSize.height) * zoom : 1;
+      return {
+        x: Math.max(-Math.max(0, (imageSize.width * scale - viewportSize) / 2),
+          Math.min(Math.max(0, (imageSize.width * scale - viewportSize) / 2), current.x)),
+        y: Math.max(-Math.max(0, (imageSize.height * scale - viewportSize) / 2),
+          Math.min(Math.max(0, (imageSize.height * scale - viewportSize) / 2), current.y)),
+      };
+    });
+  }, [imageSize.width, imageSize.height, viewportSize, zoom]);
+
   const baseScale = imageSize.width && imageSize.height
-    ? Math.max(SIZE / imageSize.width, SIZE / imageSize.height)
+    ? Math.max(viewportSize / imageSize.width, viewportSize / imageSize.height)
     : 1;
   const displayedWidth = imageSize.width * baseScale * zoom;
   const displayedHeight = imageSize.height * baseScale * zoom;
-  const maxX = Math.max(0, (displayedWidth - SIZE) / 2);
-  const maxY = Math.max(0, (displayedHeight - SIZE) / 2);
+  const maxX = Math.max(0, (displayedWidth - viewportSize) / 2);
+  const maxY = Math.max(0, (displayedHeight - viewportSize) / 2);
   const clamp = (value: number, limit: number) => Math.max(-limit, Math.min(limit, value));
 
   const move = (x: number, y: number) =>
@@ -45,8 +78,8 @@ export default function ServiceImageCrop({ source, filename, onApply, onCancel }
     const nextHeight = imageSize.height * baseScale * next;
     setZoom(next);
     setPosition((current) => ({
-      x: clamp(current.x, Math.max(0, (nextWidth - SIZE) / 2)),
-      y: clamp(current.y, Math.max(0, (nextHeight - SIZE) / 2)),
+      x: clamp(current.x, Math.max(0, (nextWidth - viewportSize) / 2)),
+      y: clamp(current.y, Math.max(0, (nextHeight - viewportSize) / 2)),
     }));
   }
 
@@ -61,11 +94,11 @@ export default function ServiceImageCrop({ source, filename, onApply, onCancel }
       canvas.height = OUTPUT_SIZE;
       const context = canvas.getContext("2d");
       if (!context) throw new Error("Canvas indisponível.");
-      const ratio = OUTPUT_SIZE / SIZE;
+      const ratio = OUTPUT_SIZE / viewportSize;
       context.drawImage(
         image,
-        ((SIZE - displayedWidth) / 2 + position.x) * ratio,
-        ((SIZE - displayedHeight) / 2 + position.y) * ratio,
+        ((viewportSize - displayedWidth) / 2 + position.x) * ratio,
+        ((viewportSize - displayedHeight) / 2 + position.y) * ratio,
         displayedWidth * ratio,
         displayedHeight * ratio,
       );
@@ -85,10 +118,16 @@ export default function ServiceImageCrop({ source, filename, onApply, onCancel }
     }
   }
 
-  return (
-    <div className={styles.cropEditor}>
+  return createPortal(
+    <div className={styles.cropOverlay} role="presentation">
+      <section className={styles.cropDialog} role="dialog" aria-modal="true" aria-label="Ajustar recorte da imagem">
+        <header className={styles.cropDialogHeader}>
+          <div><h2>Ajustar imagem</h2><p>Posicione e amplie a foto no quadrado.</p></div>
+          <button ref={closeButtonRef} type="button" aria-label="Fechar recorte" onClick={onCancel}>×</button>
+        </header>
+        <div className={styles.cropEditor}>
       <p className={styles.cropHint}>Arraste a foto para posicionar e use o controle para ajustar o zoom.</p>
-      <div className={styles.cropViewport}
+      <div ref={viewportRef} className={styles.cropViewport}
         aria-label="Área de recorte quadrado da imagem"
         onPointerDown={(event) => {
           if (!imageSize.width) return;
@@ -147,6 +186,9 @@ export default function ServiceImageCrop({ source, filename, onApply, onCancel }
           {processing ? "Processando..." : "Aplicar recorte"}
         </button>
       </div>
-    </div>
+        </div>
+      </section>
+    </div>,
+    document.body,
   );
 }
