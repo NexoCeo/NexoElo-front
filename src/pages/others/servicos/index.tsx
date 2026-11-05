@@ -407,11 +407,6 @@ export default function Servicos() {
                 <h2 id="servico-modal-title" style={{ color: theme.colors.text }}>
                   {editingServico ? t("services.editTitle") : t("services.createTitle")}
                 </h2>
-                <p style={{ color: theme.colors.inactive }}>
-                  {editingServico
-                    ? t("services.editDescription")
-                    : t("services.createDescription")}
-                </p>
               </div>
               <button type="button" onClick={closeModal} aria-label="Fechar modal" title="Fechar">
                 <FaTimes aria-hidden="true" />
@@ -421,11 +416,7 @@ export default function Servicos() {
             <form className={styles.form} onSubmit={handleSubmit}>
               <div className={styles.imageField}>
                 <div className={styles.imageFieldHeading}>
-                  <div>
-                    <strong>{t("services.image")}</strong>
-                    <span>Personalize a foto que aparece no agendamento.</span>
-                  </div>
-                  <span className={styles.imageFormatHint}>1:1 · Quadrada</span>
+                  <strong>{t("services.image")}</strong>
                 </div>
 
                 {!cropSource && (
@@ -439,7 +430,7 @@ export default function Servicos() {
                     </div>
                     <div className={styles.imagePickerContent}>
                       <strong>{imagemServico ? "Nova imagem pronta" : imagemPreviewUrl ? "Imagem atual do serviço" : "Adicione uma foto"}</strong>
-                      <span>{imagemServico ? "O recorte será salvo junto com as alterações." : "Escolha uma imagem para destacar seu serviço."}</span>
+
                       <div className={styles.imagePickerActions}>
                         <label className={styles.imageUploadAction}>
                           <FaCloudUploadAlt aria-hidden="true" />
@@ -481,7 +472,7 @@ export default function Servicos() {
                     }}
                   />
                 )}
-                {!cropSource && <p className={styles.imageHelp}>JPG, PNG ou WebP. Você poderá mover e ampliar a foto antes de salvar.</p>}
+
               </div>
 
               <label>
