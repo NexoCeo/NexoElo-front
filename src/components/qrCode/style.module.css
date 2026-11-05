@@ -118,3 +118,36 @@
 .error {
     color: var(--theme-error-text);
 }
+
+/* Separador estrutural entre o texto e a acao de copiar. */
+.copyLinkButton { padding:0 0 0 16px; overflow:hidden; }
+.copyIcon {
+    display:grid;
+    place-items:center;
+    align-self:stretch;
+    flex:0 0 60px;
+    border-left:1px solid var(--theme-border-strong);
+    transition:background 160ms ease;
+}
+.copyLinkButton:hover .copyIcon { background:var(--theme-primary-soft); }
+.copyIcon svg { font-size:18px; }
+.downloadButton {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    min-height:40px;
+    padding:9px 18px;
+    border-radius:9px;
+    border:1px solid var(--theme-border-strong);
+    color:var(--theme-primary-text);
+    background:var(--theme-surface);
+    font:inherit;
+    font-weight:700;
+    font-size:13px;
+    cursor:pointer;
+    transition:border-color 160ms ease, background 160ms ease;
+}
+.downloadButton:hover { border-color:var(--theme-primary); background:var(--theme-primary-soft); }
+.downloadButton:focus-visible { outline:2px solid var(--theme-primary-text); outline-offset:2px; }
+.downloadButton:disabled { opacity:.6; cursor:wait; }
