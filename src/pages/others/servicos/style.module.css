@@ -523,3 +523,34 @@
 .cardsBody::-webkit-scrollbar-thumb{background:var(--theme-primary);border-radius:999px}
 .cardsHeader .actionsHeader{text-align:right}.cardsHeader .valueHeader{text-align:right}
 @media(max-width:760px){.cardsHeader{display:none}.cardsBody{padding:8px 0 0;row-gap:10px}}
+
+/* Editor de imagem integrado ao modal de servicos. */
+.imageField { display:grid; gap:10px; min-width:0; }
+.cropEditButton {
+  justify-self:start; border:1px solid var(--theme-border-strong);
+  border-radius:8px; padding:9px 12px; background:var(--theme-surface-muted);
+  color:var(--theme-primary-text); font:inherit; font-size:13px; font-weight:700; cursor:pointer;
+}
+.cropEditor { display:grid; justify-items:center; gap:12px; width:100%; min-width:0; padding:14px;
+  box-sizing:border-box; background:var(--theme-surface-muted);
+  border:1px solid var(--theme-border-strong); border-radius:12px; }
+.cropHint { color:var(--theme-text-muted); font-size:13px; text-align:center; line-height:1.5; margin:0; }
+.cropViewport { position:relative; width:min(320px,100%); aspect-ratio:1;
+  border:2px solid var(--theme-primary); border-radius:20px;
+  overflow:hidden; cursor:grab; touch-action:none; user-select:none;
+  background:var(--theme-surface); box-shadow:0 0 0 3px var(--theme-primary-soft); }
+.cropViewport:active { cursor:grabbing; }
+.cropViewport img { position:absolute; max-width:none; max-height:none;
+  transform:translate(-50%,-50%); pointer-events:none; user-select:none; }
+.cropZoomLabel { width:min(320px,100%); display:flex!important;
+  flex-direction:row; justify-content:space-between; align-items:center; }
+.cropZoomLabel span { color:var(--theme-text-muted); }
+.form .cropZoom { width:min(320px,100%); min-height:22px; height:22px; padding:0;
+  accent-color:var(--theme-primary); cursor:pointer; border:0; background:transparent; }
+.cropError { color:var(--theme-error); margin:0; font-size:12px; }
+.cropActions { width:min(320px,100%); display:flex; gap:8px; justify-content:space-between; }
+.cropActions button { flex:1; min-height:40px; border-radius:8px; border:1px solid var(--theme-border-strong);
+  background:var(--theme-surface); color:var(--theme-text); cursor:pointer; font:inherit; font-size:12px; font-weight:700; }
+.cropActions button:last-child { background:var(--theme-primary); color:var(--theme-on-primary); border-color:var(--theme-primary); }
+.cropActions button:disabled { opacity:.5; cursor:not-allowed; }
+@media(max-width:760px) { .cropEditor {padding:10px;} .cropViewport {width:min(280px,100%);} }
