@@ -8,6 +8,8 @@ import { useNotification } from "@/context/NotificationContext";
 import { getClienteFinalAgendamentoUrl, obterSlugUsuario } from "@/services/agenda-publica-service";
 import LoadingState from "@/components/loading-state";
 import { useLanguage } from "@/context/LanguageContext";
+import { getUploadedImageUrl } from "@/components/header/profile-image";
+import { formatPersonName } from "@/context/UserContext";
 
 export default function QrCode() {
   const { theme } = useTheme();
@@ -78,53 +80,137 @@ export default function QrCode() {
     }
   }
 
+
   async function downloadQrCode() {
     const svg = qrRef.current?.querySelector("svg");
-    if (!svg || !urlAgendamento || downloading) return;
+    if (!svg || !urlAgendamento || !usuario || downloading) return;
 
     setDownloading(true);
-    let svgUrl = "";
+    const objectUrls: string[] = [];
     try {
-      // Reutiliza exatamente o QR Code exibido no modal; nao cria outra URL.
-      const clone = svg.cloneNode(true) as SVGSVGElement;
-      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-      clone.setAttribute("width", "1024");
-      clone.setAttribute("height", "1024");
-      const svgMarkup = new XMLSerializer().serializeToString(clone);
-      svgUrl = URL.createObjectURL(new Blob([svgMarkup], { type: "image/svg+xml;charset=utf-8" }));
-
-      const image = new Image();
-      await new Promise<void>((resolve, reject) => {
-        image.onload = () => resolve();
-        image.onerror = () => reject(new Error("Falha na conversao do QR Code."));
-        image.src = svgUrl;
-      });
+      function loadImage(src: string, external = false): Promise<HTMLImageElement> {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          if (external) img.crossOrigin = "anonymous";
+          img.onload = () => resolve(img);
+          img.onerror = () => reject(new Error("Falha ao carregar imagem"));
+          img.src = src;
+        });
+      }
+      const clonedQr = svg.cloneNode(true) as SVGSVGElement;
+      clonedQr.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      clonedQr.setAttribute("width", "800");
+      clonedQr.setAttribute("height", "800");
+      const qrUrl = URL.createObjectURL(new Blob(
+        [new XMLSerializer().serializeToString(clonedQr)],
+        { type: "image/svg+xml;charset=utf-8" },
+      ));
+      objectUrls.push(qrUrl);
+      const qrImage = await loadImage(qrUrl);
 
       const canvas = document.createElement("canvas");
-      canvas.width = 1024;
-      canvas.height = 1024;
+      canvas.width = 1200;
+      canvas.height = 1600;
       const ctx = canvas.getContext("2d");
-      if (!ctx) throw new Error("Canvas indisponivel.");
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-      const png = await new Promise<Blob>((resolve, reject) => {
-        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("Nao foi possivel criar o PNG.")), "image/png");
-      });
+      if (!ctx) throw new Error("Canvas indisponível");
+      const roundedBox = (x: number, y: number, w: number, h: number, r: number) => {
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, r);
+      };
 
-      const pngUrl = URL.createObjectURL(png);
-      const a = document.createElement("a");
-      a.href = pngUrl;
-      a.download = `nexoelo-agenda-${slug}.png`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.setTimeout(() => URL.revokeObjectURL(pngUrl), 1000);
-      showNotification({ type: "success", title: "QR Code pronto", message: "Imagem PNG baixada com sucesso." });
+      ctx.fillStyle = "#eee6db";
+      ctx.fillRect(0, 0, 1200, 1600);
+      const gradient = ctx.createLinearGradient(0, 0, 1200, 1600);
+      gradient.addColorStop(0, "#fffdf9");
+      gradient.addColorStop(1, "#faf5ed");
+      roundedBox(76, 70, 1048, 1460, 42);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+      ctx.strokeStyle = "#dcd0bf";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#607396";
+      ctx.font = "700 27px Arial, sans-serif";
+      ctx.fillText("NEXOELO  •  AGENDA PÚBLICA", 600, 166);
+
+      const name = formatPersonName(usuario.Nome) || "Agenda pública";
+      const photoUrl = getUploadedImageUrl(usuario.FotoPerfil);
+      let photo: HTMLImageElement | null = null;
+      if (photoUrl) {
+        try { photo = await loadImage(photoUrl, true); }
+        catch { photo = null; }
+      }
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(600, 315, 100, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.fillStyle = "#dce7f7";
+      ctx.fillRect(500, 215, 200, 200);
+      if (photo) {
+        const ratio = Math.max(200 / photo.naturalWidth, 200 / photo.naturalHeight);
+        const w = photo.naturalWidth * ratio;
+        const h = photo.naturalHeight * ratio;
+        ctx.drawImage(photo, 600 - w / 2, 315 - h / 2, w, h);
+      } else {
+        const initials = name.split(/\s+/).slice(0, 2).map(part => part[0]?.toUpperCase()).join("");
+        ctx.fillStyle = "#225ca8";
+        ctx.font = "700 68px Arial, sans-serif";
+        ctx.fillText(initials || "N", 600, 320);
+      }
+      ctx.restore();
+      ctx.strokeStyle = "#cfbaa0";
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.arc(600, 315, 104, 0, Math.PI * 2);
+      ctx.stroke();
+
+      let fontSize = 62;
+      ctx.fillStyle = "#253247";
+      while (fontSize > 30) {
+        ctx.font = "700 " + fontSize + "px Georgia, serif";
+        if (ctx.measureText(name).width <= 880) break;
+        fontSize -= 2;
+      }
+      ctx.fillText(name, 600, 478, 880);
+      ctx.fillStyle = "#45556e";
+      ctx.font = "400 41px Arial, sans-serif";
+      ctx.fillText("Escaneie para agendar", 600, 565);
+      ctx.fillStyle = "#728096";
+      ctx.font = "400 27px Arial, sans-serif";
+      ctx.fillText("Escolha seu serviço e reserve seu horário.", 600, 620);
+
+      roundedBox(218, 703, 764, 764, 30);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+      ctx.strokeStyle = "#e6e5e0";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(qrImage, 256, 741, 688, 688);
+      ctx.imageSmoothingEnabled = true;
+      ctx.fillStyle = "#64748b";
+      ctx.font = "600 24px Arial, sans-serif";
+      ctx.fillText("APONTE A CÂMERA DO CELULAR", 600, 1485);
+
+      const png = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("Falha ao gerar PNG")), "image/png");
+      });
+      const downloadUrl = URL.createObjectURL(png);
+      objectUrls.push(downloadUrl);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = "nexoelo-agenda-" + slug + ".png";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      showNotification({ type: "success", title: "Cartão da agenda pronto", message: "Imagem preparada para download." });
     } catch {
-      showNotification({ type: "error", title: "Erro ao baixar QR Code", message: "Não foi possível gerar a imagem. Tente novamente." });
+      showNotification({ type: "error", title: "Erro ao baixar cartão", message: "Não foi possível gerar o cartão. Tente novamente." });
     } finally {
-      if (svgUrl) URL.revokeObjectURL(svgUrl);
+      window.setTimeout(() => objectUrls.forEach(url => URL.revokeObjectURL(url)), 1000);
       setDownloading(false);
     }
   }
@@ -154,7 +240,7 @@ export default function QrCode() {
           </div>
           <button type="button" className={styles.downloadButton} onClick={() => void downloadQrCode()} disabled={downloading}>
             <FaDownload aria-hidden="true" />
-            {downloading ? "Preparando imagem..." : "Baixar QR Code"}
+            {downloading ? "Preparando cartão..." : "Baixar cartão da agenda"}
           </button>
           <div className={styles.linkBox}>
             <button
