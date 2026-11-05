@@ -137,6 +137,7 @@ export default function Servicos() {
     }
 
     function handleEscape(event: KeyboardEvent) {
+      if (cropSource) return;
       if (event.key === "Escape") {
         setOpenMenuId(null);
         setModalOpen(false);
@@ -152,7 +153,7 @@ export default function Servicos() {
       document.removeEventListener("mousedown", closeMenu);
       document.removeEventListener("keydown", handleEscape);
     };
-  }, []);
+  }, [cropSource]);
 
   function resetForm() {
     setNomeServico("");
