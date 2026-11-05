@@ -3,6 +3,9 @@ import { createPortal } from "react-dom";
 import styles from "./style.module.css";
 
 const OUTPUT_SIZE = 640;
+// Um enquadramento inicial ligeiramente ampliado deixa margem para arrastar
+// mesmo quando a imagem original ja e quadrada.
+const INITIAL_ZOOM = 1.25;
 
 type Props = {
   source: string;
@@ -16,16 +19,16 @@ export default function ServiceImageCrop({ source, filename, onApply, onCancel }
   const [viewportSize, setViewportSize] = useState(280);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(INITIAL_ZOOM);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [error, setError] = useState("");
   const [processing, setProcessing] = useState(false);
   const imageRef = useRef<HTMLImageElement | null>(null);
-  const dragRef = useRef<{ x: number; y: number; startX: number; startY: number } | null>(null);
+  const dragRef = useRef<{ pointerId: number; x: number; y: number; startX: number; startY: number } | null>(null);
 
   useEffect(() => {
     setImageSize({ width: 0, height: 0 });
-    setZoom(1);
+    setZoom(INITIAL_ZOOM);
     setPosition({ x: 0, y: 0 });
     setError("");
   }, [source]);
@@ -128,18 +131,33 @@ export default function ServiceImageCrop({ source, filename, onApply, onCancel }
         <div className={styles.cropEditor}>
       <p className={styles.cropHint}>Arraste a foto para posicionar e use o controle para ajustar o zoom.</p>
       <div ref={viewportRef} className={styles.cropViewport}
-        aria-label="Área de recorte quadrado da imagem"
+        aria-label="Área de recorte quadrado da imagem. Arraste para reposicionar ou use as setas do teclado."
+        role="group"
+        tabIndex={0}
+        onKeyDown={(event) => {
+          const offsets: Record<string, [number, number]> = {
+            ArrowLeft: [-10, 0],
+            ArrowRight: [10, 0],
+            ArrowUp: [0, -10],
+            ArrowDown: [0, 10],
+          };
+          const delta = offsets[event.key];
+          if (!delta || !imageSize.width) return;
+          event.preventDefault();
+          move(position.x + delta[0], position.y + delta[1]);
+        }}
         onPointerDown={(event) => {
-          if (!imageSize.width) return;
+          if (!imageSize.width || processing || (event.pointerType === "mouse" && event.button !== 0)) return;
           event.currentTarget.setPointerCapture(event.pointerId);
-          dragRef.current = { x: event.clientX, y: event.clientY, startX: position.x, startY: position.y };
+          dragRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, startX: position.x, startY: position.y };
         }}
         onPointerMove={(event) => {
-          if (!dragRef.current) return;
+          if (!dragRef.current || dragRef.current.pointerId !== event.pointerId) return;
           move(dragRef.current.startX + event.clientX - dragRef.current.x,
             dragRef.current.startY + event.clientY - dragRef.current.y);
         }}
         onPointerUp={(event) => {
+          if (dragRef.current?.pointerId !== event.pointerId) return;
           dragRef.current = null;
           if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
         }}
