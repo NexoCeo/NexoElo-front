@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const serviceMocks = vi.hoisted(() => ({
   atualizarServico: vi.fn(),
+  consultarAssinatura: vi.fn(),
   inserirServico: vi.fn(),
   listarServicosPorEmpresa: vi.fn(),
 }));
@@ -27,6 +28,7 @@ vi.mock("@/context/UserContext", () => ({
 }));
 
 vi.mock("@/services/servico-service", () => serviceMocks);
+vi.mock("@/services/assinatura-service", () => ({ consultarAssinatura: serviceMocks.consultarAssinatura }));
 
 vi.mock("./service-image-crop", () => ({
   default: ({ onApply, onCancel }: { onApply: (file: File) => void; onCancel: () => void }) => (
@@ -47,6 +49,7 @@ describe("Servicos", () => {
     Object.defineProperty(navigator, "languages", { configurable: true, value: ["pt-BR"] });
     Object.defineProperty(URL, "createObjectURL", { configurable: true, value: vi.fn(() => "blob:service-test") });
     Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: vi.fn() });
+    serviceMocks.consultarAssinatura.mockResolvedValue({ AcessoAtivo: true, Plano: "GRATIS" });
     serviceMocks.listarServicosPorEmpresa.mockResolvedValue([
       {
         Id: 2,
@@ -74,7 +77,7 @@ describe("Servicos", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Novo serviço" }));
 
-    const dialog = screen.getByRole("dialog", { name: "Novo serviço" });
+    const dialog = await screen.findByRole("dialog", { name: "Novo serviço" });
     expect(within(dialog).getByLabelText("Nome do serviço")).toBeInTheDocument();
 
     fireEvent.click(within(dialog).getByRole("button", { name: "Fechar modal" }));
@@ -86,7 +89,7 @@ describe("Servicos", () => {
     await screen.findByText("Servico Teste");
     fireEvent.click(screen.getByRole("button", { name: "Novo serviço" }));
 
-    const dialog = screen.getByRole("dialog", { name: "Novo serviço" });
+    const dialog = await screen.findByRole("dialog", { name: "Novo serviço" });
     fireEvent.change(within(dialog).getByLabelText("Nome do serviço"), {
       target: { value: "Corte masculino" },
     });
