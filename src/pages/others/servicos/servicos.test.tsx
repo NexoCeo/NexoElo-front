@@ -28,6 +28,16 @@ vi.mock("@/context/UserContext", () => ({
 
 vi.mock("@/services/servico-service", () => serviceMocks);
 
+vi.mock("./service-image-crop", () => ({
+  default: ({ onApply, onCancel }: { onApply: (file: File) => void; onCancel: () => void }) => (
+    <div>
+      <button type="button" onClick={() => onApply(new File(["recortada"], "servico-recortada.webp", { type: "image/webp" }))}>Aplicar recorte</button>
+      <button type="button" onClick={onCancel}>Cancelar recorte</button>
+    </div>
+  ),
+}));
+
+
 import Servicos from "./index";
 
 describe("Servicos", () => {
@@ -86,6 +96,8 @@ describe("Servicos", () => {
     fireEvent.change(within(dialog).getByLabelText("Imagem do servico"), {
       target: { files: [imagem] },
     });
+    expect(within(dialog).getByRole("button", { name: "Criar servico" })).toBeDisabled();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Aplicar recorte" }));
     fireEvent.click(within(dialog).getByRole("button", { name: "Criar servico" }));
 
     await waitFor(() => {
@@ -96,12 +108,32 @@ describe("Servicos", () => {
         NomeServico: "Corte masculino",
         Valor: 45,
         TempoEstimadoMinutos: 45,
-        ImagemServico: imagem,
+        ImagemServico: expect.objectContaining({ name: "servico-recortada.webp", type: "image/webp" }),
       });
     });
     expect(await screen.findByText("Servico cadastrado com sucesso.")).toBeInTheDocument();
     expect(screen.getByText("O novo servico foi adicionado a sua lista.")).toBeInTheDocument();
     expect(screen.queryByRole("dialog", { name: "Novo servico" })).not.toBeInTheDocument();
+  });
+
+  it("permite ajustar recorte da imagem ja cadastrada no modal de edicao", async () => {
+    serviceMocks.listarServicosPorEmpresa.mockResolvedValue([{
+      Id: 2, NomeServico: "Servico Teste", Valor: 150,
+      TempoEstimadoMinutos: 60, ImagemServico: "uploads/imagem.png",
+    }]);
+    render(<Servicos />);
+    await screen.findByText("Servico Teste");
+    fireEvent.click(screen.getByRole("button", { name: "Opcoes de Servico Teste" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Editar" }));
+    const dialog = screen.getByRole("dialog", { name: "Editar servico" });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Ajustar recorte da imagem atual" }));
+    expect(within(dialog).getByRole("button", { name: "Salvar alteracoes" })).toBeDisabled();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Aplicar recorte" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "Salvar alteracoes" }));
+    await waitFor(() => expect(serviceMocks.atualizarServico).toHaveBeenCalledWith(2, {
+      NomeServico: "Servico Teste", Valor: 150, TempoEstimadoMinutos: 60,
+      ImagemServico: expect.objectContaining({ name: "servico-recortada.webp", type: "image/webp" }),
+    }));
   });
 
   it("abre o menu do servico, edita e atualiza a linha sem recarregar", async () => {
