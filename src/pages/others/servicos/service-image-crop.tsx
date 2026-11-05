@@ -1,0 +1,152 @@
+import { useEffect, useRef, useState } from "react";
+import styles from "./style.module.css";
+
+const SIZE = 320;
+const OUTPUT_SIZE = 640;
+
+type Props = {
+  source: string;
+  filename: string;
+  onApply: (file: File) => void;
+  onCancel: () => void;
+};
+
+export default function ServiceImageCrop({ source, filename, onApply, onCancel }: Props) {
+  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [error, setError] = useState("");
+  const [processing, setProcessing] = useState(false);
+  const imageRef = useRef<HTMLImageElement | null>(null);
+  const dragRef = useRef<{ x: number; y: number; startX: number; startY: number } | null>(null);
+
+  useEffect(() => {
+    setImageSize({ width: 0, height: 0 });
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
+    setError("");
+  }, [source]);
+
+  const baseScale = imageSize.width && imageSize.height
+    ? Math.max(SIZE / imageSize.width, SIZE / imageSize.height)
+    : 1;
+  const displayedWidth = imageSize.width * baseScale * zoom;
+  const displayedHeight = imageSize.height * baseScale * zoom;
+  const maxX = Math.max(0, (displayedWidth - SIZE) / 2);
+  const maxY = Math.max(0, (displayedHeight - SIZE) / 2);
+  const clamp = (value: number, limit: number) => Math.max(-limit, Math.min(limit, value));
+
+  const move = (x: number, y: number) =>
+    setPosition({ x: clamp(x, maxX), y: clamp(y, maxY) });
+
+  function changeZoom(nextZoom: number) {
+    const next = Math.max(1, Math.min(3, nextZoom));
+    const nextWidth = imageSize.width * baseScale * next;
+    const nextHeight = imageSize.height * baseScale * next;
+    setZoom(next);
+    setPosition((current) => ({
+      x: clamp(current.x, Math.max(0, (nextWidth - SIZE) / 2)),
+      y: clamp(current.y, Math.max(0, (nextHeight - SIZE) / 2)),
+    }));
+  }
+
+  async function applyCrop() {
+    const image = imageRef.current;
+    if (!image?.complete || !image.naturalWidth || !image.naturalHeight || processing) return;
+    setProcessing(true);
+    setError("");
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = OUTPUT_SIZE;
+      canvas.height = OUTPUT_SIZE;
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("Canvas indisponível.");
+      const ratio = OUTPUT_SIZE / SIZE;
+      context.drawImage(
+        image,
+        ((SIZE - displayedWidth) / 2 + position.x) * ratio,
+        ((SIZE - displayedHeight) / 2 + position.y) * ratio,
+        displayedWidth * ratio,
+        displayedHeight * ratio,
+      );
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        try {
+          canvas.toBlob((result) => result ? resolve(result) : reject(new Error("Falha ao processar imagem.")), "image/webp", 0.9);
+        } catch (cause) {
+          reject(cause);
+        }
+      });
+      const name = (filename.replace(/\.[^.]+$/, "") || "servico") + "-recortada.webp";
+      onApply(new File([blob], name, { type: "image/webp" }));
+    } catch {
+      setError("Não foi possível recortar esta imagem. Se ela já estava cadastrada, selecione o arquivo novamente.");
+    } finally {
+      setProcessing(false);
+    }
+  }
+
+  return (
+    <div className={styles.cropEditor}>
+      <p className={styles.cropHint}>Arraste a foto para posicionar e use o controle para ajustar o zoom.</p>
+      <div className={styles.cropViewport}
+        aria-label="Área de recorte quadrado da imagem"
+        onPointerDown={(event) => {
+          if (!imageSize.width) return;
+          event.currentTarget.setPointerCapture(event.pointerId);
+          dragRef.current = { x: event.clientX, y: event.clientY, startX: position.x, startY: position.y };
+        }}
+        onPointerMove={(event) => {
+          if (!dragRef.current) return;
+          move(dragRef.current.startX + event.clientX - dragRef.current.x,
+            dragRef.current.startY + event.clientY - dragRef.current.y);
+        }}
+        onPointerUp={(event) => {
+          dragRef.current = null;
+          if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+        }}
+        onPointerCancel={() => { dragRef.current = null; }}
+      >
+        <img
+          ref={imageRef}
+          src={source}
+          crossOrigin={source.startsWith("blob:") || source.startsWith("data:") ? undefined : "anonymous"}
+          alt="Prévia do recorte"
+          draggable={false}
+          onLoad={(event) => {
+            setImageSize({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight });
+            setError("");
+          }}
+          onError={() => setError("Não foi possível carregar a imagem. Escolha outro arquivo.")}
+          style={imageSize.width ? {
+            width: displayedWidth,
+            height: displayedHeight,
+            left: `calc(50% + ${position.x}px)`,
+            top: `calc(50% + ${position.y}px)`,
+          } : { opacity: 0 }}
+        />
+      </div>
+      <label className={styles.cropZoomLabel} htmlFor="service-image-zoom">
+        Zoom <span>{Math.round(zoom * 100)}%</span>
+      </label>
+      <input
+        id="service-image-zoom"
+        className={styles.cropZoom}
+        type="range"
+        min="1"
+        max="3"
+        step="0.05"
+        value={zoom}
+        aria-label="Zoom da imagem"
+        onChange={(event) => changeZoom(Number(event.target.value))}
+        disabled={!imageSize.width || processing}
+      />
+      {error && <p role="alert" className={styles.cropError}>{error}</p>}
+      <div className={styles.cropActions}>
+        <button type="button" onClick={onCancel} disabled={processing}>Cancelar recorte</button>
+        <button type="button" onClick={() => void applyCrop()} disabled={!imageSize.width || processing}>
+          {processing ? "Processando..." : "Aplicar recorte"}
+        </button>
+      </div>
+    </div>
+  );
+}
