@@ -592,3 +592,50 @@
 /* Sobrescreve regras genericas de label/input do formulario para o botao de upload. */
 .form .imageUploadAction { display:inline-flex; gap:7px; color:var(--theme-on-primary); font-size:12px; }
 .form .imageUploadAction input { display:block; position:absolute; inset:0; width:100%; height:100%; min-height:0; margin:0; padding:0; opacity:0; border:0; cursor:pointer; }
+
+/* Modal compacto: o conteudo se adapta a largura/altura disponiveis, nao o contrario. */
+.modalBackdrop { box-sizing:border-box; padding:16px; overflow:hidden; }
+.modal {
+  box-sizing:border-box;
+  width:min(100%, 540px);
+  max-height:min(620px, calc(100dvh - 84px));
+  min-width:0;
+  padding:18px 20px;
+  overflow-x:hidden;
+  overflow-y:auto;
+  scrollbar-width:none;
+  overscroll-behavior:contain;
+}
+.modal::-webkit-scrollbar { width:0; display:none; }
+.modalHeader { align-items:center; margin-bottom:12px; gap:10px; }
+.modalHeader h2 { margin:0; font-size:21px; line-height:1.2; }
+.modalHeader button { width:34px; height:34px; flex-basis:34px; }
+.form { gap:10px; min-width:0; }
+.form label { min-width:0; gap:5px; line-height:1.2; font-size:13px; }
+.form input { box-sizing:border-box; min-height:40px; padding:0 11px; }
+.fieldGroup { gap:5px; }
+.durationField { gap:8px; }
+.submitButton { min-height:43px; margin-top:2px; }
+.imageField { gap:7px; }
+.imageFieldHeading { min-height:16px; gap:6px; }
+.imageFieldHeading strong { font-size:13px; }
+.imagePickerCard { box-sizing:border-box; width:100%; min-width:0; gap:12px; padding:11px; border-radius:12px; }
+.imageLargePreview { width:94px; height:94px; flex:0 0 94px; border-radius:12px; }
+.imagePickerContent { min-width:0; gap:8px; }
+.imagePickerContent > strong { min-width:0; font-size:13px; line-height:1.2; overflow-wrap:anywhere; }
+.imagePickerActions { gap:7px; margin-top:0; min-width:0; }
+.form .imageUploadAction,.cropEditButton { box-sizing:border-box; min-height:35px; max-width:100%; padding:0 10px; font-size:11px; gap:5px; border-radius:8px; }
+@media(max-width:560px) {
+  .modalBackdrop { padding:10px; }
+  .modal { width:100%; max-height:calc(100dvh - 20px); padding:15px; }
+  .modalHeader { margin-bottom:10px; }
+  .imagePickerCard { gap:10px; padding:10px; }
+  .imageLargePreview { width:76px; height:76px; flex-basis:76px; }
+  .imagePickerActions { gap:5px; }
+  .form .imageUploadAction,.cropEditButton { min-height:33px; font-size:10px; padding:0 7px; }
+}
+@media(max-width:380px) {
+  .imagePickerCard { flex-direction:row; align-items:center; }
+  .imageLargePreview { width:65px; height:65px; flex:0 0 65px; }
+  .imagePickerActions { align-items:flex-start; }
+}
