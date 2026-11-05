@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { FaCheck, FaCopy } from "react-icons/fa";
+import { FaCheck, FaCopy, FaDownload } from "react-icons/fa";
 import styles from "./style.module.css";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
@@ -14,7 +14,9 @@ export default function QrCode() {
   const { t } = useLanguage();
   const { usuario, setUsuario } = useUser();
   const { showNotification } = useNotification();
+  const qrRef = useRef<HTMLDivElement | null>(null);
   const [slugFallback, setSlugFallback] = useState("");
+  const [downloading, setDownloading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
@@ -76,6 +78,57 @@ export default function QrCode() {
     }
   }
 
+  async function downloadQrCode() {
+    const svg = qrRef.current?.querySelector("svg");
+    if (!svg || !urlAgendamento || downloading) return;
+
+    setDownloading(true);
+    let svgUrl = "";
+    try {
+      // Reutiliza exatamente o QR Code exibido no modal; nao cria outra URL.
+      const clone = svg.cloneNode(true) as SVGSVGElement;
+      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      clone.setAttribute("width", "1024");
+      clone.setAttribute("height", "1024");
+      const svgMarkup = new XMLSerializer().serializeToString(clone);
+      svgUrl = URL.createObjectURL(new Blob([svgMarkup], { type: "image/svg+xml;charset=utf-8" }));
+
+      const image = new Image();
+      await new Promise<void>((resolve, reject) => {
+        image.onload = () => resolve();
+        image.onerror = () => reject(new Error("Falha na conversao do QR Code."));
+        image.src = svgUrl;
+      });
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 1024;
+      canvas.height = 1024;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas indisponivel.");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+      const png = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("Nao foi possivel criar o PNG.")), "image/png");
+      });
+
+      const pngUrl = URL.createObjectURL(png);
+      const a = document.createElement("a");
+      a.href = pngUrl;
+      a.download = `nexoelo-agenda-${slug}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.setTimeout(() => URL.revokeObjectURL(pngUrl), 1000);
+      showNotification({ type: "success", title: "QR Code pronto", message: "Imagem PNG baixada com sucesso." });
+    } catch {
+      showNotification({ type: "error", title: "Erro ao baixar QR Code", message: "Não foi possível gerar a imagem. Tente novamente." });
+    } finally {
+      if (svgUrl) URL.revokeObjectURL(svgUrl);
+      setDownloading(false);
+    }
+  }
+
   if (!usuario || !canShowAgendaPublica) return null;
 
   return (
@@ -89,7 +142,7 @@ export default function QrCode() {
 
       {urlAgendamento ? (
         <div className={styles.content}>
-          <div className={styles.container}>
+          <div className={styles.container} ref={qrRef}>
             <QRCodeSVG
               value={urlAgendamento}
               title={t("qr.title")}
@@ -99,6 +152,10 @@ export default function QrCode() {
               className={styles.qrCode}
             />
           </div>
+          <button type="button" className={styles.downloadButton} onClick={() => void downloadQrCode()} disabled={downloading}>
+            <FaDownload aria-hidden="true" />
+            {downloading ? "Preparando imagem..." : "Baixar QR Code"}
+          </button>
           <div className={styles.linkBox}>
             <button
               type="button"
@@ -107,7 +164,7 @@ export default function QrCode() {
               aria-label={copyStatus === "copied" ? t("qr.copied") : t("qr.copy")}
             >
               <span>{copyStatus === "copied" ? t("qr.copied") : t("qr.copy")}</span>
-              {copyStatus === "copied" ? <FaCheck aria-hidden="true" /> : <FaCopy aria-hidden="true" />}
+              <span className={styles.copyIcon}>{copyStatus === "copied" ? <FaCheck aria-hidden="true" /> : <FaCopy aria-hidden="true" />}</span>
             </button>
             {copyStatus === "error" && (
               <p className={styles.copyError} role="alert">Não foi possível copiar o link. Tente novamente.</p>
