@@ -39,10 +39,13 @@ vi.mock("./service-image-crop", () => ({
 
 
 import Servicos from "./index";
+import { LanguageProvider } from "@/context/LanguageContext";
 
 describe("Servicos", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    Object.defineProperty(URL, "createObjectURL", { configurable: true, value: vi.fn(() => "blob:service-test") });
+    Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: vi.fn() });
     serviceMocks.listarServicosPorEmpresa.mockResolvedValue([
       {
         Id: 2,
@@ -61,7 +64,7 @@ describe("Servicos", () => {
   });
 
   it("exibe os servicos em tabela e abre o cadastro em modal", async () => {
-    render(<Servicos />);
+    render(<LanguageProvider><Servicos /></LanguageProvider>);
 
     expect(await screen.findByText("Servico Teste")).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "Servico" })).toBeInTheDocument();
@@ -78,7 +81,7 @@ describe("Servicos", () => {
   });
 
   it("cadastra um novo servico pelo modal", async () => {
-    render(<Servicos />);
+    render(<LanguageProvider><Servicos /></LanguageProvider>);
     await screen.findByText("Servico Teste");
     fireEvent.click(screen.getByRole("button", { name: "Novo servico" }));
 
@@ -121,7 +124,7 @@ describe("Servicos", () => {
       Id: 2, NomeServico: "Servico Teste", Valor: 150,
       TempoEstimadoMinutos: 60, ImagemServico: "uploads/imagem.png",
     }]);
-    render(<Servicos />);
+    render(<LanguageProvider><Servicos /></LanguageProvider>);
     await screen.findByText("Servico Teste");
     fireEvent.click(screen.getByRole("button", { name: "Opcoes de Servico Teste" }));
     fireEvent.click(screen.getByRole("menuitem", { name: "Editar" }));
@@ -137,7 +140,7 @@ describe("Servicos", () => {
   });
 
   it("abre o menu do servico, edita e atualiza a linha sem recarregar", async () => {
-    render(<Servicos />);
+    render(<LanguageProvider><Servicos /></LanguageProvider>);
     await screen.findByText("Servico Teste");
 
     fireEvent.click(screen.getByRole("button", { name: "Opcoes de Servico Teste" }));
