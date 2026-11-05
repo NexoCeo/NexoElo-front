@@ -133,7 +133,7 @@ describe("Servicos", () => {
     fireEvent.click(screen.getByRole("button", { name: "Opções de Servico Teste" }));
     fireEvent.click(screen.getByRole("menuitem", { name: "Editar" }));
     const dialog = screen.getByRole("dialog", { name: "Editar serviço" });
-    fireEvent.click(within(dialog).getByRole("button", { name: "Ajustar recorte da imagem atual" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "Ajustar recorte" }));
     expect(within(dialog).getByRole("button", { name: "Salvar alterações" })).toBeDisabled();
     fireEvent.click(within(dialog).getByRole("button", { name: "Aplicar recorte" }));
     fireEvent.click(within(dialog).getByRole("button", { name: "Salvar alterações" }));
