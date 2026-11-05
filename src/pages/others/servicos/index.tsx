@@ -15,6 +15,7 @@ import {
 import type { Servico } from "@/types/servico";
 import { getUploadedImageUrl } from "@/components/header/profile-image";
 import styles from "./style.module.css";
+import ServiceImageCrop from "./service-image-crop";
 import { useLanguage } from "@/context/LanguageContext";
 
 function formatCurrency(value: number) {
@@ -41,6 +42,8 @@ export default function Servicos() {
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
   const [imagemPreviewUrl, setImagemPreviewUrl] = useState("");
+  const [cropSource, setCropSource] = useState("");
+  const [cropFilename, setCropFilename] = useState("servico");
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
   const [upgradePlan, setUpgradePlan] = useState<{ plan: "BASICO" | "INTERMEDIARIO"; limit: number } | null>(null);
@@ -59,7 +62,8 @@ export default function Servicos() {
     nomeServico.trim().length > 0 &&
     valorNumber > 0 &&
     Number(tempoEstimadoMinutos) > 0 &&
-    !saving;
+    !saving &&
+    !cropSource;
 
   const fetchServicos = useCallback(async () => {
     if (!ownerId) {
@@ -102,6 +106,30 @@ export default function Servicos() {
   }, [editingServico?.ImagemServico, imagemServico]);
 
   useEffect(() => {
+    return () => {
+      if (cropSource.startsWith("blob:")) URL.revokeObjectURL(cropSource);
+    };
+  }, [cropSource]);
+
+  function selectImageForCrop(file: File | null) {
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setFormError("Selecione uma imagem PNG, JPG ou WebP.");
+      return;
+    }
+    setFormError("");
+    setCropFilename(file.name);
+    setCropSource(URL.createObjectURL(file));
+  }
+
+  function cropExistingImage() {
+    const existingUrl = getUploadedImageUrl(editingServico?.ImagemServico);
+    if (!existingUrl) return;
+    setCropFilename(editingServico?.NomeServico || "servico");
+    setCropSource(existingUrl);
+  }
+
+  useEffect(() => {
     function closeMenu(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setOpenMenuId(null);
@@ -113,6 +141,7 @@ export default function Servicos() {
         setOpenMenuId(null);
         setModalOpen(false);
         setImagemServico(null);
+        setCropSource("");
         setEditingServico(null);
       }
     }
@@ -130,6 +159,7 @@ export default function Servicos() {
     setValor("");
     setTempoEstimadoMinutos("30");
     setImagemServico(null);
+    setCropSource("");
     setEditingServico(null);
     setFormError("");
   }
@@ -154,6 +184,7 @@ export default function Servicos() {
     setValor(String(servico.Valor).replace(".", ","));
     setTempoEstimadoMinutos(String(servico.TempoEstimadoMinutos));
     setImagemServico(null);
+    setCropSource("");
     setFormError("");
     setOpenMenuId(null);
     setModalOpen(true);
@@ -167,6 +198,11 @@ export default function Servicos() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError("");
+
+    if (cropSource) {
+      setFormError("Aplique ou cancele o recorte da imagem antes de salvar.");
+      return;
+    }
 
     if (!nomeServico.trim()) {
       const message = "Informe o nome do servico.";
@@ -383,22 +419,42 @@ export default function Servicos() {
             </header>
 
             <form className={styles.form} onSubmit={handleSubmit}>
-              <label className={styles.imageField}>
-                {t("services.image")}
-                <span className={styles.imageControl}>
-                  <span className={styles.imagePreview} aria-hidden="true">
-                    <FaImage />
-                    {imagemPreviewUrl && <img src={imagemPreviewUrl} alt="" />}
+              <div className={styles.imageField}>
+                <label>
+                  {t("services.image")}
+                  <span className={styles.imageControl}>
+                    <span className={styles.imagePreview} aria-hidden="true">
+                      <FaImage />
+                      {imagemPreviewUrl && <img src={imagemPreviewUrl} alt="" />}
+                    </span>
+                    <span>{imagemServico?.name || t("services.selectImage")}</span>
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      aria-label={t("services.image")}
+                      onChange={(event) => {
+                        selectImageForCrop(event.target.files?.[0] ?? null);
+                        event.currentTarget.value = "";
+                      }}
+                    />
                   </span>
-                  <span>{imagemServico?.name || t("services.selectImage")}</span>
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp"
-                    aria-label={t("services.image")}
-                    onChange={(event) => setImagemServico(event.target.files?.[0] ?? null)}
+                </label>
+                {editingServico?.ImagemServico && !cropSource && (
+                  <button type="button" className={styles.cropEditButton} onClick={cropExistingImage}>
+                    Ajustar recorte da imagem atual
+                  </button>
+                )}
+                {cropSource && (
+                  <ServiceImageCrop source={cropSource} filename={cropFilename}
+                    onCancel={() => setCropSource("")}
+                    onApply={(file) => {
+                      setImagemServico(file);
+                      setCropSource("");
+                      setFormError("");
+                    }}
                   />
-                </span>
-              </label>
+                )}
+              </div>
 
               <label>
                 {t("services.name")}
