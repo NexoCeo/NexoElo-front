@@ -3,7 +3,7 @@ import { isAxiosError } from "axios";
 import { consultarAssinatura, type AssinaturaAtual } from "@/services/assinatura-service";
 import UpgradePlanModal from "@/components/upgrade-plan-modal";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FaEllipsisV, FaImage, FaPen, FaPlus, FaTimes } from "react-icons/fa";
+import { FaCloudUploadAlt, FaCropAlt, FaEllipsisV, FaImage, FaPen, FaPlus, FaTimes } from "react-icons/fa";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
@@ -420,30 +420,57 @@ export default function Servicos() {
 
             <form className={styles.form} onSubmit={handleSubmit}>
               <div className={styles.imageField}>
-                <label>
-                  {t("services.image")}
-                  <span className={styles.imageControl}>
-                    <span className={styles.imagePreview} aria-hidden="true">
-                      <FaImage />
-                      {imagemPreviewUrl && <img src={imagemPreviewUrl} alt="" />}
-                    </span>
-                    <span>{imagemServico?.name || t("services.selectImage")}</span>
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp"
-                      aria-label={t("services.image")}
-                      onChange={(event) => {
-                        selectImageForCrop(event.target.files?.[0] ?? null);
-                        event.currentTarget.value = "";
-                      }}
-                    />
-                  </span>
-                </label>
-                {editingServico?.ImagemServico && !cropSource && (
-                  <button type="button" className={styles.cropEditButton} onClick={cropExistingImage}>
-                    Ajustar recorte da imagem atual
-                  </button>
+                <div className={styles.imageFieldHeading}>
+                  <div>
+                    <strong>{t("services.image")}</strong>
+                    <span>Personalize a foto que aparece no agendamento.</span>
+                  </div>
+                  <span className={styles.imageFormatHint}>1:1 · Quadrada</span>
+                </div>
+
+                {!cropSource && (
+                  <div className={styles.imagePickerCard}>
+                    <div className={styles.imageLargePreview} aria-label="Prévia da imagem do serviço">
+                      {imagemPreviewUrl ? (
+                        <img src={imagemPreviewUrl} alt="Foto atual do serviço" />
+                      ) : (
+                        <FaImage aria-hidden="true" />
+                      )}
+                    </div>
+                    <div className={styles.imagePickerContent}>
+                      <strong>{imagemServico ? "Nova imagem pronta" : imagemPreviewUrl ? "Imagem atual do serviço" : "Adicione uma foto"}</strong>
+                      <span>{imagemServico ? "O recorte será salvo junto com as alterações." : "Escolha uma imagem para destacar seu serviço."}</span>
+                      <div className={styles.imagePickerActions}>
+                        <label className={styles.imageUploadAction}>
+                          <FaCloudUploadAlt aria-hidden="true" />
+                          {imagemPreviewUrl ? "Trocar foto" : "Escolher foto"}
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/webp"
+                            aria-label={t("services.image")}
+                            onChange={(event) => {
+                              selectImageForCrop(event.target.files?.[0] ?? null);
+                              event.currentTarget.value = "";
+                            }}
+                          />
+                        </label>
+                        {imagemPreviewUrl && (
+                          <button type="button" className={styles.cropEditButton} onClick={() => {
+                            if (imagemServico) {
+                              setCropFilename(imagemServico.name);
+                              setCropSource(URL.createObjectURL(imagemServico));
+                            } else {
+                              cropExistingImage();
+                            }
+                          }}>
+                            <FaCropAlt aria-hidden="true" /> Ajustar recorte
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 )}
+
                 {cropSource && (
                   <ServiceImageCrop source={cropSource} filename={cropFilename}
                     onCancel={() => setCropSource("")}
@@ -454,6 +481,7 @@ export default function Servicos() {
                     }}
                   />
                 )}
+                {!cropSource && <p className={styles.imageHelp}>JPG, PNG ou WebP. Você poderá mover e ampliar a foto antes de salvar.</p>}
               </div>
 
               <label>
