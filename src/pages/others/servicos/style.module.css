@@ -639,3 +639,54 @@
   .imageLargePreview { width:65px; height:65px; flex:0 0 65px; }
   .imagePickerActions { align-items:flex-start; }
 }
+
+/* O recorte e um dialogo proprio, acima do modal de edicao. Nenhum scroll e
+   necessario: a area quadrada encolhe quando a altura da tela e limitada. */
+.cropOverlay {
+  position:fixed; inset:0; z-index:9000; width:100vw; height:100dvh;
+  display:grid; place-items:center; padding:12px; box-sizing:border-box;
+  background:var(--theme-overlay); overflow:hidden; overscroll-behavior:none;
+}
+.cropDialog {
+  box-sizing:border-box; width:min(100%,420px);
+  max-height:calc(100dvh - 24px); min-width:0; min-height:0;
+  display:flex; flex-direction:column; align-items:stretch;
+  gap:10px; padding:16px;
+  border:1px solid var(--theme-border-strong); border-radius:16px;
+  background:var(--theme-surface); color:var(--theme-text);
+  box-shadow:0 24px 70px rgba(0,0,0,.4); overflow:hidden;
+}
+.cropDialogHeader { flex:0 0 auto; display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+.cropDialogHeader h2 { margin:0; font-size:19px; line-height:1.25; }
+.cropDialogHeader p { margin:3px 0 0; font-size:12px; color:var(--theme-text-muted); }
+.cropDialogHeader button {
+  display:grid; place-items:center; flex:0 0 32px; width:32px; height:32px;
+  border:0; border-radius:8px; background:var(--theme-surface-muted);
+  color:var(--theme-text); cursor:pointer; font-size:24px; line-height:1;
+}
+.cropDialog .cropEditor {
+  box-sizing:border-box; width:100%; padding:8px 0 0; min-width:0; min-height:0;
+  display:flex; flex-direction:column; align-items:center; gap:9px;
+  background:transparent; border:0; border-radius:0; overflow:hidden;
+}
+.cropDialog .cropHint { display:none; }
+.cropDialog .cropViewport {
+  flex:0 1 auto;
+  width:min(320px,calc(100vw - 80px),calc(100dvh - 245px));
+  min-width:0; max-width:100%;
+  aspect-ratio:1/1; height:auto; box-sizing:border-box;
+  border-radius:16px; overflow:hidden;
+}
+.cropDialog .cropZoomLabel, .cropDialog .cropZoom, .cropDialog .cropActions { flex:0 0 auto; width:min(320px,100%); }
+.cropDialog .cropZoomLabel { font-size:12px; min-height:16px; }
+.cropDialog .cropZoom { margin:0; }
+.cropDialog .cropActions { gap:8px; }
+.cropDialog .cropActions button { min-height:38px; }
+@media(max-height:540px) {
+  .cropDialog { gap:6px; padding:10px 12px; }
+  .cropDialogHeader h2 { font-size:16px; }
+  .cropDialogHeader p { display:none; }
+  .cropDialog .cropEditor { gap:5px; padding:0; }
+  .cropDialog .cropViewport { width:min(320px,calc(100vw - 80px),calc(100dvh - 180px)); }
+  .cropDialog .cropActions button { min-height:32px; }
+}
