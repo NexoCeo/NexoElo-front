@@ -1,7 +1,7 @@
 import { useSearchParams } from "react-router-dom";
 import AgendaBooking from "@/components/agenda-booking";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FaPlus, FaCalendarCheck, FaCalendarDay, FaRotate } from "react-icons/fa6";
+import { FaPlus, FaCalendarCheck, FaCalendarDay, FaRotate, FaFilter, FaClock, FaCircleCheck, FaCircleXmark } from "react-icons/fa6";
 import axios from "axios";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
@@ -73,6 +73,7 @@ export default function Agenda() {
   const { showNotification } = useNotification();
 
   const [bookingOpen, setBookingOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [searchParams] = useSearchParams();
   const requestedDate = searchParams.get("data");
   const requestedAppointmentId = Number(searchParams.get("agendamento") || "0");
@@ -405,6 +406,26 @@ export default function Agenda() {
         )}`
       : t("agenda.awaitingUpdate");
 
+  const statusTotals = useMemo(() => ({
+    completed: agendaItems.filter(item => ["CONCLUIDO", "CONCLUÍDO"].includes(item.status.trim().toUpperCase())).length,
+    cancelled: agendaItems.filter(item => item.status.trim().toUpperCase() === "CANCELADO").length,
+    scheduled: agendaItems.filter(item => !["CONCLUIDO", "CONCLUÍDO", "CANCELADO"].includes(item.status.trim().toUpperCase())).length,
+  }), [agendaItems]);
+  const timelineStart = 8;
+  const timelineEnd = 20;
+  const timelineItems = useMemo(() => agendaItems.map(item => {
+    const [hours, minutes] = item.horario.split(":").map(Number);
+    const startsAt = hours * 60 + minutes;
+    const duration = Math.max(30, 60);
+    return {
+      ...item,
+      start: Math.max(0, ((startsAt - timelineStart * 60) / ((timelineEnd - timelineStart) * 60)) * 100),
+      height: Math.max(5, (duration / ((timelineEnd - timelineStart) * 60)) * 100),
+      cancelled: item.status.trim().toUpperCase() === "CANCELADO",
+      completed: ["CONCLUIDO", "CONCLUÍDO"].includes(item.status.trim().toUpperCase()),
+    };
+  }), [agendaItems, agendamentos]);
+
   async function handleStatusChange(
     agendamentoId: number,
     status: "CANCELADO" | "CONCLUIDO",
@@ -458,22 +479,27 @@ export default function Agenda() {
   }
 
   return (
-    <main
-      className={styles.container}
-      style={{
-        backgroundColor:
-          theme.colors.background,
-        color: theme.colors.text,
-      }}
-    >
-      <aside
-        className={styles.sidebar}
-        aria-label={t("dashboard.period")}
-      >
+    <main className={styles.container} style={{ backgroundColor: theme.colors.background, color: theme.colors.text }}>
+      <header className={styles.topHeader}>
+        <div className={styles.headingTitle}>
+          <span className={styles.headingIcon}><FaCalendarDay aria-hidden="true" /></span>
+          <div><h1 id="agenda-title">Agenda</h1><p>Visualize e gerencie seus agendamentos.</p></div>
+        </div>
+        <div className={styles.topActions}>
+          <button type="button" className={styles.filterToggle} onClick={() => setFiltersOpen(open => !open)}
+            aria-expanded={filtersOpen} aria-controls="agenda-filters">
+            <FaFilter aria-hidden="true" /> Filtros <span aria-hidden="true">{filtersOpen ? "⌃" : "⌄"}</span>
+          </button>
+          {["AUTONOMO", "EMPRESA", "PROFISSIONAL"].includes(usuario?.Papel || "") && (
+            <button type="button" className={styles.newBookingButton} onClick={() => setBookingOpen(true)}>
+              <FaPlus aria-hidden="true" />{t("booking.new")}
+            </button>
+          )}
+        </div>
+      </header>
+      {filtersOpen && <div id="agenda-filters" className={styles.filtersPanel}>
         <div
-          className={
-            styles.viewControls
-          }
+          className={styles.viewControls}
         >
           <div
             className={
@@ -559,6 +585,19 @@ export default function Agenda() {
           )}
         </div>
 
+      </div>}
+      <section className={styles.metrics} aria-label="Resumo dos agendamentos da data selecionada">
+        <div className={styles.metric}><span className={styles.metricIcon}><FaCalendarDay /></span><div><strong>{agendaItems.length}</strong><span>Agendamentos no dia</span></div></div>
+        <div className={styles.metric}><span className={styles.metricIcon}><FaCircleCheck /></span><div><strong>{statusTotals.completed}</strong><span>Concluídos</span></div></div>
+        <div className={styles.metric}><span className={styles.metricIcon}><FaClock /></span><div><strong>{statusTotals.scheduled}</strong><span>Agendados</span></div></div>
+        <div className={styles.metric}><span className={styles.metricIcon}><FaCircleXmark /></span><div><strong>{statusTotals.cancelled}</strong><span>Cancelados</span></div></div>
+      </section>
+      <div className={styles.dayGrid}>
+      <aside
+        className={styles.sidebar}
+        aria-label={t("dashboard.period")}
+      >
+
         {viewMode === "month" ? (
           <Calendar
             selectedDate={selectedDate}
@@ -592,115 +631,46 @@ export default function Agenda() {
           {t("agenda.today")}
         </button>
 
-        {["AUTONOMO", "EMPRESA", "PROFISSIONAL"].includes(usuario?.Papel || "") && (
-          <button type="button" className={styles.newBookingButton} onClick={() => setBookingOpen(true)}>
-            <FaPlus aria-hidden="true" />{t("booking.new")}
-          </button>
-        )}
-        {podeGerenciar && (
-          <button
-            type="button"
-            className={styles.closeAllButton}
-            onClick={() => void handleCloseCurrentDay()}
-            disabled={closingDay}
-          >
-            <FaCalendarCheck aria-hidden="true" />
-            {closingDay ? t("agenda.closing") : t("agenda.closeAll")}
-          </button>
-        )}
+
+
       </aside>
-
-      <section
-        className={styles.content}
-        aria-labelledby="agenda-title"
-      >
-        <header
-          className={
-            styles.pageHeader
-          }
-        >
-          <div
-            className={
-              styles.titleGroup
-            }
-          >
-            <h1 id="agenda-title">
-              {selectedPeriodLabel}
-            </h1>
-
-            <div
-              className={
-                styles.updateInfo
-              }
-              role="status"
-              aria-live="polite"
-            >
-              <span
-                className={`${styles.liveDot} ${styles[realtimeStatus]}`}
-              />
-
-              <span>
-                {
-                  realtimeStatus === "connected" ? t("agenda.online") : realtimeStatus === "connecting" ? t("agenda.connecting") : realtimeStatus === "reconnecting" ? t("agenda.reconnecting") : t("agenda.offline")
-                }
-              </span>
-
-              <span
-                className={
-                  styles.separator
-                }
-                aria-hidden="true"
-              />
-
-              <span>
-                {lastUpdatedLabel}
-              </span>
+      <section className={styles.timelinePanel} aria-label="Horários do dia">
+        <div className={styles.panelHeader}>
+          <h2>{selectedPeriodLabel}</h2>
+          <span>{agendaItems.length} {agendaItems.length === 1 ? "agendamento" : "agendamentos"}</span>
+        </div>
+        <div className={styles.timelineCanvas}>
+          {Array.from({length:timelineEnd-timelineStart+1}, (_, index) => (
+            <div key={index} className={styles.hourRow} style={{top:`${index/(timelineEnd-timelineStart)*100}%`}}>
+              <span>{String(timelineStart+index).padStart(2,"0")}:00</span>
             </div>
+          ))}
+          <div className={styles.timelineEvents}>
+            {timelineItems.map(item => (
+              <div key={item.Id}
+                className={`${styles.timelineEvent} ${item.completed ? styles.eventCompleted : ""} ${item.cancelled ? styles.eventCancelled : ""}`}
+                style={{top:`${Math.min(98,item.start)}%`,height:`${Math.min(item.height,100-Math.min(98,item.start))}%`}}
+                title={`${item.servico} — ${item.cliente} — ${item.horario}`}>
+                <strong>{item.servico}</strong><small>{item.horario}</small>
+              </div>
+            ))}
           </div>
-
-          <div
-            className={
-              styles.headerActions
-            }
-          >
-            <span
-              className={styles.count}
-            >
-              {
-                agendaItems.length
-              }{" "}
-              {agendaItems.length ===
-              1
-                ? t("dashboard.oneAppointment")
-                : t("dashboard.manyAppointments")}
+        </div>
+      </section>
+      <section className={styles.content} aria-label="Agendamentos do dia">
+        <header className={styles.listPanelHeader}>
+          <h2>Agendamentos do dia <span>{agendaItems.length}</span></h2>
+          <div className={styles.headerActions}>
+            <span className={styles.updateInfo} role="status" aria-live="polite">
+              <span className={`${styles.liveDot} ${styles[realtimeStatus]}`} />
+              {realtimeStatus === "connected" ? t("agenda.online") : realtimeStatus === "connecting" ? t("agenda.connecting") : realtimeStatus === "reconnecting" ? t("agenda.reconnecting") : t("agenda.offline")}
             </span>
-
-            <button
-              type="button"
-              className={
-                styles.refreshButton
-              }
-              onClick={() =>
-                void loadAgenda(true)
-              }
-              disabled={
-                refreshing || loading
-              }
-              title={t("agenda.refresh")}
-              aria-label={t("agenda.refresh")}
-            >
-              <FaRotate
-                className={
-                  refreshing
-                    ? styles.rotating
-                    : undefined
-                }
-                aria-hidden="true"
-              />
+            <button type="button" className={styles.refreshButton} onClick={() => void loadAgenda(true)}
+              disabled={refreshing || loading} title={t("agenda.refresh")} aria-label={t("agenda.refresh")}>
+              <FaRotate className={refreshing ? styles.rotating : undefined} aria-hidden="true" />
             </button>
           </div>
         </header>
-
         <Card
           agendamentos={agendaItems}
           focusAppointmentId={Number.isSafeInteger(requestedAppointmentId) && requestedAppointmentId > 0 ? requestedAppointmentId : undefined}
@@ -710,7 +680,19 @@ export default function Agenda() {
           updatingId={updatingId}
           onStatusChange={podeGerenciar ? handleStatusChange : undefined}
         />
+        <div className={styles.closeDayAction}>        {podeGerenciar && (
+          <button
+            type="button"
+            className={styles.closeAllButton}
+            onClick={() => void handleCloseCurrentDay()}
+            disabled={closingDay}
+          >
+            <FaCalendarCheck aria-hidden="true" />
+            {closingDay ? t("agenda.closing") : t("agenda.closeAll")}
+          </button>
+        )}</div>
       </section>
+      </div>
       {bookingOpen && <AgendaBooking date={selectedDate} professionalId={profissionalId}
         onClose={() => setBookingOpen(false)}
         onCreated={day => {
