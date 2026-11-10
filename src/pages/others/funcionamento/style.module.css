@@ -686,3 +686,25 @@ input:focus-visible {
 @media(max-width:900px){.content{grid-template-columns:1fr}.summary{position:static;display:flex;grid-template-columns:none;gap:12px}.summaryTitle{grid-column:auto}.stepperItem{font-size:11px}.stepperItem:not(:last-child)::after{margin:0 5px}}
 @media(max-width:620px){.container{padding:12px}.stepper{overflow-x:auto;justify-content:flex-start;padding-bottom:7px;scrollbar-width:thin}.stepperItem{flex:0 0 auto}.stepperItem:not(:last-child)::after{width:16px;flex:0 0 16px}.editor{padding:13px}.availabilityOptions{grid-template-columns:1fr}.daysGrid{grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.dayButton{min-height:46px;padding:6px 2px}.dayButton strong{font-size:10px}.presets{justify-content:flex-start}.cardHeader{flex-wrap:wrap}.intervalRow{grid-template-columns:1fr 1fr 32px;gap:7px}.intervalName{grid-column:1/-1}.intervalDuration{grid-column:1/3;grid-row:auto}.removeButton{grid-column:3;grid-row:auto}.timeRange{grid-template-columns:1fr 1fr}.timeArrow{display:none}.summary{padding:13px}}
 @media(max-width:400px){.daysGrid{grid-template-columns:repeat(7,minmax(0,1fr))}.timeRange{grid-template-columns:1fr 1fr}.intervalRow{grid-template-columns:1fr 1fr 32px}}
+
+
+/* Disponibilidade: opções reais acessíveis, sem aparência nativa de botão. */
+.availabilityOptions button.availabilityOption {
+  appearance:none;
+  font:inherit;
+  color:inherit;
+  text-align:left;
+  cursor:pointer;
+  width:100%;
+}
+.availabilityOptions button.availabilityOption:hover:not(:disabled){
+  border-color:var(--theme-primary);
+}
+.availabilityOptions button.availabilityOption:focus-visible{
+  outline:2px solid var(--theme-primary);
+  outline-offset:3px;
+}
+.availabilityOptions button.availabilityOption:disabled{
+  cursor:not-allowed;
+  opacity:.7;
+}
