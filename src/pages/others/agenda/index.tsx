@@ -74,6 +74,22 @@ export default function Agenda() {
 
   const [bookingOpen, setBookingOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const filtersRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!filtersOpen) return;
+    const closeOnOutside = (event: PointerEvent) => {
+      if (!filtersRef.current?.contains(event.target as Node)) setFiltersOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setFiltersOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOnOutside);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutside);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [filtersOpen]);
   const [searchParams] = useSearchParams();
   const requestedDate = searchParams.get("data");
   const requestedAppointmentId = Number(searchParams.get("agendamento") || "0");
@@ -486,18 +502,12 @@ export default function Agenda() {
           <div><h1 id="agenda-title">Agenda</h1><p>Visualize e gerencie seus agendamentos.</p></div>
         </div>
         <div className={styles.topActions}>
+          <div className={styles.filterAnchor} ref={filtersRef}>
           <button type="button" className={styles.filterToggle} onClick={() => setFiltersOpen(open => !open)}
-            aria-expanded={filtersOpen} aria-controls="agenda-filters">
+            aria-expanded={filtersOpen} aria-haspopup="dialog" aria-controls="agenda-filters">
             <FaFilter aria-hidden="true" /> Filtros <span aria-hidden="true">{filtersOpen ? "⌃" : "⌄"}</span>
           </button>
-          {["AUTONOMO", "EMPRESA", "PROFISSIONAL"].includes(usuario?.Papel || "") && (
-            <button type="button" className={styles.newBookingButton} onClick={() => setBookingOpen(true)}>
-              <FaPlus aria-hidden="true" />{t("booking.new")}
-            </button>
-          )}
-        </div>
-      </header>
-      {filtersOpen && <div id="agenda-filters" className={styles.filtersPanel}>
+      {filtersOpen && <div id="agenda-filters" className={styles.filtersPanel} role="dialog" aria-label="Filtros da agenda">
         <div
           className={styles.viewControls}
         >
@@ -586,6 +596,14 @@ export default function Agenda() {
         </div>
 
       </div>}
+          </div>
+          {["AUTONOMO", "EMPRESA", "PROFISSIONAL"].includes(usuario?.Papel || "") && (
+            <button type="button" className={styles.newBookingButton} onClick={() => setBookingOpen(true)}>
+              <FaPlus aria-hidden="true" />{t("booking.new")}
+            </button>
+          )}
+        </div>
+      </header>
       <section className={styles.metrics} aria-label="Resumo dos agendamentos da data selecionada">
         <div className={styles.metric}><span className={styles.metricIcon}><FaCalendarDay /></span><div><strong>{agendaItems.length}</strong><span>Agendamentos no dia</span></div></div>
         <div className={styles.metric}><span className={styles.metricIcon}><FaCircleCheck /></span><div><strong>{statusTotals.completed}</strong><span>Concluídos</span></div></div>
