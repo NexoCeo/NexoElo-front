@@ -10,6 +10,8 @@ import {
   FaSave,
   FaTrash,
   FaPencilAlt,
+  FaSlidersH,
+  FaCheckCircle,
 } from "react-icons/fa";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
@@ -177,6 +179,7 @@ export default function Funcionamento() {
     ? timeToMinutes(config.HorarioFechamento) - timeToMinutes(config.HorarioAbertura)
     : 0;
   const horariosPorDia = config?.HorariosPorDia ?? {};
+  const temHorariosPersonalizados = diasSelecionados.some(dia => Boolean(horariosPorDia[dia.key]));
 
   useEffect(() => {
     async function loadFuncionamento() {
@@ -413,16 +416,42 @@ export default function Funcionamento() {
   return (
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
       <div className={styles.intro}><strong>{t("hours.intro")}</strong><span>{t("hours.introDesc")}</span></div>
+      <nav className={styles.stepper} aria-label="Etapas da configuração">
+        {["Disponibilidade", "Dias da semana", "Horários", "Intervalos", "Confirmação"].map((label,index) => (
+          <div className={styles.stepperItem} key={label}>
+            <span className={styles.stepperNumber}>{index + 1}</span>
+            <span>{label}</span>
+          </div>
+        ))}
+      </nav>
       <div className={styles.content}>
-        <form className={styles.editor} onSubmit={handleSubmit} noValidate>
+        <form id="funcionamento-form" className={styles.editor} onSubmit={handleSubmit} noValidate>
           {loading || !config ? (
             <LoadingState label={t("hours.loading")} variant="hours" embedded />
           ) : (
             <>
+              <section className={styles.availabilitySection} aria-label="Tipo de disponibilidade">
+                <div className={styles.titleGroup}>
+                  <span className={styles.step} style={{ backgroundColor: theme.colors.primary }}>1</span>
+                  <div><h2>Disponibilidade de atendimento</h2><p>Defina horários iguais ou personalizados para cada dia.</p></div>
+                </div>
+                <div className={styles.availabilityOptions}>
+                  <div className={`${styles.availabilityOption} ${!temHorariosPersonalizados ? styles.availabilitySelected : ""}`}>
+                    <FaCalendarAlt aria-hidden="true" />
+                    <span><strong>Horário padrão</strong><small>Mesmo horário para os dias selecionados</small></span>
+                    {!temHorariosPersonalizados && <FaCheckCircle aria-label="Selecionado" />}
+                  </div>
+                  <div className={`${styles.availabilityOption} ${temHorariosPersonalizados ? styles.availabilitySelected : ""}`}>
+                    <FaSlidersH aria-hidden="true" />
+                    <span><strong>Horários personalizados</strong><small>Defina horários diferentes para cada dia abaixo</small></span>
+                    {temHorariosPersonalizados && <FaCheckCircle aria-label="Selecionado" />}
+                  </div>
+                </div>
+              </section>
               <section className={styles.card} style={cardStyle}>
                 <div className={styles.cardHeader}>
                   <div className={styles.titleGroup}>
-                    <span className={styles.step} style={{ backgroundColor: theme.colors.primary }}>1</span>
+                    <span className={styles.step} style={{ backgroundColor: theme.colors.primary }}>2</span>
                     <div>
                       <h2 style={{ color: theme.colors.text }}>{t("hours.daysTitle")}</h2>
                       <p style={{ color: theme.colors.inactive }}>{t("hours.daysDesc")}</p>
@@ -464,7 +493,7 @@ export default function Funcionamento() {
               <section className={styles.card} style={cardStyle}>
                 <div className={styles.cardHeader}>
                   <div className={styles.titleGroup}>
-                    <span className={styles.step} style={{ backgroundColor: theme.colors.primary }}>2</span>
+                    <span className={styles.step} style={{ backgroundColor: theme.colors.primary }}>3</span>
                     <div>
                       <h2 style={{ color: theme.colors.text }}>{t("hours.timeTitle")}</h2>
                       <p style={{ color: theme.colors.inactive }}>{t("hours.timeDesc")}</p>
@@ -564,7 +593,7 @@ export default function Funcionamento() {
               <section className={styles.card} style={cardStyle}>
                 <div className={styles.cardHeader}>
                   <div className={styles.titleGroup}>
-                    <span className={styles.step} style={{ backgroundColor: theme.colors.primary }}>3</span>
+                    <span className={styles.step} style={{ backgroundColor: theme.colors.primary }}>4</span>
                     <div>
                       <h2 style={{ color: theme.colors.text }}>{t("hours.breaksTitle")}</h2>
                       <p style={{ color: theme.colors.inactive }}>{t("hours.breaksDesc")}</p>
@@ -638,15 +667,7 @@ export default function Funcionamento() {
                   {error && <p className={styles.error} role="alert">{error}</p>}
                   {success && <p className={styles.success}>{success}</p>}
                 </div>
-                <button
-                  type="submit"
-                  className={styles.saveButton}
-                  disabled={saving}
-                  style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
-                >
-                  <FaSave aria-hidden="true" />
-                  {saving ? t("profile.saving") : t("hours.save")}
-                </button>
+
               </div>
             </>
           )}
@@ -658,6 +679,10 @@ export default function Funcionamento() {
             <h2 style={{ color: theme.colors.text }}>{t("hours.summary")}</h2>
           </div>
 
+          <div className={styles.summaryBlock}>
+            <span style={{ color: theme.colors.inactive }}>Tipo de horário</span>
+            <strong style={{ color: theme.colors.text }}>{temHorariosPersonalizados ? "Personalizado" : "Padrão"}</strong>
+          </div>
           <div className={styles.summaryBlock}>
             <span style={{ color: theme.colors.inactive }}>{t("hours.summaryDays")}</span>
             <strong style={{ color: theme.colors.text }}>
@@ -696,6 +721,15 @@ export default function Funcionamento() {
               <small style={{ color: theme.colors.inactive }}>{t("hours.continuous")}</small>
             )}
           </div>
+          <div className={styles.readyNotice}>
+            <FaCheckCircle aria-hidden="true" />
+            <div><strong>Revise sua configuração</strong><span>Confira os dias, horários e intervalos antes de salvar.</span></div>
+          </div>
+          <button type="submit" form="funcionamento-form" className={styles.saveButton}
+            disabled={saving || loading || !config}
+            style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}>
+            <FaSave aria-hidden="true" /> {saving ? t("profile.saving") : t("hours.save")}
+          </button>
         </aside>
       </div>
     </main>
