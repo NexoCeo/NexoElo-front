@@ -21,6 +21,7 @@ import {
   FaWhatsapp,
 } from "react-icons/fa";
 import { useTheme } from "@/context/ThemeContext";
+import { getProfileImageUrl } from "@/components/header/profile-image";
 import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
 import {
@@ -622,6 +623,12 @@ export default function Profissionais() {
             <div className={styles.cardsBody}>
               {profissionais.map((profissional) => (
                 <div className={styles.professionalCard} key={profissional.Id || profissional.Email || profissional.Nome}>
+                  <img
+                    className={styles.professionalPhoto}
+                    src={getProfileImageUrl(profissional.FotoPerfil)}
+                    alt={`Foto de ${formatPersonName(profissional.Nome) || "profissional"}`}
+                    loading="lazy"
+                  />
                   <div className={styles.professionalName}>
                     <strong style={{ color: theme.colors.text }}>
                       {formatPersonName(profissional.Nome) || t("services.unnamed")}
