@@ -692,6 +692,7 @@ export default function Agenda() {
           </div>
         </header>
         <Card
+          compactAgenda
           agendamentos={agendaItems}
           focusAppointmentId={Number.isSafeInteger(requestedAppointmentId) && requestedAppointmentId > 0 ? requestedAppointmentId : undefined}
           loading={loading}
