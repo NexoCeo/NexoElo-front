@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { isAxiosError } from "axios";
 import {
   FaArrowRight,
@@ -168,6 +168,8 @@ export default function Funcionamento() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [availabilityMode, setAvailabilityMode] = useState<"padrao" | "personalizado">("padrao");
+  const personalizedBackup = useRef<FuncionamentoConfig["HorariosPorDia"]>({});
 
   const usuarioId = usuario?.Id ?? 0;
   const diasSelecionados = useMemo(
@@ -179,7 +181,7 @@ export default function Funcionamento() {
     ? timeToMinutes(config.HorarioFechamento) - timeToMinutes(config.HorarioAbertura)
     : 0;
   const horariosPorDia = config?.HorariosPorDia ?? {};
-  const temHorariosPersonalizados = diasSelecionados.some(dia => Boolean(horariosPorDia[dia.key]));
+  const temHorariosPersonalizados = availabilityMode === "personalizado";
 
   useEffect(() => {
     async function loadFuncionamento() {
@@ -193,11 +195,15 @@ export default function Funcionamento() {
         setError("");
         const data = await obterFuncionamento(usuarioId);
         setConfig(data);
+        personalizedBackup.current = { ...data.HorariosPorDia };
+        setAvailabilityMode(Object.keys(data.HorariosPorDia ?? {}).length > 0 ? "personalizado" : "padrao");
       } catch {
         const message = t("hours.loadError");
         setError(message);
         showNotification({ type: "error", title: t("hours.unavailable"), message });
         setConfig(criarFuncionamentoPadrao(usuarioId));
+        personalizedBackup.current = {};
+        setAvailabilityMode("padrao");
       } finally {
         setLoading(false);
       }
@@ -212,20 +218,64 @@ export default function Funcionamento() {
     setConfig((currentConfig) => currentConfig ? { ...currentConfig, ...nextConfig } : currentConfig);
   }
 
+  function chooseAvailabilityMode(mode: "padrao" | "personalizado") {
+    if (!config || mode === availabilityMode) return;
+    if (mode === "padrao") {
+      personalizedBackup.current = { ...config.HorariosPorDia };
+      updateConfig({ HorariosPorDia: {} });
+    } else {
+      const restored = { ...personalizedBackup.current, ...config.HorariosPorDia };
+      DIAS.filter(dia => config[dia.key]).forEach(dia => {
+        restored[dia.key] ??= {
+          Inicio: config.HorarioAbertura,
+          Fim: config.HorarioFechamento,
+          Intervalos: config.Intervalos.map(intervalo => ({ ...intervalo })),
+        };
+      });
+      updateConfig({ HorariosPorDia: restored });
+    }
+    setAvailabilityMode(mode);
+  }
+
   function toggleDia(dia: DiaFuncionamentoKey) {
     if (!config) return;
-    updateConfig({ [dia]: !config[dia] });
+    const selected = !config[dia];
+    if (selected && availabilityMode === "personalizado") {
+      updateConfig({
+        [dia]: true,
+        HorariosPorDia: {
+          ...config.HorariosPorDia,
+          [dia]: config.HorariosPorDia[dia] ?? personalizedBackup.current[dia] ?? {
+            Inicio: config.HorarioAbertura,
+            Fim: config.HorarioFechamento,
+            Intervalos: config.Intervalos.map(intervalo => ({ ...intervalo })),
+          },
+        },
+      });
+    } else {
+      updateConfig({ [dia]: selected });
+    }
   }
 
   function setDiasSelecionados(dias: Set<DiaFuncionamentoKey>) {
     if (!config) return;
-
-    updateConfig(
-      DIAS.reduce((result, dia) => {
-        result[dia.key] = dias.has(dia.key);
-        return result;
-      }, {} as Record<DiaFuncionamentoKey, boolean>),
-    );
+    const selection = DIAS.reduce((result, dia) => {
+      result[dia.key] = dias.has(dia.key);
+      return result;
+    }, {} as Record<DiaFuncionamentoKey, boolean>);
+    if (availabilityMode === "personalizado") {
+      const next = { ...config.HorariosPorDia };
+      DIAS.filter(dia => dias.has(dia.key)).forEach(dia => {
+        next[dia.key] ??= personalizedBackup.current[dia.key] ?? {
+          Inicio: config.HorarioAbertura,
+          Fim: config.HorarioFechamento,
+          Intervalos: config.Intervalos.map(intervalo => ({ ...intervalo })),
+        };
+      });
+      updateConfig({ ...selection, HorariosPorDia: next });
+    } else {
+      updateConfig(selection);
+    }
   }
 
   function personalizarDia(dia: DiaFuncionamentoKey) {
@@ -241,6 +291,7 @@ export default function Funcionamento() {
       };
     }
     updateConfig({ HorariosPorDia: next });
+    if (next[dia]) setAvailabilityMode("personalizado");
   }
 
   function alterarHorarioDia(dia: DiaFuncionamentoKey, campo: "Inicio" | "Fim", valor: string) {
@@ -391,6 +442,7 @@ export default function Funcionamento() {
       setSaving(true);
       const savedConfig = await salvarFuncionamento(usuarioId, config);
       setConfig(savedConfig);
+      personalizedBackup.current = { ...savedConfig.HorariosPorDia };
       setSuccess(t("hours.saved"));
       showNotification({
         type: "success",
@@ -436,16 +488,20 @@ export default function Funcionamento() {
                   <div><h2>Disponibilidade de atendimento</h2><p>Defina horários iguais ou personalizados para cada dia.</p></div>
                 </div>
                 <div className={styles.availabilityOptions}>
-                  <div className={`${styles.availabilityOption} ${!temHorariosPersonalizados ? styles.availabilitySelected : ""}`}>
+                  <button type="button" disabled={loading || saving || !config} aria-pressed={!temHorariosPersonalizados}
+                    onClick={() => chooseAvailabilityMode("padrao")}
+                    className={`${styles.availabilityOption} ${!temHorariosPersonalizados ? styles.availabilitySelected : ""}`}>
                     <FaCalendarAlt aria-hidden="true" />
                     <span><strong>Horário padrão</strong><small>Mesmo horário para os dias selecionados</small></span>
                     {!temHorariosPersonalizados && <FaCheckCircle aria-label="Selecionado" />}
-                  </div>
-                  <div className={`${styles.availabilityOption} ${temHorariosPersonalizados ? styles.availabilitySelected : ""}`}>
+                  </button>
+                  <button type="button" disabled={loading || saving || !config} aria-pressed={temHorariosPersonalizados}
+                    onClick={() => chooseAvailabilityMode("personalizado")}
+                    className={`${styles.availabilityOption} ${temHorariosPersonalizados ? styles.availabilitySelected : ""}`}>
                     <FaSlidersH aria-hidden="true" />
                     <span><strong>Horários personalizados</strong><small>Defina horários diferentes para cada dia abaixo</small></span>
                     {temHorariosPersonalizados && <FaCheckCircle aria-label="Selecionado" />}
-                  </div>
+                  </button>
                 </div>
               </section>
               <section className={styles.card} style={cardStyle}>
