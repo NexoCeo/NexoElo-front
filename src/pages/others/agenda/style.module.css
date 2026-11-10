@@ -689,3 +689,125 @@
 @media(max-width:1250px){.dayGrid{grid-template-columns:minmax(230px,1fr) minmax(260px,1.2fr)}.dayGrid>.content{grid-column:1/-1;min-height:300px}.metrics{gap:10px}.metric{padding:10px;gap:9px}}
 @media(max-width:850px){.container{padding:14px 12px 28px!important}.topHeader{align-items:flex-start;flex-wrap:wrap}.topActions{width:100%}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.dayGrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
 @media(max-width:620px){.headingIcon{width:53px;height:53px;flex-basis:53px;border-radius:13px}.headingTitle h1{font-size:26px}.headingTitle p{font-size:12px}.topActions .newBookingButton{flex:1;min-width:0;min-height:47px;padding:0 12px;font-size:12px}.filterToggle{min-height:47px;padding:0 13px;font-size:12px}.metric{min-height:75px}.metricIcon{width:43px;height:43px;flex-basis:43px;font-size:20px}.metric strong{font-size:22px}.metric div span{font-size:11px}.dayGrid{grid-template-columns:1fr}.dayGrid>.sidebar,.timelinePanel,.dayGrid>.content{min-height:0}.timelineCanvas{height:460px;flex:none}.dayGrid>.content{grid-column:auto}.filtersPanel{width:100%}}
+
+
+/* Agenda: apenas os painéis internos rolam — a rota cabe na viewport. */
+@media (min-width: 761px) {
+  .container {
+    height: calc(100dvh - 70px);
+    min-height: 0;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    align-content: stretch;
+    gap: 14px;
+    overflow: hidden;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+  }
+  .topHeader { min-height: 64px; margin: 0; }
+  .headingIcon { width: 62px; height: 62px; flex-basis: 62px; }
+  .metrics { margin: 0; gap: 12px; }
+  .metric { min-height: 80px; }
+  .dayGrid {
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
+    align-items: stretch;
+  }
+  .dayGrid > .sidebar,
+  .timelinePanel,
+  .dayGrid > .content {
+    min-height: 0 !important;
+    max-height: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  .dayGrid > .sidebar {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .timelinePanel { padding-bottom: 12px; }
+  .timelineViewport {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--theme-border-strong) transparent;
+  }
+  .timelineCanvas {
+    position: relative;
+    height: 720px;
+    min-height: 720px;
+    flex: none;
+    margin-top: 12px;
+    margin-bottom: 14px;
+  }
+  .dayGrid > .content > :global([class*="listSection"]) {
+    flex: 1 1 auto;
+    min-height: 0 !important;
+    max-height: none;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .dayGrid > .content :global([class*="listBody"]) {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    align-content: start;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--theme-border-strong) transparent;
+  }
+  .dayGrid > .content :global([class*="emptyState"]) {
+    flex: 1 1 auto;
+    min-height: 0 !important;
+    overflow-y: auto;
+  }
+  .listPanelHeader, .panelHeader, .closeDayAction { flex-shrink: 0; }
+  .closeDayAction {
+    margin-top: 0;
+    padding: 9px 13px;
+    border-top: 1px solid var(--theme-bottom);
+  }
+  .closeDayAction .closeAllButton { min-height: 37px; }
+  .timelineViewport::-webkit-scrollbar,
+  .dayGrid > .content :global([class*="listBody"])::-webkit-scrollbar,
+  .dayGrid > .sidebar::-webkit-scrollbar { width: 6px; }
+  .timelineViewport::-webkit-scrollbar-thumb,
+  .dayGrid > .content :global([class*="listBody"])::-webkit-scrollbar-thumb,
+  .dayGrid > .sidebar::-webkit-scrollbar-thumb { background: var(--theme-border-strong); border-radius: 999px; }
+}
+@media (min-width: 761px) and (max-width: 1250px) {
+  /* Mantém as três colunas existentes inclusive em notebooks. */
+  .dayGrid { grid-template-columns: minmax(210px, 1fr) minmax(235px, 1.12fr) minmax(260px, 1.18fr); }
+  .dayGrid > .content { grid-column: auto; }
+  .metricIcon { width: 44px; height: 44px; flex-basis: 44px; font-size: 21px; }
+  .metric strong { font-size: 23px; }
+}
+@media (min-width: 761px) and (max-height: 760px) {
+  .container { gap: 9px; padding-top: 8px !important; padding-bottom: 8px !important; }
+  .topHeader { min-height: 54px; }
+  .headingIcon { width: 50px; height: 50px; flex-basis: 50px; }
+  .headingTitle h1 { font-size: 26px; }
+  .headingTitle p { margin-top: 3px; font-size: 12px; }
+  .metrics { gap: 9px; }
+  .metric { min-height: 66px; padding: 9px; }
+  .metricIcon { width: 40px; height: 40px; flex-basis: 40px; }
+  .metric strong { font-size: 21px; }
+  .dayGrid > .sidebar { padding: 9px; }
+  .panelHeader { padding-bottom: 8px; }
+  .timelinePanel { padding-top: 11px; }
+  .listPanelHeader { min-height: 56px; padding: 10px 12px; }
+}
+@media (max-width: 760px) {
+  /* Telas estreitas mantêm rolagem natural para não cortar controles. */
+  .container { overflow: visible; }
+  .timelineViewport { min-height: 0; overflow-y: auto; max-height: 440px; }
+  .timelineCanvas { height: 720px; min-height: 720px; flex: none; }
+  .dayGrid > .content :global([class*="listBody"]) { max-height: 420px; overflow-y: auto; }
+}
