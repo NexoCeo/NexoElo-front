@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
-import { FaCalendarXmark, FaCheck, FaXmark } from "react-icons/fa6";
+import { FaCalendarXmark, FaCheck, FaXmark, FaScissors } from "react-icons/fa6";
 import styles from "./style.module.css";
 import LoadingState from "@/components/loading-state";
 import { useLanguage } from "@/context/LanguageContext";
@@ -16,6 +16,7 @@ export type AgendaCardItem = {
 
 interface CardProps {
   agendamentos: AgendaCardItem[];
+  compactAgenda?: boolean;
   loading: boolean;
   error: string;
   selectedDateLabel: string;
@@ -37,6 +38,7 @@ function statusClass(status: string) {
 
 export function Card({
   agendamentos,
+  compactAgenda = false,
   loading,
   error,
   selectedDateLabel,
@@ -96,12 +98,12 @@ const labelStatus = (status: string) => {
     else resizePair(index, desired - widths[index], widths);
   }
   return (
-    <div className={styles.listSection} ref={listRef} style={gridStyle}>
+    <div className={`${styles.listSection} ${compactAgenda ? styles.agendaCompact : ""}`} ref={listRef} style={compactAgenda ? undefined : gridStyle}>
       <div className={styles.listHeader}>
-        {labels.map((label, index) => (
+        {(compactAgenda ? [t("common.time"), t("common.customer"), t("common.service"), t("common.professional"), t("common.status"), t("common.actions")] : labels).map((label, index) => (
           <div className={styles.columnTitle} key={label} data-column={index}>
             <span>{label}</span>
-            {index < labels.length - 1 && (
+            {!compactAgenda && index < labels.length - 1 && (
               <span className={styles.resizeHandle} role="separator" aria-label={"Redimensionar coluna " + label}
                 aria-orientation="vertical" tabIndex={0}
                 title="Arraste para ajustar. Clique duas vezes para ajuste automático."
@@ -129,12 +131,18 @@ const labelStatus = (status: string) => {
           {agendamentos.map((appointment) => (
             <article key={appointment.Id} data-agendamento-id={appointment.Id} className={`${styles.listItem} ${appointment.Id === focusAppointmentId ? styles.focusedAppointment : ""}`}>
               <div className={styles.patient} data-label="Cliente" data-column={0}>
-                <span className={`${styles.statusDot} ${statusClass(appointment.status)}`} aria-hidden="true" />
+                {compactAgenda ? <span className={styles.initialAvatar} aria-hidden="true">{appointment.cliente.trim().split(/\s+/).slice(0, 2).map(name => name[0]).join("").toUpperCase()}</span> : <span className={`${styles.statusDot} ${statusClass(appointment.status)}`} aria-hidden="true" />}
                 <strong>{appointment.cliente}</strong>
               </div>
-              <div data-label="Serviço" data-column={1}>{appointment.servico}</div>
-              <div data-label="Profissional" data-column={2}>{appointment.profissional}</div>
-              <div className={styles.time} data-label="Horário" data-column={3}>{appointment.horario}</div>
+              <div className={compactAgenda ? styles.compactService : undefined} data-label="Serviço" data-column={1}>
+                {compactAgenda && <FaScissors aria-hidden="true" />}
+                <span>{appointment.servico}</span>
+              </div>
+              <div className={compactAgenda ? styles.compactProfessional : undefined} data-label="Profissional" data-column={2}>
+                {compactAgenda && <span className={styles.professionalAvatar} aria-hidden="true">{appointment.profissional.trim().split(/\s+/).slice(0, 2).map(name => name[0]).join("").toUpperCase()}</span>}
+                <span>{appointment.profissional}</span>
+              </div>
+              <div className={styles.time} data-label="Horário" data-column={3}><span>{appointment.horario}</span></div>
               <div data-label="Status" data-column={4}>
                 <span className={`${styles.statusBadge} ${statusClass(appointment.status)}`}>
                   {labelStatus(appointment.status)}
