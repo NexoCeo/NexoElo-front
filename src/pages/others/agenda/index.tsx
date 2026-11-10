@@ -658,7 +658,7 @@ export default function Agenda() {
         </div>
       </section>
       <section className={styles.content} aria-label="Agendamentos do dia">
-        <header className={styles.listPanelHeader}>
+        <header className={styles.listPanelHeader} title={lastUpdatedLabel}>
           <h2>Agendamentos do dia <span>{agendaItems.length}</span></h2>
           <div className={styles.headerActions}>
             <span className={styles.updateInfo} role="status" aria-live="polite">
