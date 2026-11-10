@@ -840,3 +840,30 @@
   width: 0;
   height: 0;
 }
+
+
+/* Corrige a regra antiga .content > :last-child (min-height:450px):
+   o rodapé fica sempre no fundo do painel, sem ocupar a área da lista. */
+.dayGrid > .content > .closeDayAction {
+  flex: 0 0 auto;
+  min-height: 0 !important;
+  height: auto;
+  margin-top: auto;
+  padding: 12px 14px;
+  border: 0;
+  border-top: 1px solid var(--theme-bottom);
+  border-radius: 0;
+  background: var(--theme-surface);
+  box-shadow: none;
+  overflow: visible;
+}
+.dayGrid > .content > .closeDayAction .closeAllButton {
+  width: 100%;
+  min-height: 41px;
+}
+@media (min-width: 761px) {
+  .dayGrid > .content > :global([class*="listSection"]) {
+    flex: 1 1 0%;
+    min-height: 0 !important;
+  }
+}
