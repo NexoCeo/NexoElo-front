@@ -21,7 +21,6 @@ import {
   FaWhatsapp,
   FaChartLine,
   FaSearch,
-  FaChevronRight,
   FaCheckCircle,
   FaTimesCircle,
   FaUsers,
@@ -162,7 +161,6 @@ export default function Profissionais() {
   const [solicitacoesError, setSolicitacoesError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"TODOS" | "APROVADO" | "PENDENTE" | "RECUSADO">("TODOS");
-  const [pendingRequestsCount, setPendingRequestsCount] = useState<number | null>(null);
 
   const empresaId = usuario?.Id ?? 0;
   const isEmpresa = usuario?.Papel === "EMPRESA";
@@ -196,15 +194,6 @@ export default function Profissionais() {
 
     loadProfissionais();
   }, [empresaId, isEmpresa, showNotification]);
-
-  useEffect(() => {
-    if (!empresaId || !isEmpresa) return;
-    let active = true;
-    listarSolicitacoesVinculo(empresaId)
-      .then(items => { if (active) setPendingRequestsCount(items.length); })
-      .catch(() => { if (active) setPendingRequestsCount(null); });
-    return () => { active = false; };
-  }, [empresaId, isEmpresa]);
 
   const getStatus = (professional: Profissional) => {
     const status = professional.VinculoStatus?.trim().toUpperCase();
@@ -434,7 +423,6 @@ export default function Profissionais() {
     try {
       const fetchedRequests = await listarSolicitacoesVinculo(empresaId);
       setSolicitacoes(fetchedRequests);
-      setPendingRequestsCount(fetchedRequests.length);
     } catch {
       const message = "Nao foi possivel carregar as solicitacoes pendentes.";
       setSolicitacoesError(message);
@@ -467,7 +455,6 @@ export default function Profissionais() {
       setSolicitacoes((items) =>
         items.filter((item) => item.VinculoId !== solicitacao.VinculoId),
       );
-      setPendingRequestsCount(current => current === null ? null : Math.max(0, current - 1));
       if (status === "APROVADO") await refreshProfissionais();
       showNotification({
         type: "success",
@@ -633,14 +620,6 @@ export default function Profissionais() {
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
       {error && <p className={styles.error}>{error}</p>}
 
-      <section className={styles.professionalsIntro} aria-label="Profissionais">
-        <span className={styles.introIcon}><FaUsers aria-hidden="true" /></span>
-        <div>
-          <h1>Profissionais</h1>
-          <p>Gerencie os profissionais vinculados à sua empresa.</p>
-        </div>
-      </section>
-
       <section className={styles.floatingActions}>
         <div className={styles.headerActions}>
           <button
@@ -669,13 +648,6 @@ export default function Profissionais() {
         <div className={styles.metricCard}><span className={styles.metricIcon}><FaClock aria-hidden="true" /></span><div><strong>{statusCounts.PENDENTE}</strong><span>Pendentes</span></div></div>
         <div className={styles.metricCard}><span className={styles.metricIcon}><FaTimesCircle aria-hidden="true" /></span><div><strong>{statusCounts.RECUSADO}</strong><span>Recusados</span></div></div>
       </section>
-
-      <button type="button" className={styles.requestsBanner} onClick={() => void openSolicitacoesModal()}>
-        <span className={styles.requestsIcon}><FaLink aria-hidden="true" /></span>
-        <span className={styles.requestsCopy}><strong>Solicitações de vínculo</strong><small>Profissionais aguardando aprovação para se vincularem à sua empresa.</small></span>
-        <span className={styles.requestsBadge}>{pendingRequestsCount === null ? "—" : `${pendingRequestsCount} ${pendingRequestsCount === 1 ? "solicitação" : "solicitações"}`}</span>
-        <FaChevronRight aria-hidden="true" className={styles.requestsChevron} />
-      </button>
 
       <section className={styles.professionalTools} aria-label="Buscar e filtrar profissionais">
         <label className={styles.searchBox}>
