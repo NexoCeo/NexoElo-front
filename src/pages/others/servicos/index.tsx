@@ -3,7 +3,7 @@ import { isAxiosError } from "axios";
 import { consultarAssinatura, type AssinaturaAtual } from "@/services/assinatura-service";
 import UpgradePlanModal from "@/components/upgrade-plan-modal";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FaCloudUploadAlt, FaCropAlt, FaEllipsisV, FaImage, FaPen, FaPlus, FaTimes } from "react-icons/fa";
+import { FaCloudUploadAlt, FaCropAlt, FaEllipsisV, FaImage, FaPen, FaPlus, FaTimes, FaSearch, FaClock, FaTags, FaDollarSign, FaCheckCircle } from "react-icons/fa";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
@@ -46,12 +46,35 @@ export default function Servicos() {
   const [cropFilename, setCropFilename] = useState("servico");
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [durationFilter, setDurationFilter] = useState<"TODOS" | "ATE30" | "ATE60" | "ACIMA60">("TODOS");
   const [upgradePlan, setUpgradePlan] = useState<{ plan: "BASICO" | "INTERMEDIARIO"; limit: number } | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   const ownerId = usuario?.Id ?? 0;
   const isEmpresa = usuario?.Papel === "EMPRESA";
   const isAutonomo = usuario?.Papel === "AUTONOMO";
+
+  const durationCounts = useMemo(() => ({
+    TODOS: servicos.length,
+    ATE30: servicos.filter(item => (item.TempoEstimadoMinutos || 0) <= 30).length,
+    ATE60: servicos.filter(item => (item.TempoEstimadoMinutos || 0) > 30 && (item.TempoEstimadoMinutos || 0) <= 60).length,
+    ACIMA60: servicos.filter(item => (item.TempoEstimadoMinutos || 0) > 60).length,
+  }), [servicos]);
+  const averagePrice = servicos.length ? servicos.reduce((sum, item) => sum + (Number(item.Valor) || 0), 0) / servicos.length : 0;
+  const averageDuration = servicos.length ? Math.round(servicos.reduce((sum, item) => sum + (Number(item.TempoEstimadoMinutos) || 0), 0) / servicos.length) : 0;
+  const withImage = servicos.filter(item => Boolean(getUploadedImageUrl(item.ImagemServico))).length;
+  const filteredServices = useMemo(() => {
+    const term = searchTerm.trim().toLocaleLowerCase("pt-BR");
+    return servicos.filter(item => {
+      const minutes = item.TempoEstimadoMinutos || 0;
+      const matchesDuration = durationFilter === "TODOS" ||
+        (durationFilter === "ATE30" && minutes <= 30) ||
+        (durationFilter === "ATE60" && minutes > 30 && minutes <= 60) ||
+        (durationFilter === "ACIMA60" && minutes > 60);
+      return matchesDuration && (!term || item.NomeServico.toLocaleLowerCase("pt-BR").includes(term));
+    });
+  }, [servicos, durationFilter, searchTerm]);
 
   const valorNumber = useMemo(() => {
     const normalizedValue = valor.replace(/\./g, "").replace(",", ".");
@@ -293,6 +316,29 @@ export default function Servicos() {
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
       {error && <p className={styles.error}>{error}</p>}
 
+      <section className={styles.serviceMetrics} aria-label="Resumo dos serviços">
+        <div className={styles.metricCard}><span className={styles.metricIcon}><FaTags aria-hidden="true" /></span><div><strong>{servicos.length}</strong><span>Serviços cadastrados</span></div></div>
+        <div className={styles.metricCard}><span className={styles.metricIcon}><FaDollarSign aria-hidden="true" /></span><div><strong>{formatCurrency(averagePrice)}</strong><span>Preço médio</span></div></div>
+        <div className={styles.metricCard}><span className={styles.metricIcon}><FaClock aria-hidden="true" /></span><div><strong>{averageDuration} min</strong><span>Duração média</span></div></div>
+        <div className={styles.metricCard}><span className={styles.metricIcon}><FaCheckCircle aria-hidden="true" /></span><div><strong>{withImage}</strong><span>Com imagem</span></div></div>
+      </section>
+      <section className={styles.serviceTools} aria-label="Buscar e filtrar serviços">
+        <label className={styles.searchBox}>
+          <FaSearch aria-hidden="true" />
+          <input type="search" value={searchTerm} onChange={event => setSearchTerm(event.target.value)}
+            placeholder="Buscar serviço por nome..." aria-label="Buscar serviços" />
+        </label>
+        <div className={styles.durationFilters} aria-label="Filtrar por duração">
+          {(["TODOS", "ATE30", "ATE60", "ACIMA60"] as const).map(filter => (
+            <button type="button" key={filter}
+              className={durationFilter === filter ? styles.durationFilterActive : ""}
+              aria-pressed={durationFilter === filter}
+              onClick={() => setDurationFilter(filter)}>
+              {filter === "TODOS" ? "Todos" : filter === "ATE30" ? "Até 30 min" : filter === "ATE60" ? "31–60 min" : "Acima de 60 min"} ({durationCounts[filter]})
+            </button>
+          ))}
+        </div>
+      </section>
       <section className={styles.tableWrap}>
         {loading ? (
           <div className={styles.cardList} aria-label={t("services.loading")}>
@@ -308,9 +354,9 @@ export default function Servicos() {
               </div>
             ))}
           </div>
-        ) : servicos.length === 0 ? (
+        ) : filteredServices.length === 0 ? (
           <p className={styles.feedback} style={{ color: theme.colors.inactive }}>
-            {t("services.empty")}
+            {servicos.length > 0 ? "Nenhum serviço encontrado para os filtros selecionados." : t("services.empty")}
           </p>
         ) : (
           <div className={styles.cardList}>
@@ -322,7 +368,7 @@ export default function Servicos() {
                 <span className={styles.actionsHeader}>{t("common.actions")}</span>
             </div>
             <div className={styles.cardsBody}>
-              {servicos.map((servico) => (
+              {filteredServices.map((servico) => (
                 <div className={styles.serviceCard} key={servico.Id || servico.NomeServico}>
                   <div className={styles.cardService}>
                     <div className={styles.serviceIdentity}>
