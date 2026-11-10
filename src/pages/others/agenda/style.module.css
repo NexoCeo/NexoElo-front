@@ -811,3 +811,32 @@
   .timelineCanvas { height: 720px; min-height: 720px; flex: none; }
   .dayGrid > .content :global([class*="listBody"]) { max-height: 420px; overflow-y: auto; }
 }
+
+
+/* Scrollbar compacta apenas nos elementos roláveis de Agendamentos do dia.
+   Inclui o pseudo-elemento dentro de :global para CSS Modules preservar o seletor WebKit. */
+.dayGrid > .content :global(*) {
+  scrollbar-width: thin;
+  scrollbar-color: var(--theme-border-strong) transparent;
+}
+.dayGrid > .content :global(*::-webkit-scrollbar) {
+  width: 6px;
+  height: 6px;
+}
+.dayGrid > .content :global(*::-webkit-scrollbar-track) {
+  background: transparent;
+  border: 0;
+}
+.dayGrid > .content :global(*::-webkit-scrollbar-thumb) {
+  background: var(--theme-border-strong);
+  border-radius: 999px;
+  border: 0;
+}
+.dayGrid > .content :global(*::-webkit-scrollbar-thumb:hover) {
+  background: var(--theme-text-muted);
+}
+.dayGrid > .content :global(*::-webkit-scrollbar-button) {
+  display: none;
+  width: 0;
+  height: 0;
+}
