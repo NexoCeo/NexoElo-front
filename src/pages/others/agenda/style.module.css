@@ -915,3 +915,102 @@
     width:min(300px,calc(100vw - 24px));
   }
 }
+
+
+/* A variante exclusiva do painel substitui a disposição antiga de sete células.
+   Mantém o tamanho fixo do painel, sua rolagem interna e o rodapé da Agenda. */
+.dayGrid > .content :global([class*="agendaCompact"]) {
+  flex: 1 1 0%;
+  min-height: 0 !important;
+  max-height: none;
+  overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
+}
+.dayGrid > .content :global([class*="agendaCompact"]) :global([class*="listHeader"]) {
+  display: grid !important;
+  min-height: 38px;
+  flex: 0 0 38px;
+  grid-template-columns: 74px minmax(0, 1fr) 106px 56px !important;
+  gap: 9px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--theme-bottom);
+}
+.dayGrid > .content :global([class*="agendaCompact"]) :global([class*="listHeader"]) > :global([class*="columnTitle"]):nth-child(3),
+.dayGrid > .content :global([class*="agendaCompact"]) :global([class*="listHeader"]) > :global([class*="columnTitle"]):nth-child(4) {
+  display: none;
+}
+.dayGrid > .content :global([class*="agendaCompact"]) :global([class*="listBody"]) {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: grid;
+  grid-auto-rows: max-content;
+  align-content: start;
+  gap: 9px;
+  padding: 10px;
+}
+.dayGrid > .content :global([class*="agendaCompact"]) :global([class*="listItem"]) {
+  display: grid !important;
+  width: 100%;
+  min-height: 101px;
+  grid-template-columns: 75px minmax(0, 1fr) minmax(87px, auto) !important;
+  grid-template-rows: repeat(3, minmax(22px,auto)) !important;
+  gap: 5px 10px;
+  padding: 11px 12px 11px 14px !important;
+  background: var(--theme-surface-muted);
+}
+.dayGrid > .content :global([class*="agendaCompact"]) :global([class*="listItem"]) > div {
+  display: flex !important;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.dayGrid > .content :global([class*="agendaCompact"]) :global([class*="listItem"]) > div::before {
+  display: none !important;
+}
+.dayGrid > .content :global([class*="agendaCompact"]) :global([class*="time"]) {
+  grid-column: 1 !important;
+  grid-row: 1 / 4 !important;
+  align-self: center;
+}
+.dayGrid > .content :global([class*="agendaCompact"]) :global([class*="patient"]) {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  align-self: center;
+}
+.dayGrid > .content :global([class*="agendaCompact"]) :global([class*="compactService"]) {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+}
+.dayGrid > .content :global([class*="agendaCompact"]) :global([class*="compactProfessional"]) {
+  grid-column: 2 !important;
+  grid-row: 3 !important;
+}
+.dayGrid > .content :global([class*="agendaCompact"]) :global([class*="listItem"]) > div:nth-child(5) {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  justify-self: end;
+}
+.dayGrid > .content :global([class*="agendaCompact"]) :global([class*="value"]) {
+  grid-column: 3 !important;
+  grid-row: 2 !important;
+  justify-self: end;
+  align-self: center;
+}
+.dayGrid > .content :global([class*="agendaCompact"]) :global([class*="actions"]) {
+  grid-column: 3 !important;
+  grid-row: 3 !important;
+  justify-self: end;
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-end;
+}
+@media (max-width: 760px) {
+  .dayGrid > .content :global([class*="agendaCompact"]) :global([class*="listBody"]) {
+    max-height: 420px;
+  }
+}
