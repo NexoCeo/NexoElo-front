@@ -639,6 +639,7 @@ export default function Agenda() {
           <h2>{selectedPeriodLabel}</h2>
           <span>{agendaItems.length} {agendaItems.length === 1 ? "agendamento" : "agendamentos"}</span>
         </div>
+        <div className={styles.timelineViewport}>
         <div className={styles.timelineCanvas}>
           {Array.from({length:timelineEnd-timelineStart+1}, (_, index) => (
             <div key={index} className={styles.hourRow} style={{top:`${index/(timelineEnd-timelineStart)*100}%`}}>
@@ -655,6 +656,7 @@ export default function Agenda() {
               </div>
             ))}
           </div>
+        </div>
         </div>
       </section>
       <section className={styles.content} aria-label="Agendamentos do dia">
