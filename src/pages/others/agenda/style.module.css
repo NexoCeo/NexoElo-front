@@ -406,3 +406,211 @@
 
 .newBookingButton{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:38px;padding:9px 12px;border:1px solid #2563eb;border-radius:6px;background:#2563eb;color:#fff;font:inherit;font-weight:700;cursor:pointer}
 .newBookingButton:hover{background:#1d4ed8}.newBookingButton:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+
+
+/* Agenda — atualização visual isolada. Não altera a estrutura ou a lógica do sistema. */
+.container{
+  --agenda-panel:var(--theme-surface);
+  --agenda-border:var(--theme-bottom);
+  --agenda-ink:var(--theme-text);
+  --agenda-muted:var(--theme-text-muted);
+  width:100%;
+  grid-template-columns:minmax(270px,340px) minmax(0,1fr);
+  align-items:start;
+  gap:16px;
+  padding:16px clamp(16px,2.1vw,34px) 34px;
+}
+.sidebar{
+  position:sticky;
+  top:80px;
+  gap:12px;
+  min-width:0;
+}
+.content{min-width:0;display:flex;flex-direction:column}
+.pageHeader{
+  min-height:84px;
+  align-items:center;
+  padding:4px 0 18px;
+  margin:0 0 14px;
+  gap:14px;
+  border-bottom:1px solid var(--agenda-border);
+}
+.titleGroup h1{
+  font-size:clamp(1.4rem,2vw,1.9rem);
+  font-weight:800;
+  letter-spacing:-.035em;
+  line-height:1.17;
+}
+.updateInfo{gap:9px;margin-top:10px;font-size:12px;line-height:1.5}
+.liveDot{width:7px;height:7px;flex-basis:7px}
+.headerActions{gap:9px}
+.count{
+  min-height:39px;
+  padding:0 13px;
+  background:var(--agenda-panel);
+  border:1px solid var(--agenda-border);
+  border-radius:12px;
+  font-size:12px;
+  font-weight:700;
+}
+.refreshButton{
+  min-height:39px;
+  width:39px;height:39px;
+  border-color:var(--agenda-border);
+  background:var(--agenda-panel);
+  border-radius:11px;
+}
+.refreshButton:hover:not(:disabled){background:var(--theme-primary-soft)}
+.viewControls{
+  padding:15px;
+  gap:13px;
+  border:1px solid var(--agenda-border);
+  border-radius:16px;
+  background:var(--agenda-panel);
+  box-shadow:0 4px 22px rgba(0,0,0,.045);
+}
+.segmented{
+  padding:4px;
+  gap:4px;
+  border:1px solid var(--agenda-border);
+  border-radius:11px;
+  background:var(--theme-surface-muted);
+}
+.segmented button{
+  min-height:41px;
+  border-radius:9px;
+  font-size:12px;
+  font-weight:750;
+}
+.segmented button.activeSegment{
+  background:var(--theme-primary);
+  box-shadow:0 4px 12px rgba(37,99,235,.18);
+}
+.professionalFilter{
+  gap:7px;
+  font-size:12px;
+  font-weight:700;
+}
+.professionalFilter select{
+  min-height:43px;
+  border:1px solid var(--agenda-border);
+  border-radius:11px;
+  background:var(--theme-surface-muted);
+  padding-inline:13px 34px;
+  font-size:13px;
+}
+.todayButton,.newBookingButton,.closeAllButton{
+  min-height:45px;
+  border-radius:11px;
+  font-size:13px;
+  font-weight:750;
+}
+.todayButton{
+  border:1px solid var(--theme-border-strong);
+  color:var(--agenda-ink);
+  background:var(--agenda-panel);
+}
+.todayButton:hover:not(:disabled){
+  background:var(--theme-surface-hover);
+  border-color:var(--theme-primary);
+}
+.todayButton:disabled{
+  color:var(--agenda-muted);
+  background:var(--agenda-panel);
+  border-color:var(--agenda-border);
+  opacity:.65;
+}
+.newBookingButton{
+  border-color:var(--theme-primary);
+  background:var(--theme-primary);
+  color:var(--theme-on-primary);
+  box-shadow:0 8px 18px rgba(37,99,235,.18);
+}
+.newBookingButton:hover{background:var(--theme-primary-hover)}
+.closeAllButton{
+  border:1px solid var(--theme-success);
+  background:var(--theme-success-soft);
+  color:var(--theme-success-text);
+}
+/* Os componentes de calendário e lista são existentes; as regras ficam
+   limitadas à página de Agenda para não afetar Dashboard ou outras telas. */
+.sidebar > :not(.viewControls):not(button){
+  border:1px solid var(--agenda-border);
+  background:var(--agenda-panel);
+  border-radius:16px;
+  box-shadow:0 5px 22px rgba(0,0,0,.045);
+}
+.content > :last-child{
+  min-height:450px;
+  border:1px solid var(--agenda-border);
+  background:var(--agenda-panel);
+  border-radius:16px;
+  box-shadow:0 5px 22px rgba(0,0,0,.045);
+}
+.content > :last-child :global([class*="listHeader"]){
+  min-height:54px;
+  background:var(--theme-surface-muted);
+  border-bottom:1px solid var(--agenda-border);
+  color:var(--agenda-muted);
+  font-size:11px;
+  letter-spacing:.035em;
+}
+.content > :last-child :global([class*="listItem"]){
+  min-height:76px;
+  margin:0;
+  border-bottom:1px solid var(--agenda-border);
+  font-size:12px;
+}
+.content > :last-child :global([class*="listItem"]):hover{
+  background:var(--theme-surface-hover);
+}
+.content > :last-child :global([class*="statusBadge"]){
+  min-height:27px;
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:10px;
+  letter-spacing:.01em;
+}
+.content > :last-child :global([class*="actionButton"]){
+  border-radius:9px;
+  min-width:30px;
+  min-height:30px;
+}
+.content > :last-child :global([class*="emptyState"]){
+  min-height:320px;
+  gap:9px;
+}
+.actionFeedback{border-radius:12px}
+@media(min-width:1280px){
+  .container{grid-template-columns:minmax(290px,350px) minmax(0,1fr)}
+}
+@media(max-width:1080px){
+  .container{grid-template-columns:minmax(230px,290px) minmax(0,1fr);gap:12px}
+  .pageHeader{flex-wrap:wrap}
+}
+@media(max-width:960px){
+  .container{grid-template-columns:1fr;gap:18px;padding:12px 16px 30px}
+  .sidebar{position:static;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:11px}
+  .sidebar > :not(.viewControls):not(button){grid-column:1 / -1}
+  .viewControls{grid-column:1 / -1}
+  .pageHeader{min-height:0;flex-direction:row;align-items:center}
+}
+@media(max-width:640px){
+  .container{padding:8px 12px 24px;gap:18px}
+  .sidebar{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .viewControls{padding:12px}
+  .todayButton,.newBookingButton,.closeAllButton{min-height:43px;font-size:12px}
+  .pageHeader{flex-direction:column;align-items:stretch;gap:12px}
+  .headerActions{width:100%}
+  .titleGroup h1{font-size:1.55rem}
+  .count{flex:1;justify-content:center}
+  .content > :last-child{min-height:360px}
+  .content > :last-child :global([class*="listItem"]){padding-block:14px}
+}
+@media(max-width:380px){
+  .sidebar{grid-template-columns:1fr}
+  .container{padding-inline:10px}
+}
+@media(prefers-reduced-motion:reduce){
+  .newBookingButton,.refreshButton,.todayButton{transition:none}
+}
