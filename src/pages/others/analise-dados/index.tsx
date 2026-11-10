@@ -1,9 +1,11 @@
 import { formatPersonName } from "@/context/UserContext";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
-import { FaBullhorn, FaChartLine, FaClock, FaEnvelope, FaUserClock, FaUsers, FaTimes } from "react-icons/fa";
+import { FaBullhorn, FaChartLine, FaClock, FaEnvelope, FaUserClock, FaUsers, FaTimes, FaCalendarAlt, FaDollarSign, FaLayerGroup, FaChevronDown } from "react-icons/fa";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
 import { listarHistoricoAgendamentos } from "@/services/agendamento-service";
+import { listarProfissionaisEmpresa } from "@/services/profissional-service";
+import type { Profissional } from "@/types/profissional";
 import type { Agendamento } from "@/types/agendamento";
 import LoadingState from "@/components/loading-state";
 import styles from "./style.module.css";
@@ -51,6 +53,9 @@ export default function AnaliseDados() {
   const [filtro, setFiltro] = useState<Filtro>(30);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+  const [profissionais, setProfissionais] = useState<Profissional[]>([]);
+  const [professionalFilter, setProfessionalFilter] = useState("TODOS");
+  const [periodFilter, setPeriodFilter] = useState(() => { const today = new Date(); return `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}`; });
   const permitido = usuario?.Papel === "EMPRESA" || usuario?.Papel === "AUTONOMO";
   useEffect(() => {
     if (!usuario?.Id || !permitido) { setCarregando(false); return; }
@@ -62,6 +67,74 @@ export default function AnaliseDados() {
       .finally(() => { if (ativo) setCarregando(false); });
     return () => { ativo = false; };
   }, [usuario?.Id, permitido]);
+
+  useEffect(() => {
+    if (!usuario?.Id || usuario.Papel !== "EMPRESA") { setProfissionais([]); return; }
+    let active = true;
+    listarProfissionaisEmpresa(usuario.Id)
+      .then(items => { if (active) setProfissionais(items); })
+      .catch(() => { if (active) setProfissionais([]); });
+    return () => { active = false; };
+  }, [usuario?.Id, usuario?.Papel]);
+
+  // O filtro do painel usa registros reais; o restante das análises existentes permanece preservado.
+  const metricsHistory = useMemo(() => historico.filter(item => {
+    const date = new Date(item.DataAgendamento);
+    const [year, month] = periodFilter.split("-").map(Number);
+    return Number.isFinite(date.getTime()) &&
+      date.getFullYear() === year && date.getMonth() + 1 === month &&
+      (professionalFilter === "TODOS" || String(item.ProfissionalId ?? "") === professionalFilter);
+  }), [historico, periodFilter, professionalFilter]);
+  const concludedHistory = useMemo(() =>
+    metricsHistory.filter(item => item.Status?.toUpperCase() === "CONCLUIDO"), [metricsHistory]);
+  const recordedRevenue = concludedHistory.reduce((sum, item) => sum + (Number(item.ValorServico ?? item.Valor ?? 0) || 0), 0);
+  const distinctCustomers = new Set(concludedHistory.map(item => item.ClienteId).filter(id => id > 0)).size;
+  const averageTicket = concludedHistory.length ? recordedRevenue / concludedHistory.length : 0;
+  const referenceMonth = useMemo(() => {
+    const [year, month] = periodFilter.split("-").map(Number);
+    return { year, month, count: new Date(year, month, 0).getDate() };
+  }, [periodFilter]);
+  const dailyCounts = useMemo(() => {
+    const days = Array.from({ length: referenceMonth.count }, (_, index) => ({ day:index + 1, count:0, revenue:0 }));
+    for (const item of metricsHistory) {
+      const date = new Date(item.DataAgendamento);
+      const entry = days[date.getDate()-1];
+      if (!entry) continue;
+      entry.count++;
+      if (item.Status?.toUpperCase() === "CONCLUIDO") entry.revenue += Number(item.ValorServico ?? item.Valor ?? 0) || 0;
+    }
+    return days;
+  }, [metricsHistory, referenceMonth]);
+  const weeklyRevenue = useMemo(() => {
+    const weeks = Array.from({length:Math.ceil(referenceMonth.count / 7)}, (_,index) => ({label:`Sem ${index+1}`,value:0}));
+    dailyCounts.forEach(item => { weeks[Math.floor((item.day-1)/7)].value += item.revenue; });
+    return weeks;
+  }, [dailyCounts, referenceMonth]);
+  const topServices = useMemo(() => {
+    const map = new Map<number,{name:string,count:number}>();
+    for (const item of concludedHistory) {
+      const old = map.get(item.ServicoId);
+      map.set(item.ServicoId,{name:item.ServicoNome || "Serviço",count:(old?.count ?? 0)+1});
+    }
+    return [...map.values()].sort((a,b)=>b.count-a.count).slice(0,4);
+  },[concludedHistory]);
+  const latestBookings = useMemo(() => [...metricsHistory]
+    .sort((a,b)=>new Date(b.DataAgendamento).getTime()-new Date(a.DataAgendamento).getTime())
+    .slice(0,4),[metricsHistory]);
+  const dayMaximum = Math.max(1,...dailyCounts.map(item=>item.count));
+  const chartPoints = dailyCounts.map((item,index) =>
+    `${(index/(Math.max(1,dailyCounts.length-1))*100).toFixed(2)},${(100-(item.count/dayMaximum)*88).toFixed(2)}`).join(" ");
+  const maxWeeklyRevenue = Math.max(1,...weeklyRevenue.map(item=>item.value));
+  const dashboardMoney = (value:number) => new Intl.NumberFormat(lang === "pt" ? "pt-BR" : "en-US",{style:"currency",currency:"BRL"}).format(value);
+  const monthOptions = Array.from({length:24},(_,index)=> {
+    const date = new Date();
+    date.setDate(1);
+    date.setMonth(date.getMonth()-index);
+    return {
+      value:`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}`,
+      label:new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US",{month:"long",year:"numeric"}).format(date),
+    };
+  });
 
   const clientes = useMemo(() => agruparClientes(historico, new Date()), [historico]);
   const inativos = useMemo(() => clientes.filter(cliente => cliente.diasSemVisitar >= filtro), [clientes, filtro]);
@@ -153,6 +226,76 @@ export default function AnaliseDados() {
 
   if (!permitido) return <main className={styles.container}>{t("analytics.notAllowed")}</main>;
   return <main className={styles.container} style={cssVars}>
+    <header className={styles.dashboardFilters} aria-label="Filtros das métricas">
+      <label className={styles.topFilter}>
+        <span>Período</span>
+        <span className={styles.filterInput}><FaCalendarAlt aria-hidden="true" />
+          <select value={periodFilter} onChange={event => setPeriodFilter(event.target.value)}
+            aria-label="Período das métricas">
+            {monthOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+          </select><FaChevronDown aria-hidden="true" /></span>
+      </label>
+      <label className={styles.topFilter}>
+        <span>Profissional</span>
+        <span className={styles.filterInput}><FaUsers aria-hidden="true" />
+          <select value={professionalFilter} onChange={event => setProfessionalFilter(event.target.value)}
+            aria-label="Profissional das métricas">
+            <option value="TODOS">Todos os profissionais</option>
+            {profissionais.map(item => <option value={String(item.Id)} key={item.Id}>{formatPersonName(item.Nome) || item.Email}</option>)}
+          </select><FaChevronDown aria-hidden="true" /></span>
+      </label>
+    </header>
+    {erro && <p className={styles.error} role="alert">{erro}</p>}
+    <section className={styles.dashboardMetrics} aria-label="Indicadores do período">
+      <div className={styles.dashboardMetric}><span className={styles.dashboardIcon}><FaCalendarAlt /></span><div><span>Agendamentos</span><strong>{metricsHistory.length}</strong></div></div>
+      <div className={styles.dashboardMetric}><span className={styles.dashboardIcon}><FaDollarSign /></span><div><span>Valor concluído</span><strong>{dashboardMoney(recordedRevenue)}</strong></div></div>
+      <div className={styles.dashboardMetric}><span className={styles.dashboardIcon}><FaUsers /></span><div><span>Clientes atendidos</span><strong>{distinctCustomers}</strong></div></div>
+      <div className={styles.dashboardMetric}><span className={styles.dashboardIcon}><FaLayerGroup /></span><div><span>Ticket médio</span><strong>{dashboardMoney(averageTicket)}</strong></div></div>
+    </section>
+    <div className={styles.dashboardCharts}>
+      <section className={styles.dashboardPanel}>
+        <h2><FaCalendarAlt aria-hidden="true" /> Agendamentos no período</h2>
+        <div className={styles.lineChart} role="img" aria-label={`Agendamentos diários: ${metricsHistory.length} no mês`}>
+          <div className={styles.lineGrid} />
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <polygon points={`0,100 ${chartPoints} 100,100`} fill="rgba(31,126,243,.18)" />
+            <polyline points={chartPoints} fill="none" stroke="#2186ff" strokeWidth="2.2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
+          </svg>
+          <div className={styles.lineLabels}><span>01/{String(referenceMonth.month).padStart(2,"0")}</span><span>{String(Math.ceil(referenceMonth.count/2)).padStart(2,"0")}/{String(referenceMonth.month).padStart(2,"0")}</span><span>{referenceMonth.count}/{String(referenceMonth.month).padStart(2,"0")}</span></div>
+        </div>
+      </section>
+      <section className={styles.dashboardPanel}>
+        <div className={styles.revenueTitle}><h2><FaDollarSign aria-hidden="true" /> Valor concluído por semana</h2><strong>{dashboardMoney(recordedRevenue)}</strong></div>
+        <div className={styles.weekChart} role="img" aria-label={`Valores dos agendamentos concluídos por semana: ${dashboardMoney(recordedRevenue)} no mês`}>
+          {weeklyRevenue.map(week => <div className={styles.weekBarColumn} key={week.label}>
+            <div className={styles.weekBarTrack}><div className={styles.weekBar} style={{height:`${Math.max(week.value>0?2:0,(week.value/maxWeeklyRevenue)*100)}%`}} title={dashboardMoney(week.value)}/></div>
+            <span>{week.label}</span>
+          </div>)}
+        </div>
+      </section>
+    </div>
+    <div className={styles.dashboardBottom}>
+      <section className={styles.dashboardPanel}>
+        <h2><FaLayerGroup aria-hidden="true"/> Serviços mais procurados</h2>
+        <div className={styles.popularList}>
+          {topServices.map((item,index)=><div className={styles.popularRow} key={index}><span>{item.name}</span><div className={styles.popularTrack}><span style={{width:`${100*item.count/Math.max(1,topServices[0]?.count ?? 1)}%`}}/></div><strong>{item.count}</strong></div>)}
+          {!topServices.length && <p className={styles.dashboardEmpty}>Nenhum serviço concluído no período.</p>}
+        </div>
+      </section>
+      <section className={styles.dashboardPanel}>
+        <div className={styles.latestTitle}><h2><FaCalendarAlt aria-hidden="true"/> Últimos agendamentos</h2></div>
+        <div className={styles.latestList}>
+          {latestBookings.map(item=><div className={styles.latestRow} key={item.Id}>
+            <time>{new Intl.DateTimeFormat("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}).format(new Date(item.DataAgendamento))}</time>
+            <strong>{formatPersonName(item.ClienteNome) || `Cliente #${item.ClienteId}`}</strong>
+            <span>{item.ServicoNome}</span>
+            <em>{dashboardMoney(Number(item.ValorServico ?? item.Valor ?? 0) || 0)}</em>
+            <small>{nomeStatus(item.Status)}</small>
+          </div>)}
+          {!latestBookings.length && <p className={styles.dashboardEmpty}>Nenhum agendamento no período.</p>}
+        </div>
+      </section>
+    </div>
     <section className={styles.chartSection} aria-label={lang === "pt" ? "Agendamentos por mês" : "Appointments by month"}>
       <div className={styles.chartHeading}>
         <div>
