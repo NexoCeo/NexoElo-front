@@ -793,3 +793,247 @@
 @media(max-width:560px){
   .servicesModal{height:min(450px,calc(100dvh - 24px))}
 }
+
+
+/* Profissionais — revisão visual isolada, sem alterações na estrutura/ações. */
+.container{
+  position:relative;
+  width:100%;
+  min-height:calc(100dvh - 70px);
+  padding:22px clamp(16px,2.1vw,34px) 34px;
+  color:var(--theme-text);
+}
+/* Ações que já existiam passam a ocupar a região superior do conteúdo. */
+.floatingActions{
+  position:absolute;
+  top:22px;
+  right:clamp(16px,2.1vw,34px);
+  bottom:auto;
+  left:auto;
+  z-index:10;
+  max-width:calc(100% - 32px);
+}
+.floatingActions .headerActions{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  flex-wrap:nowrap;
+  gap:12px;
+}
+.floatingActions .secondaryHeaderButton,
+.floatingActions .primaryButton{
+  min-height:50px;
+  height:50px;
+  padding:0 19px;
+  border-radius:12px;
+  font-size:13px;
+  font-weight:750;
+  white-space:nowrap;
+}
+.floatingActions .secondaryHeaderButton{
+  border:1px solid var(--theme-border-strong);
+  background:var(--theme-surface);
+  color:var(--theme-text);
+}
+.floatingActions .primaryButton{
+  min-width:194px;
+  box-shadow:0 7px 18px rgba(37,99,235,.16);
+}
+.tableWrap{
+  width:100%;
+  max-width:none;
+  margin:0;
+  padding-top:70px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  overflow:visible;
+}
+/* Exibir os registros como cards horizontais, mantendo os mesmos cinco campos. */
+.cardList{
+  width:100%;
+  min-width:0;
+  max-height:calc(100dvh - 172px);
+  display:flex;
+  flex-direction:column;
+}
+.cardsHeader{display:none}
+.cardsBody{
+  display:grid;
+  grid-auto-rows:max-content;
+  gap:11px;
+  padding:0 2px 4px 0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  align-content:start;
+  scrollbar-width:thin;
+  scrollbar-color:var(--theme-border-strong) transparent;
+}
+.cardsBody::-webkit-scrollbar{width:6px}
+.cardsBody::-webkit-scrollbar-track{background:transparent}
+.cardsBody::-webkit-scrollbar-thumb{background:var(--theme-border-strong);border-radius:999px}
+.professionalCard{
+  position:relative;
+  display:grid;
+  grid-template-columns:52px minmax(190px,1.6fr) minmax(130px,1fr) minmax(110px,.8fr) 46px;
+  grid-template-rows:auto auto;
+  grid-template-areas:
+    "avatar name phone status actions"
+    "avatar email phone status actions";
+  align-items:center;
+  column-gap:16px;
+  row-gap:4px;
+  min-height:83px;
+  padding:15px 18px;
+  border:1px solid var(--theme-bottom);
+  border-radius:14px;
+  background:var(--theme-surface);
+  box-shadow:0 5px 18px rgba(0,0,0,.035);
+  color:var(--theme-text);
+  transition:border-color .17s ease,background-color .17s ease;
+}
+.professionalCard:hover{
+  border-color:var(--theme-border-strong);
+  background:var(--theme-surface-hover);
+}
+/* Avatar genérico estilizado; não fabrica foto nem dados pessoais. */
+.professionalCard::before{
+  content:"";
+  grid-area:avatar;
+  width:49px;
+  height:49px;
+  border-radius:50%;
+  background:linear-gradient(145deg,#3476eb,#2357b6);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.15);
+}
+.professionalCard::after{
+  content:"";
+  position:absolute;
+  left:calc(18px + 52px + 7px);
+  top:20%;
+  bottom:20%;
+  width:1px;
+  background:var(--theme-border-strong);
+}
+.professionalName{
+  grid-area:name;
+  align-self:end;
+  min-width:0;
+  font-size:15px;
+  line-height:1.3;
+}
+.professionalName strong{
+  color:var(--theme-text)!important;
+  font-weight:800;
+}
+.professionalEmail{
+  grid-area:email;
+  align-self:start;
+  min-width:0;
+  font-size:12px;
+  line-height:1.45;
+  color:var(--theme-text-muted);
+  overflow-wrap:anywhere;
+}
+.professionalPhone{
+  grid-area:phone;
+  min-width:0;
+  align-self:center;
+  font-size:13px;
+  color:var(--theme-text-muted);
+}
+.professionalStatus{
+  grid-area:status;
+  min-width:0;
+  justify-self:start;
+  align-self:center;
+}
+.professionalStatus .status{
+  display:inline-flex;
+  min-height:30px;
+  align-items:center;
+  justify-content:center;
+  padding:5px 13px;
+  border:1px solid rgba(16,185,129,.1);
+  border-radius:999px;
+  background:var(--theme-success-soft);
+  color:var(--theme-success-text);
+  font-size:12px;
+  font-weight:750;
+  white-space:nowrap;
+}
+.cardActions{
+  grid-area:actions;
+  justify-content:flex-end;
+  align-self:center;
+}
+.menuTrigger{width:35px;height:35px;border-radius:10px;color:var(--theme-text-muted)}
+.menuPopover{border-radius:12px;box-shadow:0 16px 38px var(--theme-shadow)}
+@media(max-width:1080px){
+  .professionalCard{
+    grid-template-columns:48px minmax(130px,1.5fr) minmax(105px,1fr) minmax(90px,.85fr) 36px;
+    gap:3px 11px;
+    padding:13px;
+  }
+  .professionalCard::before{width:44px;height:44px}
+  .professionalCard::after{left:calc(13px + 48px + 4px)}
+  .professionalName{font-size:14px}
+  .professionalEmail,.professionalPhone{font-size:11px}
+  .professionalStatus .status{font-size:11px;padding:4px 9px}
+}
+@media(max-width:760px){
+  .container{padding:15px 13px 28px}
+  .floatingActions{
+    position:static;
+    width:100%;
+    max-width:none;
+    margin:0 0 18px;
+    padding:0;
+  }
+  .floatingActions .headerActions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    width:100%;
+    gap:9px;
+  }
+  .floatingActions .secondaryHeaderButton,
+  .floatingActions .primaryButton{
+    width:100%;
+    min-width:0;
+    height:46px;
+    min-height:46px;
+    padding:0 9px;
+    font-size:11px;
+  }
+  .tableWrap{padding-top:0}
+  .cardList{max-height:none}
+  .cardsBody{overflow:visible;gap:10px}
+  .professionalCard{
+    grid-template-columns:43px minmax(0,1fr) auto;
+    grid-template-rows:auto auto auto;
+    grid-template-areas:
+      "avatar name actions"
+      "avatar email status"
+      "avatar phone status";
+    min-height:106px;
+    gap:5px 10px;
+    padding:12px;
+  }
+  .professionalCard::before{width:41px;height:41px}
+  .professionalCard::after{display:none}
+  .professionalName{font-size:14px}
+  .professionalEmail{font-size:11px}
+  .professionalPhone{font-size:11px}
+  .professionalStatus{justify-self:end}
+  .cardActions{align-self:start}
+}
+@media(max-width:430px){
+  .floatingActions .headerActions{grid-template-columns:1fr}
+  .professionalCard{
+    grid-template-columns:38px minmax(0,1fr) auto;
+    column-gap:8px;
+  }
+  .professionalCard::before{width:37px;height:37px}
+  .professionalStatus .status{font-size:10px;padding:4px 7px}
+}
+@media(prefers-reduced-motion:reduce){.professionalCard{transition:none}}
