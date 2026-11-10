@@ -690,3 +690,95 @@
   .cropDialog .cropViewport { width:min(320px,calc(100vw - 80px),calc(100dvh - 180px)); }
   .cropDialog .cropActions button { min-height:32px; }
 }
+
+
+/* Serviços — mesmo acabamento visual da página Profissionais.
+   Preserva os cards, fotos originais e menu de edição existentes. */
+.container{position:relative;width:100%;min-height:calc(100dvh - 70px);padding:91px clamp(16px,2vw,32px) 28px}
+.floatingActions{position:absolute;top:20px;right:clamp(16px,2vw,32px);bottom:auto;left:auto;max-width:calc(100% - 32px);z-index:10}
+.floatingActions .primaryButton{min-width:210px;min-height:54px;height:54px;padding:0 20px;border-radius:12px;font-size:13px;font-weight:750;box-shadow:0 7px 18px rgba(37,99,235,.16)}
+.serviceMetrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:19px}
+.metricCard{display:flex;align-items:center;gap:13px;min-width:0;min-height:92px;padding:13px 15px;border:1px solid var(--theme-bottom);border-radius:14px;background:var(--theme-surface)}
+.metricIcon{display:grid;place-items:center;width:51px;height:51px;flex:0 0 51px;border-radius:12px;background:rgba(37,99,235,.18);color:#61a2ff;font-size:23px}
+.metricCard:nth-child(2) .metricIcon{background:rgba(12,180,115,.17);color:#37d9a1}
+.metricCard:nth-child(3) .metricIcon{background:rgba(230,160,23,.17);color:#f6b830}
+.metricCard:nth-child(4) .metricIcon{background:rgba(234,72,86,.17);color:#f46a75}
+.metricCard>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+.metricCard strong{font-size:clamp(17px,1.65vw,26px);line-height:1.1;font-weight:800;color:var(--theme-text);font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.metricCard div span{font-size:12px;color:var(--theme-text-muted)}
+.serviceTools{display:grid;grid-template-columns:minmax(240px,1.1fr) minmax(0,1.4fr);gap:18px;align-items:center;margin-bottom:16px}
+.searchBox{display:flex;align-items:center;gap:12px;min-width:0;height:49px;padding:0 15px;border:1px solid var(--theme-border-strong);border-radius:12px;background:var(--theme-surface);color:var(--theme-text-muted)}
+.searchBox:focus-within{border-color:var(--theme-primary)}
+.searchBox svg{flex:none;font-size:17px}
+.searchBox input{flex:1;min-width:0;border:0!important;outline:0!important;background:transparent!important;color:var(--theme-text)!important;box-shadow:none!important;font:inherit;font-size:13px}
+.searchBox input::placeholder{color:var(--theme-text-muted)}
+.durationFilters{display:flex;justify-content:flex-end;align-items:center;gap:9px;min-width:0}
+.durationFilters button{min-height:43px;padding:0 clamp(9px,1vw,16px);border:1px solid var(--theme-border-strong);border-radius:999px;background:var(--theme-surface);color:var(--theme-text-muted);font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer}
+.durationFilters button:hover{border-color:var(--theme-primary)}
+.durationFilters button.durationFilterActive{background:var(--theme-primary);border-color:var(--theme-primary);color:white}
+.tableWrap{width:100%;max-width:none;margin:0;padding:0;border:0;overflow:visible;background:transparent}
+.cardList{max-height:calc(100dvh - 370px)}
+.cardsHeader{display:none}
+.cardsBody{display:grid;grid-auto-rows:max-content;gap:11px;padding:0 2px 4px 0;overflow-y:auto;overflow-x:hidden;align-content:start;scrollbar-width:thin;scrollbar-color:var(--theme-border-strong) transparent}
+.cardsBody::-webkit-scrollbar{width:6px}
+.cardsBody::-webkit-scrollbar-thumb{background:var(--theme-border-strong);border-radius:999px}
+.serviceCard{
+  display:grid;
+  grid-template-columns:minmax(240px,2fr) minmax(120px,1fr) minmax(135px,1fr) 46px;
+  align-items:center;
+  gap:16px;
+  min-height:87px;
+  padding:13px 18px;
+  border:1px solid var(--theme-bottom);
+  border-radius:14px;
+  background:var(--theme-surface);
+  color:var(--theme-text);
+  box-shadow:none;
+  transition:background-color .16s ease,border-color .16s ease;
+}
+.serviceCard:hover{background:var(--theme-surface-hover);border-color:var(--theme-border-strong)}
+.cardService{min-width:0}
+.serviceIdentity{display:flex;align-items:center;min-width:0;gap:16px}
+.serviceThumbnail{width:52px;height:52px;flex:0 0 52px;display:grid;place-items:center;border-radius:11px;overflow:hidden;background:var(--theme-primary-soft)}
+.serviceThumbnail img{width:100%;height:100%;object-fit:cover}
+.serviceIdentity strong{font-size:15px;font-weight:800;line-height:1.35;color:var(--theme-text);min-width:0;overflow-wrap:anywhere}
+.cardDuration{color:var(--theme-text-muted);font-size:13px}
+.cardValue{text-align:left}
+.cardValue strong{color:var(--theme-primary-text)!important;font-size:15px;font-weight:800;white-space:nowrap}
+.cardActions{display:flex;align-items:center;justify-content:flex-end;min-width:0}
+.menuTrigger{border-radius:10px}
+@media(max-width:1200px){
+  .serviceTools{grid-template-columns:1fr;gap:12px}
+  .durationFilters{justify-content:flex-start;flex-wrap:wrap}
+  .cardList{max-height:calc(100dvh - 420px)}
+}
+@media(max-width:900px){
+  .serviceMetrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .serviceCard{grid-template-columns:minmax(180px,2fr) minmax(90px,1fr) minmax(100px,1fr) 40px;gap:10px;padding:12px}
+  .cardList{max-height:calc(100dvh - 470px)}
+}
+@media(max-width:760px){
+  .container{padding:14px 13px 28px}
+  .floatingActions{position:static;top:auto;right:auto;left:auto;max-width:none;width:100%;margin:0 0 14px}
+  .floatingActions .primaryButton{width:100%;min-height:46px;height:46px}
+  .serviceMetrics{gap:9px;margin-bottom:13px}
+  .metricCard{gap:9px;min-height:76px;padding:10px}
+  .metricIcon{width:42px;height:42px;flex-basis:42px;font-size:20px}
+  .metricCard strong{font-size:20px}
+  .metricCard div span{font-size:11px}
+  .serviceTools{gap:11px}
+  .durationFilters{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;padding-bottom:5px;scrollbar-width:thin}
+  .durationFilters button{flex:none}
+  .cardList{max-height:none}
+  .cardsBody{overflow:visible;gap:10px}
+  .serviceCard{grid-template-columns:minmax(0,1fr) auto 35px;grid-template-rows:auto auto;grid-template-areas:"service value actions" "duration duration actions";min-height:100px;gap:7px 9px;padding:12px}
+  .cardService{grid-area:service}
+  .cardDuration{grid-area:duration;padding-left:62px}
+  .cardValue{grid-area:value}
+  .cardActions{grid-area:actions}
+  .serviceThumbnail{width:52px;height:52px;flex-basis:52px}
+  .serviceIdentity{gap:10px}
+  .serviceIdentity strong{font-size:13px}
+  .cardValue strong{font-size:12px}
+}
+@media(max-width:420px){.metricCard{padding:8px;gap:7px}.metricIcon{width:35px;height:35px;flex-basis:35px;font-size:17px}.metricCard strong{font-size:16px}.serviceCard{grid-template-columns:minmax(0,1fr) auto 28px}.serviceThumbnail{width:44px;height:44px;flex-basis:44px}.cardDuration{padding-left:54px}}
