@@ -245,7 +245,7 @@ export default function Funcionamento() {
         [dia]: true,
         HorariosPorDia: {
           ...config.HorariosPorDia,
-          [dia]: config.HorariosPorDia[dia] ?? personalizedBackup.current[dia] ?? {
+          [dia]: config.HorariosPorDia?.[dia] ?? personalizedBackup.current?.[dia] ?? {
             Inicio: config.HorarioAbertura,
             Fim: config.HorarioFechamento,
             Intervalos: config.Intervalos.map(intervalo => ({ ...intervalo })),
@@ -266,7 +266,7 @@ export default function Funcionamento() {
     if (availabilityMode === "personalizado") {
       const next = { ...config.HorariosPorDia };
       DIAS.filter(dia => dias.has(dia.key)).forEach(dia => {
-        next[dia.key] ??= personalizedBackup.current[dia.key] ?? {
+        next[dia.key] ??= personalizedBackup.current?.[dia.key] ?? {
           Inicio: config.HorarioAbertura,
           Fim: config.HorarioFechamento,
           Intervalos: config.Intervalos.map(intervalo => ({ ...intervalo })),
