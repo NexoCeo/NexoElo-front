@@ -316,6 +316,18 @@ export default function Servicos() {
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
       {error && <p className={styles.error}>{error}</p>}
 
+      <section className={styles.floatingActions}>
+        <button
+          type="button"
+          className={styles.primaryButton}
+          onClick={openCreateModal}
+          style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
+        >
+          <FaPlus aria-hidden="true" />
+          {t("services.new")}
+        </button>
+      </section>
+
       <section className={styles.serviceMetrics} aria-label="Resumo dos serviços">
         <div className={styles.metricCard}><span className={styles.metricIcon}><FaTags aria-hidden="true" /></span><div><strong>{servicos.length}</strong><span>Serviços cadastrados</span></div></div>
         <div className={styles.metricCard}><span className={styles.metricIcon}><FaDollarSign aria-hidden="true" /></span><div><strong>{formatCurrency(averagePrice)}</strong><span>Preço médio</span></div></div>
@@ -577,17 +589,7 @@ export default function Servicos() {
           </section>
         </div>
       )}
-      <section className={styles.floatingActions}>
-        <button
-          type="button"
-          className={styles.primaryButton}
-          onClick={openCreateModal}
-          style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
-        >
-          <FaPlus aria-hidden="true" />
-          {t("services.new")}
-        </button>
-      </section>
+
 
     </main>
   );
