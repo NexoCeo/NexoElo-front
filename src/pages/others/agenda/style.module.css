@@ -867,3 +867,51 @@
     min-height: 0 !important;
   }
 }
+
+
+/* Filtros como popover leve: não altera altura da Agenda e não abre painel em linha. */
+.filterAnchor{position:relative;display:flex;align-items:center;z-index:30}
+.filterAnchor .filterToggle{width:100%;white-space:nowrap}
+.filterAnchor .filtersPanel{
+  position:absolute;
+  top:calc(100% + 9px);
+  right:0;
+  left:auto;
+  z-index:40;
+  width:min(320px,calc(100vw - 28px));
+  max-width:none;
+  margin:0;
+  border:1px solid var(--theme-border-strong);
+  border-radius:15px;
+  background:var(--theme-surface);
+  box-shadow:0 18px 50px rgba(0,0,0,.3);
+  overflow:hidden;
+}
+.filterAnchor .filtersPanel .viewControls{
+  width:100%;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:14px;
+  padding:15px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+.filterAnchor .filtersPanel .segmented,
+.filterAnchor .filtersPanel .professionalFilter{
+  width:100%;
+  min-width:0;
+  flex:none;
+}
+.filterAnchor .filtersPanel .professionalFilter select{width:100%}
+@media(max-width:620px){
+  .filterAnchor{flex:0 0 auto}
+  .filterAnchor .filtersPanel{
+    right:auto;
+    left:0;
+    width:min(300px,calc(100vw - 24px));
+  }
+}
