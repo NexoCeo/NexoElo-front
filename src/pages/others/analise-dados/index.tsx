@@ -126,15 +126,30 @@ export default function AnaliseDados() {
     `${(index/(Math.max(1,dailyCounts.length-1))*100).toFixed(2)},${(100-(item.count/dayMaximum)*88).toFixed(2)}`).join(" ");
   const maxWeeklyRevenue = Math.max(1,...weeklyRevenue.map(item=>item.value));
   const dashboardMoney = (value:number) => new Intl.NumberFormat(lang === "pt" ? "pt-BR" : "en-US",{style:"currency",currency:"BRL"}).format(value);
-  const monthOptions = Array.from({length:24},(_,index)=> {
-    const date = new Date();
-    date.setDate(1);
-    date.setMonth(date.getMonth()-index);
-    return {
-      value:`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}`,
-      label:new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US",{month:"long",year:"numeric"}).format(date),
-    };
-  });
+  const monthOptions = useMemo(() => {
+    const months = new Set<string>();
+    for (const item of historico) {
+      const date = new Date(item.DataAgendamento);
+      if (Number.isNaN(date.getTime())) continue;
+      // Todo agendamento conta como movimentação, independentemente do status.
+      months.add(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}`);
+    }
+    return [...months].sort((a,b) => b.localeCompare(a)).map(value => {
+      const [year, month] = value.split("-").map(Number);
+      return {
+        value,
+        label: new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US", {
+          month:"long", year:"numeric",
+        }).format(new Date(year, month - 1, 1)),
+      };
+    });
+  }, [historico, lang]);
+  useEffect(() => {
+    if (carregando || !monthOptions.length) return;
+    if (!monthOptions.some(option => option.value === periodFilter)) {
+      setPeriodFilter(monthOptions[0].value);
+    }
+  }, [carregando, monthOptions, periodFilter]);
 
   const clientes = useMemo(() => agruparClientes(historico, new Date()), [historico]);
   const inativos = useMemo(() => clientes.filter(cliente => cliente.diasSemVisitar >= filtro), [clientes, filtro]);
@@ -230,8 +245,9 @@ export default function AnaliseDados() {
       <label className={styles.topFilter}>
         <span>Período</span>
         <span className={styles.filterInput}><FaCalendarAlt aria-hidden="true" />
-          <select value={periodFilter} onChange={event => setPeriodFilter(event.target.value)}
+          <select value={monthOptions.length ? periodFilter : ""} disabled={carregando || !monthOptions.length} onChange={event => setPeriodFilter(event.target.value)}
             aria-label="Período das métricas">
+            {!monthOptions.length && <option value="">{carregando ? "Carregando períodos..." : "Sem movimentação"}</option>}
             {monthOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select><FaChevronDown aria-hidden="true" /></span>
       </label>
