@@ -19,6 +19,13 @@ import {
   FaUserPlus,
   FaUserClock,
   FaWhatsapp,
+  FaChartLine,
+  FaSearch,
+  FaChevronRight,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaUsers,
+  FaClock,
 } from "react-icons/fa";
 import { useTheme } from "@/context/ThemeContext";
 import { getProfileImageUrl } from "@/components/header/profile-image";
@@ -153,6 +160,9 @@ export default function Profissionais() {
   const [loadingSolicitacoes, setLoadingSolicitacoes] = useState(false);
   const [respondendoId, setRespondendoId] = useState(0);
   const [solicitacoesError, setSolicitacoesError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"TODOS" | "APROVADO" | "PENDENTE" | "RECUSADO">("TODOS");
+  const [pendingRequestsCount, setPendingRequestsCount] = useState<number | null>(null);
 
   const empresaId = usuario?.Id ?? 0;
   const isEmpresa = usuario?.Papel === "EMPRESA";
@@ -186,6 +196,33 @@ export default function Profissionais() {
 
     loadProfissionais();
   }, [empresaId, isEmpresa, showNotification]);
+
+  useEffect(() => {
+    if (!empresaId || !isEmpresa) return;
+    let active = true;
+    listarSolicitacoesVinculo(empresaId)
+      .then(items => { if (active) setPendingRequestsCount(items.length); })
+      .catch(() => { if (active) setPendingRequestsCount(null); });
+    return () => { active = false; };
+  }, [empresaId, isEmpresa]);
+
+  const getStatus = (professional: Profissional) => {
+    const status = professional.VinculoStatus?.trim().toUpperCase();
+    return status === "PENDENTE" || status === "RECUSADO" ? status : "APROVADO";
+  };
+  const statusCounts = {
+    TODOS: profissionais.length,
+    APROVADO: profissionais.filter(item => getStatus(item) === "APROVADO").length,
+    PENDENTE: profissionais.filter(item => getStatus(item) === "PENDENTE").length,
+    RECUSADO: profissionais.filter(item => getStatus(item) === "RECUSADO").length,
+  };
+  const normalizedSearch = searchTerm.trim().toLocaleLowerCase("pt-BR");
+  const filteredProfessionals = profissionais.filter(profissional => {
+    if (statusFilter !== "TODOS" && getStatus(profissional) !== statusFilter) return false;
+    if (!normalizedSearch) return true;
+    return [profissional.Nome, profissional.Email, profissional.Telefone]
+      .some(value => (value || "").toLocaleLowerCase("pt-BR").includes(normalizedSearch));
+  });
 
   useEffect(() => {
     if (!fotoPerfil) {
@@ -395,7 +432,9 @@ export default function Profissionais() {
     setLoadingSolicitacoes(true);
     setSolicitacoesError("");
     try {
-      setSolicitacoes(await listarSolicitacoesVinculo(empresaId));
+      const fetchedRequests = await listarSolicitacoesVinculo(empresaId);
+      setSolicitacoes(fetchedRequests);
+      setPendingRequestsCount(fetchedRequests.length);
     } catch {
       const message = "Nao foi possivel carregar as solicitacoes pendentes.";
       setSolicitacoesError(message);
@@ -428,6 +467,7 @@ export default function Profissionais() {
       setSolicitacoes((items) =>
         items.filter((item) => item.VinculoId !== solicitacao.VinculoId),
       );
+      setPendingRequestsCount(current => current === null ? null : Math.max(0, current - 1));
       if (status === "APROVADO") await refreshProfissionais();
       showNotification({
         type: "success",
@@ -593,6 +633,46 @@ export default function Profissionais() {
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
       {error && <p className={styles.error}>{error}</p>}
 
+      <section className={styles.professionalsIntro} aria-label="Profissionais">
+        <span className={styles.introIcon}><FaUsers aria-hidden="true" /></span>
+        <div>
+          <h1>Profissionais</h1>
+          <p>Gerencie os profissionais vinculados à sua empresa.</p>
+        </div>
+      </section>
+
+      <section className={styles.professionalMetrics} aria-label="Resumo dos profissionais">
+        <div className={styles.metricCard}><span className={styles.metricIcon}><FaUsers aria-hidden="true" /></span><div><strong>{statusCounts.TODOS}</strong><span>Profissionais</span></div><FaChartLine className={styles.metricDecoration} aria-hidden="true" /></div>
+        <div className={styles.metricCard}><span className={styles.metricIcon}><FaCheckCircle aria-hidden="true" /></span><div><strong>{statusCounts.APROVADO}</strong><span>Aprovados</span></div><FaChartLine className={styles.metricDecoration} aria-hidden="true" /></div>
+        <div className={styles.metricCard}><span className={styles.metricIcon}><FaClock aria-hidden="true" /></span><div><strong>{statusCounts.PENDENTE}</strong><span>Pendentes</span></div></div>
+        <div className={styles.metricCard}><span className={styles.metricIcon}><FaTimesCircle aria-hidden="true" /></span><div><strong>{statusCounts.RECUSADO}</strong><span>Recusados</span></div></div>
+      </section>
+
+      <button type="button" className={styles.requestsBanner} onClick={() => void openSolicitacoesModal()}>
+        <span className={styles.requestsIcon}><FaLink aria-hidden="true" /></span>
+        <span className={styles.requestsCopy}><strong>Solicitações de vínculo</strong><small>Profissionais aguardando aprovação para se vincularem à sua empresa.</small></span>
+        <span className={styles.requestsBadge}>{pendingRequestsCount === null ? "—" : `${pendingRequestsCount} ${pendingRequestsCount === 1 ? "solicitação" : "solicitações"}`}</span>
+        <FaChevronRight aria-hidden="true" className={styles.requestsChevron} />
+      </button>
+
+      <section className={styles.professionalTools} aria-label="Buscar e filtrar profissionais">
+        <label className={styles.searchBox}>
+          <FaSearch aria-hidden="true" />
+          <input type="search" value={searchTerm} onChange={event => setSearchTerm(event.target.value)}
+            placeholder="Buscar por nome, e-mail ou telefone..." aria-label="Buscar profissionais" />
+        </label>
+        <div className={styles.statusFilters} aria-label="Filtrar por status">
+          {(["TODOS", "APROVADO", "PENDENTE", "RECUSADO"] as const).map(status => (
+            <button type="button" key={status}
+              className={statusFilter === status ? styles.statusFilterActive : ""}
+              aria-pressed={statusFilter === status}
+              onClick={() => setStatusFilter(status)}>
+              {status === "TODOS" ? "Todos" : status === "APROVADO" ? "Aprovados" : status === "PENDENTE" ? "Pendentes" : "Recusados"} ({statusCounts[status]})
+            </button>
+          ))}
+        </div>
+      </section>
+
       <section className={styles.tableWrap}>
         {loading ? (
           <div className={styles.cardsBody} aria-label={t("pros.listLoading")}>
@@ -606,9 +686,9 @@ export default function Profissionais() {
               </div>
             ))}
           </div>
-        ) : profissionais.length === 0 ? (
+        ) : filteredProfessionals.length === 0 ? (
           <p className={styles.feedback} style={{ color: theme.colors.inactive }}>
-            {t("pros.empty")}
+            {profissionais.length > 0 ? "Nenhum profissional encontrado para os filtros selecionados." : t("pros.empty")}
           </p>
         ) : (
           <div className={styles.cardList}>
@@ -621,7 +701,7 @@ export default function Profissionais() {
                 <span className={styles.actionsHeader}>{t("common.actions")}</span>
             </div>
             <div className={styles.cardsBody}>
-              {profissionais.map((profissional) => (
+              {filteredProfessionals.map((profissional) => (
                 <div className={styles.professionalCard} key={profissional.Id || profissional.Email || profissional.Nome}>
                   <img
                     className={styles.professionalPhoto}
