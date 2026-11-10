@@ -641,6 +641,28 @@ export default function Profissionais() {
         </div>
       </section>
 
+      <section className={styles.floatingActions}>
+        <div className={styles.headerActions}>
+          <button
+            type="button"
+            className={styles.secondaryHeaderButton}
+            onClick={openSolicitacoesModal}
+          >
+            <FaUserClock />
+            {t("pros.linkRequests")}
+          </button>
+          <button
+            type="button"
+            className={styles.primaryButton}
+            onClick={() => { setEditingProfessional(null); void openCreateModal(); }}
+            style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
+          >
+            <FaUserPlus />
+            {t("pros.new")}
+          </button>
+        </div>
+      </section>
+
       <section className={styles.professionalMetrics} aria-label="Resumo dos profissionais">
         <div className={styles.metricCard}><span className={styles.metricIcon}><FaUsers aria-hidden="true" /></span><div><strong>{statusCounts.TODOS}</strong><span>Profissionais</span></div><FaChartLine className={styles.metricDecoration} aria-hidden="true" /></div>
         <div className={styles.metricCard}><span className={styles.metricIcon}><FaCheckCircle aria-hidden="true" /></span><div><strong>{statusCounts.APROVADO}</strong><span>Aprovados</span></div><FaChartLine className={styles.metricDecoration} aria-hidden="true" /></div>
@@ -1065,27 +1087,7 @@ export default function Profissionais() {
           </section>
         </div>
       )}
-      <section className={styles.floatingActions}>
-        <div className={styles.headerActions}>
-          <button
-            type="button"
-            className={styles.secondaryHeaderButton}
-            onClick={openSolicitacoesModal}
-          >
-            <FaUserClock />
-            {t("pros.linkRequests")}
-          </button>
-          <button
-            type="button"
-            className={styles.primaryButton}
-            onClick={() => { setEditingProfessional(null); void openCreateModal(); }}
-            style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
-          >
-            <FaUserPlus />
-            {t("pros.new")}
-          </button>
-        </div>
-      </section>
+
 
     </main>
   );
