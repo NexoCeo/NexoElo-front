@@ -1127,3 +1127,13 @@
   .metricIcon{width:37px;height:37px;flex-basis:37px;font-size:18px}
   .metricCard div span{white-space:normal}
 }
+
+
+/* Ajuste de espaçamento após remover os dois blocos solicitados. */
+@media(min-width:761px){
+  .container{padding-top:91px}
+  .floatingActions{top:20px}
+}
+@media(max-width:760px){
+  .container{padding-top:14px}
+}
