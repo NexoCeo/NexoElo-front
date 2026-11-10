@@ -1040,3 +1040,90 @@
   .professionalStatus .status{font-size:10px;padding:4px 7px}
 }
 @media(prefers-reduced-motion:reduce){.professionalCard{transition:none}}
+
+
+/* Composição visual da página Profissionais.
+   Não modifica fotos, cadastro, modais ou ações existentes. */
+.container{padding:20px clamp(16px,2vw,32px) 28px}
+.professionalsIntro{display:flex;gap:15px;align-items:center;min-height:68px;margin:0 390px 23px 0}
+.introIcon{display:grid;place-items:center;width:59px;height:59px;flex:0 0 59px;border:1px solid var(--theme-bottom);border-radius:13px;background:linear-gradient(145deg,#1a345d,#152947);color:#61a2ff;font-size:24px}
+.professionalsIntro h1{margin:0;color:var(--theme-text);font-size:clamp(24px,2vw,31px);letter-spacing:-.035em;line-height:1.17;font-weight:800}
+.professionalsIntro p{margin:7px 0 0;color:var(--theme-text-muted);font-size:13px;line-height:1.4}
+.floatingActions{top:22px}
+.floatingActions .headerActions{gap:10px}
+.professionalMetrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.metricCard{display:flex;align-items:center;gap:13px;position:relative;min-width:0;min-height:85px;padding:13px 15px;border:1px solid var(--theme-bottom);border-radius:14px;background:var(--theme-surface);overflow:hidden}
+.metricIcon{display:grid;place-items:center;width:51px;height:51px;flex:0 0 51px;border-radius:12px;background:rgba(37,99,235,.18);color:#61a2ff;font-size:23px}
+.metricCard:nth-child(2) .metricIcon{background:rgba(12,180,115,.17);color:#37d9a1}
+.metricCard:nth-child(3) .metricIcon{background:rgba(230,160,23,.17);color:#f6b830}
+.metricCard:nth-child(4) .metricIcon{background:rgba(234,72,86,.17);color:#f46a75}
+.metricCard>div{display:flex;flex-direction:column;gap:4px;min-width:0;position:relative;z-index:1}
+.metricCard strong{font-size:26px;line-height:1;font-weight:800;color:var(--theme-text);font-variant-numeric:tabular-nums}
+.metricCard div span{font-size:12px;color:var(--theme-text-muted);white-space:nowrap}
+.metricDecoration{margin-left:auto;color:var(--theme-primary);font-size:24px;flex-shrink:0;opacity:.85}
+.metricCard:nth-child(2) .metricDecoration{color:var(--theme-success)}
+.requestsBanner{width:100%;display:flex;gap:16px;align-items:center;min-height:76px;padding:15px 20px;margin:0 0 18px;border:1px solid #25466d;border-radius:14px;background:linear-gradient(110deg,rgba(35,80,149,.36),rgba(20,49,91,.38));color:var(--theme-text);text-align:left;cursor:pointer;transition:border-color .16s,background-color .16s}
+.requestsBanner:hover{border-color:var(--theme-primary);background-color:var(--theme-surface-hover)}
+.requestsIcon{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;font-size:26px;color:#5a9dff}
+.requestsCopy{display:flex;flex:1;flex-direction:column;gap:4px;min-width:0}
+.requestsCopy strong{font-size:17px;line-height:1.3;font-weight:750}
+.requestsCopy small{font-size:12px;color:var(--theme-text-muted);line-height:1.4}
+.requestsBadge{flex:0 0 auto;padding:7px 12px;border-radius:999px;background:rgba(26,97,204,.25);color:#91bbff;font-size:12px;font-weight:700}
+.requestsChevron{flex-shrink:0;color:#75b0ff;font-size:17px}
+.professionalTools{display:grid;grid-template-columns:minmax(240px,1.1fr) minmax(0,1.4fr);align-items:center;gap:19px;margin-bottom:15px}
+.searchBox{display:flex;align-items:center;gap:12px;height:47px;padding:0 15px;border:1px solid var(--theme-border-strong);border-radius:12px;background:var(--theme-surface);color:var(--theme-text-muted)}
+.searchBox:focus-within{border-color:var(--theme-primary);box-shadow:0 0 0 2px var(--theme-primary-soft)}
+.searchBox svg{flex:none;font-size:17px}
+.searchBox input{min-width:0;flex:1;border:0!important;outline:0!important;background:transparent!important;color:var(--theme-text)!important;box-shadow:none!important;font:inherit;font-size:13px}
+.searchBox input::placeholder{color:var(--theme-text-muted)}
+.statusFilters{display:flex;justify-content:flex-end;align-items:center;gap:9px;min-width:0}
+.statusFilters button{min-height:43px;padding:0 clamp(9px,1.1vw,16px);border:1px solid var(--theme-border-strong);border-radius:999px;background:var(--theme-surface);color:var(--theme-text-muted);font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer}
+.statusFilters button:hover{border-color:var(--theme-primary)}
+.statusFilters button.statusFilterActive{background:var(--theme-primary);border-color:var(--theme-primary);color:white}
+.tableWrap{padding-top:0!important}
+.cardList{max-height:calc(100dvh - 455px)}
+.professionalCard{min-height:76px}
+.professionalPhoto{border-radius:11px;object-fit:cover}
+@media(max-width:1230px){
+  .professionalTools{grid-template-columns:1fr;gap:12px}
+  .statusFilters{justify-content:flex-start;flex-wrap:wrap}
+  .professionalsIntro{margin-right:390px}
+  .cardList{max-height:calc(100dvh - 520px)}
+}
+@media(max-width:900px){
+  .professionalsIntro{margin-right:0;margin-bottom:90px}
+  .floatingActions{top:91px;left:clamp(16px,2vw,32px);right:clamp(16px,2vw,32px)}
+  .professionalMetrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cardList{max-height:calc(100dvh - 600px)}
+}
+@media(max-width:760px){
+  .container{padding:14px 13px 25px}
+  .professionalsIntro{min-height:60px;margin:0 0 14px;gap:12px}
+  .introIcon{width:51px;height:51px;flex-basis:51px}
+  .professionalsIntro h1{font-size:25px}
+  .professionalsIntro p{font-size:12px}
+  .floatingActions{position:static;top:auto;left:auto;right:auto;margin-bottom:14px}
+  .professionalMetrics{gap:9px;margin-bottom:12px}
+  .metricCard{padding:10px;gap:9px;min-height:73px}
+  .metricIcon{width:43px;height:43px;flex-basis:43px;font-size:20px}
+  .metricCard strong{font-size:21px}
+  .metricCard div span{font-size:11px}
+  .metricDecoration{display:none}
+  .requestsBanner{padding:12px;min-height:67px;gap:10px;margin-bottom:13px}
+  .requestsIcon{width:34px;height:34px;flex-basis:34px;font-size:20px}
+  .requestsCopy strong{font-size:14px}
+  .requestsCopy small{font-size:11px}
+  .requestsBadge{font-size:10px;padding:5px 8px}
+  .professionalTools{gap:10px}
+  .statusFilters{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;padding-bottom:5px;scrollbar-width:thin}
+  .statusFilters button{flex:none}
+  .cardList{max-height:none}
+}
+@media(max-width:430px){
+  .requestsBanner{flex-wrap:wrap}
+  .requestsBadge{margin-left:44px}
+  .requestsChevron{margin-left:auto}
+  .metricCard{gap:7px;padding:9px}
+  .metricIcon{width:37px;height:37px;flex-basis:37px;font-size:18px}
+  .metricCard div span{white-space:normal}
+}
