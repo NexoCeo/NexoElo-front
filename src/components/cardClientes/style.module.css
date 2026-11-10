@@ -375,3 +375,136 @@
 
 /* Highlight an appointment opened from the global notification inbox. */
 .focusedAppointment{box-shadow:inset 3px 0 0 var(--theme-primary);background:var(--theme-primary-soft)}
+
+
+/* Variante de card apenas da Agenda. Dashboard preserva o componente original. */
+.agendaCompact {
+  --agenda-columns: none;
+  container-type: inline-size;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.agendaCompact .listHeader{
+  display: grid;
+  grid-template-columns: 74px minmax(0,1fr) 106px 56px;
+  gap: 9px;
+  min-height: 38px;
+  padding: 0 12px;
+  background: var(--theme-surface-muted);
+  border-bottom: 1px solid var(--theme-bottom);
+  color: var(--theme-text-muted);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 10px;
+}
+.agendaCompact .listHeader .columnTitle{min-width:0;padding:0}
+.agendaCompact .listHeader .columnTitle:nth-child(3),
+.agendaCompact .listHeader .columnTitle:nth-child(4){display:none}
+.agendaCompact .listBody{padding:10px;display:grid;gap:9px;align-content:start}
+.agendaCompact .listItem{
+  position:relative;
+  display:grid;
+  grid-template-columns:75px minmax(0,1fr) minmax(87px,auto);
+  grid-template-rows:repeat(3,minmax(22px,auto));
+  gap:5px 10px;
+  min-height:101px;
+  width:100%;
+  padding:11px 12px 11px 14px;
+  border:1px solid var(--theme-bottom);
+  border-radius:13px;
+  background:var(--theme-surface-muted);
+  font-size:12px;
+  box-sizing:border-box;
+  align-items:center;
+}
+.agendaCompact .listItem::before{
+  position:absolute;
+  content:"";
+  top:0;left:0;bottom:0;
+  width:4px;
+  background:var(--theme-primary);
+  border-radius:13px 0 0 13px;
+}
+.agendaCompact .listItem:has(.completed)::before{background:var(--theme-success)}
+.agendaCompact .listItem:has(.cancelled)::before{background:var(--theme-error)}
+.agendaCompact .listItem>div{display:flex;align-items:center;gap:7px;min-width:0;padding:0}
+.agendaCompact .listItem>div::before{display:none}
+.agendaCompact .time{grid-column:1;grid-row:1 / 4;align-self:center;justify-self:start}
+.agendaCompact .time span{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:64px;
+  min-height:34px;
+  padding:0 8px;
+  border-radius:10px;
+  background:rgba(25,100,215,.29);
+  color:#c5dfff;
+  font-size:12px;
+  font-weight:800;
+}
+.agendaCompact .patient{grid-column:2;grid-row:1;font-weight:750}
+.agendaCompact .patient strong,
+.agendaCompact .compactService span,
+.agendaCompact .compactProfessional>span:last-child{
+  min-width:0;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.agendaCompact .initialAvatar,
+.agendaCompact .professionalAvatar{
+  display:grid;
+  place-items:center;
+  flex:0 0 30px;
+  width:30px;height:30px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#467de3,#324fb6);
+  color:#fff;
+  font-size:10px;
+  font-weight:800;
+}
+.agendaCompact .professionalAvatar{
+  width:22px;height:22px;flex-basis:22px;
+  font-size:9px;
+  background:linear-gradient(135deg,#284b77,#1d3759);
+}
+.agendaCompact .compactService{grid-column:2;grid-row:2;color:var(--theme-text);font-weight:700}
+.agendaCompact .compactService svg{flex:none;font-size:16px;color:var(--theme-text-muted)}
+.agendaCompact .compactProfessional{grid-column:2;grid-row:3;color:var(--theme-text-muted);font-size:11px}
+.agendaCompact .listItem>div:nth-child(5){grid-column:3;grid-row:1;justify-self:end}
+.agendaCompact .statusBadge{
+  font-size:10px;
+  font-weight:750;
+  min-height:26px;
+  border-radius:999px;
+  text-transform:none;
+  padding:5px 8px;
+}
+.agendaCompact .value{grid-column:3;grid-row:2;justify-self:end;font-weight:700;color:var(--theme-primary-text);font-size:11px}
+.agendaCompact .actions{grid-column:3;grid-row:3;justify-self:end;justify-content:flex-end}
+.agendaCompact .actions .actionButton{width:28px;height:28px;border-radius:9px}
+.agendaCompact .noActions{font-size:11px}
+@container (min-width: 790px){
+  .agendaCompact .listHeader{grid-template-columns:80px 1.3fr 1.2fr 1fr 104px 66px}
+  .agendaCompact .listHeader .columnTitle:nth-child(3),
+  .agendaCompact .listHeader .columnTitle:nth-child(4){display:flex}
+  .agendaCompact .listItem{grid-template-columns:80px minmax(0,1.3fr) minmax(0,1.2fr) minmax(0,1fr) 104px 66px;grid-template-rows:1fr;min-height:68px}
+  .agendaCompact .time{grid-column:1;grid-row:1}
+  .agendaCompact .patient{grid-column:2;grid-row:1}
+  .agendaCompact .compactService{grid-column:3;grid-row:1}
+  .agendaCompact .compactProfessional{grid-column:4;grid-row:1}
+  .agendaCompact .listItem>div:nth-child(5){grid-column:5;grid-row:1}
+  .agendaCompact .value{display:none}
+  .agendaCompact .actions{grid-column:6;grid-row:1}
+}
+@container (max-width: 380px){
+  .agendaCompact .listHeader{grid-template-columns:60px minmax(0,1fr) 92px 39px;gap:5px;padding:0 8px;font-size:9px}
+  .agendaCompact .listItem{grid-template-columns:60px minmax(0,1fr) auto;gap:3px 6px;padding:9px 7px 9px 11px}
+  .agendaCompact .time span{min-width:52px;padding:0 4px;font-size:11px}
+  .agendaCompact .initialAvatar{width:25px;height:25px;flex-basis:25px;font-size:9px}
+  .agendaCompact .statusBadge{font-size:9px;padding:4px 6px}
+}
