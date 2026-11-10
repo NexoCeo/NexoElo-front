@@ -602,3 +602,87 @@ input:focus-visible {
 .dayPauseRow button{border:0;border-radius:7px;min-height:34px;background:var(--theme-error-soft,rgba(239,68,68,.12));color:var(--theme-error-text,#f87171);cursor:pointer}
 .dayPauses small{color:var(--theme-text-muted,#94a3b8)}
 @media(max-width:560px){.intro{margin-bottom:14px}.intro strong{font-size:15px}.dayHoursRow{padding:10px}.dayHoursEditor{gap:9px}.dayPauseRow{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) 28px;gap:5px}}
+
+
+/* Funcionamento — aparência do assistente de configuração de horários.
+   Estilização isolada, preservando controles e comportamentos existentes. */
+.container{width:100%;padding:15px clamp(14px,2vw,30px) 28px}
+.intro{width:100%;max-width:none;margin:0 0 14px;gap:3px}
+.intro strong{font-size:clamp(19px,2vw,27px);font-weight:800;letter-spacing:-.035em}
+.intro span{font-size:13px}
+.stepper{display:flex;align-items:center;justify-content:space-between;gap:7px;margin:0 0 17px;padding:0 6px;min-height:39px}
+.stepperItem{display:flex;align-items:center;gap:9px;color:var(--theme-text-muted);font-size:12px;white-space:nowrap;flex:1;min-width:0}
+.stepperItem:not(:last-child)::after{content:"";height:1px;background:var(--theme-border-strong);flex:1;margin:0 12px}
+.stepperNumber{width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;border:1px solid var(--theme-border-strong);border-radius:50%;font-size:12px;color:var(--theme-text-muted)}
+.stepperItem:first-child{color:var(--theme-text);font-weight:750}
+.stepperItem:first-child .stepperNumber{background:var(--theme-primary);color:white;border-color:var(--theme-primary)}
+.content{width:100%;max-width:none;grid-template-columns:minmax(0,1.92fr) minmax(285px,.95fr);gap:18px;align-items:stretch}
+.editor{min-width:0;display:flex;flex-direction:column;gap:0;padding:17px 20px;border:1px solid var(--theme-bottom);border-radius:16px;background:var(--theme-surface)}
+.editor>.card,.editor>.availabilitySection{border:0!important;border-radius:0;background:transparent!important;box-shadow:none;padding:14px 0 18px;margin:0}
+.editor>.card:not(:last-of-type),.availabilitySection{border-bottom:1px solid var(--theme-bottom)!important}
+.editor>.availabilitySection{padding-top:0}
+.titleGroup{align-items:flex-start;gap:12px}
+.titleGroup h2,.availabilitySection h2{margin:0;color:var(--theme-text);font-size:17px;line-height:1.3;font-weight:780}
+.titleGroup p,.availabilitySection p{margin:3px 0 0;color:var(--theme-text-muted);font-size:12px;line-height:1.4}
+.step{width:29px;height:29px;flex-basis:29px;font-size:12px}
+.cardHeader{align-items:center;gap:12px;margin-bottom:13px}
+.availabilityOptions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:13px 0 0 42px}
+.availabilityOption{display:flex;align-items:center;gap:11px;min-width:0;min-height:74px;padding:12px;border:1px solid var(--theme-border-strong);border-radius:11px;background:var(--theme-surface-muted)}
+.availabilityOption>svg:first-child{box-sizing:content-box;flex:0 0 22px;width:22px;height:22px;padding:12px;border-radius:10px;background:var(--theme-primary-soft);color:var(--theme-primary-text)}
+.availabilityOption>span{display:grid;gap:3px;min-width:0}
+.availabilityOption strong{font-size:12px;color:var(--theme-text);line-height:1.2}
+.availabilityOption small{font-size:11px;color:var(--theme-text-muted);line-height:1.35}
+.availabilityOption>svg:last-child:not(:first-child){margin-left:auto;flex-shrink:0;color:#38bdf8}
+.availabilitySelected{border-color:var(--theme-primary);background:var(--theme-primary-soft);box-shadow:inset 0 0 0 1px var(--theme-primary)}
+.presets{gap:5px}
+.presets button{min-height:29px;border-radius:8px;padding:0 9px;font-size:10px}
+.daysGrid{grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;padding-left:40px}
+.dayButton{min-height:54px;padding:8px 5px;border-radius:10px;gap:0}
+.dayButtonActive{box-shadow:none;background:var(--theme-primary)!important;color:white!important;border-color:var(--theme-primary)!important}
+.dayButton strong{font-size:12px}
+.dayFullName{display:none}
+.dayCheck{top:5px;right:5px}
+.timeRange{margin-left:40px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.timeRange label{gap:5px;font-size:12px}
+.timeRange input,.intervalRow input{height:42px;border-radius:10px;border-color:var(--theme-border-strong);background:var(--theme-surface-muted);color:var(--theme-text);color-scheme:dark;font-size:12px}
+.timeArrow{display:none}
+.duration{min-height:29px;font-size:11px;border-radius:8px}
+.dayHoursList{padding-left:40px;gap:7px;max-height:185px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--theme-border-strong) transparent}
+.dayHoursRow{padding:9px 12px;border-radius:10px;background:var(--theme-surface-muted)}
+.dayHoursIdentity strong{font-size:12px}
+.dayHoursIdentity span{font-size:11px}
+.customizeButton{border-radius:8px;min-height:32px}
+.intervalList{margin-left:40px;max-height:190px;overflow-y:auto;scrollbar-width:thin}
+.intervalRow{grid-template-columns:minmax(92px,.85fr) minmax(95px,1fr) minmax(95px,1fr) auto 35px;gap:9px;padding:9px;border:1px solid var(--theme-bottom)!important;border-radius:10px;background:var(--theme-surface-muted)}
+.intervalRow+.intervalRow{margin-top:7px}
+.intervalName{min-height:36px;font-size:12px}
+.intervalRow label{gap:4px;font-size:11px}
+.intervalRow input{height:36px}
+.intervalDuration{min-height:36px;font-size:10px;min-width:38px}
+.removeButton{width:34px;height:34px}
+.addButton{min-height:34px;border:1px solid var(--theme-border-strong);border-radius:9px;background:transparent;color:var(--theme-text);font-size:11px}
+.emptyState{margin-left:40px;min-height:60px;border-radius:10px}
+.editor>.actions{min-height:0;padding:0}
+.messages:empty{display:none}
+.summary{position:sticky;top:82px;display:flex;flex-direction:column;align-self:start;gap:14px;min-width:0;padding:19px;border:1px solid var(--theme-bottom);border-radius:16px;background:var(--theme-surface)}
+.summaryTitle{gap:12px;padding:0}
+.summaryTitle>svg{box-sizing:content-box;width:21px;height:21px;padding:11px;border-radius:11px;background:var(--theme-success-soft);color:var(--theme-success-text)!important}
+.summaryTitle h2{font-size:17px;font-weight:750}
+.summaryBlock{display:grid;gap:4px;margin:0;padding:10px 12px;border:1px solid var(--theme-bottom);border-bottom:0;background:var(--theme-surface-muted)}
+.summaryBlock:nth-of-type(2){border-radius:11px 11px 0 0}
+.summaryBlock:nth-of-type(5){border-bottom:1px solid var(--theme-bottom);border-radius:0 0 11px 11px}
+.summaryBlock>span{font-size:11px;font-weight:750;text-transform:none;color:var(--theme-text-muted)!important}
+.summaryBlock>strong{font-size:12px;line-height:1.45}
+.summaryIntervals{max-height:135px;overflow-y:auto;scrollbar-width:thin;gap:5px}
+.summaryIntervals small{font-size:11px;line-height:1.5;gap:8px}
+.summaryIntervals small span{text-align:right}
+.readyNotice{display:flex;align-items:flex-start;gap:12px;padding:15px;border:1px solid #149969;border-radius:12px;background:rgba(12,135,89,.18)}
+.readyNotice>svg{flex:0 0 21px;font-size:21px;color:#43e8ac;margin-top:2px}
+.readyNotice>div{display:grid;gap:5px}
+.readyNotice strong{font-size:12px;color:var(--theme-text)}
+.readyNotice span{font-size:11px;color:var(--theme-text-muted);line-height:1.45}
+.summary>.saveButton{width:100%;min-width:0;min-height:46px;border-radius:11px;font-size:13px}
+@media(max-width:1100px){.content{grid-template-columns:minmax(0,1.55fr) minmax(260px,.95fr);gap:12px}.editor{padding:14px}.summary{padding:15px}.availabilityOptions{margin-left:0}.daysGrid,.timeRange,.dayHoursList,.intervalList,.emptyState{margin-left:0;padding-left:0}}
+@media(max-width:900px){.content{grid-template-columns:1fr}.summary{position:static;display:flex;grid-template-columns:none;gap:12px}.summaryTitle{grid-column:auto}.stepperItem{font-size:11px}.stepperItem:not(:last-child)::after{margin:0 5px}}
+@media(max-width:620px){.container{padding:12px}.stepper{overflow-x:auto;justify-content:flex-start;padding-bottom:7px;scrollbar-width:thin}.stepperItem{flex:0 0 auto}.stepperItem:not(:last-child)::after{width:16px;flex:0 0 16px}.editor{padding:13px}.availabilityOptions{grid-template-columns:1fr}.daysGrid{grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.dayButton{min-height:46px;padding:6px 2px}.dayButton strong{font-size:10px}.presets{justify-content:flex-start}.cardHeader{flex-wrap:wrap}.intervalRow{grid-template-columns:1fr 1fr 32px;gap:7px}.intervalName{grid-column:1/-1}.intervalDuration{grid-column:1/3;grid-row:auto}.removeButton{grid-column:3;grid-row:auto}.timeRange{grid-template-columns:1fr 1fr}.timeArrow{display:none}.summary{padding:13px}}
+@media(max-width:400px){.daysGrid{grid-template-columns:repeat(7,minmax(0,1fr))}.timeRange{grid-template-columns:1fr 1fr}.intervalRow{grid-template-columns:1fr 1fr 32px}}
