@@ -338,3 +338,39 @@
   .profileName{max-width:60px}
   .profileButton{padding-left:7px;gap:4px}
 }
+
+
+/* Identidade da marca exclusiva do cabeçalho em celulares. */
+.mobileBrand{display:none}
+@media(max-width:760px){
+  .header{justify-content:space-between;gap:8px}
+  .mobileBrand{
+    display:inline-flex;
+    align-items:center;
+    flex:0 0 auto;
+    gap:5px;
+    min-width:0;
+    max-width:112px;
+    text-decoration:none;
+    color:var(--theme-text);
+    white-space:nowrap;
+  }
+  .mobileBrand img{width:26px;height:26px;object-fit:contain;flex:0 0 26px}
+  .mobileBrand span{font-family:Inter,system-ui,sans-serif;font-size:12px;font-weight:800;letter-spacing:-.45px}
+  .mobileBrand:focus-visible{outline:2px solid var(--theme-primary);outline-offset:3px;border-radius:5px}
+  .headerActions{width:auto;flex:1 1 auto;min-width:0;gap:6px;margin-left:auto}
+  .findMeButton{flex:0 1 auto;min-width:0;font-size:11px;padding:6px 2px}
+  .profileWrapper{flex:0 0 auto}
+  .profileButton{padding:3px 4px 3px 7px;gap:4px;min-height:36px;max-width:100px}
+  .profileName{max-width:48px;font-size:11px}
+  .fotoPerfil{width:26px;height:26px}
+}
+@media(max-width:380px){
+  .mobileBrand{gap:3px;max-width:94px}
+  .mobileBrand img{width:22px;height:22px;flex-basis:22px}
+  .mobileBrand span{font-size:11px}
+  .headerActions{gap:3px}
+  .findMeButton{font-size:10px}
+  .profileButton{max-width:82px;padding-left:5px}
+  .profileName{max-width:36px;font-size:10px}
+}
