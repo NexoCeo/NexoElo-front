@@ -708,3 +708,18 @@ input:focus-visible {
   cursor:not-allowed;
   opacity:.7;
 }
+
+
+@media(max-width:760px){
+ .container{min-height:0;padding:12px 12px 24px}
+ .content{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+ .editor,.summary{min-width:0;max-width:100%}
+ .editor{padding:12px}
+ .editor>.card,.editor>.availabilitySection{padding:12px 0}
+ .availabilityOptions{margin:12px 0 0}
+ .stepper{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+ .timeRange,.daysGrid,.intervalList,.dayHoursList{min-width:0;max-width:100%}
+ .timeRange input,.intervalRow input{width:100%;min-width:0}
+ .summary{position:static;width:100%;max-width:100%}
+ .summary>.saveButton{min-height:48px}
+}
