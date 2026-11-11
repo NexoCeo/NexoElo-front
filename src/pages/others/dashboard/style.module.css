@@ -240,3 +240,19 @@
     transition: none;
   }
 }
+
+
+@media(max-width:760px){
+ .container{width:100%;max-width:100%;padding:13px 13px 22px}
+ .header{margin-bottom:14px;gap:10px}
+ .agendaHeader{gap:12px}
+ .agendaSection{min-width:0}
+ .agendaTitleGroup h2{font-size:clamp(17px,5vw,23px)}
+ .agendaTitleGroup p{font-size:12px}
+ .agendaActions{width:100%}
+ .agendaLink{width:100%;min-height:46px;border-radius:11px}
+}
+@media(max-width:380px){
+ .titleGroup h1{font-size:1.45rem}
+ .agendaTitleGroup h2{font-size:17px}
+}
