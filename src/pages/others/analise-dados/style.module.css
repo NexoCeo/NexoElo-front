@@ -195,3 +195,81 @@
 @media(max-width:760px){.dashboardFilters{justify-content:stretch}.topFilter{flex:1;min-width:0}.dashboardCharts,.dashboardBottom{grid-template-columns:1fr}.dashboardMetric{min-height:75px}.dashboardMetric strong{font-size:20px}.dashboardPanel{padding:14px}}
 @media(max-width:440px){.dashboardFilters{flex-wrap:wrap}.topFilter{flex:1 1 100%;max-width:none}.dashboardMetrics{gap:9px}.dashboardMetric{gap:8px;padding:9px}.dashboardIcon{flex-basis:36px;width:36px;height:36px;font-size:17px}.dashboardMetric strong{font-size:17px}.dashboardMetric>div>span{font-size:10px}.latestRow{grid-template-columns:80px minmax(0,1fr) auto}.latestRow>em{display:none}}
 @media(prefers-reduced-motion:reduce){.weekBar{transition:none}}
+
+
+/* Opções personalizadas — exclusivamente os dois filtros superiores de Métricas. */
+.dashboardFilters{position:relative;z-index:30;overflow:visible}
+.dashboardFilters .topFilter{position:relative;overflow:visible}
+.dashboardFilters .filterInput{
+  display:flex;
+  width:100%;
+  min-height:25px;
+  padding:0;
+  border:0;
+  background:transparent;
+  text-align:left;
+  color:var(--analysis-text);
+  cursor:pointer;
+  font:inherit;
+  font-size:12px;
+  font-weight:650;
+}
+.dashboardFilters .filterInput:focus-visible{outline:2px solid var(--analysis-primary);outline-offset:3px;border-radius:4px}
+.dashboardFilters .filterInput:disabled{cursor:not-allowed;opacity:.65}
+.dashboardFilters .filterValue{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dashboardFilters .filterInput[aria-expanded="true"]>svg:last-child{transform:rotate(180deg)}
+.dashboardFilters .filterOptions{
+  position:absolute;
+  top:calc(100% + 9px);
+  right:0;
+  left:0;
+  min-width:max(100%,225px);
+  max-height:min(310px,45dvh);
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:6px;
+  border:1px solid var(--analysis-border);
+  border-radius:12px;
+  background:var(--analysis-panel);
+  box-shadow:0 16px 36px rgba(0,0,0,.35);
+  z-index:50;
+  scrollbar-width:thin;
+  scrollbar-color:var(--theme-border-strong) transparent;
+}
+.dashboardFilters .filterOptions::-webkit-scrollbar{width:6px}
+.dashboardFilters .filterOptions::-webkit-scrollbar-track{background:transparent}
+.dashboardFilters .filterOptions::-webkit-scrollbar-thumb{background:var(--theme-border-strong);border-radius:8px}
+.dashboardFilters .filterOptions button{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  width:100%;
+  min-height:37px;
+  padding:8px 11px;
+  border:1px solid transparent;
+  border-radius:8px;
+  background:transparent;
+  color:var(--analysis-text);
+  font:500 12px Inter,system-ui,sans-serif;
+  text-align:left;
+  cursor:pointer;
+  transition:background-color .15s ease,border-color .15s ease;
+}
+.dashboardFilters .filterOptions button:hover,
+.dashboardFilters .filterOptions button:focus-visible{
+  background:var(--theme-surface-hover);
+  border-color:var(--analysis-border);
+  outline:none;
+}
+.dashboardFilters .filterOptions button.filterOptionSelected{
+  background:var(--theme-primary-soft);
+  color:var(--theme-primary-text);
+  border-color:var(--theme-primary);
+  font-weight:700;
+}
+.dashboardFilters .filterOptions button>span{flex:none;font-weight:800}
+@media(max-width:440px){
+  .dashboardFilters .filterOptions{left:0;right:0;min-width:100%;max-height:260px}
+}
+@media(prefers-reduced-motion:reduce){.dashboardFilters .filterOptions button{transition:none}}
