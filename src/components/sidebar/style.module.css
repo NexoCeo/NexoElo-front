@@ -200,3 +200,8 @@ button.analyticsAnchor > span:nth-child(2) { flex: 1; }
   object-fit: contain; 
   display: block; 
 }
+
+
+@media(max-width:760px){
+  .nav,.nav.open{display:none!important;visibility:hidden!important;pointer-events:none!important}
+}
