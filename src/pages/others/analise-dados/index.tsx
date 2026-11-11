@@ -1,5 +1,5 @@
 import { formatPersonName } from "@/context/UserContext";
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { FaBullhorn, FaChartLine, FaClock, FaEnvelope, FaUserClock, FaUsers, FaTimes, FaCalendarAlt, FaDollarSign, FaLayerGroup, FaChevronDown } from "react-icons/fa";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
@@ -55,6 +55,23 @@ export default function AnaliseDados() {
   const [erro, setErro] = useState("");
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [professionalFilter, setProfessionalFilter] = useState("TODOS");
+  const [openMetricsFilter, setOpenMetricsFilter] = useState<"periodo" | "profissional" | null>(null);
+  const metricsFiltersRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!openMetricsFilter) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (!metricsFiltersRef.current?.contains(event.target as Node)) setOpenMetricsFilter(null);
+    };
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpenMetricsFilter(null);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onEscape);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onEscape);
+    };
+  }, [openMetricsFilter]);
   const [periodFilter, setPeriodFilter] = useState(() => { const today = new Date(); return `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}`; });
   const permitido = usuario?.Papel === "EMPRESA" || usuario?.Papel === "AUTONOMO";
   useEffect(() => {
@@ -241,25 +258,60 @@ export default function AnaliseDados() {
 
   if (!permitido) return <main className={styles.container}>{t("analytics.notAllowed")}</main>;
   return <main className={styles.container} style={cssVars}>
-    <header className={styles.dashboardFilters} aria-label="Filtros das métricas">
-      <label className={styles.topFilter}>
+    <header className={styles.dashboardFilters} aria-label="Filtros das métricas" ref={metricsFiltersRef}>
+      <div className={styles.topFilter}>
         <span>Período</span>
-        <span className={styles.filterInput}><FaCalendarAlt aria-hidden="true" />
-          <select value={monthOptions.length ? periodFilter : ""} disabled={carregando || !monthOptions.length} onChange={event => setPeriodFilter(event.target.value)}
-            aria-label="Período das métricas">
-            {!monthOptions.length && <option value="">{carregando ? "Carregando períodos..." : "Sem movimentação"}</option>}
-            {monthOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
-          </select><FaChevronDown aria-hidden="true" /></span>
-      </label>
-      <label className={styles.topFilter}>
+        <button type="button" className={styles.filterInput}
+          disabled={carregando || !monthOptions.length}
+          aria-label="Período das métricas"
+          aria-haspopup="listbox"
+          aria-controls="metrics-period-options"
+          aria-expanded={openMetricsFilter === "periodo"}
+          onClick={() => setOpenMetricsFilter(open => open === "periodo" ? null : "periodo")}>
+          <FaCalendarAlt aria-hidden="true" />
+          <span className={styles.filterValue}>{monthOptions.find(option => option.value === periodFilter)?.label ?? (carregando ? "Carregando períodos..." : "Sem movimentação")}</span>
+          <FaChevronDown aria-hidden="true" />
+        </button>
+        {openMetricsFilter === "periodo" && (
+          <div id="metrics-period-options" className={styles.filterOptions} role="listbox" aria-label="Selecionar período">
+            {monthOptions.map(option => (
+              <button type="button" role="option" aria-selected={periodFilter === option.value}
+                className={periodFilter === option.value ? styles.filterOptionSelected : ""}
+                key={option.value}
+                onClick={() => { setPeriodFilter(option.value); setOpenMetricsFilter(null); }}>
+                {option.label}
+                {periodFilter === option.value && <span aria-hidden="true">✓</span>}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className={styles.topFilter}>
         <span>Profissional</span>
-        <span className={styles.filterInput}><FaUsers aria-hidden="true" />
-          <select value={professionalFilter} onChange={event => setProfessionalFilter(event.target.value)}
-            aria-label="Profissional das métricas">
-            <option value="TODOS">Todos os profissionais</option>
-            {profissionais.map(item => <option value={String(item.Id)} key={item.Id}>{formatPersonName(item.Nome) || item.Email}</option>)}
-          </select><FaChevronDown aria-hidden="true" /></span>
-      </label>
+        <button type="button" className={styles.filterInput}
+          aria-label="Profissional das métricas"
+          aria-haspopup="listbox"
+          aria-controls="metrics-professional-options"
+          aria-expanded={openMetricsFilter === "profissional"}
+          onClick={() => setOpenMetricsFilter(open => open === "profissional" ? null : "profissional")}>
+          <FaUsers aria-hidden="true" />
+          <span className={styles.filterValue}>{professionalFilter === "TODOS" ? "Todos os profissionais" : (profissionais.find(item => String(item.Id) === professionalFilter)?.Nome || "Todos os profissionais")}</span>
+          <FaChevronDown aria-hidden="true" />
+        </button>
+        {openMetricsFilter === "profissional" && (
+          <div id="metrics-professional-options" className={styles.filterOptions} role="listbox" aria-label="Selecionar profissional">
+            {[{value:"TODOS",label:"Todos os profissionais"}, ...profissionais.map(item => ({value:String(item.Id),label:formatPersonName(item.Nome) || item.Email}))].map(option => (
+              <button type="button" role="option" aria-selected={professionalFilter === option.value}
+                className={professionalFilter === option.value ? styles.filterOptionSelected : ""}
+                key={option.value}
+                onClick={() => { setProfessionalFilter(option.value); setOpenMetricsFilter(null); }}>
+                {option.label}
+                {professionalFilter === option.value && <span aria-hidden="true">✓</span>}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </header>
     {erro && <p className={styles.error} role="alert">{erro}</p>}
     <section className={styles.dashboardMetrics} aria-label="Indicadores do período">
