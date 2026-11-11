@@ -1,6 +1,6 @@
 import { formatPersonName } from "@/context/UserContext";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { FaBullhorn, FaChartLine, FaClock, FaEnvelope, FaUserClock, FaUsers, FaTimes, FaCalendarAlt, FaDollarSign, FaLayerGroup, FaChevronDown } from "react-icons/fa";
+import { FaBullhorn, FaChartLine, FaEnvelope, FaUsers, FaTimes, FaCalendarAlt, FaDollarSign, FaLayerGroup, FaChevronDown } from "react-icons/fa";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
 import { listarHistoricoAgendamentos } from "@/services/agendamento-service";
@@ -11,46 +11,11 @@ import LoadingState from "@/components/loading-state";
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
 
-type ClienteRetencao = {
-  id: number;
-  nome: string;
-  ultimaVisita: Date;
-  visitas: number;
-  diasSemVisitar: number;
-};
-type Filtro = 30 | 60 | 90;
-function diasDesde(data: Date, referencia: Date) {
-  const diaAtual = new Date(referencia.getFullYear(), referencia.getMonth(), referencia.getDate()).getTime();
-  const diaVisita = new Date(data.getFullYear(), data.getMonth(), data.getDate()).getTime();
-  return Math.floor((diaAtual - diaVisita) / 86400000);
-}
-function formatarData(data: Date, lang: "pt" | "en") {
-  return new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US", { day: "2-digit", month: "short", year: "numeric" }).format(data);
-}
-function agruparClientes(agendamentos: Agendamento[], referencia: Date): ClienteRetencao[] {
-  const clientes = new Map<number, { nome: string; ultimaVisita: Date; visitas: number }>();
-  for (const agendamento of agendamentos) {
-    if (agendamento.ClienteId <= 0 || agendamento.Status.toUpperCase() !== "CONCLUIDO") continue;
-    const data = new Date(agendamento.DataAgendamento);
-    if (!Number.isFinite(data.getTime()) || data > referencia) continue;
-    const anterior = clientes.get(agendamento.ClienteId);
-    clientes.set(agendamento.ClienteId, {
-      nome: formatPersonName(agendamento.ClienteNome) || anterior?.nome || "Cliente #" + agendamento.ClienteId,
-      ultimaVisita: anterior && anterior.ultimaVisita > data ? anterior.ultimaVisita : data,
-      visitas: (anterior?.visitas || 0) + 1,
-    });
-  }
-  return Array.from(clientes, ([id, data]) => ({
-    id, ...data, diasSemVisitar: diasDesde(data.ultimaVisita, referencia),
-  })).sort((a, b) => b.diasSemVisitar - a.diasSemVisitar);
-}
-
 export default function AnaliseDados() {
   const { theme } = useTheme();
   const { t, lang } = useLanguage();
   const { usuario } = useUser();
   const [historico, setHistorico] = useState<Agendamento[]>([]);
-  const [filtro, setFiltro] = useState<Filtro>(30);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
@@ -168,15 +133,6 @@ export default function AnaliseDados() {
     }
   }, [carregando, monthOptions, periodFilter]);
 
-  const clientes = useMemo(() => agruparClientes(historico, new Date()), [historico]);
-  const inativos = useMemo(() => clientes.filter(cliente => cliente.diasSemVisitar >= filtro), [clientes, filtro]);
-  const todosAgendamentos = useMemo(() => [...historico].sort((a, b) =>
-    new Date(b.DataAgendamento).getTime() - new Date(a.DataAgendamento).getTime()), [historico]);
-  const contagens = useMemo(() => ({
-    agendado: historico.filter(item => item.Status.toUpperCase() === "AGENDADO").length,
-    concluido: historico.filter(item => item.Status.toUpperCase() === "CONCLUIDO").length,
-    cancelado: historico.filter(item => item.Status.toUpperCase() === "CANCELADO").length,
-  }), [historico]);
   const [anoGrafico, setAnoGrafico] = useState(() => new Date().getFullYear());
   const [mesDetalhe, setMesDetalhe] = useState<number | null>(null);
   const [servicoDetalhe, setServicoDetalhe] = useState<number | null>(null);
@@ -469,74 +425,6 @@ export default function AnaliseDados() {
       </div>}
     </div>}
     <div className={styles.grid}>
-      <section className={styles.section}>
-        <div className={styles.sectionHead}>
-          <div className={styles.sectionName}><FaUserClock aria-hidden="true"/><span>{t("analytics.recovery")}</span></div>
-          <p>{t("analytics.recoveryDescription")}</p>
-        </div>
-        <div className={styles.filterRow}>
-          <span>{t("analytics.noReturn")}</span>
-          <div className={styles.filters} role="group" aria-label="Período sem retorno">
-            {([30, 60, 90] as const).map(valor =>
-              <button key={valor} type="button" className={filtro === valor ? styles.selected : ""}
-                aria-pressed={filtro === valor} onClick={() => setFiltro(valor)}>{valor} {t("analytics.days")}</button>)}
-          </div>
-        </div>
-        {carregando ? <LoadingState label={t("analytics.loading")} compact/> : erro
-          ? <p className={styles.error} role="alert">{erro}</p>
-          : <>
-            <div className={styles.metrics}>
-              <div className={styles.metric}><FaUsers aria-hidden="true"/><strong>{clientes.length}</strong><span>{t("analytics.completedCustomers")}</span></div>
-              <div className={styles.metric}><FaClock aria-hidden="true"/><strong>{inativos.length}</strong><span>{t("analytics.inactive")} {filtro}+ {t("analytics.days")}</span></div>
-            </div>
-            <div className={styles.listHeader}><span>{t("analytics.customer")}</span><span>{t("analytics.lastVisit")}</span><span>{t("analytics.noReturnColumn")}</span></div>
-            {inativos.length ? <div className={styles.list}>
-              {inativos.map(cliente => <div className={styles.client} key={cliente.id}>
-                <div className={styles.clientName}><strong>{cliente.nome}</strong><small>{cliente.visitas} {t("analytics.visits")}</small></div>
-                <span>{formatarData(cliente.ultimaVisita, lang)}</span><strong>{cliente.diasSemVisitar} {t("analytics.days")}</strong>
-              </div>)}
-            </div> : <div className={styles.empty}>{t("analytics.empty")}</div>}
-            <p className={styles.note}>{t("analytics.note")}</p>
-
-          </>}
-      </section>
-      <section className={`${styles.section} ${styles.appointmentHistory}`}>
-              <div className={styles.sectionName}>{lang === "pt" ? "Todos os agendamentos" : "All appointments"}</div>
-              <p className={styles.historySummary}>
-                {lang === "pt"
-                  ? `Total: ${historico.length} · Agendados: ${contagens.agendado} · Concluídos: ${contagens.concluido} · Cancelados: ${contagens.cancelado}`
-                  : `Total: ${historico.length} · Scheduled: ${contagens.agendado} · Completed: ${contagens.concluido} · Cancelled: ${contagens.cancelado}`}
-              </p>
-              <div className={styles.historyHeader}>
-                <span>{t("analytics.customer")}</span>
-                <span>{lang === "pt" ? "Serviço e data" : "Service and date"}</span>
-                <span>Status</span>
-                <span>{lang === "pt" ? "Motivo do cancelamento" : "Cancellation reason"}</span>
-              </div>
-              <div className={styles.historyList}>
-                {todosAgendamentos.map(item => {
-                  const data = new Date(item.DataAgendamento);
-                  const status = item.Status.toUpperCase();
-                  return <div className={styles.historyItem} key={item.Id}>
-                    <strong>{formatPersonName(item.ClienteNome) || `Cliente #${item.ClienteId}`}</strong>
-                    <span><time className={styles.historyDate} dateTime={item.DataAgendamento}>{Number.isFinite(data.getTime())
-                      ? new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }).format(data)
-                      : item.DataAgendamento}</time><strong>{item.ServicoNome}</strong></span>
-                    <span className={`${styles.historyStatus} ${status === "CONCLUIDO" ? styles.historyCompleted : status === "CANCELADO" ? styles.historyCancelled : styles.historyScheduled}`}>{status === "CONCLUIDO"
-                      ? (lang === "pt" ? "Concluído" : "Completed")
-                      : status === "CANCELADO" ? (lang === "pt" ? "Cancelado" : "Cancelled")
-                      : status === "AGENDADO" ? (lang === "pt" ? "Agendado" : "Scheduled") : status}</span>
-                    <span>{status === "CANCELADO"
-                      ? item.MotivoCancelamento || (lang === "pt" ? "Motivo não registrado" : "Reason not recorded")
-                      : "—"}</span>
-                  </div>;
-                })}
-                {!todosAgendamentos.length && <div className={styles.empty}>
-                  {lang === "pt" ? "Nenhum agendamento registrado." : "No appointments recorded."}
-                </div>}
-              </div>
-      </section>
-
       <section className={`${styles.section} ${styles.marketingSection}`}>
         <div className={styles.sectionHead}>
           <div className={styles.sectionName}><FaChartLine aria-hidden="true"/><span>{t("analytics.marketing")}</span></div>
