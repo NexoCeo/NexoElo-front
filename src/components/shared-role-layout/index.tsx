@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { FaHome, FaCalendarAlt, FaTools, FaUsers, FaThLarge, FaChartBar, FaClock, FaChartLine, FaUser, FaCreditCard, FaWhatsapp, FaTimes } from "react-icons/fa";
+import { FaHome, FaCalendarAlt, FaTools, FaUsers, FaThLarge, FaChartBar, FaClock, FaChartLine, FaWhatsapp, FaTimes } from "react-icons/fa";
 import { useUser } from "@/context/UserContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { getRoleBasePath } from "@/routes/role-paths";
@@ -65,8 +65,6 @@ function MobileNavigation() {
     ...(manager && access.reports ? [{ to: `${base}/relatorios`, label: t("nav.reports"), icon: <FaChartBar aria-hidden="true" /> }] : []),
     ...(manager && access.analytics ? [{ to: `${base}/analise-dados/metricas`, label: t("nav.metrics"), icon: <FaChartLine aria-hidden="true" /> }] : []),
     ...(manager && access.whatsapp ? [{ to: `${base}/analise-dados/whatsapp-business`, label: "WhatsApp Business", icon: <FaWhatsapp aria-hidden="true" /> }] : []),
-    { to: `${base}/perfil`, label: t("header.profile"), icon: <FaUser aria-hidden="true" /> },
-    ...(manager ? [{ to: `${base}/assinatura`, label: t("header.subscription"), icon: <FaCreditCard aria-hidden="true" /> }] : []),
   ];
   const moreActive = secondary.some(item => location.pathname === item.to);
   return (
