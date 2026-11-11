@@ -424,8 +424,7 @@ export default function AnaliseDados() {
         </section>
       </div>}
     </div>}
-    <div className={styles.grid}>
-      <section className={`${styles.section} ${styles.marketingSection}`}>
+    <section className={`${styles.section} ${styles.marketingSection}`}>
         <div className={styles.sectionHead}>
           <div className={styles.sectionName}><FaChartLine aria-hidden="true"/><span>{t("analytics.marketing")}</span></div>
           <p>{t("analytics.marketingDescription")}</p>
@@ -438,7 +437,6 @@ export default function AnaliseDados() {
         <div className={styles.automation}><FaUsers aria-hidden="true"/><div><strong>{t("analytics.reactivation")}</strong>
           <span>{t("analytics.reactivationDescription")}</span></div><span className={styles.disabled}>Indisponível</span></div>
         <p className={styles.note}>{t("analytics.noCharges")}</p>
-      </section>
-    </div>
+    </section>
   </main>;
 }
