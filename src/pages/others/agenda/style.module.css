@@ -1014,3 +1014,33 @@
     max-height: 420px;
   }
 }
+
+
+/* Agenda no celular: cards empilhados com scroll interno apenas nas listas. */
+@media(max-width:760px){
+ .container{display:block!important;min-height:0!important;height:auto!important;padding:12px 12px 24px!important;overflow:visible!important}
+ .topHeader{display:flex;flex-direction:column;align-items:stretch;gap:12px;margin-bottom:13px}
+ .headingTitle{gap:11px}
+ .headingIcon{width:48px;height:48px;flex-basis:48px}
+ .headingTitle h1{font-size:23px}
+ .headingTitle p{font-size:12px;line-height:1.35}
+ .topActions{display:flex;gap:9px}
+ .topActions .newBookingButton{flex:1;min-width:0;max-width:none}
+ .filterToggle{min-height:45px}
+ .metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:14px}
+ .metric{min-height:70px;gap:9px;padding:10px}
+ .metricIcon{width:40px;height:40px;flex-basis:40px;font-size:18px}
+ .metric strong{font-size:20px}
+ .metric div span{font-size:11px;white-space:normal}
+ .dayGrid{display:flex!important;flex-direction:column;min-height:0;height:auto;gap:12px;overflow:visible}
+ .dayGrid>.sidebar,.dayGrid>.content,.timelinePanel{width:100%;height:auto;max-height:none;min-height:0!important;overflow:visible}
+ .dayGrid>.sidebar{padding:12px}
+ .timelinePanel{min-height:350px!important;padding:13px}
+ .timelineViewport{height:330px;max-height:330px;overflow-y:auto;overscroll-behavior:contain}
+ .timelineCanvas{height:720px;min-height:720px}
+ .dayGrid>.content{display:flex;min-height:340px!important;max-height:460px;overflow:hidden}
+ .dayGrid>.content :global([class*="agendaCompact"]){flex:1;min-height:0}
+ .dayGrid>.content :global([class*="listBody"]){max-height:none;overflow-y:auto;min-height:0}
+ .listPanelHeader{flex:0 0 auto}
+ .closeDayAction{flex:0 0 auto;min-height:0!important}
+}
