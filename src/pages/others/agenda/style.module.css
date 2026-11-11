@@ -1044,3 +1044,103 @@
  .listPanelHeader{flex:0 0 auto}
  .closeDayAction{flex:0 0 auto;min-height:0!important}
 }
+
+
+/* Agenda em celulares: o estado vazio não deve reservar espaço para uma
+   tabela desktop; cabeçalho, lista e rodapé cabem no mesmo painel. */
+@media (max-width: 760px) {
+  .dayGrid > .content {
+    display: flex !important;
+    flex-direction: column;
+    width: 100%;
+    height: 340px;
+    min-height: 0 !important;
+    max-height: 340px;
+    overflow: hidden !important;
+    border: 1px solid var(--theme-bottom);
+    border-radius: 16px;
+    background: var(--theme-surface);
+  }
+  .dayGrid > .content > .listPanelHeader {
+    flex: 0 0 auto;
+    min-width: 0;
+    min-height: 56px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .dayGrid > .content .listPanelHeader h2 {
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-size: clamp(14px, 4vw, 17px);
+    line-height: 1.25;
+  }
+  .dayGrid > .content .headerActions {
+    width: auto;
+    flex: 0 0 auto;
+    margin-left: auto;
+    gap: 7px;
+  }
+  .dayGrid > .content .updateInfo {
+    margin: 0;
+    min-height: 0;
+    font-size: 0;
+    gap: 0;
+  }
+  .dayGrid > .content .liveDot { margin: 0; }
+  .dayGrid > .content .refreshButton {
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    min-height: 34px;
+  }
+  .dayGrid > .content > :global([class*="agendaCompact"]) {
+    display: flex !important;
+    flex: 1 1 0%;
+    flex-direction: column;
+    min-height: 0 !important;
+    height: auto;
+    max-height: none;
+    overflow: hidden !important;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+  .dayGrid > .content > :global([class*="agendaCompact"]) :global([class*="listHeader"]) {
+    display: none !important;
+  }
+  .dayGrid > .content > :global([class*="agendaCompact"]) :global([class*="listBody"]) {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+  }
+  .dayGrid > .content > :global([class*="agendaCompact"]) :global([class*="emptyState"]) {
+    flex: 1 1 auto;
+    min-height: 0 !important;
+    height: auto;
+    padding: 14px 16px;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .dayGrid > .content > .closeDayAction {
+    flex: 0 0 auto;
+    min-height: 0 !important;
+    margin-top: 0;
+    padding: 10px 12px;
+    border-top: 1px solid var(--theme-bottom);
+    background: var(--theme-surface);
+  }
+}
+@media (max-width: 380px) {
+  .dayGrid > .content .listPanelHeader h2 { font-size: 13px; }
+  .dayGrid > .content > .listPanelHeader { padding-inline: 9px; }
+}
