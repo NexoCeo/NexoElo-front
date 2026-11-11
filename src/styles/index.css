@@ -87,3 +87,17 @@ button:is(
     max-height: calc(100dvh - 232px - env(safe-area-inset-bottom, 0px)) !important;
   }
 }
+
+
+/* A região do safe-area e as bordas do viewport seguem o tema,
+   inclusive quando a navegação por gestos do Android fica visível. */
+html {
+  background: var(--theme-background, #0B1220);
+  color-scheme: dark;
+}
+html:has(body.light) { color-scheme: light; }
+@media (max-width: 760px) {
+  body, #root {
+    background: var(--theme-background, #0B1220);
+  }
+}
