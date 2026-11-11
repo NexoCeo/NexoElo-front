@@ -374,3 +374,31 @@
   .profileButton{max-width:82px;padding-left:5px}
   .profileName{max-width:36px;font-size:10px}
 }
+
+
+/* Separador entre "Me encontre" e o perfil — desktop e mobile. */
+.headerActions .profileWrapper {
+  display: flex;
+  align-items: center;
+  padding-left: 15px;
+}
+.headerActions .profileWrapper::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 1px;
+  height: clamp(22px, 2.2vw, 30px);
+  transform: translateY(-50%);
+  border-radius: 1px;
+  background: var(--theme-border-strong, var(--theme-bottom));
+  pointer-events: none;
+}
+@media (max-width: 760px) {
+  .headerActions .profileWrapper { padding-left: 9px; }
+  .headerActions .profileWrapper::before { height: 21px; }
+}
+@media (max-width: 380px) {
+  .headerActions .profileWrapper { padding-left: 7px; }
+  .headerActions .profileWrapper::before { height: 18px; }
+}
