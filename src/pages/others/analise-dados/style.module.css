@@ -273,3 +273,171 @@
   .dashboardFilters .filterOptions{left:0;right:0;min-width:100%;max-height:260px}
 }
 @media(prefers-reduced-motion:reduce){.dashboardFilters .filterOptions button{transition:none}}
+
+
+/* Cards inferiores da página Métricas no estilo dos painéis compactos.
+   Apenas recuperação e histórico: automações e demais painéis permanecem intactos. */
+.grid{gap:16px;align-items:stretch}
+.grid>.section:first-child,
+.grid>.appointmentHistory{
+  height:320px;
+  min-height:0;
+  padding:16px 18px;
+  border:1px solid var(--analysis-border);
+  border-radius:14px;
+  background:var(--analysis-panel);
+  overflow:hidden;
+}
+.grid>.section:first-child .sectionHead{gap:3px;margin-bottom:12px}
+.grid>.section:first-child .sectionName,
+.grid>.appointmentHistory>.sectionName{
+  display:flex;
+  align-items:center;
+  min-height:31px;
+  margin:0;
+  font-size:15px;
+  font-weight:750;
+  color:var(--analysis-text);
+}
+.grid>.section:first-child .sectionName svg{
+  box-sizing:content-box;
+  flex:none;
+  width:17px;
+  height:17px;
+  padding:8px;
+  border-radius:9px;
+  background:rgba(33,117,245,.15);
+  color:#429cff;
+}
+.grid>.section:first-child .sectionHead p{font-size:11px;line-height:1.4}
+.grid>.section:first-child .filterRow{gap:8px;margin-bottom:10px;font-size:11px}
+.grid>.section:first-child .filters button{min-height:30px;padding:5px 9px;border-radius:8px;font-size:11px}
+.grid>.section:first-child .metrics{gap:9px;margin-bottom:11px}
+.grid>.section:first-child .metric{padding:9px 12px;gap:2px;border-radius:10px}
+.grid>.section:first-child .metric svg{font-size:13px}
+.grid>.section:first-child .metric strong{font-size:19px;line-height:1.15}
+.grid>.section:first-child .metric span{font-size:10px;line-height:1.3}
+.grid>.section:first-child .listHeader,
+.grid>.appointmentHistory .historyHeader{
+  min-height:30px;
+  padding:7px 10px;
+  border-radius:9px;
+  background:var(--theme-surface-muted);
+  border-bottom:1px solid var(--analysis-border);
+  color:var(--analysis-muted);
+  font-size:10px;
+  letter-spacing:0;
+}
+.grid>.section:first-child .list,
+.grid>.appointmentHistory .historyList{
+  min-height:0;
+  flex:1 1 auto;
+  scrollbar-width:thin;
+  scrollbar-color:var(--theme-border-strong) transparent;
+}
+.grid>.section:first-child .client{min-height:38px;padding:8px 10px;font-size:11px}
+.grid>.section:first-child .empty{flex:1;min-height:0;padding:14px 8px;display:grid;place-items:center;font-size:11px}
+.grid>.section:first-child .note{margin-top:8px;line-height:1.3;font-size:10px}
+.grid>.appointmentHistory{gap:0}
+.grid>.appointmentHistory>.sectionName{flex:0 0 auto}
+.grid>.appointmentHistory .historySummary{flex:0 0 auto;margin:2px 0 10px;font-size:11px}
+.grid>.appointmentHistory .historyHeader{flex:0 0 auto}
+.grid>.appointmentHistory .historyHeader,
+.grid>.appointmentHistory .historyItem{
+  grid-template-columns:minmax(95px,.85fr) minmax(165px,1.7fr) minmax(87px,.7fr) minmax(80px,1.15fr);
+  gap:10px;
+  align-items:center;
+}
+.grid>.appointmentHistory .historyItem{
+  min-height:44px;
+  padding:7px 10px;
+  font-size:11px;
+  line-height:1.35;
+}
+.grid>.appointmentHistory .historyItem>strong{
+  font-size:11px;
+  font-weight:750;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.grid>.appointmentHistory .historyItem>span:nth-child(2){
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  gap:9px;
+  min-width:0;
+}
+.grid>.appointmentHistory .historyItem>span:nth-child(2)>strong{
+  min-width:0;
+  font-size:11px;
+  font-weight:600;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.historyDate{
+  display:inline-flex;
+  align-items:center;
+  flex:0 0 auto;
+  padding:6px 8px;
+  border-radius:7px;
+  border:1px solid var(--analysis-border);
+  background:var(--theme-primary-soft);
+  color:var(--theme-primary-text);
+  font-size:10px;
+  line-height:1.15;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.grid>.appointmentHistory .historyStatus{
+  display:inline-flex;
+  width:max-content;
+  max-width:100%;
+  align-items:center;
+  justify-content:center;
+  padding:6px 9px;
+  border-radius:999px;
+  background:var(--theme-primary-soft);
+  color:var(--theme-primary-text);
+  font-size:10px;
+  line-height:1.15;
+  font-weight:700;
+  white-space:nowrap;
+}
+.grid>.appointmentHistory .historyCompleted{background:rgba(13,156,103,.18);color:#47dfaa}
+.grid>.appointmentHistory .historyCancelled{background:rgba(225,67,82,.18);color:#fa8290}
+.grid>.appointmentHistory .historyScheduled{background:rgba(35,103,221,.2);color:#79b6ff}
+.grid>.appointmentHistory .historyItem>span:last-child{
+  min-width:0;
+  color:var(--analysis-muted);
+  overflow-wrap:anywhere;
+}
+.grid>.section:first-child .list::-webkit-scrollbar,
+.grid>.appointmentHistory .historyList::-webkit-scrollbar{width:5px}
+.grid>.section:first-child .list::-webkit-scrollbar-thumb,
+.grid>.appointmentHistory .historyList::-webkit-scrollbar-thumb{background:var(--theme-border-strong);border-radius:99px}
+@media(max-width:1100px){
+  .grid>.appointmentHistory .historyHeader,
+  .grid>.appointmentHistory .historyItem{
+    grid-template-columns:minmax(75px,1fr) minmax(130px,1.6fr) minmax(75px,.8fr);
+    gap:7px;
+  }
+  .grid>.appointmentHistory .historyHeader>span:last-child,
+  .grid>.appointmentHistory .historyItem>span:last-child{display:none}
+  .grid>.appointmentHistory .historyItem>span:nth-child(2){flex-wrap:wrap;gap:4px}
+}
+@media(max-width:960px){
+  .grid>.section:first-child,.grid>.appointmentHistory{height:320px}
+}
+@media(max-width:560px){
+  .grid>.section:first-child,.grid>.appointmentHistory{height:350px;padding:14px}
+  .grid>.appointmentHistory .historyHeader,
+  .grid>.appointmentHistory .historyItem{grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) auto}
+  .grid>.appointmentHistory .historyHeader>span:nth-child(3),
+  .grid>.appointmentHistory .historyItem>span:nth-child(3){display:inline-flex;grid-column:auto}
+  .grid>.appointmentHistory .historyItem>span:nth-child(2){display:flex}
+  .grid>.appointmentHistory .historyDate{font-size:9px;padding:5px}
+  .grid>.appointmentHistory .historyStatus{font-size:9px;padding:5px 6px}
+  .grid>.section:first-child .filterRow{align-items:flex-start}
+}
