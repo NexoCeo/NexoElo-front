@@ -55,7 +55,7 @@
 
 
 @media(max-width:760px){
-  .host{right:14px;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:1300}
+  .host{right:14px;bottom:calc(132px + env(safe-area-inset-bottom,0px));z-index:1300}
   .fab{width:46px;height:46px}
   .panel{width:min(420px,calc(100vw - 28px));max-height:calc(100dvh - 165px - env(safe-area-inset-bottom,0px));height:min(600px,calc(100dvh - 165px - env(safe-area-inset-bottom,0px)))}
 }
