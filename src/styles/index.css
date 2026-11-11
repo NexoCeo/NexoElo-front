@@ -73,3 +73,17 @@ button:is(
 ) svg {
   color: inherit !important;
 }
+
+
+/* Widget externo do NexoDesk: o script aplica bottom:18px inline no host.
+   O seletor global com !important é necessário para respeitar a barra mobile
+   do NexoElo; não modifica o posicionamento dos demais clientes NexoDesk. */
+@media (max-width: 760px) {
+  #nexodesk-embed-host {
+    bottom: calc(136px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 16px !important;
+  }
+  #nexodesk-embed-host iframe {
+    max-height: calc(100dvh - 232px - env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
