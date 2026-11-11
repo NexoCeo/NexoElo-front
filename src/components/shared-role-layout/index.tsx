@@ -85,6 +85,22 @@ function MobileNavigation() {
 
 export default function SharedRoleLayout({ children }: SharedRoleLayoutProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" && typeof window.matchMedia === "function" &&
+    window.matchMedia("(max-width: 760px)").matches
+  );
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function") return;
+    const query = window.matchMedia("(max-width: 760px)");
+    const update = () => setIsMobile(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+  useEffect(() => {
+    if (isMobile) setIsMenuOpen(false);
+  }, [isMobile]);
 
   useEffect(() => {
     function handleEscape(event: KeyboardEvent) {
@@ -108,7 +124,7 @@ export default function SharedRoleLayout({ children }: SharedRoleLayoutProps) {
       >
         {children}
       </div>
-      <MobileNavigation />
+      {isMobile && <MobileNavigation />}
       <SupportWidget />
     </div>
   );
