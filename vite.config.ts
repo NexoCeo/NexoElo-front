@@ -44,8 +44,8 @@ export default defineConfig(({ mode }) => {
 
           description: "Plataforma NexoElo",
 
-          theme_color: "#ffffff",
-          background_color: "#ffffff",
+          theme_color: "#0B1220",
+          background_color: "#0B1220",
 
           display: "standalone",
 
