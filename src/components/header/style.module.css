@@ -314,3 +314,27 @@
   border-radius: 0;
   pointer-events: none;
 }
+
+
+@media(max-width:760px){
+  .header{
+    padding:0 12px;
+    height:60px;
+    gap:8px;
+    padding-top:env(safe-area-inset-top,0px);
+  }
+  .menuButton{display:none}
+  .headerActions{width:100%;margin-left:0;justify-content:flex-end;gap:9px;min-width:0}
+  .profileButton{max-width:min(40vw,170px);min-height:38px}
+  .profileName{max-width:80px}
+  .findMeButton{white-space:nowrap;font-size:12px}
+  .profileMenu{right:0;max-width:calc(100vw - 24px);border-radius:12px}
+  .modalOverlay{padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+  .findMeModal{width:100%;max-height:calc(100dvh - 24px - env(safe-area-inset-bottom,0px));border-radius:15px;overflow-y:auto;overscroll-behavior:contain}
+}
+@media(max-width:360px){
+  .headerActions{gap:4px}
+  .findMeButton{font-size:11px;padding-inline:2px}
+  .profileName{max-width:60px}
+  .profileButton{padding-left:7px;gap:4px}
+}
