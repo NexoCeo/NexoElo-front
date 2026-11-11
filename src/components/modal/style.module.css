@@ -7,3 +7,12 @@
 .body p{margin:0 0 12px}
 .actions{padding:0 22px 20px;display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
 @media(max-width:500px){.header{padding:17px 16px 8px}.body{padding:8px 16px 16px}.actions{padding:0 16px 16px}}
+
+
+@media(max-width:760px){
+ .backdrop{padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+ .dialog{width:100%;max-width:550px;max-height:calc(100dvh - 24px - env(safe-area-inset-bottom,0px));overscroll-behavior:contain;overflow-wrap:anywhere}
+ .body{min-width:0}
+ .body input,.body select,.body textarea{max-width:100%}
+ .actions{position:sticky;bottom:0;background:var(--theme-background2,#121a2b);padding-top:12px}
+}
