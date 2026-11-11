@@ -55,10 +55,10 @@ function MobileNavigation() {
   }, [moreOpen]);
 
   const primary = [
+    { to: `${base}/dashboard`, label: "Início", icon: <FaHome aria-hidden="true" /> },
     { to: `${base}/agenda`, label: t("nav.calendar"), icon: <FaCalendarAlt aria-hidden="true" /> },
     ...(manager ? [{ to: `${base}/servicos`, label: t("nav.services"), icon: <FaTools aria-hidden="true" /> }] : []),
     ...(usuario?.Papel === "EMPRESA" ? [{ to: "/empresa/profissionais", label: t("nav.professionals"), icon: <FaUsers aria-hidden="true" /> }] : []),
-    { to: `${base}/dashboard`, label: "Início", icon: <FaHome aria-hidden="true" /> },
   ];
   const secondary = [
     ...(manager ? [{ to: `${base}/funcionamento`, label: t("nav.hours"), icon: <FaClock aria-hidden="true" /> }] : []),
