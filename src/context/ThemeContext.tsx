@@ -50,6 +50,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
     document.documentElement.style.setProperty("--theme-background-color", theme.colors.background);
     document.documentElement.style.setProperty("--theme-text-color", theme.colors.text);
+    // Android/PWA: mantém a área de navegação do sistema na cor do tema ativo.
+    document.documentElement.style.colorScheme = theme.dark ? "dark" : "light";
+    document.documentElement.style.backgroundColor = theme.colors.background;
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    themeMeta?.setAttribute("content", theme.colors.background);
   }, [theme, themeName]);
 
   useEffect(() => {
