@@ -394,12 +394,16 @@ export default function Servicos() {
                           />
                         )}
                       </span>
-                      <strong style={{ color: theme.colors.text }}>
-                        {servico.NomeServico || t("services.unnamed")}
-                      </strong>
+                      <div className={styles.serviceText}>
+                        <strong style={{ color: theme.colors.text }}>
+                          {servico.NomeServico || t("services.unnamed")}
+                        </strong>
+                        <span className={styles.cardDuration}>
+                          <FaClock aria-hidden="true" /> {servico.TempoEstimadoMinutos || 0} min
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div className={styles.cardDuration}>{servico.TempoEstimadoMinutos || 0} min</div>
                   <div className={styles.cardValue}>
                     <strong style={{ color: theme.colors.primary }}>
                       {formatCurrency(servico.Valor)}
