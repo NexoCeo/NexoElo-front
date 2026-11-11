@@ -519,10 +519,10 @@ export default function AnaliseDados() {
                   const status = item.Status.toUpperCase();
                   return <div className={styles.historyItem} key={item.Id}>
                     <strong>{formatPersonName(item.ClienteNome) || `Cliente #${item.ClienteId}`}</strong>
-                    <span><strong>{item.ServicoNome}</strong><small>{Number.isFinite(data.getTime())
-                      ? new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US", { dateStyle: "short", timeStyle: "short" }).format(data)
-                      : item.DataAgendamento}</small></span>
-                    <span className={styles.historyStatus}>{status === "CONCLUIDO"
+                    <span><time className={styles.historyDate} dateTime={item.DataAgendamento}>{Number.isFinite(data.getTime())
+                      ? new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }).format(data)
+                      : item.DataAgendamento}</time><strong>{item.ServicoNome}</strong></span>
+                    <span className={`${styles.historyStatus} ${status === "CONCLUIDO" ? styles.historyCompleted : status === "CANCELADO" ? styles.historyCancelled : styles.historyScheduled}`}>{status === "CONCLUIDO"
                       ? (lang === "pt" ? "Concluído" : "Completed")
                       : status === "CANCELADO" ? (lang === "pt" ? "Cancelado" : "Cancelled")
                       : status === "AGENDADO" ? (lang === "pt" ? "Agendado" : "Scheduled") : status}</span>
