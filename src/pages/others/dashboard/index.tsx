@@ -5,6 +5,7 @@ import { FaArrowRight, FaCalendarDay } from "react-icons/fa6";
 import { useTheme } from "@/context/ThemeContext";
 import { useNotification } from "@/context/NotificationContext";
 import type { AgendaCardItem } from "@/components/cardClientes";
+import LoadingState from "@/components/loading-state";
 import {
   formatAgendaDateParam,
   listarAgendaPorData,
@@ -60,7 +61,8 @@ export default function Dashboard() {
   const canOpenAgenda = role === "EMPRESA" || role === "AUTONOMO";
   const [range, setRange] = useState<DashboardRange>("today");
   const [appointments, setAppointments] = useState<Agendamento[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const [error, setError] = useState("");
 
   const loadAppointments = useCallback(async () => {
@@ -86,6 +88,7 @@ export default function Dashboard() {
       showNotification({ type: "error", title: t("dashboard.unavailable"), message });
     } finally {
       setLoading(false);
+      setHasLoaded(true);
     }
   }, [isProfessional, range, showNotification, t, usuario?.Id]);
 
@@ -177,8 +180,8 @@ export default function Dashboard() {
         </div>
 
         <div className={styles.mobileAppointments} aria-live="polite">
-          {loading ? (
-            <div className={styles.mobileEmpty}>{t("common.loading")}</div>
+          {!hasLoaded ? (
+            <LoadingState variant="dashboard" embedded label={t("common.loading")} />
           ) : error ? (
             <div className={styles.mobileEmpty} role="alert">{error}</div>
           ) : appointments.length === 0 ? (
