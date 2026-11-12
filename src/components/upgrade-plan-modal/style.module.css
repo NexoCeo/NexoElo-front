@@ -11,7 +11,7 @@
 .price{display:flex;align-items:baseline;gap:9px;margin:28px 0 4px;padding:0 12px}
 .price strong{font-size:22px}.price span{font-size:13px}
 .modal .benefit{margin:0 12px 24px;color:var(--upgrade-muted);font-size:12px}
-.cta{display:flex;align-items:center;justify-content:center;gap:14px;width:100%;height:42px;border:0;border-radius:999px;background:var(--upgrade-button);color:var(--upgrade-button-text);font:600 14px Inter,system-ui,sans-serif;cursor:pointer}
+.cta{display:flex;align-items:center;justify-content:center;gap:14px;width:100%;height:42px;border:0;border-radius:999px;background:var(--upgrade-button);color:var(--upgrade-button-text);font-weight:600;font-size:14px;cursor:pointer}
 .cta:hover{filter:brightness(.94)}
 .cta:focus-visible,.close:focus-visible{outline:2px solid var(--upgrade-accent);outline-offset:3px}
 @media(max-width:500px){.modal{padding:17px}.modal h2{font-size:19px}.modal p{font-size:14px}}
