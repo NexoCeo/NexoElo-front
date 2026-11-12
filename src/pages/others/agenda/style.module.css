@@ -1163,3 +1163,132 @@
     min-height: 45px;
   }
 }
+
+
+/* Filtro de profissional: seletor integrado ao tema com menu de opções.
+   Restrito ao popover da Agenda; não altera selects de outras páginas. */
+.filterAnchor .filtersPanel { overflow: visible; }
+.filterAnchor .filtersPanel .professionalFilter {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+.professionalSelect {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 7px;
+  width: 100%;
+  min-height: 62px;
+  padding: 10px 12px;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 12px;
+  background: var(--theme-surface);
+  color: var(--theme-text);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+.professionalSelect:hover,
+.professionalSelectOpen,
+.professionalSelect:focus-visible {
+  border-color: var(--theme-primary);
+  box-shadow: 0 0 0 1px var(--theme-primary);
+}
+.professionalSelectLabel {
+  display: block;
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 500;
+  color: var(--theme-text-muted);
+}
+.professionalSelectValue {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.25;
+  color: var(--theme-text);
+}
+.professionalSelectValue > svg:first-child {
+  color: var(--theme-text-muted);
+  flex: 0 0 auto;
+  font-size: 13px;
+}
+.professionalSelectValue > span {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.professionalSelectValue > svg:last-child {
+  flex: 0 0 auto;
+  color: var(--theme-text-muted);
+  font-size: 11px;
+  transition: transform 150ms ease;
+}
+.professionalChevronOpen { transform: rotate(180deg); }
+.professionalOptions {
+  position: absolute;
+  z-index: 70;
+  top: calc(100% + 7px);
+  left: 0;
+  right: 0;
+  display: grid;
+  gap: 4px;
+  max-height: min(240px, 35dvh);
+  padding: 6px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--theme-primary);
+  border-radius: 11px;
+  background: var(--theme-surface);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, .28);
+}
+.professionalOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 37px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--theme-text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+}
+.professionalOption > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.professionalOption > svg { flex: 0 0 auto; }
+.professionalOption:hover,
+.professionalOption:focus-visible {
+  background: var(--theme-primary-soft);
+  color: var(--theme-primary-text);
+}
+.professionalOptionSelected {
+  border-color: var(--theme-primary);
+  background: var(--theme-primary-soft);
+  color: var(--theme-primary-text);
+}
+@media (max-width: 620px) {
+  .professionalSelect { min-height: 58px; padding: 9px 11px; }
+  .professionalOptions { max-height: min(220px, 33dvh); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .professionalSelect,
+  .professionalSelectValue > svg:last-child { transition: none; }
+}
