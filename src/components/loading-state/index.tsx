@@ -156,14 +156,18 @@ function ContextualSkeleton({ kind, embedded }: { kind: Variant; embedded: boole
     <SkeletonPanel type="bars" />
   </div>;
 
-  if (kind === "subscription") return <div className={styles.skPage}>
-    <SkeletonHeader action />
-    <div className={styles.skStats}><SkeletonStat index={0} /><SkeletonStat index={1} /><SkeletonStat index={2} /></div>
-    <div className={styles.skPlans}>{[0,1,2].map(i => <div className={styles.skPlan} key={i}>
-      <Bar width="55%" /><Bar width="68%" />{[0,1,2,3,4].map(j => <Bar width={j%2?"85%":"70%"} key={j} />)}
-      <span className={styles.skAction} />
-    </div>)}</div>
-  </div>;
+  if (kind === "subscription") {
+    const showPlans = typeof window !== "undefined" && window.location.pathname.endsWith("/planos");
+    return <div className={styles.skPage}>
+      <SkeletonHeader action />
+      {showPlans
+        ? <div className={styles.skPlans}>{[0,1,2].map(i => <div className={styles.skPlan} key={i}>
+            <Bar width="55%" /><Bar width="68%" />{[0,1,2,3,4].map(j => <Bar width={j%2?"85%":"70%"} key={j} />)}
+            <span className={styles.skAction} />
+          </div>)}</div>
+        : <div className={styles.skStats}><SkeletonStat index={0} /><SkeletonStat index={1} /><SkeletonStat index={2} /></div>}
+    </div>;
+  }
 
   if (kind === "whatsapp") return <div className={styles.skPage}>
     <SkeletonHeader action />
@@ -232,11 +236,16 @@ export default function LoadingState({ label = "Carregando", compact = false, de
             <div className={styles.hoursEditor}>
               <div className={styles.hoursPanel}>
                 <div className={styles.hoursHead}><Bar width="45%"/><Bar width="30%"/></div>
+                <div className={styles.hoursChoices}>{[0,1].map(i => <div className={styles.hoursChoice} key={i}>
+                  <span className={styles.skIcon}/><div><Bar width="75%"/><Bar width="90%"/></div>
+                </div>)}</div>
+              </div>
+              <div className={styles.hoursPanel}>
+                <div className={styles.hoursHead}><Bar width="48%"/><Bar width="20%"/></div>
                 <div className={styles.hoursDays}>{Array.from({length:7},(_,i)=><div key={i} className={styles.hoursDay}><Bar width="60%"/><Bar width="75%"/></div>)}</div>
               </div>
               <div className={styles.hoursPanel}><div className={styles.hoursHead}><Bar width="40%"/><Bar width="20%"/></div><div className={styles.hoursInputs}><Bar width="100%"/><Bar width="100%"/></div></div>
-              <div className={styles.hoursPanel}><div className={styles.hoursHead}><Bar width="48%"/></div>{[0,1,2].map(i=><div className={styles.hoursLine} key={i}><Bar width="34%"/><Bar width="40%"/></div>)}</div>
-              <div className={styles.hoursPanel}><div className={styles.hoursHead}><Bar width="38%"/><Bar width="18%"/></div><Bar width="55%"/></div>
+              <div className={styles.hoursPanel}><div className={styles.hoursHead}><Bar width="38%"/><Bar width="18%"/></div><div className={styles.hoursLine}><Bar width="34%"/><Bar width="40%"/></div><Bar width="63%"/></div>
             </div>
             {!embedded && <aside className={styles.hoursSummary}><Bar width="65%"/>{[0,1,2].map(i=><div className={styles.hoursSummaryRow} key={i}><Bar width="50%"/><Bar width="76%"/></div>)}</aside>}
           </div>
