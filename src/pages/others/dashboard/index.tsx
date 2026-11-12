@@ -1,5 +1,5 @@
 import { formatPersonName } from "@/context/UserContext";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaArrowRight, FaCalendarDay } from "react-icons/fa6";
 import { useTheme } from "@/context/ThemeContext";
@@ -20,6 +20,11 @@ import { useLanguage } from "@/context/LanguageContext";
 import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
 type DashboardRange = "today" | "week";
+
+export type DashboardInitialAgenda = {
+  appointments: Agendamento[];
+  failed: boolean;
+};
 
 function weekRange(date: Date) {
   const start = new Date(date);
@@ -83,7 +88,59 @@ function toCardItem(appointment: Agendamento, includeDate: boolean): AgendaCardI
   };
 }
 
-export default function Dashboard() {
+// Mesmo cabeçalho e a mesma geometria do Dashboard final, usados pelo gate
+// durante a verificação de acesso + consulta da agenda. Não monta o Dashboard
+// duas vezes nem dispara duas animações de carregamento em sequência.
+export function DashboardLoadingShell() {
+  const { theme } = useTheme();
+  const { t, lang } = useLanguage();
+  const usuario = getStoredUser<{ Id?: number; Papel?: string }>();
+  const role = usuario?.Papel?.toUpperCase();
+  const isProfessional = role === "PROFISSIONAL";
+  const canOpenAgenda = role === "EMPRESA" || role === "AUTONOMO";
+  const todayLabel = new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+  }).format(new Date());
+  const cacheKey = dashboardCountCacheKey(usuario?.Id ?? 0, isProfessional, "today", new Date());
+  const loadingVariant = (readCachedCount(cacheKey) ?? 0) > 0
+    ? "dashboard"
+    : "dashboard-empty";
+
+  return (
+    <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
+      <section className={styles.agendaSection} aria-labelledby="dashboard-agenda-title">
+        <div className={styles.agendaHeader}>
+          <div className={styles.agendaTitleGroup}>
+            <h2 id="dashboard-agenda-title">
+              <FaCalendarDay aria-hidden="true" />
+              <span>{t("dashboard.today")}</span>
+            </h2>
+            <p>
+              {todayLabel}
+              <span aria-hidden="true" />
+              {t("dashboard.update")}
+            </p>
+          </div>
+          {canOpenAgenda && (
+            <div className={styles.agendaActions}>
+              <Link className={styles.agendaLink} to={getRolePagePath(role, "agenda")}>
+                {t("dashboard.openCalendar")}
+                <FaArrowRight aria-hidden="true" />
+              </Link>
+            </div>
+          )}
+        </div>
+        <div className={styles.mobileAppointments}>
+          <LoadingState variant={loadingVariant} embedded label={t("common.loading")} />
+        </div>
+      </section>
+    </main>
+  );
+}
+
+export default function Dashboard({ initialAgenda }: { initialAgenda?: DashboardInitialAgenda } = {}) {
   const { theme } = useTheme();
   const { t, lang } = useLanguage();
   const { showNotification } = useNotification();
@@ -92,10 +149,13 @@ export default function Dashboard() {
   const isProfessional = role === "PROFISSIONAL";
   const canOpenAgenda = role === "EMPRESA" || role === "AUTONOMO";
   const [range, setRange] = useState<DashboardRange>("today");
-  const [appointments, setAppointments] = useState<Agendamento[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [hasLoaded, setHasLoaded] = useState(false);
-  const [error, setError] = useState("");
+  const [appointments, setAppointments] = useState<Agendamento[]>(() => initialAgenda?.appointments ?? []);
+  const [loading, setLoading] = useState(!initialAgenda);
+  const [hasLoaded, setHasLoaded] = useState(Boolean(initialAgenda));
+  const [error, setError] = useState(() => initialAgenda?.failed ? t("dashboard.loadError") : "");
+  // A primeira consulta já foi efetuada pelo gate. As próximas continuam
+  // usando SignalR, visibilidade e revalidação normalmente.
+  const skipFirstFetch = useRef(Boolean(initialAgenda));
 
   const loadAppointments = useCallback(async () => {
     if (!usuario?.Id) return;
@@ -131,8 +191,21 @@ export default function Dashboard() {
   }, [isProfessional, range, showNotification, t, usuario?.Id]);
 
   useEffect(() => {
+    if (skipFirstFetch.current) {
+      skipFirstFetch.current = false;
+      return;
+    }
     void loadAppointments();
   }, [loadAppointments]);
+
+  useEffect(() => {
+    if (initialAgenda && !initialAgenda.failed && usuario?.Id) {
+      storeCachedCount(
+        dashboardCountCacheKey(usuario.Id, isProfessional, range, new Date()),
+        initialAgenda.appointments.length,
+      );
+    }
+  }, [initialAgenda, isProfessional, range, usuario?.Id]);
 
   useEffect(() => {
     if (!usuario?.Id) return;
