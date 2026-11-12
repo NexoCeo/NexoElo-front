@@ -117,3 +117,162 @@
 @media(max-width:900px){.reportsGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.reportsShell{padding:0 12px 28px}.reportsHeader{flex-direction:column;align-items:stretch;gap:14px}.reportsPeriod{width:100%;flex:auto}.reportsGrid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.reportsIcon{animation:none}}
+
+
+/* Skeletons de rota: os blocos refletem as mesmas estruturas das páginas,
+   sem tabelas/KPIs genéricos onde o layout real usa cards. */
+.skPage,.skDashboard {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  min-width: 0;
+  padding: 18px clamp(14px,2vw,34px) 26px;
+  display: grid;
+  align-content: start;
+  gap: 16px;
+}
+.skDashboard { padding: 18px clamp(14px,3vw,40px) 26px; gap: 12px; }
+.skIcon,.skAction,.skSmallButton,.skPhoto,.skPhotoLarge,.skDateBar,
+.skDay,.skCalendarButton,.skPills>span,.skBarChart>span,
+.skChartArea,.skFilter {
+  display: block;
+  flex-shrink: 0;
+  background: linear-gradient(100deg,var(--theme-background2,#182237) 15%,var(--theme-glass-strong,#344054) 45%,var(--theme-background2,#182237) 75%);
+  background-size: 220% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+.skIcon {width:46px;height:46px;border-radius:11px}
+.skAction {width:172px;height:45px;border-radius:11px}
+.skSmallButton {width:35px;height:35px;border-radius:9px}
+.skHeader,.skDashboardHeader {display:flex;align-items:center;justify-content:space-between;min-width:0;gap:18px;min-height:74px}
+.skHeading {display:flex;align-items:center;gap:14px;min-width:0;flex:1}
+.skHeading>div,.skDashboardTitle {width:min(100%,440px);min-width:0;display:grid;gap:10px}
+.skHeading>div .bar:first-child,.skDashboardTitle .bar:first-child {height:23px}
+.skDashboardHeader {min-height:76px;margin-bottom:4px}
+.skDashboardTitle .bar {max-width:100%}
+.skStats,.skCharts,.skInsights,.skPlans,.skStats,.skMetricFilters,.skToolbar,.skAppointments,.skAgendaGrid {min-width:0}
+.skStats {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.skStat {min-width:0;display:flex;align-items:center;gap:13px;min-height:76px;padding:12px 14px;border:1px solid var(--theme-bottom);border-radius:15px;background:var(--theme-surface)}
+.skStat>div {flex:1;min-width:0;display:grid;gap:10px}
+.skStat .bar:first-child {height:19px}
+.skPage>.skStats {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.skAppointments {display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,310px));gap:15px;align-content:start}
+.skAppointment {min-width:0;min-height:174px;padding:15px 14px;display:grid;align-content:start;gap:13px;border:1px solid var(--theme-bottom);border-left:4px solid var(--theme-primary);border-radius:15px;background:var(--theme-surface)}
+.skBetween {display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:0}
+.skBetween .bar{flex:0 1 auto}
+.skAppointmentBottom {margin-top:4px;padding-top:11px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--theme-bottom)}
+.skAppointmentBottom>.bar{height:24px;border-radius:20px}
+.skAgendaGrid {display:grid;grid-template-columns:minmax(220px,1fr) minmax(290px,1.18fr) minmax(290px,1.25fr);gap:14px;align-items:stretch;min-height:485px}
+.skCalendar,.skTimeline,.skAgendaList {min-width:0;min-height:485px;padding:15px;border:1px solid var(--theme-bottom);border-radius:16px;background:var(--theme-surface);overflow:hidden}
+.skCalendar {display:flex;flex-direction:column;gap:18px}
+.skCalendarHeading {height:44px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 12px;border-radius:9px;background:var(--theme-surface-muted)}
+.skDateBar {width:13px;height:17px;border-radius:4px}
+.skCalendarDays {display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.skCalendarDays>div {display:grid;justify-items:center;gap:15px;min-width:0}
+.skCalendarDays .bar{height:8px}
+.skDay {height:23px;width:23px;border-radius:50%}
+.skCalendarButton {height:42px;margin-top:10px;border-radius:10px}
+.skPanelHeading {display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:19px}
+.skPanelHeading .bar:first-child {height:17px}
+.skTimelineRows {display:grid;grid-template-rows:repeat(7,1fr);height:360px}
+.skTimeRow {display:grid;grid-template-columns:40px minmax(0,1fr);align-items:start;gap:9px}
+.skTimeRow .bar {height:9px}
+.skTimeRow>span:last-child {border-top:1px dashed var(--theme-border-strong);margin-top:5px}
+.skAgendaList {display:flex;flex-direction:column}
+.skMiniBooking {margin-bottom:8px;padding:12px 14px;min-height:72px;display:grid;align-content:center;gap:9px;border:1px solid var(--theme-bottom);border-radius:12px;background:var(--theme-surface-muted)}
+.skMiniBooking .bar{height:10px}
+.skAgendaFooter {margin-top:auto;min-height:42px;border:1px solid var(--theme-bottom);border-radius:10px;display:grid;place-items:center}
+.skAgendaFooter .bar {height:12px}
+.skActions {display:flex;align-items:center;justify-content:flex-end;gap:10px;min-height:65px}
+.skToolbar {display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:58px}
+.skSearch {width:min(100%,580px);min-width:0;min-height:47px;display:flex;align-items:center;padding:0 15px;border:1px solid var(--theme-bottom);border-radius:11px;background:var(--theme-surface)}
+.skPills {display:flex;justify-content:flex-end;gap:9px;overflow:hidden}
+.skPills>span {width:85px;height:37px;border-radius:30px}
+.skList {display:grid;gap:10px;min-width:0}
+.skListRow {min-width:0;min-height:80px;display:grid;grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,.85fr)) 38px;align-items:center;gap:18px;padding:12px 16px;border:1px solid var(--theme-bottom);border-radius:13px;background:var(--theme-surface)}
+.skListIdentity {display:flex;align-items:center;gap:12px;min-width:0}
+.skListIdentity>div {flex:1;min-width:0;display:grid;gap:9px}
+.skPhoto {width:52px;height:52px;border-radius:10px}
+.skListRow>.bar{height:12px}
+.skMetricFilters {display:flex;justify-content:flex-end;gap:12px;min-height:62px}
+.skFilter {width:min(240px,45%);height:55px;border-radius:12px}
+.skCharts,.skInsights {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.skPanel {box-sizing:border-box;min-width:0;min-height:170px;padding:20px;border:1px solid var(--theme-bottom);border-radius:16px;background:var(--theme-surface);overflow:hidden}
+.skCharts .skPanel {min-height:290px}
+.skPanelLines{display:grid;gap:20px}
+.skPanelLines .skBetween{padding:12px 0;border-bottom:1px solid var(--theme-bottom)}
+.skChart {height:205px;position:relative;display:flex;align-items:flex-end;border-bottom:1px solid var(--theme-border-strong);background:repeating-linear-gradient(to top,transparent 0,transparent 42px,var(--theme-bottom) 43px,var(--theme-bottom) 44px)}
+.skChartArea {width:100%;height:43%;opacity:.7;clip-path:polygon(0 88%,8% 75%,18% 80%,34% 48%,50% 62%,62% 35%,75% 52%,87% 20%,100% 33%,100% 100%,0 100%);background:var(--theme-primary-soft)}
+.skBarChart {height:205px;display:flex;justify-content:space-around;align-items:flex-end;gap:16px;border-bottom:1px solid var(--theme-border-strong)}
+.skBarChart>span {width:13%;border-radius:5px 5px 0 0}
+.skPlan {min-width:0;min-height:325px;padding:22px;display:grid;align-content:start;gap:17px;border:1px solid var(--theme-bottom);border-radius:16px;background:var(--theme-surface)}
+.skPlan>.bar:nth-child(2) {height:30px}
+.skPlan>.skAction{width:100%;margin-top:10px}
+.skPlans {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.skWhatsAppHero {min-height:145px;display:grid;align-content:center;gap:16px;padding:20px;border:1px solid var(--theme-bottom);border-radius:16px;background:var(--theme-surface)}
+.skProfileHero {min-width:0;display:flex;align-items:center;gap:20px;padding:22px;border:1px solid var(--theme-bottom);border-radius:16px;background:var(--theme-surface)}
+.skPhotoLarge {height:86px;width:86px;border-radius:15px}
+.skProfileHero>div {flex:1;max-width:440px;min-width:0;display:grid;gap:13px}
+.skProfileFields {min-height:250px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;padding:20px;border:1px solid var(--theme-bottom);border-radius:16px;background:var(--theme-surface)}
+.skProfileField {padding:15px;display:grid;align-content:start;gap:12px}
+.skClientCards {width:100%;display:grid;gap:12px}
+.skClientCard {min-width:0;display:flex;align-items:center;gap:16px;min-height:112px;padding:16px;border:1px solid var(--theme-bottom);border-radius:14px;background:var(--theme-surface)}
+.skClientCard>div {flex:1;min-width:0;display:grid;gap:12px}
+@media(max-width:1100px){
+  .skAgendaGrid{grid-template-columns:minmax(200px,.82fr) minmax(240px,1fr) minmax(240px,1fr);gap:10px}
+  .skListRow{gap:10px}
+}
+@media(max-width:850px){
+  .skAgendaGrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .skCalendar{min-height:290px}
+  .skAgendaList{grid-column:1/-1;min-height:250px}
+  .skPage>.skStats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .skListRow{grid-template-columns:minmax(0,2fr) minmax(0,1fr) 38px}
+  .skListRow>.bar:nth-of-type(2),.skListRow>.bar:nth-of-type(3){display:none}
+  .skCharts .skPanel{min-height:235px}
+}
+@media(max-width:620px){
+  .skPage,.skDashboard{padding:12px 12px 85px;gap:11px}
+  .skHeader,.skDashboardHeader{min-height:58px;gap:10px}
+  .skHeading{gap:9px}
+  .skHeading>.skIcon{width:46px;height:46px}
+  .skHeading>div .bar:first-child{height:18px}
+  .skHeader>.skAction{width:98px;height:39px}
+  .skStats,.skPage>.skStats{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .skStat{min-height:72px;padding:10px;gap:9px}
+  .skStat>.skIcon{width:37px;height:37px}
+  .skAppointments{grid-template-columns:minmax(0,1fr);gap:10px}
+  .skAppointment{min-height:163px}
+  .skAgendaGrid{grid-template-columns:minmax(0,1fr);gap:10px;min-height:0}
+  .skCalendar,.skTimeline,.skAgendaList{min-height:0;padding:12px;grid-column:1/-1}
+  .skCalendar{min-height:205px;gap:10px}
+  .skTimeline{min-height:260px}
+  .skTimelineRows{height:230px}
+  .skAgendaList{min-height:230px}
+  .skActions{min-height:54px}
+  .skActions>.skAction{flex:1;max-width:210px}
+  .skToolbar{display:grid;gap:10px}
+  .skSearch{width:100%}
+  .skPills{justify-content:flex-start}
+  .skPills>span{flex:0 0 80px}
+  .skListRow{grid-template-columns:minmax(0,1fr) 38px;padding:12px}
+  .skListRow>.bar{display:none}
+  .skCharts,.skInsights,.skPlans{grid-template-columns:minmax(0,1fr);gap:11px}
+  .skCharts .skPanel{min-height:220px}
+  .skPanel{padding:14px}
+  .skBarChart,.skChart{height:175px}
+  .skMetricFilters{min-height:52px}
+  .skFilter{height:48px}
+  .skProfileHero{padding:14px;gap:12px}
+  .skPhotoLarge{width:60px;height:60px}
+  .skProfileHero>.skAction{display:none}
+  .skProfileFields{grid-template-columns:1fr;min-height:0}
+  .skClientCard{padding:13px}
+  .skClientCard>.skIcon{width:38px;height:38px}
+}
+@media(prefers-reduced-motion:reduce){
+  .skIcon,.skAction,.skSmallButton,.skPhoto,.skPhotoLarge,.skDateBar,
+  .skDay,.skCalendarButton,.skPills>span,.skBarChart>span,
+  .skChartArea,.skFilter{animation:none}
+}
