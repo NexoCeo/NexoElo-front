@@ -97,7 +97,7 @@
     background:transparent;
     color:var(--theme-text-muted);
     text-decoration:none;
-    font:500 10px/1.15 Inter,system-ui,sans-serif;
+    font-weight:500;font-size:10px;line-height:1.15;
     cursor:pointer;
   }
   .mobileNavItem svg{font-size:19px;flex:none}
