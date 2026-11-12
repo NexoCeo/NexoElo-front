@@ -16,6 +16,7 @@ import { getRolePagePath } from "@/routes/role-paths";
 import type { Agendamento } from "@/types/agendamento";
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
+import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
 type DashboardRange = "today" | "week";
 
@@ -104,6 +105,8 @@ export default function Dashboard() {
       void realtimeClient.stop();
     };
   }, [isProfessional, loadAppointments, usuario?.Id]);
+
+  usePageRevalidation(loadAppointments, { enabled: Boolean(usuario?.Id) });
 
   const agendaItems = useMemo(
     () => [...appointments]
