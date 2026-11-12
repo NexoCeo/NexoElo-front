@@ -256,3 +256,137 @@
  .titleGroup h1{font-size:1.45rem}
  .agendaTitleGroup h2{font-size:17px}
 }
+
+
+/* Dashboard mobile: cards individuais; tabela e botão de agenda permanecem no desktop. */
+.mobileAppointments{display:none}
+.desktopAppointments{display:block}
+@media(max-width:760px){
+  .desktopAppointments{display:none}
+  .mobileAppointments{display:block;min-width:0}
+  .agendaActions:has(.agendaLink){display:none}
+  .agendaHeader{margin-bottom:14px;min-height:0}
+  .mobileAppointmentList{display:grid;gap:10px;align-content:start}
+  .mobileAppointmentCard{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    position:relative;
+    min-width:0;
+    padding:15px;
+    border:1px solid var(--theme-bottom);
+    border-radius:15px;
+    background:var(--theme-surface);
+    color:var(--theme-text);
+    overflow:hidden;
+  }
+  .mobileAppointmentCard::before{
+    content:"";
+    position:absolute;
+    top:0;bottom:0;left:0;
+    width:4px;
+    background:var(--theme-primary);
+  }
+  .mobileAppointmentMain{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;min-width:0}
+  .mobileAppointmentTime{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    width:max-content;
+    max-width:100%;
+    padding:6px 9px;
+    margin-bottom:3px;
+    background:var(--theme-primary-soft);
+    border-radius:8px;
+    color:var(--theme-primary-text);
+    font-size:12px;
+    font-weight:750;
+    font-variant-numeric:tabular-nums;
+  }
+  .mobileAppointmentTime svg{flex:none;font-size:12px}
+  .mobileAppointmentClient{
+    font-size:15px;
+    line-height:1.3;
+    font-weight:800;
+    overflow-wrap:anywhere;
+  }
+  .mobileAppointmentService{font-size:13px;color:var(--theme-text);overflow-wrap:anywhere}
+  .mobileAppointmentProfessional{font-size:12px;color:var(--theme-text-muted);overflow-wrap:anywhere}
+  .mobileAppointmentFooter{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+    padding-top:11px;
+    border-top:1px solid var(--theme-bottom);
+  }
+  .mobileAppointmentStatus{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 1 auto;
+    min-height:26px;
+    min-width:0;
+    padding:5px 10px;
+    border-radius:999px;
+    background:var(--theme-primary-soft);
+    color:var(--theme-primary-text);
+    font-size:10px;
+    font-weight:750;
+    white-space:nowrap;
+  }
+  .mobileAppointmentValue{
+    margin-left:auto;
+    color:var(--theme-text);
+    font-size:12px;
+    font-weight:800;
+    font-variant-numeric:tabular-nums;
+    white-space:nowrap;
+  }
+  .mobileAppointmentArrow{
+    display:grid;
+    place-items:center;
+    flex:0 0 37px;
+    width:37px;
+    height:37px;
+    border:1px solid var(--theme-primary);
+    border-radius:11px;
+    background:var(--theme-primary);
+    color:var(--theme-on-primary);
+    text-decoration:none;
+    transition:background-color .15s ease;
+  }
+  .mobileAppointmentArrow:hover{background:var(--theme-primary-hover)}
+  .mobileAppointmentArrow:focus-visible{outline:2px solid var(--theme-primary);outline-offset:3px}
+  .mobileAppointmentArrow svg{font-size:14px}
+  .mobileCompleted::before{background:var(--theme-success)}
+  .mobileCompleted .mobileAppointmentStatus{background:var(--theme-success-soft);color:var(--theme-success)}
+  .mobileCancelled::before{background:var(--theme-error)}
+  .mobileCancelled .mobileAppointmentStatus{background:var(--theme-error-soft);color:var(--theme-error)}
+  .mobileEmpty{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:8px;
+    min-height:190px;
+    padding:26px 15px;
+    border:1px solid var(--theme-bottom);
+    border-radius:15px;
+    background:var(--theme-surface);
+    text-align:center;
+    color:var(--theme-text-muted);
+    font-size:12px;
+  }
+  .mobileEmpty svg{font-size:25px}
+  .mobileEmpty strong{font-size:15px;color:var(--theme-text)}
+}
+@media(max-width:370px){
+  .mobileAppointmentCard{padding:12px}
+  .mobileAppointmentFooter{gap:6px}
+  .mobileAppointmentStatus{padding-inline:7px;font-size:9px}
+  .mobileAppointmentValue{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){
+  .mobileAppointmentArrow{transition:none}
+}
