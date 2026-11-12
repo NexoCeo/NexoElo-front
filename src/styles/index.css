@@ -1,3 +1,11 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap");
+
+/* Única família tipográfica do NexoElo: todos os elementos herdam da raiz. */
+html { font-family: "Poppins", sans-serif; }
+body, #root, button, input, select, textarea, option {
+  font-family: inherit;
+}
+
 * {
   margin: 0;
   padding: 0;
