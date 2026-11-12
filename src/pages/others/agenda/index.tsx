@@ -1,7 +1,7 @@
 import { useSearchParams } from "react-router-dom";
 import AgendaBooking from "@/components/agenda-booking";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FaPlus, FaCalendarCheck, FaCalendarDay, FaRotate, FaFilter, FaClock, FaCircleCheck, FaCircleXmark, FaUsers, FaChevronDown, FaCheck } from "react-icons/fa6";
+import { FaPlus, FaCalendarCheck, FaCalendarDay, FaFilter, FaClock, FaCircleCheck, FaCircleXmark, FaUsers, FaChevronDown, FaCheck } from "react-icons/fa6";
 import axios from "axios";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
@@ -133,7 +133,6 @@ export default function Agenda() {
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
 
   const [loading, setLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
 
   const [error, setError] = useState("");
 
@@ -175,9 +174,7 @@ export default function Agenda() {
       const currentRequest =
         ++requestSequence.current;
 
-      if (silent) {
-        setRefreshing(true);
-      } else {
+      if (!silent) {
         setLoading(true);
       }
 
@@ -221,7 +218,6 @@ export default function Agenda() {
           currentRequest === requestSequence.current
         ) {
           setLoading(false);
-          setRefreshing(false);
         }
       }
     },
@@ -707,13 +703,7 @@ export default function Agenda() {
       <section className={styles.content} aria-label="Agendamentos do dia">
         <header className={styles.listPanelHeader} title={lastUpdatedLabel}>
           <h2>Agendamentos do dia</h2>
-          <div className={styles.headerActions}>
-            <span className={styles.appointmentCount} aria-label={`${agendaItems.length} agendamentos`} aria-live="polite">{agendaItems.length}</span>
-            <button type="button" className={styles.refreshButton} onClick={() => void loadAgenda(true)}
-              disabled={refreshing || loading} title={t("agenda.refresh")} aria-label={t("agenda.refresh")}>
-              <FaRotate className={refreshing ? styles.rotating : undefined} aria-hidden="true" />
-            </button>
-          </div>
+          <span className={styles.appointmentCount} aria-label={`${agendaItems.length} agendamentos`} aria-live="polite">{agendaItems.length}</span>
         </header>
         <Card
           compactAgenda
