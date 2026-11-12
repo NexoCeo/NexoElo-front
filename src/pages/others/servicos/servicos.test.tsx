@@ -42,6 +42,7 @@ vi.mock("./service-image-crop", () => ({
 
 import Servicos from "./index";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { MemoryRouter } from "react-router-dom";
 
 describe("Servicos", () => {
   beforeEach(() => {
@@ -68,7 +69,7 @@ describe("Servicos", () => {
   });
 
   it("exibe os servicos em tabela e abre o cadastro em modal", async () => {
-    render(<LanguageProvider><Servicos /></LanguageProvider>);
+    render(<MemoryRouter><LanguageProvider><Servicos /></LanguageProvider></MemoryRouter>);
 
     expect(await screen.findByText("Servico Teste")).toBeInTheDocument();
     expect(screen.getByText("Serviço")).toBeInTheDocument();
@@ -85,7 +86,7 @@ describe("Servicos", () => {
   });
 
   it("cadastra um novo servico pelo modal", async () => {
-    render(<LanguageProvider><Servicos /></LanguageProvider>);
+    render(<MemoryRouter><LanguageProvider><Servicos /></LanguageProvider></MemoryRouter>);
     await screen.findByText("Servico Teste");
     fireEvent.click(screen.getByRole("button", { name: "Novo serviço" }));
 
@@ -128,7 +129,7 @@ describe("Servicos", () => {
       Id: 2, NomeServico: "Servico Teste", Valor: 150,
       TempoEstimadoMinutos: 60, ImagemServico: "uploads/imagem.png",
     }]);
-    render(<LanguageProvider><Servicos /></LanguageProvider>);
+    render(<MemoryRouter><LanguageProvider><Servicos /></LanguageProvider></MemoryRouter>);
     await screen.findByText("Servico Teste");
     fireEvent.click(screen.getByRole("button", { name: "Opções de Servico Teste" }));
     fireEvent.click(screen.getByRole("menuitem", { name: "Editar" }));
@@ -144,7 +145,7 @@ describe("Servicos", () => {
   });
 
   it("abre o menu do servico, edita e atualiza a linha sem recarregar", async () => {
-    render(<LanguageProvider><Servicos /></LanguageProvider>);
+    render(<MemoryRouter><LanguageProvider><Servicos /></LanguageProvider></MemoryRouter>);
     await screen.findByText("Servico Teste");
 
     fireEvent.click(screen.getByRole("button", { name: "Opções de Servico Teste" }));
