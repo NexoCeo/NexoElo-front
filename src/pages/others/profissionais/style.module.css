@@ -1081,20 +1081,20 @@
 .statusFilters button:hover{border-color:var(--theme-primary)}
 .statusFilters button.statusFilterActive{background:var(--theme-primary);border-color:var(--theme-primary);color:white}
 .tableWrap{padding-top:0!important}
-.cardList{max-height:calc(100dvh - 455px)}
+.cardList{max-height:calc(100dvh - 370px)}
 .professionalCard{min-height:76px}
 .professionalPhoto{border-radius:11px;object-fit:cover}
 @media(max-width:1230px){
   .professionalTools{grid-template-columns:1fr;gap:12px}
   .statusFilters{justify-content:flex-start;flex-wrap:wrap}
   .professionalsIntro{margin-right:390px}
-  .cardList{max-height:calc(100dvh - 520px)}
+  .cardList{max-height:calc(100dvh - 420px)}
 }
 @media(max-width:900px){
   .professionalsIntro{margin-right:0;margin-bottom:90px}
   .floatingActions{top:91px;left:clamp(16px,2vw,32px);right:clamp(16px,2vw,32px)}
   .professionalMetrics{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .cardList{max-height:calc(100dvh - 600px)}
+  .cardList{max-height:calc(100dvh - 470px)}
 }
 @media(max-width:760px){
   .container{padding:14px 13px 25px}
