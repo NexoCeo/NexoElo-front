@@ -579,7 +579,7 @@ input:focus-visible {
 }
 
 /* Abertura alinhada ao mesmo grid dos cards. */
-.intro{width:min(100%,1180px);margin:0 auto 20px;display:flex;flex-direction:column;gap:5px;color:var(--theme-text,#f8fafc);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+.intro{width:min(100%,1180px);margin:0 auto 20px;display:flex;flex-direction:column;gap:5px;color:var(--theme-text,#f8fafc);}
 .intro strong{font-size:17px;line-height:1.35;font-weight:700}
 .intro span{font-size:13px;line-height:1.45;color:var(--theme-text-muted,#9ca3af)}
 .card,.summary{border-radius:12px}
@@ -589,11 +589,11 @@ input:focus-visible {
 .dayHoursIdentity{display:grid;gap:4px;min-width:0}
 .dayHoursIdentity strong{font-size:14px}
 .dayHoursIdentity span{font-size:12px;color:var(--theme-text-muted,#94a3b8)}
-.customizeButton{border:1px solid var(--theme-focus,#395da7);border-radius:8px;padding:8px 12px;background:var(--theme-primary-soft,rgba(37,99,235,.14));color:var(--theme-primary-text,#60a5fa);font:600 12px Inter,system-ui,sans-serif;cursor:pointer}
+.customizeButton{border:1px solid var(--theme-focus,#395da7);border-radius:8px;padding:8px 12px;background:var(--theme-primary-soft,rgba(37,99,235,.14));color:var(--theme-primary-text,#60a5fa);font-weight:600;font-size:12px;cursor:pointer}
 .customizeButton:hover{filter:brightness(1.12)}
 .dayHoursEditor{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding-top:12px;border-top:1px solid var(--theme-bottom,#334155)}
 .dayHoursEditor label{display:grid;gap:7px;font-size:12px;font-weight:650}
-.dayHoursEditor input,.dayPauseRow input{width:100%;min-width:0;box-sizing:border-box;height:40px;padding:6px 10px;border-radius:7px;border:1px solid var(--theme-glass-strong,#344154);background:var(--theme-background-color,#0b1220);color:var(--theme-text-color,#fff);font:600 13px Inter,system-ui,sans-serif}
+.dayHoursEditor input,.dayPauseRow input{width:100%;min-width:0;box-sizing:border-box;height:40px;padding:6px 10px;border-radius:7px;border:1px solid var(--theme-glass-strong,#344154);background:var(--theme-background-color,#0b1220);color:var(--theme-text-color,#fff);font-weight:600;font-size:13px;}
 .dayPauses{grid-column:1/-1;display:grid;gap:8px}
 .dayPausesHeader{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px}
 .dayPausesHeader button{border:0;background:transparent;color:var(--theme-primary-text,#60a5fa);font-weight:650;cursor:pointer}
