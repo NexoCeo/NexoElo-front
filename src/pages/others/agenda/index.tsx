@@ -220,7 +220,7 @@ export default function Agenda() {
     ],
   );
 
-  usePageRevalidation(() => loadAgenda(true), { enabled: Boolean(usuario?.Id) && !bookingOpen && !closingDay });
+  usePageRevalidation(() => loadAgenda(true), { enabled: Boolean(usuario?.Id) && !bookingOpen && !closingDay, pollIntervalMs: 0 });
 
   selectedDateKeyRef.current =
     selectedDateKey;
