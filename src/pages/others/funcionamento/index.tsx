@@ -25,6 +25,7 @@ import type { DiaFuncionamentoKey, FuncionamentoConfig } from "@/types/funcionam
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
 import LoadingState from "@/components/loading-state";
+import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
 const DIAS: Array<{ key: DiaFuncionamentoKey; label: string; short: string }> = [
   { key: "Domingo", label: "Domingo", short: "Dom" },
@@ -170,6 +171,7 @@ export default function Funcionamento() {
   const [success, setSuccess] = useState("");
   const [availabilityMode, setAvailabilityMode] = useState<"padrao" | "personalizado">("padrao");
   const personalizedBackup = useRef<FuncionamentoConfig["HorariosPorDia"]>({});
+  const lastSavedConfig = useRef("");
 
   const usuarioId = usuario?.Id ?? 0;
   const diasSelecionados = useMemo(
@@ -195,13 +197,16 @@ export default function Funcionamento() {
         setError("");
         const data = await obterFuncionamento(usuarioId);
         setConfig(data);
+        lastSavedConfig.current = JSON.stringify(data);
         personalizedBackup.current = { ...data.HorariosPorDia };
         setAvailabilityMode(Object.keys(data.HorariosPorDia ?? {}).length > 0 ? "personalizado" : "padrao");
       } catch {
         const message = t("hours.loadError");
         setError(message);
         showNotification({ type: "error", title: t("hours.unavailable"), message });
-        setConfig(criarFuncionamentoPadrao(usuarioId));
+        const defaults = criarFuncionamentoPadrao(usuarioId);
+        setConfig(defaults);
+        lastSavedConfig.current = JSON.stringify(defaults);
         personalizedBackup.current = {};
         setAvailabilityMode("padrao");
       } finally {
@@ -211,6 +216,20 @@ export default function Funcionamento() {
 
     loadFuncionamento();
   }, [showNotification, usuarioId]);
+
+  usePageRevalidation(async () => {
+    if (!usuarioId) return;
+    try {
+      const data = await obterFuncionamento(usuarioId);
+      setConfig(data);
+      lastSavedConfig.current = JSON.stringify(data);
+      personalizedBackup.current = { ...data.HorariosPorDia };
+      setAvailabilityMode(Object.keys(data.HorariosPorDia ?? {}).length > 0 ? "personalizado" : "padrao");
+    } catch { /* preserve settings while offline */ }
+  }, {
+    enabled: Boolean(usuarioId) && !saving &&
+      (config === null || JSON.stringify(config) === lastSavedConfig.current),
+  });
 
   function updateConfig(nextConfig: Partial<FuncionamentoConfig>) {
     setError("");
@@ -442,6 +461,7 @@ export default function Funcionamento() {
       setSaving(true);
       const savedConfig = await salvarFuncionamento(usuarioId, config);
       setConfig(savedConfig);
+      lastSavedConfig.current = JSON.stringify(savedConfig);
       personalizedBackup.current = { ...savedConfig.HorariosPorDia };
       setSuccess(t("hours.saved"));
       showNotification({
