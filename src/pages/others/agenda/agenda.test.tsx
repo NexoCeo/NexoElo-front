@@ -178,17 +178,17 @@ describe("Agenda", () => {
     expect(screen.queryByText("Ao vivo")).not.toBeInTheDocument();
     const count = screen.getByLabelText("2 agendamentos");
     expect(count.parentElement?.nextElementSibling).toBeNull();
-    expect(count.nextElementSibling).toBe(screen.getByRole("button", { name: "Atualizar agenda" }));
+    expect(screen.queryByRole("button", { name: "Atualizar agenda" })).not.toBeInTheDocument();
     expect(screen.getByText("2 agendamentos")).toBeInTheDocument();
     expect(screen.queryByText("Carregando agendamentos...")).not.toBeInTheDocument();
   });
 
-  it("ignora eventos de outro dia e atualiza ao usar o controle manual", async () => {
+  it("ignora eventos de outro dia e atualiza automaticamente quando a data corresponde", async () => {
     agendaServiceMock.listarAgendaPorData
       .mockResolvedValueOnce([appointment()])
       .mockResolvedValueOnce([
         appointment(),
-        appointment({ Id: 9, ClienteNome: "Atualização Manual" }),
+        appointment({ Id: 9, ClienteNome: "Atualização Automática" }),
       ]);
 
     render(<Agenda />);
@@ -199,8 +199,11 @@ describe("Agenda", () => {
     });
     expect(agendaServiceMock.listarAgendaPorData).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByRole("button", { name: "Atualizar agenda" }));
-    expect(await screen.findByText("Atualização Manual")).toBeInTheDocument();
+    await act(async () => {
+      realtimeMock.onAgendaUpdated?.({ Data: "2026-08-10" });
+    });
+    expect(await screen.findByText("Atualização Automática")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Atualizar agenda" })).not.toBeInTheDocument();
   });
 
   it("mantem a agenda atualizada pelo intervalo de seguranca", async () => {
