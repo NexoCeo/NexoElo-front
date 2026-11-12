@@ -18,6 +18,7 @@ import {
 } from "@/services/usuario-service";
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
+import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 import ProfileOverview from "@/components/profile-overview";
 import LoadingState from "@/components/loading-state";
 
@@ -115,6 +116,14 @@ export default function Perfil() {
       active = false;
     };
   }, [setUsuario, showNotification, userId]);
+
+  usePageRevalidation(async () => {
+    if (!userId) return;
+    try {
+      const profile = await obterPerfilUsuario(userId);
+      setUsuario(profile);
+    } catch { /* retain the existing profile when offline */ }
+  }, { enabled: Boolean(userId) && !modalOpen && !saving && !photoSaving });
 
   useEffect(() => {
     if (!fotoPerfil) {
