@@ -6,7 +6,7 @@
   background: var(--theme-surface);
   color: var(--theme-text);
   box-shadow: 0 8px 24px var(--theme-shadow);
-  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  
 }
 
 .header {
