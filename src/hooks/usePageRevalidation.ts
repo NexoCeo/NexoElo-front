@@ -10,13 +10,14 @@ import { useLocation } from "react-router-dom";
  */
 export function usePageRevalidation(
   refresh: () => void | Promise<unknown>,
-  options: { enabled?: boolean; minIntervalMs?: number } = {},
+  options: { enabled?: boolean; minIntervalMs?: number; pollIntervalMs?: number } = {},
 ) {
   const location = useLocation();
-  const { enabled = true, minIntervalMs = 1500 } = options;
+  const { enabled = true, minIntervalMs = 1500, pollIntervalMs = 60_000 } = options;
   const refreshRef = useRef(refresh);
   const lastRun = useRef(0);
   const firstRoute = useRef(true);
+  const inFlight = useRef(false);
 
   useEffect(() => {
     refreshRef.current = refresh;
@@ -27,9 +28,13 @@ export function usePageRevalidation(
     const revalidate = () => {
       if (document.visibilityState === "hidden") return;
       const now = Date.now();
-      if (now - lastRun.current < minIntervalMs) return;
+      if (inFlight.current || now - lastRun.current < minIntervalMs) return;
       lastRun.current = now;
-      void refreshRef.current();
+      inFlight.current = true;
+      void Promise.resolve()
+        .then(() => refreshRef.current())
+        .catch(() => undefined)
+        .finally(() => { inFlight.current = false; });
     };
     const onVisibility = () => {
       if (document.visibilityState === "visible") revalidate();
@@ -38,12 +43,14 @@ export function usePageRevalidation(
     window.addEventListener("focus", revalidate);
     window.addEventListener("online", revalidate);
     document.addEventListener("visibilitychange", onVisibility);
+    const interval = pollIntervalMs > 0 ? window.setInterval(revalidate, pollIntervalMs) : undefined;
     return () => {
+      if (interval !== undefined) window.clearInterval(interval);
       window.removeEventListener("focus", revalidate);
       window.removeEventListener("online", revalidate);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [enabled, minIntervalMs]);
+  }, [enabled, minIntervalMs, pollIntervalMs]);
 
   useEffect(() => {
     // Avoid a duplicate request with the page's original mount effect.
