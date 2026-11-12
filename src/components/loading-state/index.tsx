@@ -115,7 +115,8 @@ function SkeletonToolbar({ options = true }: { options?: boolean }) {
     {options && <div className={styles.skPills}>{[0,1,2,3].map(i => <span key={i} />)}</div>}
   </div>;
 }
-function ContextualSkeleton({ kind }: { kind: Variant }) {
+function ContextualSkeleton({ kind, embedded }: { kind: Variant; embedded: boolean }) {
+  if (kind === "dashboard" && embedded) return <SkeletonAppointments count={2} />;
   if (kind === "dashboard") return <div className={styles.skDashboard}>
     <div className={styles.skDashboardHeader}>
       <div className={styles.skDashboardTitle}><Bar width="70%" /><Bar width="80%" /></div>
@@ -207,7 +208,7 @@ export default function LoadingState({ label = "Carregando", compact = false, de
     <div className={`${styles.loading} ${compact ? styles.compact : ""} ${dense ? styles.dense : ""} ${embedded ? styles.embedded : ""}`} role="status" aria-live="polite" aria-label={label} aria-busy="true">
       <span className={styles.srOnly}>{label}</span>
       {!compact && (["dashboard", "agenda", "services", "professionals", "metrics", "analytics", "subscription", "whatsapp", "profile", "client-home", "client-history", "agenda-list"] as Variant[]).includes(kind) ? (
-        <ContextualSkeleton kind={kind} />
+        <ContextualSkeleton kind={kind} embedded={embedded} />
       ) : !compact && kind === "reports" ? (
         <div className={styles.reportsShell} aria-hidden="true">
           <div className={styles.reportsHeader}>
