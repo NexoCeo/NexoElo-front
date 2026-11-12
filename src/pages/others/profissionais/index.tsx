@@ -653,10 +653,10 @@ export default function Profissionais() {
       </section>
 
       <section className={styles.professionalMetrics} aria-label="Resumo dos profissionais">
-        <div className={styles.metricCard}><span className={styles.metricIcon}><FaUsers aria-hidden="true" /></span><div><strong>{statusCounts.TODOS}</strong><span>Profissionais</span></div><FaChartLine className={styles.metricDecoration} aria-hidden="true" /></div>
-        <div className={styles.metricCard}><span className={styles.metricIcon}><FaCheckCircle aria-hidden="true" /></span><div><strong>{statusCounts.APROVADO}</strong><span>Aprovados</span></div><FaChartLine className={styles.metricDecoration} aria-hidden="true" /></div>
-        <div className={styles.metricCard}><span className={styles.metricIcon}><FaClock aria-hidden="true" /></span><div><strong>{statusCounts.PENDENTE}</strong><span>Pendentes</span></div></div>
-        <div className={styles.metricCard}><span className={styles.metricIcon}><FaTimesCircle aria-hidden="true" /></span><div><strong>{statusCounts.RECUSADO}</strong><span>Recusados</span></div></div>
+        <div className={styles.metricCard}><span className={styles.metricIcon}><FaUsers aria-hidden="true" /></span><div>{loading ? <span className={styles.skeletonLine} style={{ width: 36, height: 22 }}/> : <strong>{statusCounts.TODOS}</strong>}<span>Profissionais</span></div><FaChartLine className={styles.metricDecoration} aria-hidden="true" /></div>
+        <div className={styles.metricCard}><span className={styles.metricIcon}><FaCheckCircle aria-hidden="true" /></span><div>{loading ? <span className={styles.skeletonLine} style={{ width: 36, height: 22 }}/> : <strong>{statusCounts.APROVADO}</strong>}<span>Aprovados</span></div><FaChartLine className={styles.metricDecoration} aria-hidden="true" /></div>
+        <div className={styles.metricCard}><span className={styles.metricIcon}><FaClock aria-hidden="true" /></span><div>{loading ? <span className={styles.skeletonLine} style={{ width: 36, height: 22 }}/> : <strong>{statusCounts.PENDENTE}</strong>}<span>Pendentes</span></div></div>
+        <div className={styles.metricCard}><span className={styles.metricIcon}><FaTimesCircle aria-hidden="true" /></span><div>{loading ? <span className={styles.skeletonLine} style={{ width: 36, height: 22 }}/> : <strong>{statusCounts.RECUSADO}</strong>}<span>Recusados</span></div></div>
       </section>
 
       <section className={styles.professionalTools} aria-label="Buscar e filtrar profissionais">
