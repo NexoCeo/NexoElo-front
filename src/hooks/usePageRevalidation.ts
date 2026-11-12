@@ -16,7 +16,7 @@ export function usePageRevalidation(
   const { enabled = true, minIntervalMs = 1500, pollIntervalMs = 60_000 } = options;
   const refreshRef = useRef(refresh);
   const lastRun = useRef(0);
-  const firstRoute = useRef(true);
+  const previousRoute = useRef(location.pathname + location.search);
   const inFlight = useRef(false);
 
   useEffect(() => {
@@ -53,13 +53,18 @@ export function usePageRevalidation(
   }, [enabled, minIntervalMs, pollIntervalMs]);
 
   useEffect(() => {
-    // Avoid a duplicate request with the page's original mount effect.
-    if (firstRoute.current) {
-      firstRoute.current = false;
-      return;
-    }
+    // Only a real route change should revalidate. Closing an edit modal or
+    // toggling "enabled" must not overwrite a just-saved record.
+    const route = location.pathname + location.search;
+    if (previousRoute.current === route) return;
+    previousRoute.current = route;
     if (!enabled || document.visibilityState === "hidden") return;
+    if (inFlight.current) return;
     lastRun.current = Date.now();
-    void refreshRef.current();
+    inFlight.current = true;
+    void Promise.resolve()
+      .then(() => refreshRef.current())
+      .catch(() => undefined)
+      .finally(() => { inFlight.current = false; });
   }, [location.pathname, location.search, enabled]);
 }
