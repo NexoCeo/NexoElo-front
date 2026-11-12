@@ -313,3 +313,18 @@
 .hoursChoice>div {min-width:0;flex:1;display:grid;gap:10px}
 .hoursChoice .bar{height:10px}
 @media(max-width:560px){.hoursChoices{gap:8px}.hoursChoice{padding:8px;min-height:70px;gap:7px}.hoursChoice>.skIcon{height:34px;width:34px;flex-basis:34px}}
+
+
+/* O estado de carregamento ocupa no maximo a area visivel abaixo do header;
+   parte excedente e cortada visualmente, sem alterar os cards definitivos. */
+.loading[data-loading-scroll-lock="true"]:not(.embedded):not(.compact) {
+  height: calc(100dvh - var(--shared-header-height, 60px) - var(--shared-header-clearance, 10px) - var(--mobile-nav-height, 0px) - env(safe-area-inset-bottom, 0px) - 12px);
+  max-height: calc(100dvh - var(--shared-header-height, 60px) - var(--shared-header-clearance, 10px) - var(--mobile-nav-height, 0px) - env(safe-area-inset-bottom, 0px) - 12px);
+  min-height: 0;
+  overflow: clip;
+}
+.loading.embedded[data-loading-scroll-lock="true"] {
+  min-height: 0;
+  max-width: 100%;
+  overflow: clip;
+}
