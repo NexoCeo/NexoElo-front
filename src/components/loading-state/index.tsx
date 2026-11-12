@@ -5,7 +5,7 @@ type LoadingStateProps = {
   compact?: boolean;
   dense?: boolean;
   embedded?: boolean;
-  variant?: "cards" | "table" | "form" | "profile" | "analytics" | "agenda" | "services" | "hours" | "reports" | "dashboard" | "professionals" | "metrics" | "subscription" | "whatsapp" | "client-home" | "client-history" | "agenda-list" | "client-providers" | "client-services" | "client-professionals" | "client-slots";
+  variant?: "cards" | "table" | "form" | "profile" | "analytics" | "agenda" | "services" | "hours" | "reports" | "dashboard" | "dashboard-empty" | "professionals" | "metrics" | "subscription" | "whatsapp" | "client-home" | "client-history" | "agenda-list" | "client-providers" | "client-services" | "client-professionals" | "client-slots";
 };
 
 function inferVariant(): NonNullable<LoadingStateProps["variant"]> {
@@ -116,6 +116,13 @@ function SkeletonToolbar({ options = true }: { options?: boolean }) {
   </div>;
 }
 function ContextualSkeleton({ kind, embedded }: { kind: Variant; embedded: boolean }) {
+  if (kind === "dashboard-empty") return (
+    <div className={styles.skDashboardEmpty} aria-hidden="true">
+      <span className={styles.skEmptyCalendar} />
+      <Bar width="145px" />
+      <Bar width="42px" />
+    </div>
+  );
   if (kind === "dashboard" && embedded) return <SkeletonAppointments count={2} />;
   if (kind === "dashboard") return <div className={styles.skDashboard}>
     <div className={styles.skDashboardHeader}>
@@ -211,7 +218,7 @@ export default function LoadingState({ label = "Carregando", compact = false, de
   return (
     <div className={`${styles.loading} ${compact ? styles.compact : ""} ${dense ? styles.dense : ""} ${embedded ? styles.embedded : ""}`} data-loading-scroll-lock="true" role="status" aria-live="polite" aria-label={label} aria-busy="true">
       <span className={styles.srOnly}>{label}</span>
-      {!compact && (["dashboard", "agenda", "services", "professionals", "metrics", "analytics", "subscription", "whatsapp", "profile", "client-home", "client-history", "agenda-list"] as Variant[]).includes(kind) ? (
+      {!compact && (["dashboard", "dashboard-empty", "agenda", "services", "professionals", "metrics", "analytics", "subscription", "whatsapp", "profile", "client-home", "client-history", "agenda-list"] as Variant[]).includes(kind) ? (
         <ContextualSkeleton kind={kind} embedded={embedded} />
       ) : !compact && kind === "reports" ? (
         <div className={styles.reportsShell} aria-hidden="true">
