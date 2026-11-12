@@ -123,7 +123,7 @@ const labelStatus = (status: string) => {
       </div>
 
       {loading ? (
-        <LoadingState variant="table" embedded label={t("common.loading")} />
+        <LoadingState variant={compactAgenda ? "agenda-list" : "table"} embedded label={t("common.loading")} />
       ) : error ? (
         <div className={styles.error} role="alert">{error}</div>
       ) : agendamentos.length > 0 ? (
