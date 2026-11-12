@@ -356,7 +356,7 @@
     white-space:nowrap;
   }
   .mobileBrand img{width:26px;height:26px;object-fit:contain;flex:0 0 26px}
-  .mobileBrand span{font-family:Inter,system-ui,sans-serif;font-size:12px;font-weight:800;letter-spacing:-.45px}
+  .mobileBrand span{font-size:12px;font-weight:800;letter-spacing:-.45px}
   .mobileBrand:focus-visible{outline:2px solid var(--theme-primary);outline-offset:3px;border-radius:5px}
   .headerActions{width:auto;flex:1 1 auto;min-width:0;gap:6px;margin-left:auto}
   .findMeButton{flex:0 1 auto;min-width:0;font-size:11px;padding:6px 2px}
