@@ -679,7 +679,7 @@ export default function Profissionais() {
 
       <section className={styles.tableWrap}>
         {loading ? (
-          <div className={styles.cardList} aria-label={t("pros.listLoading")} role="status" aria-busy="true">
+          <div className={styles.cardList} data-loading-scroll-lock="true" aria-label={t("pros.listLoading")} role="status" aria-busy="true">
             <div className={styles.cardsBody}>
               {Array.from({ length: 4 }, (_, index) => (
                 <div className={styles.professionalCard} key={index} aria-hidden="true">
