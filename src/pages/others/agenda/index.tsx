@@ -1,7 +1,7 @@
 import { useSearchParams } from "react-router-dom";
 import AgendaBooking from "@/components/agenda-booking";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FaPlus, FaCalendarCheck, FaCalendarDay, FaRotate, FaFilter, FaClock, FaCircleCheck, FaCircleXmark } from "react-icons/fa6";
+import { FaPlus, FaCalendarCheck, FaCalendarDay, FaRotate, FaFilter, FaClock, FaCircleCheck, FaCircleXmark, FaUsers, FaChevronDown, FaCheck } from "react-icons/fa6";
 import axios from "axios";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
@@ -75,14 +75,28 @@ export default function Agenda() {
 
   const [bookingOpen, setBookingOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [professionalOptionsOpen, setProfessionalOptionsOpen] = useState(false);
   const filtersRef = useRef<HTMLDivElement>(null);
+  const professionalOptionsRef = useRef<HTMLDivElement>(null);
+  const professionalTriggerRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (!filtersOpen) return;
     const closeOnOutside = (event: PointerEvent) => {
-      if (!filtersRef.current?.contains(event.target as Node)) setFiltersOpen(false);
+      if (!filtersRef.current?.contains(event.target as Node)) {
+        setFiltersOpen(false);
+        setProfessionalOptionsOpen(false);
+      } else if (!professionalOptionsRef.current?.contains(event.target as Node)) {
+        setProfessionalOptionsOpen(false);
+      }
     };
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setFiltersOpen(false);
+      if (event.key !== "Escape") return;
+      if (professionalOptionsOpen) {
+        setProfessionalOptionsOpen(false);
+        professionalTriggerRef.current?.focus();
+      } else {
+        setFiltersOpen(false);
+      }
     };
     document.addEventListener("pointerdown", closeOnOutside);
     document.addEventListener("keydown", closeOnEscape);
@@ -90,7 +104,13 @@ export default function Agenda() {
       document.removeEventListener("pointerdown", closeOnOutside);
       document.removeEventListener("keydown", closeOnEscape);
     };
-  }, [filtersOpen]);
+  }, [filtersOpen, professionalOptionsOpen]);
+  useEffect(() => {
+    if (!professionalOptionsOpen) return;
+    professionalOptionsRef.current
+      ?.querySelector<HTMLButtonElement>('[role="option"][aria-selected="true"]')
+      ?.focus();
+  }, [professionalOptionsOpen]);
   const [searchParams] = useSearchParams();
   const requestedDate = searchParams.get("data");
   const requestedAppointmentId = Number(searchParams.get("agendamento") || "0");
@@ -487,7 +507,10 @@ export default function Agenda() {
         </div>
         <div className={styles.topActions}>
           <div className={styles.filterAnchor} ref={filtersRef}>
-          <button type="button" className={styles.filterToggle} onClick={() => setFiltersOpen(open => !open)}
+          <button type="button" className={styles.filterToggle} onClick={() => {
+              setFiltersOpen(open => !open);
+              setProfessionalOptionsOpen(false);
+            }}
             aria-label="Filtros da agenda" title="Filtros da agenda"
             aria-expanded={filtersOpen} aria-haspopup="dialog" aria-controls="agenda-filters">
             <FaFilter aria-hidden="true" />
@@ -538,45 +561,71 @@ export default function Agenda() {
           </div>
 
           {isEmpresa && (
-            <label
-              className={
-                styles.professionalFilter
-              }
-            >
-              {t("common.professional")}
-
-              <select
-                value={profissionalId}
-                onChange={(event) =>
-                  setProfissionalId(
-                    Number(
-                      event.target.value,
-                    ),
-                  )
-                }
+            <div className={styles.professionalFilter} ref={professionalOptionsRef}>
+              <button
+                type="button"
+                ref={professionalTriggerRef}
+                className={`${styles.professionalSelect} ${professionalOptionsOpen ? styles.professionalSelectOpen : ""}`}
+                aria-haspopup="listbox"
+                aria-expanded={professionalOptionsOpen}
+                aria-controls="agenda-professional-options"
+                onClick={() => setProfessionalOptionsOpen(open => !open)}
+                onKeyDown={(event) => {
+                  if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+                    event.preventDefault();
+                    setProfessionalOptionsOpen(true);
+                  }
+                }}
               >
-                <option value={0}>
-                  {t("agenda.allProfessionals")}
-                </option>
+                <span className={styles.professionalSelectLabel}>{t("common.professional")}</span>
+                <span className={styles.professionalSelectValue}>
+                  <FaUsers aria-hidden="true" />
+                  <span>
+                    {profissionais.find(profissional => profissional.Id === profissionalId)?.Nome
+                      ?? t("agenda.allProfessionals")}
+                  </span>
+                  <FaChevronDown className={professionalOptionsOpen ? styles.professionalChevronOpen : ""} aria-hidden="true" />
+                </span>
+              </button>
 
-                {profissionais.map(
-                  (profissional) => (
-                    <option
-                      key={
-                        profissional.Id
-                      }
-                      value={
-                        profissional.Id
-                      }
+              {professionalOptionsOpen && (
+                <div
+                  className={styles.professionalOptions}
+                  id="agenda-professional-options"
+                  role="listbox"
+                  aria-label={t("common.professional")}
+                  onKeyDown={event => {
+                    if (event.key !== "ArrowDown" && event.key !== "ArrowUp" && event.key !== "Home" && event.key !== "End") return;
+                    event.preventDefault();
+                    const options = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="option"]'));
+                    const index = options.indexOf(document.activeElement as HTMLButtonElement);
+                    const next = event.key === "Home" ? 0
+                      : event.key === "End" ? options.length - 1
+                      : event.key === "ArrowDown" ? (index + 1) % options.length
+                      : (index - 1 + options.length) % options.length;
+                    options[next]?.focus();
+                  }}
+                >
+                  {[{ Id: 0, Nome: t("agenda.allProfessionals") }, ...profissionais].map(profissional => (
+                    <button
+                      key={profissional.Id}
+                      type="button"
+                      role="option"
+                      aria-selected={profissionalId === profissional.Id}
+                      className={`${styles.professionalOption} ${profissionalId === profissional.Id ? styles.professionalOptionSelected : ""}`}
+                      onClick={() => {
+                        setProfissionalId(profissional.Id);
+                        setProfessionalOptionsOpen(false);
+                        professionalTriggerRef.current?.focus();
+                      }}
                     >
-                      {
-                        profissional.Nome
-                      }
-                    </option>
-                  ),
-                )}
-              </select>
-            </label>
+                      <span>{profissional.Nome}</span>
+                      {profissionalId === profissional.Id && <FaCheck aria-hidden="true" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </div>
 
