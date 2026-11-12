@@ -5,7 +5,7 @@ type LoadingStateProps = {
   compact?: boolean;
   dense?: boolean;
   embedded?: boolean;
-  variant?: "cards" | "table" | "form" | "profile" | "analytics" | "agenda" | "services" | "hours" | "reports" | "dashboard" | "professionals" | "metrics" | "subscription" | "whatsapp" | "client-home" | "client-history" | "client-providers" | "client-services" | "client-professionals" | "client-slots";
+  variant?: "cards" | "table" | "form" | "profile" | "analytics" | "agenda" | "services" | "hours" | "reports" | "dashboard" | "professionals" | "metrics" | "subscription" | "whatsapp" | "client-home" | "client-history" | "agenda-list" | "client-providers" | "client-services" | "client-professionals" | "client-slots";
 };
 
 function inferVariant(): NonNullable<LoadingStateProps["variant"]> {
@@ -121,7 +121,7 @@ function ContextualSkeleton({ kind }: { kind: Variant }) {
       <div className={styles.skDashboardTitle}><Bar width="70%" /><Bar width="80%" /></div>
       <span className={styles.skAction} />
     </div>
-    <SkeletonAppointments count={3} />
+    <SkeletonAppointments count={2} />
   </div>;
 
   if (kind === "agenda") return <div className={styles.skPage}>
@@ -182,6 +182,14 @@ function ContextualSkeleton({ kind }: { kind: Variant }) {
     </div>
   </div>;
 
+  if (kind === "agenda-list") return <div className={styles.skCompactAgendaList} aria-hidden="true">
+    {Array.from({ length: 3 }, (_, i) => <div className={styles.skCompactBooking} key={i}>
+      <span className={styles.skIcon} />
+      <div><Bar width="68%" /><Bar width="52%" /><Bar width="33%" /></div>
+      <Bar width="66px" />
+    </div>)}
+  </div>;
+
   if (kind === "client-home" || kind === "client-history") return <div className={styles.skClientCards}>
     {Array.from({ length: kind === "client-home" ? 1 : 3 }, (_, i) =>
       <div className={styles.skClientCard} key={i}>
@@ -198,7 +206,7 @@ export default function LoadingState({ label = "Carregando", compact = false, de
   return (
     <div className={`${styles.loading} ${compact ? styles.compact : ""} ${dense ? styles.dense : ""} ${embedded ? styles.embedded : ""}`} role="status" aria-live="polite" aria-label={label} aria-busy="true">
       <span className={styles.srOnly}>{label}</span>
-      {!compact && (["dashboard", "agenda", "services", "professionals", "metrics", "analytics", "subscription", "whatsapp", "profile", "client-home", "client-history"] as Variant[]).includes(kind) ? (
+      {!compact && (["dashboard", "agenda", "services", "professionals", "metrics", "analytics", "subscription", "whatsapp", "profile", "client-home", "client-history", "agenda-list"] as Variant[]).includes(kind) ? (
         <ContextualSkeleton kind={kind} />
       ) : !compact && kind === "reports" ? (
         <div className={styles.reportsShell} aria-hidden="true">
@@ -215,7 +223,10 @@ export default function LoadingState({ label = "Carregando", compact = false, de
         </div>
       ) : !compact && kind === "hours" ? (
         <div className={`${styles.hoursShell} ${embedded ? styles.hoursEmbedded : ""}`} aria-hidden="true">
-          {!embedded && <div className={styles.hoursIntro}><Bar width="32%"/><Bar width="58%"/></div>}
+          {!embedded && <>
+            <div className={styles.hoursIntro}><Bar width="32%"/><Bar width="58%"/></div>
+            <div className={styles.hoursStepper}>{[0,1,2,3,4].map(i => <div key={i}><span className={styles.hoursStepCircle}/><Bar width="55%" /></div>)}</div>
+          </>}
           <div className={styles.hoursColumns}>
             <div className={styles.hoursEditor}>
               <div className={styles.hoursPanel}>
@@ -261,6 +272,18 @@ export default function LoadingState({ label = "Carregando", compact = false, de
               <div className={styles.agendaTableBody}>{[0,1,2,3,4].map(i=><div className={styles.agendaTableRow} key={i}>{[0,1,2,3,4,5,6].map(j=><Bar key={j} width={j===0?"75%":"58%"}/>)}</div>)}</div>
             </div>
           </section>
+        </div>
+      ) : compact && ["client-providers", "client-professionals", "client-services", "client-slots"].includes(kind) ? (
+        <div className={kind === "client-slots" ? styles.skSlots : styles.skCompactCards} aria-hidden="true">
+          {Array.from({ length: kind === "client-slots" ? 6 : 3 }, (_, index) =>
+            kind === "client-slots"
+              ? <span className={styles.skSlot} key={index} />
+              : <div className={styles.skCompactCard} key={index}>
+                  <span className={styles.skPhoto} />
+                  <div><Bar width={index % 2 ? "70%" : "80%"} /><Bar width="52%" /><Bar width="65%" /></div>
+                  <span className={styles.skSmallButton} />
+                </div>
+          )}
         </div>
       ) : compact ? <div className={styles.compactLines}><Bar width="65%"/><Bar width="86%"/><Bar width="44%"/></div> : (
         <div className={styles.page}>
