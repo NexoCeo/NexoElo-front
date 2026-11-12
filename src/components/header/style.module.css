@@ -402,3 +402,59 @@
   .headerActions .profileWrapper { padding-left: 7px; }
   .headerActions .profileWrapper::before { height: 18px; }
 }
+
+
+/* Assinatura da NexoCeo: exclusiva do menu de perfil em telas pequenas. */
+.mobileDeveloperCredit {
+  display: none;
+}
+@media (max-width: 760px) {
+  .profileMenu .mobileDeveloperCredit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 9px;
+    padding: 15px 8px 8px;
+    border-top: 1px solid var(--theme-bottom);
+    text-align: center;
+    color: var(--theme-text-muted);
+  }
+
+  /* Sem segunda linha gerada pelo separador geral do menu. */
+  .profileMenu > .mobileDeveloperCredit::before {
+    display: none;
+  }
+
+  .developerCreditLabel {
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--theme-text-muted);
+  }
+
+  .developerCreditBrand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .developerCreditBrand img {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    object-fit: contain;
+  }
+
+  .developerCreditBrand strong {
+    font-size: 14px;
+    line-height: 1.25;
+    letter-spacing: -.3px;
+    font-weight: 800;
+    color: var(--theme-text);
+    white-space: nowrap;
+  }
+}
