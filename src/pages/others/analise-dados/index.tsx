@@ -10,6 +10,7 @@ import type { Agendamento } from "@/types/agendamento";
 import LoadingState from "@/components/loading-state";
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
+import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
 export default function AnaliseDados() {
   const { theme } = useTheme();
@@ -58,6 +59,18 @@ export default function AnaliseDados() {
       .catch(() => { if (active) setProfissionais([]); });
     return () => { active = false; };
   }, [usuario?.Id, usuario?.Papel]);
+
+  usePageRevalidation(async () => {
+    if (!usuario?.Id || !permitido) return;
+    try {
+      const history = await listarHistoricoAgendamentos(usuario.Id);
+      setHistorico(history);
+      setErro("");
+      if (usuario.Papel === "EMPRESA") {
+        try { setProfissionais(await listarProfissionaisEmpresa(usuario.Id)); } catch { /* retain options */ }
+      }
+    } catch { /* retain the last good data during temporary network failures */ }
+  }, { enabled: Boolean(usuario?.Id) && permitido });
 
   // O filtro do painel usa registros reais; o restante das análises existentes permanece preservado.
   const metricsHistory = useMemo(() => historico.filter(item => {
