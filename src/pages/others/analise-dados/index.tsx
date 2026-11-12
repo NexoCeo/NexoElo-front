@@ -226,6 +226,7 @@ export default function AnaliseDados() {
   } as CSSProperties;
 
   if (!permitido) return <main className={styles.container}>{t("analytics.notAllowed")}</main>;
+  if (carregando) return <LoadingState label={t("analytics.loading")} variant="metrics" />;
   return <main className={styles.container} style={cssVars}>
     <header className={styles.dashboardFilters} aria-label="Filtros das métricas" ref={metricsFiltersRef}>
       <div className={styles.topFilter}>
