@@ -679,16 +679,19 @@ export default function Profissionais() {
 
       <section className={styles.tableWrap}>
         {loading ? (
-          <div className={styles.cardsBody} aria-label={t("pros.listLoading")}>
-            {Array.from({ length: 4 }, (_, index) => (
-              <div className={styles.professionalCard} key={index} aria-hidden="true">
-                <span className={styles.skeletonLine} style={{ width: "65%" }}/>
-                <span className={styles.skeletonLine} style={{ width: "80%" }}/>
-                <span className={styles.skeletonLine} style={{ width: "75%" }}/>
-                <span className={styles.skeletonLine} style={{ width: "75px", height: "24px" }}/>
-                <span className={styles.skeletonLine} style={{ width: "30px", height: "30px" }}/>
-              </div>
-            ))}
+          <div className={styles.cardList} aria-label={t("pros.listLoading")} role="status" aria-busy="true">
+            <div className={styles.cardsBody}>
+              {Array.from({ length: 4 }, (_, index) => (
+                <div className={styles.professionalCard} key={index} aria-hidden="true">
+                  <span className={styles.skeletonThumb} style={{ gridArea: "avatar", width: 49, height: 49, borderRadius: 11 }}/>
+                  <span className={styles.skeletonLine} style={{ gridArea: "name", width: "64%" }}/>
+                  <span className={styles.skeletonLine} style={{ gridArea: "email", width: "82%", height: 10 }}/>
+                  <span className={styles.skeletonLine} style={{ gridArea: "phone", width: "73%", height: 11 }}/>
+                  <span className={styles.skeletonLine} style={{ gridArea: "status", width: 82, height: 27, borderRadius: 99 }}/>
+                  <span className={styles.skeletonThumb} style={{ gridArea: "actions", width: 30, height: 30, borderRadius: 9 }}/>
+                </div>
+              ))}
+            </div>
           </div>
         ) : filteredProfessionals.length === 0 ? (
           <p className={styles.feedback} style={{ color: theme.colors.inactive }}>
