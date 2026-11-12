@@ -460,3 +460,11 @@
  .latestRow>time{font-size:9px}
  .latestRow>em{font-size:10px}
 }
+
+/* Somente atendimentos concluídos usam verde; cancelados usam vermelho. */
+.latestRow.latestCompleted > em { color: #40d9a2; }
+.latestRow.latestCompleted > small { background: rgba(13,150,103,.18); color: #55e1b1; }
+.latestRow.latestCancelled > em { color: #fa8290; }
+.latestRow.latestCancelled > small { background: rgba(225,67,82,.18); color: #fa8290; }
+.latestRow.latestOther > em { color: var(--analysis-muted); }
+.latestRow.latestOther > small { background: var(--theme-primary-soft); color: var(--theme-primary-text); }
