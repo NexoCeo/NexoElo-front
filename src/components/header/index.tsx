@@ -15,6 +15,7 @@ import NotificationBell from "@/components/notificationBell";
 import { logout as endSession } from "@/services/logout-service";
 import { defaultProfileImg, getProfileImageUrl } from "./profile-image";
 import logoNexoCeo from "@/assets/logoNexoCeo.png";
+import logoNexoElo from "@/assets/logo.png";
 
 interface HeaderProps {
   isMenuOpen: boolean;
@@ -117,9 +118,9 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
           <FaBars aria-hidden="true" />
         </button>
 
-        <Link to={`${basePath}/dashboard`} className={styles.mobileBrand} aria-label="NexoCeo — início">
-          <img src={logoNexoCeo} alt="" aria-hidden="true" />
-          <span>NexoCeo</span>
+        <Link to={`${basePath}/dashboard`} className={styles.mobileBrand} aria-label="NexoElo — início">
+          <img src={logoNexoElo} alt="" aria-hidden="true" />
+          <span>NexoElo</span>
         </Link>
 
         <div className={styles.headerActions}>
