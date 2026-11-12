@@ -1,5 +1,6 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { render } from "@/test/render-with-notifications";
+import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { FuncionamentoConfig } from "@/types/funcionamento";
 
@@ -62,7 +63,7 @@ describe("Funcionamento", () => {
   });
 
   it("separa dias, expediente e pausas em etapas independentes", async () => {
-    render(<Funcionamento />);
+    render(<MemoryRouter><Funcionamento /></MemoryRouter>);
 
     expect(await screen.findByRole("heading", { name: "Dias de atendimento" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Horario de funcionamento" })).toBeInTheDocument();
@@ -74,7 +75,7 @@ describe("Funcionamento", () => {
   });
 
   it("adiciona almoco e uma segunda pausa livre e salva sem sair da tela", async () => {
-    render(<Funcionamento />);
+    render(<MemoryRouter><Funcionamento /></MemoryRouter>);
     await screen.findByRole("heading", { name: "Dias de atendimento" });
 
     fireEvent.click(screen.getByRole("button", { name: "Adicionar pausa" }));
@@ -111,7 +112,7 @@ describe("Funcionamento", () => {
     const config = createConfig();
     config.Domingo = true;
     serviceMock.obterFuncionamento.mockResolvedValue(config);
-    render(<Funcionamento />);
+    render(<MemoryRouter><Funcionamento /></MemoryRouter>);
     await screen.findByRole("heading", { name: "Dias de atendimento" });
 
     fireEvent.click(screen.getByRole("button", { name: "Seg a sex" }));
