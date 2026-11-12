@@ -108,7 +108,7 @@ export default function Agenda() {
     const date = new Date(requestedDate + "T12:00:00");
     if (!Number.isNaN(date.getTime())) setSelectedDate(date);
   }, [requestedDate]);
-  const [viewMode, setViewMode] = useState<ViewMode>("month");
+  const [viewMode, setViewMode] = useState<ViewMode>("week");
 
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [profissionalId, setProfissionalId] = useState(0);
@@ -504,23 +504,6 @@ export default function Agenda() {
             <button
               type="button"
               className={
-                viewMode === "month"
-                  ? styles.activeSegment
-                  : ""
-              }
-              onClick={() =>
-                setViewMode("month")
-              }
-              aria-pressed={
-                viewMode === "month"
-              }
-            >
-              {t("agenda.monthly")}
-            </button>
-
-            <button
-              type="button"
-              className={
                 viewMode === "week"
                   ? styles.activeSegment
                   : ""
@@ -533,6 +516,23 @@ export default function Agenda() {
               }
             >
               {t("agenda.weekly")}
+            </button>
+
+            <button
+              type="button"
+              className={
+                viewMode === "month"
+                  ? styles.activeSegment
+                  : ""
+              }
+              onClick={() =>
+                setViewMode("month")
+              }
+              aria-pressed={
+                viewMode === "month"
+              }
+            >
+              {t("agenda.monthly")}
             </button>
           </div>
 
