@@ -2,6 +2,7 @@ import { formatPersonName } from "@/context/UserContext";
 import LoadingState from "@/components/loading-state";
 import { useTheme } from "@/context/ThemeContext";
 import { useEffect, useMemo, useState } from "react";
+import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 import { isAxiosError } from "axios";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
@@ -161,6 +162,9 @@ export default function ClienteFinalAgendar() {
   const [dataSelecionada, setDataSelecionada] = useState(draft?.dataSelecionada ?? "");
   const [dataAgendamento, setDataAgendamento] = useState(draft?.dataAgendamento ?? "");
   const [refreshHorarios, setRefreshHorarios] = useState(0);
+  usePageRevalidation(() => setRefreshHorarios(value => value + 1), {
+    enabled: Boolean(dataSelecionada) && Boolean(servicoId) && !loading,
+  });
   const [loading, setLoading] = useState(false);
   const [loadingResponsaveis, setLoadingResponsaveis] = useState(false);
   const [loadingProfissionais, setLoadingProfissionais] = useState(false);
