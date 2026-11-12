@@ -26,6 +26,7 @@ import styles from "./style.module.css";
 import { formatPersonName, formatEmailDisplay } from "@/context/UserContext";
 import ProfileOverview from "@/components/profile-overview";
 import { useLanguage } from "@/context/LanguageContext";
+import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
 type HomeSection = "home" | "historico" | "perfil";
 
@@ -246,6 +247,8 @@ export default function ClienteFinalHome() {
       void realtime?.stop();
     };
   }, [loadAppointments, cliente?.Id]);
+
+  usePageRevalidation(() => loadAppointments(true), { enabled: Boolean(cliente?.Id) && updatingId === null });
 
   const upcomingAppointments = useMemo(
     () => appointments.filter(isUpcoming).sort(
