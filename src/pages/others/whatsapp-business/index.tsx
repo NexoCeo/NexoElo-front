@@ -4,6 +4,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { FaWhatsapp, FaCheckCircle, FaExclamationTriangle, FaPaperPlane, FaRegClock, FaBullhorn, FaExternalLinkAlt, FaCog, FaShieldAlt, FaArrowRight } from "react-icons/fa";
 import { buscarStatusWhatsApp, obterConfiguracaoCadastro, concluirCadastro, salvarPreferenciasWhatsApp, desconectarWhatsApp, type WhatsAppStatus, type WhatsAppPreferencias } from "@/services/whatsapp-business-service";
 import styles from "./style.module.css";
+import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
 declare global { interface Window { FB?: { init: (options: Record<string, unknown>) => void; login: (callback: (data: { authResponse?: { code?: string } }) => void, options: Record<string, unknown>) => void; }; } }
 
@@ -43,6 +44,7 @@ export default function WhatsAppBusiness() {
     } catch { setAvailable(false); }
   }
   useEffect(() => { void refresh(); }, []);
+  usePageRevalidation(refresh, { enabled: !busy });
 
   async function connect() {
     setBusy(true); setMessage("");
