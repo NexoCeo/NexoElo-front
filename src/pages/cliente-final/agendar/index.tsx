@@ -713,7 +713,7 @@ export default function ClienteFinalAgendar() {
                     {!dataSelecionada ? <p className={styles.emptyState}>Escolha uma data para consultar os horários disponíveis.</p> :
                       <fieldset className={styles.scheduleFieldset} disabled={loadingHorarios}>
                         <legend>{t("client.availableSlots")}</legend>
-                        {loadingHorarios ? <LoadingState label={t("client.slotsLoading")} compact /> :
+                        {loadingHorarios ? <LoadingState label={t("client.slotsLoading")} variant="client-slots" compact /> :
                           horariosDisponiveis.length === 0 ? <p className={styles.scheduleFeedback}>{t("client.slotsEmpty")}</p> :
                           <div className={styles.timeGrid}>
                             {horariosDisponiveis.map((horario) => (
