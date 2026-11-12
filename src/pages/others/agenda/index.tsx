@@ -488,8 +488,9 @@ export default function Agenda() {
         <div className={styles.topActions}>
           <div className={styles.filterAnchor} ref={filtersRef}>
           <button type="button" className={styles.filterToggle} onClick={() => setFiltersOpen(open => !open)}
+            aria-label="Filtros da agenda" title="Filtros da agenda"
             aria-expanded={filtersOpen} aria-haspopup="dialog" aria-controls="agenda-filters">
-            <FaFilter aria-hidden="true" /> Filtros <span aria-hidden="true">{filtersOpen ? "⌃" : "⌄"}</span>
+            <FaFilter aria-hidden="true" />
           </button>
       {filtersOpen && <div id="agenda-filters" className={styles.filtersPanel} role="dialog" aria-label="Filtros da agenda">
         <div
