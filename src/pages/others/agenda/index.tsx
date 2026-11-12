@@ -327,29 +327,10 @@ export default function Agenda() {
         REFRESH_INTERVAL_MS,
       );
 
-    window.addEventListener(
-      "focus",
-      refreshVisibleAgenda,
-    );
-
-    document.addEventListener(
-      "visibilitychange",
-      refreshVisibleAgenda,
-    );
-
     return () => {
       window.clearInterval(interval);
 
-      window.removeEventListener(
-        "focus",
-        refreshVisibleAgenda,
-      );
-
-      document.removeEventListener(
-        "visibilitychange",
-        refreshVisibleAgenda,
-      );
-    };
+        };
   }, [usuario?.Id]);
 
   const agendaItems =
