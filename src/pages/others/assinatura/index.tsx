@@ -7,6 +7,7 @@ import { useNotification } from "@/context/NotificationContext";
 import { consultarAssinatura, iniciarCheckout, alterarPlano, atualizarRecursosAtivos, listarRecursosPlano, abrirPortal, planos, type AssinaturaAtual, type RecursoPlano } from "@/services/assinatura-service";
 import styles from "./style.module.css";
 import Modal from "@/components/modal";
+import LoadingState from "@/components/loading-state";
 import { useLanguage } from "@/context/LanguageContext";
 import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
@@ -122,6 +123,8 @@ export default function MinhaAssinatura({ publicView = false }: { publicView?: b
   function alternarRecurso(id: string) {
     setSelecionados(prev=>prev.includes(id)?prev.filter(i=>i!==id):[...prev,id]);
   }
+
+  if (loading && !publicView) return <LoadingState variant="subscription" label={t("common.loading")} />;
 
   return (
     <main className={styles.page}>
