@@ -5,19 +5,25 @@ type LoadingStateProps = {
   compact?: boolean;
   dense?: boolean;
   embedded?: boolean;
-  variant?: "cards" | "table" | "form" | "profile" | "analytics" | "agenda" | "services" | "hours" | "reports";
+  variant?: "cards" | "table" | "form" | "profile" | "analytics" | "agenda" | "services" | "hours" | "reports" | "dashboard" | "professionals" | "metrics" | "subscription" | "whatsapp" | "client-home" | "client-history" | "client-providers" | "client-services" | "client-professionals" | "client-slots";
 };
 
 function inferVariant(): NonNullable<LoadingStateProps["variant"]> {
-  const path = window.location.pathname.toLowerCase();
-  if (path.includes("analise-dados") || path.includes("dashboard")) return "analytics";
-  if (path.includes("/agenda")) return "agenda";
-  if (path.includes("/servicos")) return "services";
-  if (path.includes("/funcionamento")) return "hours";
-  if (path.includes("/relatorios")) return "reports";
-  if (path.includes("relatorios") || path.includes("profissionais")) return "table";
-  if (path.includes("perfil")) return "profile";
-  if (path.includes("funcionamento") || path.includes("register") || path.includes("assinatura")) return "form";
+  const path = typeof window === "undefined" ? "" : window.location.pathname.toLowerCase();
+  // Route-specific skeletons must follow the current UI, not the old table layouts.
+  if (path.includes("/analise-dados/metricas")) return "metrics";
+  if (path.includes("/analise-dados/whatsapp-business")) return "whatsapp";
+  if (path.includes("/cliente-final/home")) return "client-home";
+  if (path.includes("/cliente-final/agendar")) return "client-providers";
+  if (path.endsWith("/dashboard") || path.endsWith("/home")) return "dashboard";
+  if (path.endsWith("/agenda")) return "agenda";
+  if (path.endsWith("/servicos")) return "services";
+  if (path.endsWith("/profissionais")) return "professionals";
+  if (path.endsWith("/funcionamento")) return "hours";
+  if (path.endsWith("/relatorios")) return "reports";
+  if (path.includes("/assinatura")) return "subscription";
+  if (path.endsWith("/perfil")) return "profile";
+  if (path.includes("/login") || path.includes("/register") || path.includes("/recuperarsenha")) return "form";
   return "cards";
 }
 
@@ -25,12 +31,176 @@ function Bar({ width = "100%" }: { width?: string }) {
   return <span aria-hidden="true" className={styles.bar} style={{ width }} />;
 }
 
+
+type Variant = NonNullable<LoadingStateProps["variant"]>;
+
+function SkeletonHeader({ action = false }: { action?: boolean }) {
+  return <div className={styles.skHeader}>
+    <div className={styles.skHeading}>
+      <span className={styles.skIcon} aria-hidden="true" />
+      <div><Bar width="56%" /><Bar width="80%" /></div>
+    </div>
+    {action && <span className={styles.skAction} aria-hidden="true" />}
+  </div>;
+}
+
+function SkeletonStat({ index }: { index: number }) {
+  return <div className={styles.skStat}>
+    <span className={styles.skIcon} aria-hidden="true" />
+    <div><Bar width={index === 1 ? "68%" : "44%"} /><Bar width="80%" /></div>
+  </div>;
+}
+function SkeletonStats({ count = 4 }: { count?: number }) {
+  return <div className={styles.skStats} aria-hidden="true">
+    {Array.from({ length: count }, (_, index) => <SkeletonStat index={index} key={index} />)}
+  </div>;
+}
+function SkeletonAppointment({ index }: { index: number }) {
+  return <article className={styles.skAppointment} aria-hidden="true">
+    <div className={styles.skBetween}><Bar width={index % 2 ? "52%" : "46%"} /><Bar width="63px" /></div>
+    <div className={styles.skBetween}><Bar width="38%" /><Bar width="64px" /></div>
+    <Bar width="31%" />
+    <div className={styles.skAppointmentBottom}><Bar width="74px" /><span className={styles.skSmallButton} /></div>
+  </article>;
+}
+function SkeletonAppointments({ count = 3 }: { count?: number }) {
+  return <div className={styles.skAppointments}>
+    {Array.from({ length: count }, (_, index) => <SkeletonAppointment index={index} key={index} />)}
+  </div>;
+}
+function SkeletonCalendar() {
+  return <div className={styles.skCalendar} aria-hidden="true">
+    <div className={styles.skCalendarHeading}><span className={styles.skDateBar} /><Bar width="32%" /><span className={styles.skDateBar} /></div>
+    <div className={styles.skCalendarDays}>
+      {Array.from({ length: 7 }, (_, index) => <div key={index}><Bar width="70%" /><span className={styles.skDay} /></div>)}
+    </div>
+    <span className={styles.skCalendarButton} />
+  </div>;
+}
+function SkeletonTimeline() {
+  return <div className={styles.skTimeline} aria-hidden="true">
+    <div className={styles.skPanelHeading}><Bar width="68%" /><Bar width="35%" /></div>
+    <div className={styles.skTimelineRows}>
+      {Array.from({ length: 7 }, (_, index) => <div className={styles.skTimeRow} key={index}>
+        <Bar width="38px" /><span />
+      </div>)}
+    </div>
+  </div>;
+}
+function SkeletonPanel({ type = "lines" }: { type?: "lines" | "chart" | "bars" }) {
+  return <div className={styles.skPanel} aria-hidden="true">
+    <div className={styles.skPanelHeading}><Bar width="43%" /><Bar width="16%" /></div>
+    {type === "chart"
+      ? <div className={styles.skChart}><span className={styles.skChartArea} /></div>
+      : type === "bars" ? <div className={styles.skBarChart}>{[22, 44, 38, 68, 56].map((height, index) =>
+        <span style={{ height: height + "%" }} key={index} />)}</div>
+      : <div className={styles.skPanelLines}>
+        {[0,1,2].map(i => <div className={styles.skBetween} key={i}><Bar width="26%" /><Bar width="48%" /><Bar width="14%" /></div>)}
+      </div>}
+  </div>;
+}
+function SkeletonListRow({ index, photo = false }: { index: number; photo?: boolean }) {
+  return <div className={styles.skListRow} key={index} aria-hidden="true">
+    <div className={styles.skListIdentity}>
+      <span className={photo ? styles.skPhoto : styles.skIcon} />
+      <div><Bar width={index % 2 ? "78%" : "67%"} /><Bar width="54%" /></div>
+    </div>
+    <Bar width="59%" /><Bar width="70%" /><Bar width="66%" />
+    <span className={styles.skSmallButton} />
+  </div>;
+}
+function SkeletonToolbar({ options = true }: { options?: boolean }) {
+  return <div className={styles.skToolbar} aria-hidden="true">
+    <div className={styles.skSearch}><Bar width="48%" /></div>
+    {options && <div className={styles.skPills}>{[0,1,2,3].map(i => <span key={i} />)}</div>}
+  </div>;
+}
+function ContextualSkeleton({ kind }: { kind: Variant }) {
+  if (kind === "dashboard") return <div className={styles.skDashboard}>
+    <div className={styles.skDashboardHeader}>
+      <div className={styles.skDashboardTitle}><Bar width="70%" /><Bar width="80%" /></div>
+      <span className={styles.skAction} />
+    </div>
+    <SkeletonAppointments count={3} />
+  </div>;
+
+  if (kind === "agenda") return <div className={styles.skPage}>
+    <SkeletonHeader action />
+    <SkeletonStats />
+    <div className={styles.skAgendaGrid}>
+      <SkeletonCalendar />
+      <SkeletonTimeline />
+      <div className={styles.skAgendaList}>
+        <div className={styles.skPanelHeading}><Bar width="70%" /><Bar width="20%" /></div>
+        {[0,1,2].map(i => <div className={styles.skMiniBooking} key={i}><Bar width="50%" /><Bar width="70%" /><Bar width="36%" /></div>)}
+        <div className={styles.skAgendaFooter}><Bar width="70%" /></div>
+      </div>
+    </div>
+  </div>;
+
+  if (kind === "services" || kind === "professionals") return <div className={styles.skPage}>
+    <div className={styles.skActions}><span className={styles.skAction} />{kind === "professionals" && <span className={styles.skAction} />}</div>
+    <SkeletonStats />
+    <SkeletonToolbar />
+    <div className={styles.skList}>
+      {Array.from({ length: 4 }, (_, i) => <SkeletonListRow key={i} index={i} photo={kind === "professionals"} />)}
+    </div>
+  </div>;
+
+  if (kind === "metrics" || kind === "analytics") return <div className={styles.skPage}>
+    <div className={styles.skMetricFilters}><span className={styles.skFilter} /><span className={styles.skFilter} /></div>
+    <SkeletonStats />
+    <div className={styles.skCharts}><SkeletonPanel type="chart" /><SkeletonPanel type="bars" /></div>
+    <div className={styles.skInsights}><SkeletonPanel /><SkeletonPanel /></div>
+    <SkeletonPanel type="bars" />
+  </div>;
+
+  if (kind === "subscription") return <div className={styles.skPage}>
+    <SkeletonHeader action />
+    <div className={styles.skStats}><SkeletonStat index={0} /><SkeletonStat index={1} /><SkeletonStat index={2} /></div>
+    <div className={styles.skPlans}>{[0,1,2].map(i => <div className={styles.skPlan} key={i}>
+      <Bar width="55%" /><Bar width="68%" />{[0,1,2,3,4].map(j => <Bar width={j%2?"85%":"70%"} key={j} />)}
+      <span className={styles.skAction} />
+    </div>)}</div>
+  </div>;
+
+  if (kind === "whatsapp") return <div className={styles.skPage}>
+    <SkeletonHeader action />
+    <div className={styles.skWhatsAppHero}><Bar width="30%" /><Bar width="68%" /><Bar width="52%" /></div>
+    <SkeletonStats />
+    <div className={styles.skInsights}><SkeletonPanel /><SkeletonPanel /></div>
+  </div>;
+
+  if (kind === "profile") return <div className={styles.skPage}>
+    <div className={styles.skProfileHero}>
+      <span className={styles.skPhotoLarge} />
+      <div><Bar width="47%" /><Bar width="65%" /><Bar width="38%" /></div>
+      <span className={styles.skAction} />
+    </div>
+    <div className={styles.skProfileFields}>
+      {[0,1,2,3].map(i => <div className={styles.skProfileField} key={i}><Bar width="36%" /><Bar width="65%" /></div>)}
+    </div>
+  </div>;
+
+  if (kind === "client-home" || kind === "client-history") return <div className={styles.skClientCards}>
+    {Array.from({ length: kind === "client-home" ? 1 : 3 }, (_, i) =>
+      <div className={styles.skClientCard} key={i}>
+        <span className={styles.skIcon} /><div><Bar width="63%" /><Bar width="85%" /><Bar width="45%" /></div>
+        <Bar width="74px" />
+      </div>)}
+  </div>;
+
+  return null;
+}
+
 export default function LoadingState({ label = "Carregando", compact = false, dense = false, embedded = false, variant }: LoadingStateProps) {
   const kind = variant ?? inferVariant();
   return (
     <div className={`${styles.loading} ${compact ? styles.compact : ""} ${dense ? styles.dense : ""} ${embedded ? styles.embedded : ""}`} role="status" aria-live="polite" aria-label={label} aria-busy="true">
       <span className={styles.srOnly}>{label}</span>
-      {!compact && kind === "reports" ? (
+      {!compact && (["dashboard", "agenda", "services", "professionals", "metrics", "analytics", "subscription", "whatsapp", "profile", "client-home", "client-history"] as Variant[]).includes(kind) ? (
+        <ContextualSkeleton kind={kind} />
+      ) : !compact && kind === "reports" ? (
         <div className={styles.reportsShell} aria-hidden="true">
           <div className={styles.reportsHeader}>
             <div className={styles.reportsPeriod}><Bar width="62%"/><Bar width="100%"/></div>
