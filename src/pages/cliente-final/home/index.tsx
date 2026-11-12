@@ -444,7 +444,7 @@ export default function ClienteFinalHome() {
             </header>
 
             {loading ? (
-              <LoadingState label={t("client.historyLoading")} variant="table" embedded />
+              <LoadingState label={t("client.historyLoading")} variant="client-history" embedded />
             ) : error && appointments.length === 0 ? (
               <div className={styles.feedback} role="alert">
                 <span>{error}</span>
