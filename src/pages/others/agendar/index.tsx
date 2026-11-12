@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import api from "@/services/api";
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
+import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
 type Disponibilidade = {
   diaSemana: number;
@@ -32,6 +33,17 @@ export default function Agendar() {
 
     void carregar();
   }, [username]);
+
+  usePageRevalidation(async () => {
+    if (!username) return;
+    try {
+      const response = await api.get<Disponibilidade[]>(`/disponibilidade/${username}`);
+      const fresh = gerarHorariosProximos(response.data);
+      setHorarios(fresh);
+      setDataSelecionada(current =>
+        current && !fresh.some(date => date.toISOString() === current) ? null : current);
+    } catch { /* Retain the last available schedule while offline. */ }
+  }, { enabled: Boolean(username) });
 
   const gerarHorariosProximos = (
     disponibilidades: Disponibilidade[],
