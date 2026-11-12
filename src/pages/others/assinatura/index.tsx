@@ -8,6 +8,7 @@ import { consultarAssinatura, iniciarCheckout, alterarPlano, atualizarRecursosAt
 import styles from "./style.module.css";
 import Modal from "@/components/modal";
 import { useLanguage } from "@/context/LanguageContext";
+import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
 
 export default function MinhaAssinatura({ publicView = false }: { publicView?: boolean }) {
@@ -43,6 +44,11 @@ export default function MinhaAssinatura({ publicView = false }: { publicView?: b
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [showNotification, publicView, usuario?.Id]);
+
+  usePageRevalidation(async () => {
+    if (publicView && !usuario?.Id) return;
+    try { setAssinatura(await consultarAssinatura()); } catch { /* keep last known subscription */ }
+  }, { enabled: (Boolean(usuario?.Id) || !publicView) && !pending && !confirmacao && !editandoRecursos });
 
   async function executar(chave: string, acao: () => Promise<void>) {
     setPending(chave);
