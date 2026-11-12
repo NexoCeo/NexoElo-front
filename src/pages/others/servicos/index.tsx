@@ -331,10 +331,10 @@ export default function Servicos() {
       </section>
 
       <section className={styles.serviceMetrics} aria-label="Resumo dos serviços">
-        <div className={styles.metricCard}><span className={styles.metricIcon}><FaTags aria-hidden="true" /></span><div><strong>{servicos.length}</strong><span>Serviços cadastrados</span></div></div>
-        <div className={styles.metricCard}><span className={styles.metricIcon}><FaDollarSign aria-hidden="true" /></span><div><strong>{formatCurrency(averagePrice)}</strong><span>Preço médio</span></div></div>
-        <div className={styles.metricCard}><span className={styles.metricIcon}><FaClock aria-hidden="true" /></span><div><strong>{averageDuration} min</strong><span>Duração média</span></div></div>
-        <div className={styles.metricCard}><span className={styles.metricIcon}><FaCheckCircle aria-hidden="true" /></span><div><strong>{withImage}</strong><span>Com imagem</span></div></div>
+        <div className={styles.metricCard}><span className={styles.metricIcon}><FaTags aria-hidden="true" /></span><div>{loading ? <span className={styles.skeletonLine} style={{ width: 36, height: 22 }}/> : <strong>{servicos.length}</strong>}<span>Serviços cadastrados</span></div></div>
+        <div className={styles.metricCard}><span className={styles.metricIcon}><FaDollarSign aria-hidden="true" /></span><div>{loading ? <span className={styles.skeletonLine} style={{ width: 95, height: 22 }}/> : <strong>{formatCurrency(averagePrice)}</strong>}<span>Preço médio</span></div></div>
+        <div className={styles.metricCard}><span className={styles.metricIcon}><FaClock aria-hidden="true" /></span><div>{loading ? <span className={styles.skeletonLine} style={{ width: 65, height: 22 }}/> : <strong>{averageDuration} min</strong>}<span>Duração média</span></div></div>
+        <div className={styles.metricCard}><span className={styles.metricIcon}><FaCheckCircle aria-hidden="true" /></span><div>{loading ? <span className={styles.skeletonLine} style={{ width: 36, height: 22 }}/> : <strong>{withImage}</strong>}<span>Com imagem</span></div></div>
       </section>
       <section className={styles.serviceTools} aria-label="Buscar e filtrar serviços">
         <label className={styles.searchBox}>
