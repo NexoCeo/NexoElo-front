@@ -4,6 +4,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { FaWhatsapp, FaCheckCircle, FaExclamationTriangle, FaPaperPlane, FaRegClock, FaBullhorn, FaExternalLinkAlt, FaCog, FaShieldAlt, FaArrowRight } from "react-icons/fa";
 import { buscarStatusWhatsApp, obterConfiguracaoCadastro, concluirCadastro, salvarPreferenciasWhatsApp, desconectarWhatsApp, type WhatsAppStatus, type WhatsAppPreferencias } from "@/services/whatsapp-business-service";
 import styles from "./style.module.css";
+import LoadingState from "@/components/loading-state";
 import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
 declare global { interface Window { FB?: { init: (options: Record<string, unknown>) => void; login: (callback: (data: { authResponse?: { code?: string } }) => void, options: Record<string, unknown>) => void; }; } }
@@ -34,6 +35,7 @@ export default function WhatsAppBusiness() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [available, setAvailable] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   async function refresh() {
     try {
@@ -42,6 +44,7 @@ export default function WhatsAppBusiness() {
       setPreferences(old => ({ ...old, confirmacoes: response.confirmacoes, lembretes: response.lembretes, promocoes: response.promocoes }));
       setAvailable(response.integracaoDisponivel === true);
     } catch { setAvailable(false); }
+    finally { setInitialLoading(false); }
   }
   useEffect(() => { void refresh(); }, []);
   usePageRevalidation(refresh, { enabled: !busy });
@@ -102,6 +105,7 @@ export default function WhatsAppBusiness() {
     { key: "lembretes", label: t("wh.reminders"), detail: t("wh.reminderDesc"), icon: <FaRegClock /> },
     { key: "promocoes", label: t("wh.promotions"), detail: t("wh.promotionDesc"), icon: <FaBullhorn /> }
   ] as const;
+  if (initialLoading) return <LoadingState variant="whatsapp" label={t("common.loading")} />;
   return <main className={styles.page} style={vars}>
     <header className={styles.hero}>
       <div className={styles.heroContent}>
