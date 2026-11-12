@@ -199,17 +199,29 @@ export default function Dashboard() {
                     : ["CONCLUIDO", "CONCLUÍDO"].includes(normalizedStatus)
                       ? styles.mobileCompleted
                       : styles.mobileScheduled;
-                  const appointmentDate = formatAgendaDateParam(new Date(appointment.DataAgendamento));
+                  const appointmentDateTime = new Date(appointment.DataAgendamento);
+                  const appointmentDate = formatAgendaDateParam(appointmentDateTime);
+                  const dateTimeLabel = new Intl.DateTimeFormat("pt-BR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }).format(appointmentDateTime);
                   const destination = `${getRolePagePath(role, "agenda")}?data=${appointmentDate}&agendamento=${appointment.Id}`;
                   return (
                     <article className={`${styles.mobileAppointmentCard} ${statusStyle}`} key={appointment.Id}>
                       <div className={styles.mobileAppointmentMain}>
-                        <div className={styles.mobileAppointmentTime}>
-                          <FaCalendarDay aria-hidden="true" />
-                          <span>{item.horario}</span>
+                        <div className={styles.mobileAppointmentNameRow}>
+                          <strong className={styles.mobileAppointmentClient}>{item.cliente}</strong>
+                          <span className={styles.mobileAppointmentTime}>
+                            <FaCalendarDay aria-hidden="true" />
+                            <span>{dateTimeLabel}</span>
+                          </span>
                         </div>
-                        <strong className={styles.mobileAppointmentClient}>{item.cliente}</strong>
-                        <span className={styles.mobileAppointmentService}>{item.servico}</span>
+                        <div className={styles.mobileAppointmentServiceRow}>
+                          <span className={styles.mobileAppointmentService}>{item.servico}</span>
+                          <strong className={styles.mobileAppointmentValue}>{item.valor}</strong>
+                        </div>
                         <span className={styles.mobileAppointmentProfessional}>{item.profissional}</span>
                       </div>
                       <div className={styles.mobileAppointmentFooter}>
@@ -218,7 +230,6 @@ export default function Dashboard() {
                             : ["CONCLUIDO", "CONCLUÍDO"].includes(normalizedStatus) ? t("status.completed")
                               : normalizedStatus === "AGENDADO" ? t("status.scheduled") : item.status}
                         </span>
-                        <strong className={styles.mobileAppointmentValue}>{item.valor}</strong>
                         <Link className={styles.mobileAppointmentArrow} to={destination}
                           aria-label={`Abrir agendamento de ${item.cliente} na agenda`}>
                           <FaArrowRight aria-hidden="true" />
