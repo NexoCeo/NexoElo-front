@@ -677,7 +677,7 @@ export default function ClienteFinalAgendar() {
                   {responsavelEhEmpresa && <button type="button" className={styles.textAction} onClick={() => setExpandedSection("profissional")}>Trocar profissional</button>}
                 </div>
                 {responsavelEhEmpresa && selectedProfissional && <p className={styles.selectedProfessional}>Com {formatPersonName(selectedProfissional.Nome)}</p>}
-                {loadingServicos ? <LoadingState label={t("client.servicesLoading")} compact /> :
+                {loadingServicos ? <LoadingState label={t("client.servicesLoading")} variant="client-services" compact /> :
                   servicos.length === 0 ? <p className={styles.emptyState}>{t("client.servicesEmpty")}</p> :
                   <div className={styles.serviceList}>
                     {servicos.map((servico) => (
