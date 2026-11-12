@@ -234,16 +234,10 @@ export default function ClienteFinalHome() {
     }) : null;
     realtime?.start();
     const interval = window.setInterval(refresh, 15_000);
-    window.addEventListener("focus", refresh);
-    window.addEventListener("online", refresh);
-    document.addEventListener("visibilitychange", refresh);
     return () => {
       requestGeneration.current += 1;
       requestPending.current = false;
       window.clearInterval(interval);
-      window.removeEventListener("focus", refresh);
-      window.removeEventListener("online", refresh);
-      document.removeEventListener("visibilitychange", refresh);
       void realtime?.stop();
     };
   }, [loadAppointments, cliente?.Id]);
