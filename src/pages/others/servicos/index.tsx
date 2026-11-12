@@ -89,14 +89,14 @@ export default function Servicos() {
     !saving &&
     !cropSource;
 
-  const fetchServicos = useCallback(async () => {
+  const fetchServicos = useCallback(async (silent = false) => {
     if (!ownerId) {
       setLoading(false);
       return;
     }
 
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError("");
       const data = await listarServicosPorEmpresa(ownerId);
       setServicos(data);
@@ -105,14 +105,14 @@ export default function Servicos() {
       setError(message);
       showNotification({ type: "error", title: t("services.unavailable"), message });
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [ownerId, showNotification]);
 
   useEffect(() => {
     void fetchServicos();
   }, [fetchServicos]);
-  usePageRevalidation(fetchServicos, { enabled: Boolean(ownerId) && !modalOpen && !saving && !cropSource });
+  usePageRevalidation(() => fetchServicos(true), { enabled: Boolean(ownerId) && !modalOpen && !saving && !cropSource });
 
   useEffect(() => {
     if (!imagemServico) {
