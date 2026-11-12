@@ -59,6 +59,31 @@ canvas {
   }
 }
 
+/* Sem rolagem enquanto existir algum skeleton visivel, inclusive nos gates
+   e nas listas embutidas. O CSS libera automaticamente ao desmontar o ultimo
+   skeleton: nenhum listener global ou overflow inline permanece na pagina. */
+html:has([data-loading-scroll-lock="true"]),
+body:has([data-loading-scroll-lock="true"]) {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
+#root:has([data-loading-scroll-lock="true"]) {
+  height: 100dvh;
+  min-height: 0;
+  overflow: clip;
+}
+
+/* Impede que estruturas altas de skeleton, criadas para manter a geometria
+   das paginas, adicionem uma area rolavel dentro do layout protegido. */
+#root:has([data-loading-scroll-lock="true"]) [data-loading-scroll-lock="true"] {
+  max-width: 100%;
+  min-width: 0;
+  overscroll-behavior: none;
+}
+
 /* Botoes com fundo azul primario aplicado por style inline (React).
    A cor e mantida branca nos temas claro e escuro, incluindo SVGs. */
 button:is(
