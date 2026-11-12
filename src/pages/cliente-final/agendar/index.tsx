@@ -590,7 +590,7 @@ export default function ClienteFinalAgendar() {
             <div><h2>Explore os prestadores</h2><p>Encontre o atendimento que combina com você</p></div>
             {!loadingResponsaveis && <span>{prestadoresFiltrados.length} {prestadoresFiltrados.length === 1 ? "resultado" : "resultados"}</span>}
           </div>
-          {loadingResponsaveis ? <LoadingState label={t("client.providersLoading")} compact /> :
+          {loadingResponsaveis ? <LoadingState label={t("client.providersLoading")} variant="client-providers" compact /> :
             responsaveis.length === 0 ? <p className={styles.emptyState}>{t("client.providersEmpty")}</p> :
             prestadoresFiltrados.length === 0 ? <p className={styles.emptyState}>Nenhum prestador corresponde à sua busca.</p> :
             <div className={styles.providerList}>
