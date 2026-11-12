@@ -140,7 +140,7 @@ button.analyticsAnchor {
   border-radius: 6px;
   background: transparent;
   color: var(--sidebar-inactive);
-  font-family: inherit;
+  
   font-size: inherit;
   font-weight: 700;
   line-height: 1.3;
@@ -183,7 +183,7 @@ button.analyticsAnchor > span:nth-child(2) { flex: 1; }
 }
 .brandCaption {
   color: var(--sidebar-inactive);
-  font: 500 11px/1.3 Inter, system-ui, sans-serif;
+  font-weight:500;font-size:11px;line-height:1.3;
 }
 .brandIdentity {
   display: flex;
@@ -191,7 +191,7 @@ button.analyticsAnchor > span:nth-child(2) { flex: 1; }
   justify-content: center;
   gap: 8px;
   color: var(--sidebar-text);
-  font: 750 15px/1.2 Inter, system-ui, sans-serif;
+  font-weight:750;font-size:15px;line-height:1.2;
   letter-spacing: -.02em;
 }
 .brandIdentity img { 
