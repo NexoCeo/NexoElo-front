@@ -355,18 +355,28 @@ export default function Servicos() {
       </section>
       <section className={styles.tableWrap}>
         {loading ? (
-          <div className={styles.cardList} aria-label={t("services.loading")}>
-            {Array.from({ length: 4 }, (_, index) => (
-              <div className={styles.serviceCard} key={index} aria-hidden="true">
-                <div className={styles.cardService}>
-                  <span className={styles.skeletonThumb}/>
-                  <span className={styles.skeletonLine} style={{ width: "48%" }}/>
+          <div className={styles.cardList} aria-label={t("services.loading")} role="status" aria-busy="true">
+            <div className={styles.cardsBody}>
+              {Array.from({ length: 4 }, (_, index) => (
+                <div className={styles.serviceCard} key={index} aria-hidden="true">
+                  <div className={styles.cardService}>
+                    <div className={styles.serviceIdentity}>
+                      <span className={styles.skeletonThumb} style={{ width: 54, height: 54, borderRadius: 10 }}/>
+                      <div className={styles.serviceText} style={{ flex: 1 }}>
+                        <span className={styles.skeletonLine} style={{ width: "75%" }}/>
+                        <span className={styles.skeletonLine} style={{ width: "45%", height: 10 }}/>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={styles.cardValue} style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <span className={styles.skeletonLine} style={{ width: 77, height: 26, borderRadius: 99 }}/>
+                  </div>
+                  <div className={styles.cardActions}>
+                    <span className={styles.skeletonThumb} style={{ width: 26, height: 32, borderRadius: 8 }}/>
+                  </div>
                 </div>
-                <span className={styles.skeletonLine} style={{ width: "62px" }}/>
-                <span className={styles.skeletonLine} style={{ width: "80px" }}/>
-                <span className={styles.skeletonThumb} style={{ width: "34px", height: "34px" }}/>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         ) : filteredServices.length === 0 ? (
           <p className={styles.feedback} style={{ color: theme.colors.inactive }}>
