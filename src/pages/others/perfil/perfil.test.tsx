@@ -1,5 +1,6 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { render } from "@/test/render-with-notifications";
+import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -59,14 +60,14 @@ describe("Perfil", () => {
   });
 
   it("carrega e apresenta os dados do usuario", async () => {
-    render(<Perfil />);
+    render(<MemoryRouter><Perfil /></MemoryRouter>);
 
     expect(await screen.findByRole("heading", { name: "Empresa Teste" })).toBeInTheDocument();
     expect(mocks.obterPerfilUsuario).toHaveBeenCalledWith(7);
   });
 
   it("edita o perfil e atualiza o contexto imediatamente", async () => {
-    render(<Perfil />);
+    render(<MemoryRouter><Perfil /></MemoryRouter>);
     await screen.findByRole("heading", { name: "Empresa Teste" });
     fireEvent.click(screen.getByRole("button", { name: "Editar perfil" }));
 
