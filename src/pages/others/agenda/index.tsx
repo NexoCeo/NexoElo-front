@@ -24,6 +24,7 @@ import type { Profissional } from "@/types/profissional";
 import styles from "./style.module.css";
 import { formatPersonName } from "@/context/UserContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
 const REFRESH_INTERVAL_MS = 15_000;
 
@@ -218,6 +219,8 @@ export default function Agenda() {
       usuario?.Id,
     ],
   );
+
+  usePageRevalidation(() => loadAgenda(true), { enabled: Boolean(usuario?.Id) && !bookingOpen && !closingDay });
 
   selectedDateKeyRef.current =
     selectedDateKey;
