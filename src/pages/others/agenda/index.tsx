@@ -15,10 +15,7 @@ import {
   listarAgendaPorData,
 } from "@/services/agendamento-service";
 import { listarProfissionaisEmpresa } from "@/services/profissional-service";
-import {
-  createAgendaRealtimeClient,
-  type AgendaRealtimeStatus,
-} from "@/services/agenda-realtime-service";
+import { createAgendaRealtimeClient } from "@/services/agenda-realtime-service";
 import type { Agendamento } from "@/types/agendamento";
 import type { Profissional } from "@/types/profissional";
 import styles from "./style.module.css";
@@ -142,9 +139,6 @@ export default function Agenda() {
 
   const [lastUpdated, setLastUpdated] =
     useState<Date | null>(null);
-
-  const [realtimeStatus, setRealtimeStatus] =
-    useState<AgendaRealtimeStatus>("connecting");
 
   const requestSequence = useRef(0);
 
@@ -318,8 +312,7 @@ export default function Agenda() {
           }
         },
 
-        onStatusChange:
-          setRealtimeStatus,
+        onStatusChange: () => undefined,
       });
 
     realtimeClient.start();
@@ -713,12 +706,9 @@ export default function Agenda() {
       </section>
       <section className={styles.content} aria-label="Agendamentos do dia">
         <header className={styles.listPanelHeader} title={lastUpdatedLabel}>
-          <h2>Agendamentos do dia <span>{agendaItems.length}</span></h2>
+          <h2>Agendamentos do dia</h2>
           <div className={styles.headerActions}>
-            <span className={styles.updateInfo} role="status" aria-live="polite">
-              <span className={`${styles.liveDot} ${styles[realtimeStatus]}`} />
-              {realtimeStatus === "connected" ? t("agenda.online") : realtimeStatus === "connecting" ? t("agenda.connecting") : realtimeStatus === "reconnecting" ? t("agenda.reconnecting") : t("agenda.offline")}
-            </span>
+            <span className={styles.appointmentCount} aria-label={`${agendaItems.length} agendamentos`} aria-live="polite">{agendaItems.length}</span>
             <button type="button" className={styles.refreshButton} onClick={() => void loadAgenda(true)}
               disabled={refreshing || loading} title={t("agenda.refresh")} aria-label={t("agenda.refresh")}>
               <FaRotate className={refreshing ? styles.rotating : undefined} aria-hidden="true" />
