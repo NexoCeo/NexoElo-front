@@ -84,6 +84,13 @@ body:has([data-loading-scroll-lock="true"]) {
   overscroll-behavior: none;
 }
 
+/* Cards com rolagem própria não devem mostrar uma segunda barra de scroll
+   durante a montagem dos placeholders (Serviços e Profissionais). */
+[data-loading-scroll-lock="true"] [class*="cardsBody"] {
+  overflow: clip !important;
+  scrollbar-width: none;
+}
+
 /* Botoes com fundo azul primario aplicado por style inline (React).
    A cor e mantida branca nos temas claro e escuro, incluindo SVGs. */
 button:is(
