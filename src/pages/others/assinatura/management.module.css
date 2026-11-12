@@ -1,7 +1,7 @@
 .management{border:1px solid var(--theme-bottom,#334155);border-radius:14px;background:var(--theme-background2,#111827);padding:20px;margin-bottom:18px;display:block;color:var(--theme-text,#f8fafc)}
 .managementHeading{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
 .managementHeading h2{margin:0 0 5px;font-size:18px}
-.viewPlansButton{border:0;border-radius:9px;background:var(--theme-primary,#2563eb);color:#fff;padding:11px 18px;font:700 13px Inter,system-ui,sans-serif;cursor:pointer;white-space:nowrap}
+.viewPlansButton{border:0;border-radius:9px;background:var(--theme-primary,#2563eb);color:#fff;padding:11px 18px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
 .viewPlansButton:hover{filter:brightness(1.08)}
 .managementStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .managementStat{min-width:0;padding:15px;border:1px solid var(--theme-bottom,#334155);border-radius:10px;display:flex;flex-direction:column;gap:9px;background:var(--theme-background,#0b1220)}
