@@ -27,8 +27,13 @@ if ("serviceWorker" in navigator) {
   }, { once: true });
 }
 
-async function bootstrap() {
-  await migrateLegacyAuthSession();
+function bootstrap() {
+  // A migração copia os dados legados de sessão de forma síncrona antes da
+  // requisição HTTP. Não aguardar a API: servidores em cold start podem
+  // demorar até o timeout e deixar a tela completamente em branco.
+  void migrateLegacyAuthSession().catch((error) => {
+    console.error("Não foi possível concluir a migração da sessão.", error);
+  });
 
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
