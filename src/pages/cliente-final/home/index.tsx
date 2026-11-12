@@ -242,7 +242,7 @@ export default function ClienteFinalHome() {
     };
   }, [loadAppointments, cliente?.Id]);
 
-  usePageRevalidation(() => loadAppointments(true), { enabled: Boolean(cliente?.Id) && updatingId === null });
+  usePageRevalidation(() => loadAppointments(true), { enabled: Boolean(cliente?.Id) && updatingId === null, pollIntervalMs: 0 });
 
   const upcomingAppointments = useMemo(
     () => appointments.filter(isUpcoming).sort(
