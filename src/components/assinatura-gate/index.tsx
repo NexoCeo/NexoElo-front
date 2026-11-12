@@ -16,7 +16,7 @@ export default function AssinaturaGate({ children, relatorios = false, avancado 
       .catch(() => { if (active) setErro(true); });
     return () => { active = false; };
   }, []);
-  if (!state && !erro) return <LoadingState label={t("gate.verifying")} variant={location.pathname.endsWith("/agenda") ? "agenda" : location.pathname.endsWith("/servicos") ? "services" : location.pathname.endsWith("/funcionamento") ? "hours" : location.pathname.endsWith("/relatorios") ? "reports" : undefined} />;
+  if (!state && !erro) return <LoadingState label={t("gate.verifying")} />;
   if (erro || !state) return <p style={{ padding: 24 }}>{t("gate.error")}</p>;
   if (!state.AcessoAtivo && !erro) return <Navigate to={base + "/assinatura/planos"} replace />;
   if ((relatorios && state.Plano !== "GRATIS" && !state.RelatoriosLiberados) || (avancado && state.Plano !== "AVANCADO" && state.Plano !== "GRATIS") || (whatsappOnly && state.Plano !== "AVANCADO"))
