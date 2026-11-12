@@ -304,3 +304,12 @@
   .hoursStepCircle{height:25px;width:25px;flex-basis:25px}
 }
 @media(prefers-reduced-motion:reduce){.skSlot,.hoursStepCircle{animation:none}}
+
+
+/* Configuração de funcionamento: opções de disponibilidade, dias, horários e pausas. */
+.hoursChoices {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.hoursChoice {min-width:0;min-height:76px;border:1px solid var(--theme-bottom);border-radius:10px;display:flex;align-items:center;gap:12px;padding:12px}
+.hoursChoice>.skIcon {width:44px;height:44px;flex:0 0 44px}
+.hoursChoice>div {min-width:0;flex:1;display:grid;gap:10px}
+.hoursChoice .bar{height:10px}
+@media(max-width:560px){.hoursChoices{gap:8px}.hoursChoice{padding:8px;min-height:70px;gap:7px}.hoursChoice>.skIcon{height:34px;width:34px;flex-basis:34px}}
