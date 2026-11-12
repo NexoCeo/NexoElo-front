@@ -2,6 +2,8 @@ import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { render } from "@/test/render-with-notifications";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Agendamento } from "@/types/agendamento";
+import type { Profissional } from "@/types/profissional";
+import { listarProfissionaisEmpresa } from "@/services/profissional-service";
 
 const agendaServiceMock = vi.hoisted(() => ({
   listarAgendaPorData: vi.fn(),
@@ -90,6 +92,7 @@ describe("Agenda", () => {
     vi.useRealTimers();
     vi.setSystemTime(new Date(2026, 7, 10, 10, 0, 0));
     agendaServiceMock.listarAgendaPorData.mockReset();
+    vi.mocked(listarProfissionaisEmpresa).mockResolvedValue([]);
     agendaServiceMock.atualizarStatusAgendamento.mockReset();
     agendaServiceMock.concluirAgendamentosDoDiaAtual.mockReset();
     agendaServiceMock.concluirAgendamentosDoDiaAtual.mockResolvedValue(0);
@@ -252,6 +255,36 @@ describe("Agenda", () => {
       undefined,
       expect.any(AbortSignal),
     );
+  });
+
+  it("permite filtrar profissionais pelo menu estilizado da agenda", async () => {
+    vi.mocked(listarProfissionaisEmpresa).mockResolvedValue([
+      { Id: 9, Nome: "Ana Silva" } as Profissional,
+    ]);
+    agendaServiceMock.listarAgendaPorData.mockResolvedValue([]);
+
+    render(<Agenda />);
+    fireEvent.click(screen.getByRole("button", { name: "Filtros da agenda" }));
+
+    const professionalSelect = screen.getByRole("button", { name: /profissional todos os profissionais/i });
+    expect(professionalSelect).toHaveAttribute("aria-expanded", "false");
+
+    fireEvent.click(professionalSelect);
+    const selected = screen.getByRole("option", { name: "Todos os profissionais" });
+    expect(selected).toHaveAttribute("aria-selected", "true");
+
+    fireEvent.click(await screen.findByRole("option", { name: "Ana Silva" }));
+
+    expect(professionalSelect).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByText("Ana Silva")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(agendaServiceMock.listarAgendaPorData).toHaveBeenCalledWith(
+        7,
+        expect.any(String),
+        9,
+        expect.any(AbortSignal),
+      );
+    });
   });
 
   it("permite cancelar um agendamento individual pela agenda", async () => {
