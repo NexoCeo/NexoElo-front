@@ -97,7 +97,6 @@ export function DashboardLoadingShell() {
   const usuario = getStoredUser<{ Id?: number; Papel?: string }>();
   const role = usuario?.Papel?.toUpperCase();
   const isProfessional = role === "PROFISSIONAL";
-  const canOpenAgenda = role === "EMPRESA" || role === "AUTONOMO";
   const todayLabel = new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US", {
     weekday: "long",
     day: "2-digit",
@@ -123,14 +122,6 @@ export function DashboardLoadingShell() {
               {t("dashboard.update")}
             </p>
           </div>
-          {canOpenAgenda && (
-            <div className={styles.agendaActions}>
-              <Link className={styles.agendaLink} to={getRolePagePath(role, "agenda")}>
-                {t("dashboard.openCalendar")}
-                <FaArrowRight aria-hidden="true" />
-              </Link>
-            </div>
-          )}
         </div>
         <div className={styles.mobileAppointments}>
           <LoadingState variant={loadingVariant} embedded label={t("common.loading")} />
@@ -263,8 +254,8 @@ export default function Dashboard({ initialAgenda }: { initialAgenda?: Dashboard
             </p>
           </div>
 
-          <div className={styles.agendaActions}>
-            {isProfessional ? (
+          {isProfessional && (
+            <div className={styles.agendaActions}>
               <div className={styles.segmented} aria-label={t("dashboard.period")}>
                 <button
                   type="button"
@@ -283,16 +274,8 @@ export default function Dashboard({ initialAgenda }: { initialAgenda?: Dashboard
                   {t("dashboard.weekFilter")}
                 </button>
               </div>
-            ) : canOpenAgenda ? (
-              <Link
-                className={styles.agendaLink}
-                to={getRolePagePath(role, "agenda")}
-              >
-                {t("dashboard.openCalendar")}
-                <FaArrowRight aria-hidden="true" />
-              </Link>
-            ) : null}
-          </div>
+            </div>
+          )
         </div>
 
         <div className={styles.mobileAppointments} aria-live="polite">
