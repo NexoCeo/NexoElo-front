@@ -1,5 +1,6 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { render } from "@/test/render-with-notifications";
+import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const vinculoMock = vi.hoisted(() => ({
@@ -76,7 +77,7 @@ describe("Profissionais", () => {
       senhaTemporaria: "SenhaTemporaria9!",
     });
 
-    const { container } = render(<Profissionais />);
+    const { container } = render(<MemoryRouter><Profissionais /></MemoryRouter>);
     fireEvent.click(screen.getByRole("button", { name: /novo profissional/i }));
     fireEvent.change(screen.getByPlaceholderText("Nome do profissional"), {
       target: { value: "Profissional Teste" },
@@ -107,7 +108,7 @@ describe("Profissionais", () => {
     ]);
     vinculoMock.responder.mockResolvedValue(undefined);
 
-    render(<Profissionais />);
+    render(<MemoryRouter><Profissionais /></MemoryRouter>);
     fireEvent.click(screen.getByRole("button", { name: /solicitacoes de vinculo/i }));
 
     expect(await screen.findByText("Profissional Pendente")).toBeInTheDocument();
@@ -121,7 +122,7 @@ describe("Profissionais", () => {
   });
 
   it("nao exibe pais, estado ou cidade ao abrir o cadastro do profissional", async () => {
-    render(<Profissionais />);
+    render(<MemoryRouter><Profissionais /></MemoryRouter>);
 
     fireEvent.click(screen.getByRole("button", { name: /novo profissional/i }));
 
@@ -143,7 +144,7 @@ describe("Profissionais", () => {
         },
       },
     });
-    const { container } = render(<Profissionais />);
+    const { container } = render(<MemoryRouter><Profissionais /></MemoryRouter>);
     fireEvent.click(screen.getByRole("button", { name: /novo profissional/i }));
     fireEvent.change(screen.getByPlaceholderText("Nome do profissional"), {
       target: { value: "Profissional Teste" },
