@@ -328,3 +328,36 @@
   max-width: 100%;
   overflow: clip;
 }
+
+
+/* Dashboard sem agendamentos: corresponde ao painel vazio real, sem cards fictícios. */
+.skDashboardEmpty {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 190px;
+  padding: 26px 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--theme-bottom);
+  border-radius: 15px;
+  background: var(--theme-surface);
+}
+.skDashboardEmpty .bar:nth-child(2) { height: 16px; }
+.skDashboardEmpty .bar:last-child { height: 12px; }
+.skEmptyCalendar {
+  display: block;
+  width: 26px;
+  height: 26px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  background: linear-gradient(100deg,var(--theme-background2,#182237) 15%,var(--theme-glass-strong,#344054) 45%,var(--theme-background2,#182237) 75%);
+  background-size: 220% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+@media(prefers-reduced-motion:reduce) {
+  .skEmptyCalendar { animation:none; }
+}
