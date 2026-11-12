@@ -309,7 +309,7 @@ export default function AnaliseDados() {
       <section className={styles.dashboardPanel}>
         <div className={styles.latestTitle}><h2><FaCalendarAlt aria-hidden="true"/> Últimos agendamentos</h2></div>
         <div className={styles.latestList}>
-          {latestBookings.map(item=><div className={styles.latestRow} key={item.Id}>
+          {latestBookings.map(item=><div className={`${styles.latestRow} ${item.Status?.toUpperCase() === "CONCLUIDO" ? styles.latestCompleted : item.Status?.toUpperCase() === "CANCELADO" ? styles.latestCancelled : styles.latestOther}`} key={item.Id}>
             <time>{new Intl.DateTimeFormat("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}).format(new Date(item.DataAgendamento))}</time>
             <strong>{formatPersonName(item.ClienteNome) || `Cliente #${item.ClienteId}`}</strong>
             <span>{item.ServicoNome}</span>
