@@ -17,6 +17,7 @@ import { getUploadedImageUrl } from "@/components/header/profile-image";
 import styles from "./style.module.css";
 import ServiceImageCrop from "./service-image-crop";
 import { useLanguage } from "@/context/LanguageContext";
+import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", {
@@ -111,6 +112,7 @@ export default function Servicos() {
   useEffect(() => {
     void fetchServicos();
   }, [fetchServicos]);
+  usePageRevalidation(fetchServicos, { enabled: Boolean(ownerId) && !modalOpen && !saving && !cropSource });
 
   useEffect(() => {
     if (!imagemServico) {
