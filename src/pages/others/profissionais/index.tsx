@@ -53,6 +53,7 @@ import {
 } from "@/services/vinculo-service";
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
+import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
 type ApiError =
   | string
@@ -194,6 +195,15 @@ export default function Profissionais() {
 
     loadProfissionais();
   }, [empresaId, isEmpresa, showNotification]);
+
+  usePageRevalidation(async () => {
+    if (!empresaId || !isEmpresa) return;
+    try {
+      const data = await listarProfissionaisEmpresa(empresaId);
+      setProfissionais(data);
+      setError("");
+    } catch { /* preserve the last good list */ }
+  }, { enabled: isEmpresa && Boolean(empresaId) && !modalOpen && !servicosModalOpen && !solicitacoesOpen && !saving && !savingServicos });
 
   const getStatus = (professional: Profissional) => {
     const status = professional.VinculoStatus?.trim().toUpperCase();
