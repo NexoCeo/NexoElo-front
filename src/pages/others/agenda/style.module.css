@@ -617,7 +617,7 @@
 
 
 /* Layout de referência da Agenda — escopo exclusivo desta rota. */
-.container{display:block!important;width:100%;min-height:calc(100dvh - 80px);padding:20px clamp(14px,2vw,34px) 30px!important;background:var(--theme-background);font-family:Inter,system-ui,sans-serif}
+.container{display:block!important;width:100%;min-height:calc(100dvh - 80px);padding:20px clamp(14px,2vw,34px) 30px!important;background:var(--theme-background);}
 .topHeader{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:72px;margin-bottom:23px}
 .headingTitle{display:flex;align-items:center;gap:17px;min-width:0}
 .headingIcon{width:70px;height:70px;flex:0 0 70px;display:grid;place-items:center;border-radius:17px;background:linear-gradient(135deg,#203d69,#142a4b);color:#d1e3ff}
