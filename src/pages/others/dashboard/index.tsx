@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { FaArrowRight, FaCalendarDay } from "react-icons/fa6";
 import { useTheme } from "@/context/ThemeContext";
 import { useNotification } from "@/context/NotificationContext";
-import { Card, type AgendaCardItem } from "@/components/cardClientes";
+import type { AgendaCardItem } from "@/components/cardClientes";
 import {
   formatAgendaDateParam,
   listarAgendaPorData,
@@ -176,16 +176,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className={styles.desktopAppointments}>
-          <Card
-            agendamentos={agendaItems}
-            loading={loading}
-            error={error}
-            selectedDateLabel={
-              isProfessional && range === "week" ? t("dashboard.weekFilter") : t("dashboard.todayFilter")
-            }
-          />
-        </div>
         <div className={styles.mobileAppointments} aria-live="polite">
           {loading ? (
             <div className={styles.mobileEmpty}>{t("common.loading")}</div>
