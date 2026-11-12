@@ -100,7 +100,7 @@ export default function SharedRoleRoutes({
         path="dashboard"
         element={
           <ProtectedRoute>
-            {requireApprovedProfessional ? <Dashboard /> : <AssinaturaGate><Dashboard /></AssinaturaGate>}
+            {requireApprovedProfessional ? <Dashboard /> : <AssinaturaGate preloadDashboard>{(agenda) => <Dashboard initialAgenda={agenda} />}</AssinaturaGate>}
           </ProtectedRoute>
         }
       />
