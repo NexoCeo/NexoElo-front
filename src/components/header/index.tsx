@@ -207,13 +207,6 @@ export default function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
                   <FaSignOutAlt aria-hidden="true" />
                   <span>{t("header.logout")}</span>
                 </button>
-                <div className={styles.mobileDeveloperCredit} role="presentation">
-                  <span className={styles.developerCreditLabel}>Desenvolvido por</span>
-                  <div className={styles.developerCreditBrand}>
-                    <img src={logoNexoCeo} alt="" aria-hidden="true" />
-                    <strong>NexoCeo</strong>
-                  </div>
-                </div>
               </div>
             )}
           </div>
