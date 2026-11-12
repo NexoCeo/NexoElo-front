@@ -201,12 +201,10 @@ export default function Dashboard() {
                       : styles.mobileScheduled;
                   const appointmentDateTime = new Date(appointment.DataAgendamento);
                   const appointmentDate = formatAgendaDateParam(appointmentDateTime);
-                  const dateTimeLabel = new Intl.DateTimeFormat("pt-BR", {
-                    day: "2-digit",
-                    month: "2-digit",
+                  const timeLabel = appointmentDateTime.toLocaleTimeString("pt-BR", {
                     hour: "2-digit",
                     minute: "2-digit",
-                  }).format(appointmentDateTime);
+                  });
                   const destination = `${getRolePagePath(role, "agenda")}?data=${appointmentDate}&agendamento=${appointment.Id}`;
                   return (
                     <article className={`${styles.mobileAppointmentCard} ${statusStyle}`} key={appointment.Id}>
@@ -215,7 +213,7 @@ export default function Dashboard() {
                           <strong className={styles.mobileAppointmentClient}>{item.cliente}</strong>
                           <span className={styles.mobileAppointmentTime}>
                             <FaCalendarDay aria-hidden="true" />
-                            <span>{dateTimeLabel}</span>
+                            <span>{timeLabel}</span>
                           </span>
                         </div>
                         <div className={styles.mobileAppointmentServiceRow}>
