@@ -258,14 +258,10 @@
 }
 
 
-/* Dashboard mobile: cards individuais; tabela e botão de agenda permanecem no desktop. */
-.mobileAppointments{display:none}
-.desktopAppointments{display:block}
-@media(max-width:760px){
-  .desktopAppointments{display:none}
-  .mobileAppointments{display:block;min-width:0}
-  .agendaActions:has(.agendaLink){display:none}
-  .agendaHeader{margin-bottom:14px;min-height:0}
+/* Os mesmos cards de agendamento são utilizados em desktop e mobile.
+   A grade se adapta ao espaço disponível sem linhas vazias de tabela. */
+.mobileAppointments{display:block;min-width:0}
+
   .mobileAppointmentList{display:grid;gap:10px;align-content:start}
   .mobileAppointmentCard{
     display:flex;
@@ -380,7 +376,19 @@
   }
   .mobileEmpty svg{font-size:25px}
   .mobileEmpty strong{font-size:15px;color:var(--theme-text)}
+
+@media(min-width:761px){
+  .mobileAppointmentList{
+    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:15px;
+  }
 }
+@media(max-width:760px){
+  .agendaActions:has(.agendaLink){display:none}
+  .agendaHeader{margin-bottom:14px;min-height:0}
+  .mobileAppointmentList{grid-template-columns:minmax(0,1fr);gap:10px}
+}
+
 @media(max-width:370px){
   .mobileAppointmentCard{padding:12px}
   .mobileAppointmentFooter{gap:6px}
