@@ -173,14 +173,70 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <Card
-          agendamentos={agendaItems}
-          loading={loading}
-          error={error}
-          selectedDateLabel={
-            isProfessional && range === "week" ? t("dashboard.weekFilter") : t("dashboard.todayFilter")
-          }
-        />
+        <div className={styles.desktopAppointments}>
+          <Card
+            agendamentos={agendaItems}
+            loading={loading}
+            error={error}
+            selectedDateLabel={
+              isProfessional && range === "week" ? t("dashboard.weekFilter") : t("dashboard.todayFilter")
+            }
+          />
+        </div>
+        <div className={styles.mobileAppointments} aria-live="polite">
+          {loading ? (
+            <div className={styles.mobileEmpty}>{t("common.loading")}</div>
+          ) : error ? (
+            <div className={styles.mobileEmpty} role="alert">{error}</div>
+          ) : appointments.length === 0 ? (
+            <div className={styles.mobileEmpty}>
+              <FaCalendarDay aria-hidden="true" />
+              <strong>{t("common.noAppointments")}</strong>
+              <span>{isProfessional && range === "week" ? t("dashboard.weekFilter") : t("dashboard.todayFilter")}</span>
+            </div>
+          ) : (
+            <div className={styles.mobileAppointmentList}>
+              {[...appointments]
+                .sort((first, second) => new Date(first.DataAgendamento).getTime() - new Date(second.DataAgendamento).getTime())
+                .map((appointment) => {
+                  const item = toCardItem(appointment, isProfessional && range === "week");
+                  const normalizedStatus = item.status.trim().toUpperCase();
+                  const statusStyle = normalizedStatus === "CANCELADO"
+                    ? styles.mobileCancelled
+                    : ["CONCLUIDO", "CONCLUÍDO"].includes(normalizedStatus)
+                      ? styles.mobileCompleted
+                      : styles.mobileScheduled;
+                  const appointmentDate = formatAgendaDateParam(new Date(appointment.DataAgendamento));
+                  const destination = `${getRolePagePath(role, "agenda")}?data=${appointmentDate}&agendamento=${appointment.Id}`;
+                  return (
+                    <article className={`${styles.mobileAppointmentCard} ${statusStyle}`} key={appointment.Id}>
+                      <div className={styles.mobileAppointmentMain}>
+                        <div className={styles.mobileAppointmentTime}>
+                          <FaCalendarDay aria-hidden="true" />
+                          <span>{item.horario}</span>
+                        </div>
+                        <strong className={styles.mobileAppointmentClient}>{item.cliente}</strong>
+                        <span className={styles.mobileAppointmentService}>{item.servico}</span>
+                        <span className={styles.mobileAppointmentProfessional}>{item.profissional}</span>
+                      </div>
+                      <div className={styles.mobileAppointmentFooter}>
+                        <span className={styles.mobileAppointmentStatus}>
+                          {normalizedStatus === "CANCELADO" ? t("status.canceled")
+                            : ["CONCLUIDO", "CONCLUÍDO"].includes(normalizedStatus) ? t("status.completed")
+                              : normalizedStatus === "AGENDADO" ? t("status.scheduled") : item.status}
+                        </span>
+                        <strong className={styles.mobileAppointmentValue}>{item.valor}</strong>
+                        <Link className={styles.mobileAppointmentArrow} to={destination}
+                          aria-label={`Abrir agendamento de ${item.cliente} na agenda`}>
+                          <FaArrowRight aria-hidden="true" />
+                        </Link>
+                      </div>
+                    </article>
+                  );
+                })}
+            </div>
+          )}
+        </div>
       </section>
     </main>
   );
