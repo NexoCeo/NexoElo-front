@@ -656,7 +656,7 @@ export default function ClienteFinalAgendar() {
             {responsavelEhEmpresa && etapaAtual === "profissional" && (
               <section className={styles.bookingPanel}>
                 <div className={styles.sectionHeading}><div><h2>Com quem deseja agendar?</h2><p>Selecione o profissional que vai atender você.</p></div></div>
-                {loadingProfissionais ? <LoadingState label={t("client.professionalsLoading")} compact /> :
+                {loadingProfissionais ? <LoadingState label={t("client.professionalsLoading")} variant="client-professionals" compact /> :
                   profissionais.length === 0 ? <p className={styles.emptyState}>{t("client.professionalsEmpty")}</p> :
                   <div className={styles.providerList}>
                     {profissionais.map((profissional) => (
