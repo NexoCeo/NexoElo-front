@@ -31,6 +31,38 @@ function weekRange(date: Date) {
   return { start, end };
 }
 
+// Salva somente a quantidade do último resultado para selecionar um skeleton
+// coerente na próxima abertura da mesma agenda (usuário, data e período).
+function dashboardCountCacheKey(
+  userId: number,
+  isProfessional: boolean,
+  range: DashboardRange,
+  date: Date,
+) {
+  const weekly = isProfessional && range === "week";
+  const periodStart = weekly ? weekRange(date).start : date;
+  return `nexoelo:dashboard-skeleton:v1:${isProfessional ? "professional" : "owner"}:${userId}:${weekly ? "week" : "today"}:${formatAgendaDateParam(periodStart)}`;
+}
+
+function readCachedCount(key: string): number | null {
+  try {
+    const value = window.sessionStorage.getItem(key);
+    if (value === null) return null;
+    const count = Number(value);
+    return Number.isSafeInteger(count) && count >= 0 ? count : null;
+  } catch {
+    return null;
+  }
+}
+
+function storeCachedCount(key: string, count: number) {
+  try {
+    window.sessionStorage.setItem(key, String(count));
+  } catch {
+    // O carregamento deve continuar mesmo se o storage estiver indisponível.
+  }
+}
+
 function toCardItem(appointment: Agendamento, includeDate: boolean): AgendaCardItem {
   const date = new Date(appointment.DataAgendamento);
   const time = date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
@@ -72,16 +104,22 @@ export default function Dashboard() {
       setLoading(true);
       setError("");
       const now = new Date();
+      let nextAppointments: Agendamento[];
       if (!isProfessional || range === "today") {
-        setAppointments(await listarAgendaPorData(usuario.Id, formatAgendaDateParam(now)));
+        nextAppointments = await listarAgendaPorData(usuario.Id, formatAgendaDateParam(now));
       } else {
         const period = weekRange(now);
-        setAppointments(await listarAgendaPorPeriodo(
+        nextAppointments = await listarAgendaPorPeriodo(
           usuario.Id,
           formatAgendaDateParam(period.start),
           formatAgendaDateParam(period.end),
-        ));
+        );
       }
+      setAppointments(nextAppointments);
+      storeCachedCount(
+        dashboardCountCacheKey(usuario.Id, isProfessional, range, now),
+        nextAppointments.length,
+      );
     } catch {
       const message = t("dashboard.loadError");
       setError(message);
@@ -127,9 +165,14 @@ export default function Dashboard() {
     day: "2-digit",
     month: "long",
   }).format(new Date());
-  const appointmentCountLabel = loading
+  const appointmentCountLabel = !hasLoaded && loading
     ? t("dashboard.update")
     : `${agendaItems.length} ${agendaItems.length === 1 ? t("dashboard.oneAppointment") : t("dashboard.manyAppointments")}`;
+
+  const cacheKey = dashboardCountCacheKey(usuario?.Id ?? 0, isProfessional, range, new Date());
+  const loadingVariant = (readCachedCount(cacheKey) ?? 0) > 0
+    ? "dashboard"
+    : "dashboard-empty";
 
   return (
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
@@ -181,7 +224,7 @@ export default function Dashboard() {
 
         <div className={styles.mobileAppointments} aria-live="polite">
           {!hasLoaded ? (
-            <LoadingState variant="dashboard" embedded label={t("common.loading")} />
+            <LoadingState variant={loadingVariant} embedded label={t("common.loading")} />
           ) : error ? (
             <div className={styles.mobileEmpty} role="alert">{error}</div>
           ) : appointments.length === 0 ? (
