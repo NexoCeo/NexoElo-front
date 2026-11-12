@@ -209,7 +209,7 @@ function ContextualSkeleton({ kind, embedded }: { kind: Variant; embedded: boole
 export default function LoadingState({ label = "Carregando", compact = false, dense = false, embedded = false, variant }: LoadingStateProps) {
   const kind = variant ?? inferVariant();
   return (
-    <div className={`${styles.loading} ${compact ? styles.compact : ""} ${dense ? styles.dense : ""} ${embedded ? styles.embedded : ""}`} role="status" aria-live="polite" aria-label={label} aria-busy="true">
+    <div className={`${styles.loading} ${compact ? styles.compact : ""} ${dense ? styles.dense : ""} ${embedded ? styles.embedded : ""}`} data-loading-scroll-lock="true" role="status" aria-live="polite" aria-label={label} aria-busy="true">
       <span className={styles.srOnly}>{label}</span>
       {!compact && (["dashboard", "agenda", "services", "professionals", "metrics", "analytics", "subscription", "whatsapp", "profile", "client-home", "client-history", "agenda-list"] as Variant[]).includes(kind) ? (
         <ContextualSkeleton kind={kind} embedded={embedded} />
