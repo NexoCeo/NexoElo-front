@@ -175,7 +175,10 @@ describe("Agenda", () => {
     });
 
     expect(await screen.findByText("Novo Cliente")).toBeInTheDocument();
-    expect(screen.getByText("Ao vivo")).toBeInTheDocument();
+    expect(screen.queryByText("Ao vivo")).not.toBeInTheDocument();
+    const count = screen.getByLabelText("2 agendamentos");
+    expect(count.parentElement?.nextElementSibling).toBeNull();
+    expect(count.nextElementSibling).toBe(screen.getByRole("button", { name: "Atualizar agenda" }));
     expect(screen.getByText("2 agendamentos")).toBeInTheDocument();
     expect(screen.queryByText("Carregando agendamentos...")).not.toBeInTheDocument();
   });
