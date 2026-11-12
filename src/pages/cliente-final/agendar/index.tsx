@@ -162,9 +162,6 @@ export default function ClienteFinalAgendar() {
   const [dataSelecionada, setDataSelecionada] = useState(draft?.dataSelecionada ?? "");
   const [dataAgendamento, setDataAgendamento] = useState(draft?.dataAgendamento ?? "");
   const [refreshHorarios, setRefreshHorarios] = useState(0);
-  usePageRevalidation(() => setRefreshHorarios(value => value + 1), {
-    enabled: Boolean(dataSelecionada) && Boolean(servicoId) && !loading,
-  });
   const [loading, setLoading] = useState(false);
   const [loadingResponsaveis, setLoadingResponsaveis] = useState(false);
   const [loadingProfissionais, setLoadingProfissionais] = useState(false);
@@ -175,6 +172,10 @@ export default function ClienteFinalAgendar() {
   const [expandedSection, setExpandedSection] = useState<BookingSection | null>(draft?.expandedSection ?? "responsavel");
   const [buscaPrestador, setBuscaPrestador] = useState("");
   const [filtroPrestador, setFiltroPrestador] = useState<"TODOS" | "EMPRESA" | "AUTONOMO">("TODOS");
+  usePageRevalidation(() => setRefreshHorarios(value => value + 1), {
+    enabled: Boolean(dataSelecionada) && Boolean(servicoId) && !loading,
+  });
+
 
   const selectedResponsavel = responsaveis.find(
     (responsavel) => responsavel.Id === responsavelId,
