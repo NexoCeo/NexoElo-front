@@ -1144,3 +1144,22 @@
   .dayGrid > .content .listPanelHeader h2 { font-size: 13px; }
   .dayGrid > .content > .listPanelHeader { padding-inline: 9px; }
 }
+
+
+/* O botão de filtros exibe somente o ícone em qualquer tamanho de tela. */
+.filterAnchor .filterToggle {
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  min-height: 48px;
+  padding: 0;
+  gap: 0;
+}
+@media (max-width: 760px) {
+  .filterAnchor .filterToggle {
+    width: 45px;
+    min-width: 45px;
+    height: 45px;
+    min-height: 45px;
+  }
+}
