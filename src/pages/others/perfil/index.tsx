@@ -1,20 +1,22 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FaEnvelope, FaPen, FaPhone, FaUser } from "react-icons/fa";
+import { getProfileImageUrl, getUploadedImageUrl } from "@/components/header/profile-image";
 import {
-  FaCamera,
-  FaEnvelope,
-  FaPen,
-  FaPhone,
-  FaSave,
-  FaTimes,
-  FaUser,
-} from "react-icons/fa";
-import { getProfileImageUrl } from "@/components/header/profile-image";
+  EntityEditorModal,
+  EntityImageField,
+  EntityEditorForm,
+  EntityEditorField,
+  EntityEditorError,
+  EntityEditorSubmit,
+} from "@/components/entity-editor-modal";
+import ServiceImageCrop from "../servicos/service-image-crop";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
 import {
   atualizarPerfilUsuario,
   obterPerfilUsuario,
+  obterFotoOriginalUsuario,
 } from "@/services/usuario-service";
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
@@ -22,33 +24,10 @@ import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 import ProfileOverview from "@/components/profile-overview";
 import LoadingState from "@/components/loading-state";
 
-const MAX_SOURCE_PHOTO_BYTES = 30 * 1024 * 1024;
-const MAX_UPLOAD_PHOTO_BYTES = 5 * 1024 * 1024;
+const MAX_SOURCE_PHOTO_BYTES = 20 * 1024 * 1024;
 
 function isValidPhoto(file: File) {
   return ["image/jpeg", "image/png", "image/webp"].includes(file.type) && file.size <= MAX_SOURCE_PHOTO_BYTES;
-}
-
-async function preparePhoto(file: File): Promise<File> {
-  if (!isValidPhoto(file)) throw new Error("Invalid photo");
-  const objectUrl = URL.createObjectURL(file);
-  try {
-    const img = new Image();
-    img.src = objectUrl;
-    await img.decode();
-    const scale = Math.min(1, 1200 / Math.max(img.naturalWidth, img.naturalHeight));
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
-    canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("Image processing unavailable");
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/jpeg", 0.82));
-    if (!blob || blob.size > MAX_UPLOAD_PHOTO_BYTES) throw new Error("Unable to optimize photo");
-    return new File([blob], "profile-photo.jpg", { type: "image/jpeg", lastModified: Date.now() });
-  } finally {
-    URL.revokeObjectURL(objectUrl);
-  }
 }
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -73,10 +52,12 @@ export default function Perfil() {
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
   const [fotoPerfil, setFotoPerfil] = useState<File | null>(null);
+  const [fotoOriginal, setFotoOriginal] = useState<File | null>(null);
   const [fotoPreview, setFotoPreview] = useState("");
+  const [cropSource, setCropSource] = useState("");
+  const [cropFilename, setCropFilename] = useState("perfil");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [photoSaving, setPhotoSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -89,7 +70,8 @@ export default function Perfil() {
     nome.trim().length > 0 &&
     emailPattern.test(email.trim()) &&
     (!telefoneDigits || (telefoneDigits.length >= 10 && telefoneDigits.length <= 11)) &&
-    !saving;
+    !saving &&
+    !cropSource;
 
   useEffect(() => {
     if (!userId) return;
@@ -123,7 +105,7 @@ export default function Perfil() {
       const profile = await obterPerfilUsuario(userId);
       setUsuario(profile);
     } catch { /* retain the existing profile when offline */ }
-  }, { enabled: Boolean(userId) && !modalOpen && !saving && !photoSaving });
+  }, { enabled: Boolean(userId) && !modalOpen && !saving && !cropSource });
 
   useEffect(() => {
     if (!fotoPerfil) {
@@ -142,62 +124,82 @@ export default function Perfil() {
   }, [fotoPerfil, usuario?.FotoPerfil]);
 
   useEffect(() => {
-    function handleEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setModalOpen(false);
-        setFotoPerfil(null);
-        setError("");
-      }
-    }
+    return () => {
+      if (cropSource.startsWith("blob:")) URL.revokeObjectURL(cropSource);
+    };
+  }, [cropSource]);
 
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, []);
-
-  function openModal() {
+  // O mesmo fluxo de edição é utilizado por EMPRESA, AUTONOMO e PROFISSIONAL.
+  function openModal(selectedPhoto?: File) {
     setNome(usuario?.Nome ?? "");
     setEmail(usuario?.Email ?? "");
     setTelefone(usuario?.Telefone ?? "");
     setFotoPerfil(null);
+    setFotoOriginal(null);
+    setCropSource("");
     setError("");
     setSuccess("");
     setModalOpen(true);
+    if (selectedPhoto) selectPhotoForCrop(selectedPhoto);
   }
 
   function closeModal() {
     setModalOpen(false);
     setFotoPerfil(null);
+    setFotoOriginal(null);
+    setCropSource("");
     setError("");
   }
 
-  async function handlePhotoChange(file: File) {
-    if (!usuario || photoSaving) return;
+  function selectPhotoForCrop(file: File | null) {
+    if (!file) return;
     if (!isValidPhoto(file)) {
-      showNotification({ type: "warning", title: t("profile.invalidPhoto"), message: t("profile.invalidPhotoDesc") });
+      const message = "Selecione uma foto JPG, PNG ou WebP com até 20 MB.";
+      setError(message);
+      showNotification({ type: "warning", title: t("profile.invalidPhoto"), message });
       return;
     }
-    try {
-      setPhotoSaving(true);
-      const optimizedPhoto = await preparePhoto(file);
-      const updated = await atualizarPerfilUsuario(usuario.Id, {
-        Nome: usuario.Nome,
-        Email: usuario.Email,
-        Telefone: usuario.Telefone,
-        FotoPerfil: optimizedPhoto,
-      });
-      setUsuario({
-        ...usuario,
-        ...updated,
-        Papel: updated.Papel || usuario.Papel,
-        Slug: updated.Slug || usuario.Slug,
-        UrlPublica: updated.UrlPublica || usuario.UrlPublica,
-      });
-      showNotification({ type: "success", title: t("profile.updatedPhoto"), message: t("profile.updatedPhotoDesc") });
-    } catch {
-      showNotification({ type: "error", title: t("profile.uploadFailed"), message: t("profile.uploadFailedDesc") });
-    } finally {
-      setPhotoSaving(false);
+    setError("");
+    setFotoPerfil(null);
+    setFotoOriginal(file);
+    setCropFilename(file.name);
+    setCropSource(URL.createObjectURL(file));
+  }
+
+  async function adjustCrop() {
+    setError("");
+    if (fotoOriginal) {
+      setCropFilename(fotoOriginal.name);
+      setCropSource(URL.createObjectURL(fotoOriginal));
+      return;
     }
+
+    if (!usuario?.Id) return;
+    try {
+      const original = await obterFotoOriginalUsuario(usuario.Id);
+      if (original) {
+        setFotoOriginal(original);
+        setCropFilename(original.name);
+        setCropSource(URL.createObjectURL(original));
+        return;
+      }
+      showNotification({
+        type: "warning",
+        title: "Foto original não disponível",
+        message: "Esta foto foi cadastrada antes da preservação do arquivo original. Reenvie a foto completa para recuperar o enquadramento.",
+      });
+    } catch {
+      showNotification({
+        type: "warning",
+        title: "Não foi possível carregar a imagem original",
+        message: "Você pode usar o recorte salvo ou selecionar a foto completa novamente.",
+      });
+    }
+
+    const existing = getUploadedImageUrl(usuario.FotoPerfil);
+    if (!existing) return;
+    setCropFilename(usuario.Nome || "perfil");
+    setCropSource(existing);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -212,7 +214,7 @@ export default function Perfil() {
       return;
     }
 
-    if (fotoPerfil && !isValidPhoto(fotoPerfil)) {
+    if (fotoOriginal && !isValidPhoto(fotoOriginal)) {
       const message = t("profile.invalidPhotoDesc");
       setError(message);
       showNotification({ type: "warning", title: t("profile.invalidPhoto"), message });
@@ -221,12 +223,12 @@ export default function Perfil() {
 
     try {
       setSaving(true);
-      const optimizedPhoto = fotoPerfil ? await preparePhoto(fotoPerfil) : null;
       const updated = await atualizarPerfilUsuario(usuario.Id, {
         Nome: nome.trim(),
         Email: email.trim(),
         Telefone: telefoneDigits,
-        FotoPerfil: optimizedPhoto,
+        FotoPerfil: fotoPerfil,
+        FotoOriginal: fotoPerfil ? fotoOriginal : null,
       });
 
       setUsuario({
@@ -264,12 +266,11 @@ export default function Perfil() {
           email={usuario?.Email}
           phone={usuario?.Telefone}
           avatarUrl={getProfileImageUrl(usuario?.FotoPerfil)}
-          onPhotoChange={usuario && !loading ? (file) => void handlePhotoChange(file) : undefined}
-          photoSaving={photoSaving}
+          onPhotoChange={usuario && !loading ? (file) => openModal(file) : undefined}
           action={<button
           type="button"
           className={styles.editButton}
-          onClick={openModal}
+          onClick={() => openModal()}
           disabled={!usuario || loading}
           style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
         >
@@ -280,107 +281,69 @@ export default function Perfil() {
       </div>
 
       {modalOpen && (
-        <div className={styles.modalBackdrop} role="presentation">
-          <section
-            className={styles.modal}
-            style={{ backgroundColor: theme.colors.background2 }}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="editar-perfil-title"
-          >
-            <header className={styles.modalHeader}>
-              <div>
-                <h2 id="editar-perfil-title" style={{ color: theme.colors.text }}>
-                  {t("profile.edit")}
-                </h2>
-                <p style={{ color: theme.colors.inactive }}>
-                  {t("profile.changeNotice")}
-                </p>
-              </div>
-              <button type="button" onClick={closeModal} aria-label={t("common.close")} title={t("common.close")}>
-                <FaTimes aria-hidden="true" />
-              </button>
-            </header>
+        <EntityEditorModal
+          title={t("profile.edit")}
+          description={t("profile.changeNotice")}
+          onClose={closeModal}
+          busy={saving}
+          cropOpen={Boolean(cropSource)}
+        >
+          <EntityEditorForm onSubmit={handleSubmit}>
+            <EntityImageField
+              label={t("profile.photo")}
+              alt={t("profile.photoPreview")}
+              previewUrl={fotoPreview}
+              selectedFile={fotoPerfil}
+              onSelectFile={selectPhotoForCrop}
+              onAdjustCrop={fotoOriginal || getUploadedImageUrl(usuario?.FotoPerfil)
+                ? () => void adjustCrop()
+                : undefined}
+              cropContent={cropSource ? (
+                <ServiceImageCrop
+                  source={cropSource}
+                  filename={cropFilename}
+                  onCancel={() => setCropSource("")}
+                  onApply={(file) => {
+                    setFotoPerfil(file);
+                    setCropSource("");
+                    setError("");
+                  }}
+                />
+              ) : null}
+            />
 
-            <form className={styles.form} onSubmit={handleSubmit}>
-              <label className={styles.photoField}>
-                {t("profile.photo")}
-                <span className={styles.photoControl}>
-                  <span className={styles.photoPreview}>
-                    <img src={fotoPreview} alt={t("profile.photoPreview")} />
-                  </span>
-                  <span>
-                    <strong>{fotoPerfil?.name || t("profile.choosePhoto")}</strong>
-                    <small>{t("profile.photoHelp")}</small>
-                  </span>
-                  <FaCamera aria-hidden="true" />
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp"
-                    aria-label={t("profile.photo")}
-                    onChange={(event) => setFotoPerfil(event.target.files?.[0] ?? null)}
-                  />
-                </span>
-              </label>
+            <EntityEditorField label={t("profile.name")} icon={<FaUser />}>
+              <input
+                type="text"
+                value={nome}
+                onChange={(event) => setNome(event.target.value)}
+                placeholder={t("profile.name")}
+              />
+            </EntityEditorField>
+            <EntityEditorField label={t("profile.email")} icon={<FaEnvelope />}>
+              <input
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="email@exemplo.com"
+              />
+            </EntityEditorField>
+            <EntityEditorField label={t("profile.phone")} icon={<FaPhone />}>
+              <input
+                type="tel"
+                inputMode="numeric"
+                value={telefone}
+                onChange={(event) => setTelefone(event.target.value)}
+                placeholder={t("profile.phonePlaceholder")}
+              />
+            </EntityEditorField>
 
-              <label>
-                {t("profile.name")}
-                <span className={styles.inputWrap}>
-                  <input
-                    type="text"
-                    value={nome}
-                    onChange={(event) => setNome(event.target.value)}
-                    autoFocus
-                  />
-                  <FaUser aria-hidden="true" />
-                </span>
-              </label>
-
-              <label>
-                {t("profile.email")}
-                <span className={styles.inputWrap}>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                  />
-                  <FaEnvelope aria-hidden="true" />
-                </span>
-              </label>
-
-              <label>
-                {t("profile.phone")}
-                <span className={styles.inputWrap}>
-                  <input
-                    type="tel"
-                    inputMode="numeric"
-                    value={telefone}
-                    onChange={(event) => setTelefone(event.target.value)}
-                    placeholder={t("profile.phonePlaceholder")}
-                  />
-                  <FaPhone aria-hidden="true" />
-                </span>
-              </label>
-
-              {error && <p className={styles.formError}>{error}</p>}
-
-              <footer className={styles.modalActions}>
-                <button type="button" className={styles.cancelButton} onClick={closeModal}>
-                  {t("common.cancel")}
-                </button>
-                <button
-                  type="submit"
-                  className={styles.saveButton}
-                  disabled={!canSubmit}
-                  style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
-                >
-                  <FaSave aria-hidden="true" />
-                  {saving ? t("profile.saving") : t("common.save")}
-                </button>
-              </footer>
-            </form>
-          </section>
-        </div>
+            <EntityEditorError message={error} />
+            <EntityEditorSubmit disabled={!canSubmit}>
+              {saving ? t("profile.saving") : t("common.save")}
+            </EntityEditorSubmit>
+          </EntityEditorForm>
+        </EntityEditorModal>
       )}
     </main>
   );
