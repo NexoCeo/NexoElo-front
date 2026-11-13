@@ -89,8 +89,6 @@ export default function Perfil() {
   const [cropFilename, setCropFilename] = useState("perfil");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const userId = usuario?.Id ?? 0;
   const telefoneDigits = useMemo(
@@ -121,7 +119,6 @@ export default function Perfil() {
       } catch {
         if (active) {
           const message = t("profile.loadError");
-          setError(message);
           showNotification({ type: "error", title: t("profile.unavailable"), message });
         }
       } finally {
@@ -174,8 +171,6 @@ export default function Perfil() {
     setFotoPerfil(null);
     setFotoOriginal(null);
     setCropSource("");
-    setError("");
-    setSuccess("");
     setModalOpen(true);
     if (selectedPhoto) selectPhotoForCrop(selectedPhoto);
   }
@@ -185,18 +180,15 @@ export default function Perfil() {
     setFotoPerfil(null);
     setFotoOriginal(null);
     setCropSource("");
-    setError("");
   }
 
   function selectPhotoForCrop(file: File | null) {
     if (!file) return;
     if (!isValidPhoto(file)) {
       const message = "Selecione uma foto JPG, PNG ou WebP com até 20 MB.";
-      setError(message);
       showNotification({ type: "warning", title: t("profile.invalidPhoto"), message });
       return;
     }
-    setError("");
     setFotoPerfil(null);
     setFotoOriginal(file);
     setCropFilename(file.name);
@@ -204,7 +196,6 @@ export default function Perfil() {
   }
 
   async function adjustCrop() {
-    setError("");
     if (fotoOriginal) {
       setCropFilename(fotoOriginal.name);
       setCropSource(URL.createObjectURL(fotoOriginal));
@@ -241,19 +232,15 @@ export default function Perfil() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError("");
-    setSuccess("");
 
     if (!canSubmit || !usuario) {
       const message = t("profile.review");
-      setError(message);
       showNotification({ type: "warning", title: t("profile.invalidData"), message });
       return;
     }
 
     if (fotoOriginal && !isValidPhoto(fotoOriginal)) {
       const message = t("profile.invalidPhotoDesc");
-      setError(message);
       showNotification({ type: "warning", title: t("profile.invalidPhoto"), message });
       return;
     }
@@ -276,7 +263,6 @@ export default function Perfil() {
         Slug: updated.Slug || usuario.Slug,
         UrlPublica: updated.UrlPublica || usuario.UrlPublica,
       });
-      setSuccess(t("profile.saved"));
       showNotification({
         type: "success",
         title: t("profile.savedTitle"),
@@ -285,7 +271,6 @@ export default function Perfil() {
       closeModal();
     } catch {
       const message = t("profile.saveFailed");
-      setError(message);
       showNotification({ type: "error", title: t("profile.saveFailedTitle"), message });
     } finally {
       setSaving(false);
@@ -294,8 +279,6 @@ export default function Perfil() {
 
   return (
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
-      {success && <p className={styles.success}>{success}</p>}
-      {error && !modalOpen && <p className={styles.error}>{error}</p>}
 
       <div className={styles.profileShell}>
         {!usuario && loading ? <LoadingState label={t("profile.loading")} /> : <ProfileOverview
@@ -348,7 +331,6 @@ export default function Perfil() {
                   onApply={(file) => {
                     setFotoPerfil(file);
                     setCropSource("");
-                    setError("");
                   }}
                 />
               ) : null}
@@ -399,7 +381,6 @@ export default function Perfil() {
               </>
             )}
 
-            <EntityEditorError message={error} />
             <EntityEditorSubmit disabled={!canSubmit}>
               {saving ? t("profile.saving") : t("common.save")}
             </EntityEditorSubmit>
