@@ -4,9 +4,7 @@
 }
 
 .header,
-.profilePanel,
-.success,
-.error {
+.profilePanel {
   width: min(100%, 920px);
   margin-right: auto;
   margin-left: auto;
@@ -135,17 +133,6 @@
   font-size: 15px;
 }
 
-.success,
-.error {
-  margin-bottom: 16px;
-  font-size: 14px;
-}
-
-.success {
-  color: var(--theme-success);
-}
-
-.error,
 .formError {
   color: var(--theme-error);
 }
