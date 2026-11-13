@@ -331,9 +331,138 @@
   width: min(100%, 560px);
 }
 
-.requestsModal {
-  width: min(100%, 580px);
+.requestsBackdrop {
+  place-items: center;
 }
+
+.requestsModal {
+  box-sizing: border-box;
+  width: min(620px, calc(100vw - 32px));
+  height: min(580px, calc(100dvh - 32px));
+  min-height: 0;
+  max-height: none;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow: hidden;
+}
+
+.requestsTabs {
+  flex: 0 0 auto;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 8px;
+  border-bottom: 1px solid var(--theme-border-strong);
+}
+
+.requestsTabs button {
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 8px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--theme-text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  transition: border-color 160ms ease, color 160ms ease;
+}
+
+.requestsTabs button:hover {
+  color: var(--theme-text);
+}
+
+.requestsTabs button:focus-visible {
+  outline: 2px solid var(--theme-primary-text);
+  outline-offset: -2px;
+}
+
+.requestsTabs button.requestsTabActive {
+  border-bottom-color: var(--theme-primary);
+  color: var(--theme-primary-text);
+}
+
+.requestsPanel {
+  box-sizing: border-box;
+  min-height: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 18px;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 10px;
+  background: var(--theme-surface-muted);
+}
+
+.requestsPanel .modalHeader {
+  flex: 0 0 auto;
+}
+
+.requestsBody {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  padding: 2px 2px 10px;
+}
+
+.requestDate {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--theme-text-muted);
+}
+
+.historyStatus {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.historyApproved {
+  background: var(--theme-success-soft);
+  color: var(--theme-success-text);
+}
+
+.historyRejected {
+  background: var(--theme-error-soft);
+  color: var(--theme-error-text);
+}
+
+@media (max-width: 760px) {
+  .requestsBackdrop {
+    padding: 12px;
+    place-items: center;
+  }
+  .requestsModal {
+    width: min(620px, 100%);
+    height: min(580px, calc(100dvh - 24px));
+    padding: 14px;
+    gap: 12px;
+  }
+  .requestsPanel {
+    padding: 12px;
+  }
+  .requestsTabs button {
+    font-size: 12px;
+  }
+}
+
 
 .whatsappModal {
   width: min(100%, 480px);
