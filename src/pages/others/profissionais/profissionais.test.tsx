@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const vinculoMock = vi.hoisted(() => ({
   listar: vi.fn(),
+  historico: vi.fn(),
   responder: vi.fn(),
 }));
 const profissionalMock = vi.hoisted(() => ({
@@ -55,6 +56,7 @@ vi.mock("@/services/servico-service", () => ({
 
 vi.mock("@/services/vinculo-service", () => ({
   listarSolicitacoesVinculo: vinculoMock.listar,
+  listarHistoricoSolicitacoesVinculo: vinculoMock.historico,
   responderSolicitacaoVinculo: vinculoMock.responder,
 }));
 
@@ -83,6 +85,9 @@ describe("Profissionais", () => {
     profissionalMock.original.mockReset();
     profissionalMock.original.mockResolvedValue(null);
     vinculoMock.listar.mockReset();
+    vinculoMock.listar.mockResolvedValue([]);
+    vinculoMock.historico.mockReset();
+    vinculoMock.historico.mockResolvedValue([]);
     vinculoMock.responder.mockReset();
   });
 
@@ -163,7 +168,7 @@ describe("Profissionais", () => {
     vinculoMock.responder.mockResolvedValue(undefined);
 
     render(<MemoryRouter><LanguageProvider><Profissionais /></LanguageProvider></MemoryRouter>);
-    fireEvent.click(screen.getByRole("button", { name: /solicitações de vínculo/i }));
+    fireEvent.click(screen.getByRole("button", { name: /vínculo profissionais/i }));
 
     expect(await screen.findByText("Profissional Pendente")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Aprovar vinculo de Profissional Pendente" }));
@@ -173,6 +178,68 @@ describe("Profissionais", () => {
     });
     expect(screen.queryByText("Profissional Pendente")).not.toBeInTheDocument();
     expect(await screen.findByText(/agora faz parte da empresa/i)).toBeInTheDocument();
+  });
+
+  it("abre Vínculo profissionais com abas e mantém modal de tamanho padronizado mesmo vazio", async () => {
+    vinculoMock.listar.mockResolvedValue([]);
+    render(<MemoryRouter><LanguageProvider><Profissionais /></LanguageProvider></MemoryRouter>);
+    fireEvent.click(screen.getByRole("button", { name: "Vínculo profissionais" }));
+
+    const dialog = screen.getByRole("dialog", { name: "Vínculo profissionais" });
+    expect(dialog).toHaveClass(expect.stringContaining("requestsModal"));
+    expect(within(dialog).getByRole("tab", { name: "Solicitações" }))
+      .toHaveAttribute("aria-selected", "true");
+    expect(within(dialog).getByRole("tab", { name: "Histórico de solicitações" }))
+      .toHaveAttribute("aria-selected", "false");
+    expect(await within(dialog).findByText("Nenhuma solicitação pendente.")).toBeInTheDocument();
+
+    fireEvent.click(within(dialog).getByRole("tab", { name: "Histórico de solicitações" }));
+    await waitFor(() => expect(vinculoMock.historico).toHaveBeenCalledWith(7));
+    expect(within(dialog).getByRole("tab", { name: "Histórico de solicitações" }))
+      .toHaveAttribute("aria-selected", "true");
+    expect(await within(dialog).findByText("Nenhuma solicitação respondida até o momento.")).toBeInTheDocument();
+
+    fireEvent.click(within(dialog).getByRole("tab", { name: "Solicitações" }));
+    expect(within(dialog).getByRole("tab", { name: "Solicitações" }))
+      .toHaveAttribute("aria-selected", "true");
+    expect(vinculoMock.listar).toHaveBeenCalledTimes(1);
+  });
+
+  it("exibe no histórico as solicitações aprovadas e recusadas sem botões de decisão", async () => {
+    vinculoMock.historico.mockResolvedValue([
+      { VinculoId: 32, ProfissionalId: 8, Nome: "Maria Silva", Email: "maria@example.com", Status: "APROVADO", DataSolicitacao: "2026-11-12T15:30:00" },
+      { VinculoId: 31, ProfissionalId: 9, Nome: "FELIPE COSTA", Email: "FELIPE@EXEMPLO.COM", Status: "RECUSADO", DataSolicitacao: "2026-11-11T12:30:00" },
+    ]);
+    render(<MemoryRouter><LanguageProvider><Profissionais /></LanguageProvider></MemoryRouter>);
+    fireEvent.click(screen.getByRole("button", { name: "Vínculo profissionais" }));
+
+    const dialog = screen.getByRole("dialog", { name: "Vínculo profissionais" });
+    fireEvent.click(within(dialog).getByRole("tab", { name: "Histórico de solicitações" }));
+
+    expect(await within(dialog).findByText("Maria Silva")).toBeInTheDocument();
+    expect(within(dialog).getByText("Felipe Costa")).toBeInTheDocument();
+    expect(within(dialog).getByText("felipe@exemplo.com")).toBeInTheDocument();
+    expect(within(dialog).getByText("Aprovada")).toBeInTheDocument();
+    expect(within(dialog).getByText("Recusada")).toBeInTheDocument();
+    expect(within(dialog).getAllByText(/Solicitado em/)).toHaveLength(2);
+    expect(within(dialog).queryByRole("button", { name: /aprovar vinculo/i })).not.toBeInTheDocument();
+    expect(within(dialog).queryByRole("button", { name: /recusar vinculo/i })).not.toBeInTheDocument();
+  });
+
+  it("mostra erro de histórico sem perder as solicitações pendentes", async () => {
+    vinculoMock.historico.mockRejectedValue(new Error("servidor indisponível"));
+    vinculoMock.listar.mockResolvedValue([{
+      VinculoId: 28, Id: 19, Nome: "Profissional Pendente", Email: "p@example.com", Status: "PENDENTE",
+    }]);
+    render(<MemoryRouter><LanguageProvider><Profissionais /></LanguageProvider></MemoryRouter>);
+    fireEvent.click(screen.getByRole("button", { name: "Vínculo profissionais" }));
+    const dialog = screen.getByRole("dialog", { name: "Vínculo profissionais" });
+    expect(await within(dialog).findByText("Profissional Pendente")).toBeInTheDocument();
+
+    fireEvent.click(within(dialog).getByRole("tab", { name: "Histórico de solicitações" }));
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent("Não foi possível carregar o histórico de solicitações.");
+    fireEvent.click(within(dialog).getByRole("tab", { name: "Solicitações" }));
+    expect(within(dialog).getByText("Profissional Pendente")).toBeInTheDocument();
   });
 
   it("nao exibe pais, estado ou cidade ao abrir o cadastro do profissional", async () => {
