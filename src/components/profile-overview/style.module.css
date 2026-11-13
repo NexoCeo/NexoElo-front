@@ -5,12 +5,18 @@
 .cameraButton:hover,.cameraButton:focus-within{background:var(--theme-primary,#2563eb);transform:scale(1.06)}.cameraButton:focus-within{outline:2px solid var(--theme-primary-text,#60a5fa);outline-offset:2px}
 .cameraButton svg{font-size:13px}.cameraButton input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .spinner{width:13px;height:13px;border:2px solid rgba(255,255,255,.35);border-top-color:currentColor;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
-.heading{text-align:center;max-width:100%;margin-bottom:20px}
-.heading h2{margin:0 0 5px;font-size:clamp(21px,2.5vw,27px);font-weight:750;letter-spacing:-.025em;line-height:1.2;overflow-wrap:anywhere}
-.role{color:var(--theme-primary-text,#60a5fa);font-size:11px;font-weight:750;letter-spacing:.08em;text-transform:uppercase}
-.heading p{margin:7px 0 0;color:var(--theme-text-muted,#94a3b8);font-size:12px}
-.details{width:100%;max-width:360px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:0 auto;padding:17px 0;border-top:1px solid var(--theme-bottom,#334155);text-align:center}
-.details>div{min-width:0}.details dt{display:flex;align-items:center;justify-content:center;gap:7px;margin:0 0 6px;font-size:11px;font-weight:650;color:var(--theme-text-muted,#94a3b8)}
-.details dt svg{color:var(--theme-primary-text,#60a5fa)}.details dd{margin:0;font-size:13px;font-weight:550;line-height:1.4;overflow-wrap:anywhere}
-.action{width:100%;max-width:280px;margin-top:18px;display:flex;justify-content:center}.action>*{width:100%}
-@media(max-width:600px){.profile{padding:0 8px}.avatar{width:100px;height:100px;margin-bottom:14px}.avatar>span{font-size:33px}.heading{margin-bottom:18px}.details{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:15px 0;max-width:360px}.details dd{font-size:12px}.action{margin-top:18px}}
+.heading{width:100%;min-width:0;text-align:center;max-width:100%;margin-bottom:20px}
+.heading h2{margin:0 0 5px;font-size:clamp(21px,2.5vw,27px);font-weight:750;letter-spacing:-.025em;line-height:1.2;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.role{display:block;min-width:0;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--theme-primary-text,#60a5fa);font-size:11px;font-weight:750;letter-spacing:.08em;text-transform:uppercase}
+.heading p{margin:7px 0 0;color:var(--theme-text-muted,#94a3b8);font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.details{width:100%;max-width:540px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:28px;row-gap:18px;margin:0 auto;padding:17px 0;border-top:1px solid var(--theme-bottom,#334155);text-align:center}
+.details>div{min-width:0;max-width:100%;overflow:hidden}.details dt{display:flex;align-items:center;justify-content:center;gap:7px;min-width:0;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin:0 0 6px;font-size:11px;font-weight:650;color:var(--theme-text-muted,#94a3b8)}
+.details dt svg{flex-shrink:0;color:var(--theme-primary-text,#60a5fa)}.details dd{margin:0;min-width:0;max-width:100%;font-size:13px;font-weight:550;line-height:1.4;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.action{width:100%;max-width:280px;margin-top:18px;display:flex;justify-content:center}.action>*{width:100%;min-width:0;white-space:nowrap}
+@media(max-width:600px){.profile{padding:0 8px}.avatar{width:100px;height:100px;margin-bottom:14px}.avatar>span{font-size:33px}.heading{margin-bottom:18px}.details{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:12px;row-gap:15px;padding:15px 0;max-width:540px}.details dd{font-size:12px}.action{margin-top:18px}}
+
+/* Em telas compactas, cada informação recebe toda a largura disponível.
+   Nenhum valor quebra de linha; textos excepcionalmente longos são truncados. */
+@media(max-width:480px){
+  .details{grid-template-columns:minmax(0,1fr);row-gap:15px}
+}
