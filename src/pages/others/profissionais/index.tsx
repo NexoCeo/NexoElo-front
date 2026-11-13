@@ -1018,28 +1018,28 @@ export default function Profissionais() {
           >
             <div className={styles.requestsTopBar}>
               <div className={styles.requestsTabs} role="tablist" aria-label={t("pros.linkRequests")}>
-              <button
-                id="vinculos-tab-solicitacoes"
-                type="button"
-                role="tab"
-                aria-selected={vinculosTab === "solicitacoes"}
-                aria-controls="vinculos-panel"
-                className={vinculosTab === "solicitacoes" ? styles.requestsTabActive : ""}
-                onClick={() => void selecionarAbaVinculos("solicitacoes")}
-              >
-                {t("pros.requestsTab")}
-              </button>
-              <button
-                id="vinculos-tab-historico"
-                type="button"
-                role="tab"
-                aria-selected={vinculosTab === "historico"}
-                aria-controls="vinculos-panel"
-                className={vinculosTab === "historico" ? styles.requestsTabActive : ""}
-                onClick={() => void selecionarAbaVinculos("historico")}
-              >
-                {t("pros.historyTab")}
-              </button>
+                <button
+                  id="vinculos-tab-solicitacoes"
+                  type="button"
+                  role="tab"
+                  aria-selected={vinculosTab === "solicitacoes"}
+                  aria-controls="vinculos-panel"
+                  className={vinculosTab === "solicitacoes" ? styles.requestsTabActive : ""}
+                  onClick={() => void selecionarAbaVinculos("solicitacoes")}
+                >
+                  {t("pros.requestsTab")}
+                </button>
+                <button
+                  id="vinculos-tab-historico"
+                  type="button"
+                  role="tab"
+                  aria-selected={vinculosTab === "historico"}
+                  aria-controls="vinculos-panel"
+                  className={vinculosTab === "historico" ? styles.requestsTabActive : ""}
+                  onClick={() => void selecionarAbaVinculos("historico")}
+                >
+                  {t("pros.historyTab")}
+                </button>
               </div>
               <button
                 type="button"
@@ -1069,7 +1069,6 @@ export default function Profissionais() {
                       ? t("pros.requestsDescription") : t("pros.historyDescription")}
                   </p>
                 </div>
-
               </header>
 
               <div className={styles.requestsBody}>
