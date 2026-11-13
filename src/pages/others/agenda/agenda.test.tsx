@@ -120,6 +120,67 @@ describe("Agenda", () => {
     );
   });
 
+  it("preserva 13h30 e 14h sem sobrepor cards de serviços consecutivos", async () => {
+    agendaServiceMock.listarAgendaPorData.mockResolvedValue([
+      appointment({
+        Id: 30,
+        ClienteNome: "Cliente Hidratação",
+        ServicoNome: "Hidratação",
+        DataAgendamento: "2026-08-10T13:30:00",
+        DuracaoMinutos: 30,
+      }),
+      appointment({
+        Id: 31,
+        ClienteNome: "Cliente Fibra",
+        ServicoNome: "Fibra em gel decorada",
+        DataAgendamento: "2026-08-10T14:00:00",
+        DuracaoMinutos: 60,
+      }),
+    ]);
+
+    render(<Agenda />);
+    expect(await screen.findByText("Cliente Hidratação")).toBeInTheDocument();
+
+    const first = document.querySelector<HTMLElement>('[data-appointment-id="30"]');
+    const second = document.querySelector<HTMLElement>('[data-appointment-id="31"]');
+    expect(first).not.toBeNull();
+    expect(second).not.toBeNull();
+    expect(first).toHaveAttribute("data-event-lanes", "1");
+    expect(second).toHaveAttribute("data-event-lanes", "1");
+    expect(Number.parseFloat(first!.style.top) + Number.parseFloat(first!.style.height))
+      .toBeLessThan(Number.parseFloat(second!.style.top));
+    expect(first).toHaveAttribute("title", expect.stringContaining("13:30 (30 min)"));
+    expect(second).toHaveAttribute("title", expect.stringContaining("14:00 (60 min)"));
+  });
+
+  it("mantém atendimentos simultâneos visíveis em colunas independentes", async () => {
+    agendaServiceMock.listarAgendaPorData.mockResolvedValue([
+      appointment({
+        Id: 40,
+        ServicoNome: "Hidratação",
+        DataAgendamento: "2026-08-10T13:30:00",
+        DuracaoMinutos: 60,
+      }),
+      appointment({
+        Id: 41,
+        ServicoNome: "Fibra em gel decorada",
+        DataAgendamento: "2026-08-10T14:00:00",
+        DuracaoMinutos: 60,
+      }),
+    ]);
+
+    render(<Agenda />);
+    await screen.findByText("Fibra em gel decorada");
+    const first = document.querySelector<HTMLElement>('[data-appointment-id="40"]')!;
+    const second = document.querySelector<HTMLElement>('[data-appointment-id="41"]')!;
+    expect(first).toHaveAttribute("data-event-lanes", "2");
+    expect(second).toHaveAttribute("data-event-lanes", "2");
+    expect(first).toHaveAttribute("data-event-lane", "0");
+    expect(second).toHaveAttribute("data-event-lane", "1");
+    expect(first.style.left).not.toBe(second.style.left);
+    expect(Number.parseFloat(first.style.top)).toBeLessThan(Number.parseFloat(second.style.top));
+  });
+
   it("busca somente o novo dia quando o usuario seleciona outra data", async () => {
     agendaServiceMock.listarAgendaPorData
       .mockResolvedValueOnce([])
