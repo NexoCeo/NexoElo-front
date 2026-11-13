@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { FaEnvelope, FaPen, FaPhone, FaUser } from "react-icons/fa";
+import { FaEnvelope, FaIdCard, FaPen, FaPhone, FaUser } from "react-icons/fa";
 import { getProfileImageUrl, getUploadedImageUrl } from "@/components/header/profile-image";
 import {
   EntityEditorModal,
@@ -31,6 +31,36 @@ function isValidPhoto(file: File) {
 }
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// O formato alfanumerico (12 caracteres + 2 digitos) tambem e valido desde 2026.
+const normalizeCnpj = (value: string) =>
+  value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 14);
+
+function formatCnpj(value: string): string {
+  const cnpj = normalizeCnpj(value);
+  let result = cnpj.slice(0, 2);
+  if (cnpj.length > 2) result += "." + cnpj.slice(2, 5);
+  if (cnpj.length > 5) result += "." + cnpj.slice(5, 8);
+  if (cnpj.length > 8) result += "/" + cnpj.slice(8, 12);
+  if (cnpj.length > 12) result += "-" + cnpj.slice(12, 14);
+  return result;
+}
+
+function isValidCnpj(value: string): boolean {
+  const cnpj = normalizeCnpj(value);
+  if (!/^[A-Z0-9]{12}[0-9]{2}$/.test(cnpj) ||
+      cnpj.slice(0, 12).split("").every(char => char === cnpj[0])) return false;
+
+  const calc = (weights: number[]) => {
+    const sum = weights.reduce((total, weight, index) =>
+      total + (cnpj.charCodeAt(index) - 48) * weight, 0);
+    const remainder = sum % 11;
+    return remainder < 2 ? 0 : 11 - remainder;
+  };
+
+  return Number(cnpj[12]) === calc([5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]) &&
+    Number(cnpj[13]) === calc([6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+}
+
 
 function formatRole(role?: string, lang: "pt" | "en" = "pt") {
   const labels: Record<string, string> = {
@@ -51,6 +81,7 @@ export default function Perfil() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
+  const [cnpj, setCnpj] = useState("");
   const [fotoPerfil, setFotoPerfil] = useState<File | null>(null);
   const [fotoOriginal, setFotoOriginal] = useState<File | null>(null);
   const [fotoPreview, setFotoPreview] = useState("");
@@ -66,10 +97,15 @@ export default function Perfil() {
     () => telefone.replace(/\D/g, ""),
     [telefone],
   );
+  const isEmpresa = usuario?.Papel === "EMPRESA";
+  const cnpjChanged = isEmpresa &&
+    normalizeCnpj(cnpj) !== normalizeCnpj(usuario?.Cnpj ?? "");
+  const cnpjValid = !cnpjChanged || isValidCnpj(cnpj);
   const canSubmit =
     nome.trim().length > 0 &&
     emailPattern.test(email.trim()) &&
     (!telefoneDigits || (telefoneDigits.length >= 10 && telefoneDigits.length <= 11)) &&
+    cnpjValid &&
     !saving &&
     !cropSource;
 
@@ -134,6 +170,7 @@ export default function Perfil() {
     setNome(usuario?.Nome ?? "");
     setEmail(usuario?.Email ?? "");
     setTelefone(usuario?.Telefone ?? "");
+    setCnpj(formatCnpj(usuario?.Cnpj ?? ""));
     setFotoPerfil(null);
     setFotoOriginal(null);
     setCropSource("");
@@ -227,6 +264,7 @@ export default function Perfil() {
         Nome: nome.trim(),
         Email: email.trim(),
         Telefone: telefoneDigits,
+        ...(cnpjChanged ? { Cnpj: formatCnpj(cnpj) } : {}),
         FotoPerfil: fotoPerfil,
         FotoOriginal: fotoPerfil ? fotoOriginal : null,
       });
@@ -341,6 +379,25 @@ export default function Perfil() {
                 placeholder={t("profile.phonePlaceholder")}
               />
             </EntityEditorField>
+            {isEmpresa && (
+              <>
+                <EntityEditorField label={t("profile.cnpj")} icon={<FaIdCard />}>
+                  <input
+                    type="text"
+                    inputMode="text"
+                    autoComplete="off"
+                    value={cnpj}
+                    onChange={(event) => setCnpj(formatCnpj(event.target.value))}
+                    maxLength={18}
+                    placeholder="00.000.000/0000-00"
+                    aria-invalid={cnpjChanged && !cnpjValid}
+                  />
+                </EntityEditorField>
+                {cnpjChanged && !cnpjValid && (
+                  <EntityEditorError message="Informe um CNPJ válido com 14 caracteres e dígitos verificadores corretos." />
+                )}
+              </>
+            )}
 
             <EntityEditorError message={error} />
             <EntityEditorSubmit disabled={!canSubmit}>
