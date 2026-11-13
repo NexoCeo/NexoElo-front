@@ -138,7 +138,6 @@ export default function Dashboard({ initialAgenda }: { initialAgenda?: Dashboard
   const usuario = getStoredUser<{ Id?: number; Papel?: string }>();
   const role = usuario?.Papel?.toUpperCase();
   const isProfessional = role === "PROFISSIONAL";
-  const canOpenAgenda = role === "EMPRESA" || role === "AUTONOMO";
   const [range, setRange] = useState<DashboardRange>("today");
   const [appointments, setAppointments] = useState<Agendamento[]>(() => initialAgenda?.appointments ?? []);
   const [loading, setLoading] = useState(!initialAgenda);
