@@ -655,9 +655,12 @@
 .hourRow{position:absolute;left:0;right:0;height:1px;border-top:1px dashed var(--theme-border-strong);margin-left:52px;pointer-events:none}
 .hourRow span{position:absolute;right:calc(100% + 12px);top:-8px;color:var(--theme-text-muted);font-size:11px;font-variant-numeric:tabular-nums}
 .timelineEvents{position:absolute;top:0;bottom:0;left:54px;right:0;border-left:1px solid var(--theme-border-strong);pointer-events:none}
-.timelineEvent{position:absolute;left:1px;right:0;z-index:1;min-height:25px;padding:5px 9px;background:linear-gradient(95deg,rgba(34,95,179,.65),rgba(41,89,166,.4));border-left:4px solid #3097ff;border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:6px;overflow:hidden;color:var(--theme-text)}
+.timelineEvent{box-sizing:border-box;position:absolute;left:1px;right:0;z-index:1;min-height:0;padding:4px 7px;background:linear-gradient(95deg,rgba(34,95,179,.65),rgba(41,89,166,.4));border-left:4px solid #3097ff;border-radius:7px;display:flex;align-items:center;justify-content:space-between;gap:5px;overflow:hidden;color:var(--theme-text)}
 .timelineEvent strong{font-size:11px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .timelineEvent small{font-size:10px;white-space:nowrap}
+.timelineEventCompact{flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:3px 6px}
+.timelineEventCompact strong{max-width:100%;font-size:10px}
+.timelineEventCompact small{font-size:9px;line-height:1;opacity:.88}
 .eventCompleted{background:rgba(12,116,82,.45);border-left-color:#21d895}
 .eventCancelled{background:rgba(128,39,46,.35);border-left-color:#fa6b75;opacity:.75}
 .dayGrid>.content{display:flex;flex-direction:column;padding:0!important}
