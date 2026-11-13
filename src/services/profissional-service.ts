@@ -129,10 +129,25 @@ export async function criarProfissionalEmpresa(
 
 export async function atualizarProfissionalEmpresa(
   profissionalId: number,
-  dados: { Nome: string; Email: string; Telefone: string },
+  dados: { Nome: string; Email: string; Telefone: string; FotoPerfil?: File | null },
 ): Promise<Profissional> {
+  if (dados.FotoPerfil) {
+    const formData = new FormData();
+    formData.append("Nome", dados.Nome);
+    formData.append("Email", dados.Email);
+    formData.append("Telefone", dados.Telefone);
+    formData.append("FotoPerfil", dados.FotoPerfil);
+    const { data } = await api.put<ApiRecord>(
+      `/Usuario/empresa/profissionais/${profissionalId}/com-foto`,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } },
+    );
+    return normalizeProfissional(data);
+  }
   const { data } = await api.put<ApiRecord>(
-    `/Usuario/empresa/profissionais/${profissionalId}`, dados,
+    `/Usuario/empresa/profissionais/${profissionalId}`, {
+      Nome: dados.Nome, Email: dados.Email, Telefone: dados.Telefone,
+    },
   );
   return normalizeProfissional(data);
 }
