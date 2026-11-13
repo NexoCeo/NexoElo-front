@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { isAxiosError } from "axios";
 import { resolverLocalizacao } from "@/services/localizacao-service";
 import type {
@@ -93,8 +93,14 @@ export function useCadastroLocalizacao(): CadastroLocalizacaoController {
     useState<LocalizacaoResolvida | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const requisicaoPendente = useRef<Promise<CadastroLocalizacaoPayload> | null>(null);
 
-  const usarLocalizacaoAtual = useCallback(async () => {
+  const usarLocalizacaoAtual = useCallback(() => {
+    // Evita duas requisições de geolocalização no React StrictMode e
+    // ao enviar o formulário enquanto a localização já está sendo obtida.
+    if (requisicaoPendente.current) return requisicaoPendente.current;
+
+    const request = (async (): Promise<CadastroLocalizacaoPayload> => {
     if (modo === "automatica" && coordenadas) {
       return {
         latitude: coordenadas.latitude,
@@ -139,7 +145,15 @@ export function useCadastroLocalizacao(): CadastroLocalizacaoController {
     } finally {
       setLoading(false);
     }
-  }, [coordenadas, localizacaoResolvida, modo]);
+    })();
+
+    requisicaoPendente.current = request;
+    const clear = () => {
+      if (requisicaoPendente.current === request) requisicaoPendente.current = null;
+    };
+    void request.then(clear, clear);
+    return request;
+  }, [coordenadas, modo]);
 
   const reset = useCallback(() => {
     setModo("nao-selecionada");
