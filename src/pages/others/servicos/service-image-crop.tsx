@@ -77,6 +77,12 @@ export default function ServiceImageCrop({ source, filename, onApply, onCancel }
 
   function changeZoom(nextZoom: number) {
     const next = Math.max(1, Math.min(3, nextZoom));
+    if (next === 1) {
+      // Zoom mínimo: enquadramento central da fonte original, sem deslocamento residual.
+      setZoom(1);
+      setPosition({ x: 0, y: 0 });
+      return;
+    }
     const nextWidth = imageSize.width * baseScale * next;
     const nextHeight = imageSize.height * baseScale * next;
     setZoom(next);
