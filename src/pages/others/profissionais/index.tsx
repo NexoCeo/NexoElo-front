@@ -28,6 +28,8 @@ import {
 } from "react-icons/fa";
 import { useTheme } from "@/context/ThemeContext";
 import { getProfileImageUrl } from "@/components/header/profile-image";
+import { EntityEditorModal, EntityImageField } from "@/components/entity-editor-modal";
+import ServiceImageCrop from "../servicos/service-image-crop";
 import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
 import {
@@ -145,6 +147,8 @@ export default function Profissionais() {
 
   const [fotoPerfil, setFotoPerfil] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [cropSource, setCropSource] = useState("");
+  const [cropFilename, setCropFilename] = useState("profissional");
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
@@ -170,6 +174,7 @@ export default function Profissionais() {
     validateEmail(email) &&
     validatePhone(telefone) &&
     (Boolean(fotoPerfil) || Boolean(editingProfessional)) &&
+    !cropSource &&
     !saving;
 
   useEffect(() => {
@@ -234,6 +239,29 @@ export default function Profissionais() {
 
     return () => URL.revokeObjectURL(nextPreviewUrl);
   }, [fotoPerfil]);
+
+  useEffect(() => {
+    return () => {
+      if (cropSource.startsWith("blob:")) URL.revokeObjectURL(cropSource);
+    };
+  }, [cropSource]);
+
+  function selectProfessionalPhoto(file: File | null) {
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setFormError("Selecione uma foto PNG, JPG ou WebP.");
+      return;
+    }
+    setFormError("");
+    setCropFilename(file.name);
+    setCropSource(URL.createObjectURL(file));
+  }
+
+  function adjustProfessionalCrop() {
+    if (!fotoPerfil) return;
+    setCropFilename(fotoPerfil.name);
+    setCropSource(URL.createObjectURL(fotoPerfil));
+  }
 
   useEffect(() => {
     if (!servicosModalOpen || !profissionalEmEdicao?.Id || !empresaId) {
@@ -308,6 +336,7 @@ export default function Profissionais() {
   function resetForm() {
     setEditingProfessional(null);
     setFotoPerfil(null);
+    setCropSource("");
     setNome("");
     setEmail("");
     setTelefone("");
@@ -322,6 +351,7 @@ export default function Profissionais() {
     setEmail(profissional.Email);
     setTelefone(profissional.Telefone ?? "");
     setFotoPerfil(null);
+    setCropSource("");
     setFormError("");
     setModalOpen(true);
   }
@@ -516,8 +546,13 @@ export default function Profissionais() {
       return;
     }
 
+    if (cropSource) {
+      setFormError("Aplique ou cancele o recorte antes de salvar.");
+      return;
+    }
+
     if (!fotoPerfil && !editingProfessional) {
-      const message = "Selecione uma foto de perfil.";
+      const message = "Selecione uma foto de perfil."
       setFormError(message);
       showNotification({ type: "warning", title: "Foto obrigatoria", message });
       return;
@@ -770,37 +805,37 @@ export default function Profissionais() {
         onClose={() => setUpgradePlan(null)}
         onViewPlans={() => window.location.assign("/empresa/assinatura")} />}
       {modalOpen && (
-        <div className={styles.modalBackdrop} role="presentation">
-          <section className={styles.modal} style={{ backgroundColor: theme.colors.background2 }}>
-            <header className={styles.modalHeader}>
-              <div>
-                <h2 style={{ color: theme.colors.text }}>{editingProfessional ? "Editar profissional" : t("pros.new")}</h2>
-                <p style={{ color: theme.colors.inactive }}>
-                  {editingProfessional ? "Atualize os dados do profissional vinculado." : t("pros.registerDesc")}
-                </p>
-              </div>
-              <button type="button" onClick={closeModal} aria-label="Fechar modal">
-                <FaTimes />
-              </button>
-            </header>
-
-            <form className={styles.form} onSubmit={handleCreateProfissional}>
-              {!editingProfessional && (
-              <label className={styles.photoField}>
-                {t("profile.photo")}
-                <span className={styles.photoControl}>
-                  <span className={styles.photoPreview}>
-                    {previewUrl ? <img src={previewUrl} alt="Foto selecionada" /> : <FaPlus />}
-                  </span>
-                  <strong>{fotoPerfil ? fotoPerfil.name : t("pros.photo")}</strong>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(event) => setFotoPerfil(event.target.files?.[0] ?? null)}
-                  />
-                </span>
-              </label>
-              )}
+        <EntityEditorModal
+          title={editingProfessional ? "Editar profissional" : t("pros.new")}
+          description={editingProfessional ? "Atualize os dados do profissional vinculado." : t("pros.registerDesc")}
+          onClose={closeModal}
+          busy={saving}
+          cropOpen={Boolean(cropSource)}
+        >
+          <form className={`${styles.form} ${styles.editorForm}`} onSubmit={handleCreateProfissional}>
+            <EntityImageField
+              label="Foto do profissional"
+              previewUrl={editingProfessional
+                ? getProfileImageUrl(editingProfessional.FotoPerfil)
+                : previewUrl}
+              selectedFile={editingProfessional ? null : fotoPerfil}
+              alt="Foto do profissional"
+              onSelectFile={editingProfessional ? undefined : selectProfessionalPhoto}
+              onAdjustCrop={editingProfessional ? undefined : adjustProfessionalCrop}
+              readonlyHint={editingProfessional ? "A foto é atualizada pelo próprio profissional em seu perfil." : undefined}
+              cropContent={cropSource ? (
+                <ServiceImageCrop
+                  source={cropSource}
+                  filename={cropFilename}
+                  onCancel={() => setCropSource("")}
+                  onApply={(file) => {
+                    setFotoPerfil(file);
+                    setCropSource("");
+                    setFormError("");
+                  }}
+                />
+              ) : null}
+            />
 
               <label>
                 {t("profile.name")}
@@ -852,8 +887,7 @@ export default function Profissionais() {
                 {saving ? t("pros.creating") : editingProfessional ? "Salvar alterações" : t("pros.create")}
               </button>
             </form>
-          </section>
-        </div>
+        </EntityEditorModal>
       )}
 
       {whatsAppShare && (
