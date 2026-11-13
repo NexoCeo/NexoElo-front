@@ -132,6 +132,11 @@ describe("Perfil", () => {
       expect(within(dialog).getByLabelText("E-mail")).toBeInTheDocument();
       expect(within(dialog).getByLabelText("Telefone")).toBeInTheDocument();
       expect(within(dialog).getByLabelText("Foto de perfil")).toBeInTheDocument();
+      if (papel === "EMPRESA") {
+        expect(within(dialog).getByLabelText("CNPJ")).toHaveValue("12.345.678/0001-95");
+      } else {
+        expect(within(dialog).queryByLabelText("CNPJ")).not.toBeInTheDocument();
+      }
       expect(within(dialog).getByRole("button", { name: "Salvar alterações" })).toBeInTheDocument();
     },
   );
@@ -212,6 +217,59 @@ describe("Perfil", () => {
     expect(screen.getByText("Nome fantasia")).toBeInTheDocument();
     expect(screen.getByText("CNPJ")).toBeInTheDocument();
     expect(screen.getAllByText("Não informado").length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("permite alterar o CNPJ da empresa e envia a alteracao ao backend", async () => {
+    mocks.atualizarPerfilUsuario.mockResolvedValueOnce({
+      ...mocks.usuario,
+      Cnpj: "11.222.333/0001-81",
+    });
+
+    render(<MemoryRouter><LanguageProvider><Perfil /></LanguageProvider></MemoryRouter>);
+    await screen.findByRole("heading", { name: "Empresa Teste" });
+    fireEvent.click(screen.getByRole("button", { name: "Editar perfil" }));
+    const dialog = screen.getByRole("dialog", { name: "Editar perfil" });
+    const cnpjInput = within(dialog).getByLabelText("CNPJ");
+    expect(cnpjInput).toHaveValue("12.345.678/0001-95");
+
+    fireEvent.change(cnpjInput, { target: { value: "11222333000181" } });
+    expect(cnpjInput).toHaveValue("11.222.333/0001-81");
+    fireEvent.click(within(dialog).getByRole("button", { name: "Salvar alterações" }));
+
+    await waitFor(() => expect(mocks.atualizarPerfilUsuario).toHaveBeenCalledWith(7,
+      expect.objectContaining({ Cnpj: "11.222.333/0001-81" })));
+    expect(mocks.setUsuario).toHaveBeenLastCalledWith(
+      expect.objectContaining({ Cnpj: "11.222.333/0001-81" }),
+    );
+  });
+
+  it("aceita CNPJ alfanumerico com digitos verificadores validos", async () => {
+    render(<MemoryRouter><LanguageProvider><Perfil /></LanguageProvider></MemoryRouter>);
+    await screen.findByRole("heading", { name: "Empresa Teste" });
+    fireEvent.click(screen.getByRole("button", { name: "Editar perfil" }));
+    const dialog = screen.getByRole("dialog", { name: "Editar perfil" });
+    const input = within(dialog).getByLabelText("CNPJ");
+
+    fireEvent.change(input, { target: { value: "12abc34501de35" } });
+    expect(input).toHaveValue("12.ABC.345/01DE-35");
+    expect(within(dialog).getByRole("button", { name: "Salvar alterações" })).toBeEnabled();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Salvar alterações" }));
+    await waitFor(() => expect(mocks.atualizarPerfilUsuario).toHaveBeenCalledWith(7,
+      expect.objectContaining({ Cnpj: "12.ABC.345/01DE-35" })));
+  });
+
+  it("impede o envio de um CNPJ alterado com digitos verificadores invalidos", async () => {
+    render(<MemoryRouter><LanguageProvider><Perfil /></LanguageProvider></MemoryRouter>);
+    await screen.findByRole("heading", { name: "Empresa Teste" });
+    fireEvent.click(screen.getByRole("button", { name: "Editar perfil" }));
+    const dialog = screen.getByRole("dialog", { name: "Editar perfil" });
+
+    fireEvent.change(within(dialog).getByLabelText("CNPJ"), {
+      target: { value: "11.111.111/1111-11" },
+    });
+    expect(within(dialog).getByRole("button", { name: "Salvar alterações" })).toBeDisabled();
+    expect(within(dialog).getByText(/dígitos verificadores corretos/)).toBeInTheDocument();
+    expect(mocks.atualizarPerfilUsuario).not.toHaveBeenCalled();
   });
 
 });
