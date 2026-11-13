@@ -1,4 +1,4 @@
-import type { ChangeEvent, ReactNode } from "react";
+import type { ChangeEvent, FormEventHandler, ReactNode } from "react";
 import { useEffect } from "react";
 import { FaCloudUploadAlt, FaCropAlt, FaImage, FaTimes } from "react-icons/fa";
 import styles from "./style.module.css";
@@ -94,5 +94,51 @@ export function EntityImageField({
       )}
       {cropContent}
     </div>
+  );
+}
+
+/** Mesma estrutura de formulário usada por Serviços e Profissionais. */
+export function EntityEditorForm({
+  onSubmit, children,
+}: {
+  onSubmit: FormEventHandler<HTMLFormElement>;
+  children: ReactNode;
+}) {
+  return <form className={styles.editorForm} onSubmit={onSubmit}>{children}</form>;
+}
+
+/** Os campos variam; bordas, alturas, ícones e tipografia são compartilhados. */
+export function EntityEditorField({
+  label, icon, children,
+}: {
+  label: string;
+  icon?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <label className={styles.editorField}>
+      <span>{label}</span>
+      <span className={icon ? styles.fieldWithIcon : styles.fieldControl}>
+        {children}
+        {icon && <span className={styles.fieldIcon} aria-hidden="true">{icon}</span>}
+      </span>
+    </label>
+  );
+}
+
+export function EntityEditorError({ message }: { message: string }) {
+  return message ? <p className={styles.editorError} role="alert">{message}</p> : null;
+}
+
+export function EntityEditorSubmit({
+  disabled, children,
+}: {
+  disabled: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <button className={styles.editorSubmit} type="submit" disabled={disabled}>
+      {children}
+    </button>
   );
 }
