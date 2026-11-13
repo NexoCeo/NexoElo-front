@@ -1,3 +1,4 @@
+import { formatUserCode, normalizeUserData } from "@/context/UserContext";
 import api from "./api";
 
 /* =========================================================
@@ -44,7 +45,7 @@ export async function obterStatusVinculoProfissional(): Promise<VinculoProfissio
 
   return {
     status:
-      status.toUpperCase() as VinculoProfissionalStatus["status"],
+      formatUserCode(status) as VinculoProfissionalStatus["status"],
 
     empresaId:
       data.EmpresaId ??
@@ -52,9 +53,9 @@ export async function obterStatusVinculoProfissional(): Promise<VinculoProfissio
       null,
 
     empresaNome:
-      data.EmpresaNome ??
-      data.empresaNome ??
-      null,
+      data.EmpresaNome || data.empresaNome
+        ? normalizeUserData({ EmpresaNome: data.EmpresaNome ?? data.empresaNome ?? "" }).EmpresaNome
+        : null,
 
     dataSolicitacao:
       data.DataSolicitacao ??
@@ -100,7 +101,7 @@ export async function listarEmpresasParaNovoVinculo(
   );
 
   return response.data
-    .map((empresa) => ({
+    .map((empresa) => normalizeUserData({
       Id:
         empresa.Id ??
         empresa.id ??
@@ -197,7 +198,7 @@ export async function listarSolicitacoesVinculo(
     `/vinculos/empresa/${empresaId}/solicitacoes`,
   );
 
-  return response.data.map((item) => ({
+  return response.data.map((item) => normalizeUserData({
     VinculoId:
       item.VinculoId ??
       item.vinculoId ??
