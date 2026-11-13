@@ -1,3 +1,4 @@
+import { normalizeUserData } from "@/context/UserContext";
 import api from "./api";
 import type { AgendaPublica } from "@/types/agenda-publica";
 
@@ -88,7 +89,7 @@ export async function obterSlugUsuario(usuarioId: number) {
 const EMPRESAS_CACHE_MS = 3 * 60 * 1000;
 const empresasCache = new Map<number, { data: EmpresaCadastro[]; expiresAt: number }>();
 const empresasPendentes = new Map<number, Promise<EmpresaCadastro[]>>();
-const EMPRESAS_CACHE_PREFIX = "nexoelo:cadastro-empresas:v1:";
+const EMPRESAS_CACHE_PREFIX = "nexoelo:cadastro-empresas:v2:";
 
 function lerEmpresasCacheSessao(key: number) {
   if (typeof window === "undefined") return null;
@@ -145,7 +146,7 @@ export async function listarEmpresasParaCadastro(
       : await api.get<ApiRecord[]>("/Profissional/empresas", { params: { cidadeId } });
 
     const companies = response.data
-      .map((empresa) => ({
+      .map((empresa) => normalizeUserData({
         Id: pickNumber(empresa, [
           "IdUsuario", "idUsuario", "Id", "id",
           "UsuarioId", "usuarioId", "EmpresaId", "empresaId",
