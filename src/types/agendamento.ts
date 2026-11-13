@@ -32,6 +32,8 @@ export type Agendamento = {
   Valor: number;
   Taxa: number;
   ValorServico: number;
+  /** Duração real cadastrada para o serviço, em minutos. */
+  DuracaoMinutos?: number;
   Status: string;
   MotivoCancelamento?: string | null;
   ClienteNome: string;
