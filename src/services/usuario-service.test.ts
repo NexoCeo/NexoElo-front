@@ -23,8 +23,10 @@ describe("usuario-service", () => {
     mocks.get.mockResolvedValue({
       data: {
         Id: 7,
-        Nome: "Empresa Teste",
+        Nome: "BARBEARIA SHOP LTDA",
         Email: "EMPRESA@MAIL.COM",
+        NomeFantasia: "BARBEARIA DO PEDRO",
+        Cnpj: "27019954000100",
         Telefone: "27999999999",
         FotoPerfil: "uploads/empresa.png",
         TipoUsuario: "EMPRESA",
@@ -37,6 +39,10 @@ describe("usuario-service", () => {
     expect(mocks.get).toHaveBeenCalledWith("/Usuario/7");
     expect(result).toMatchObject({
       Id: 7,
+      Nome: "Barbearia Shop Ltda",
+      Email: "empresa@mail.com",
+      NomeFantasia: "Barbearia do Pedro",
+      Cnpj: "27.019.954/0001-00",
       Papel: "EMPRESA",
       FotoPerfil: "uploads/empresa.png",
     });
