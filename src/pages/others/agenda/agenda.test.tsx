@@ -163,6 +163,7 @@ describe("Agenda", () => {
       }),
       appointment({
         Id: 41,
+        ClienteNome: "Cliente Simultâneo",
         ServicoNome: "Fibra em gel decorada",
         DataAgendamento: "2026-08-10T14:00:00",
         DuracaoMinutos: 60,
@@ -170,7 +171,7 @@ describe("Agenda", () => {
     ]);
 
     render(<Agenda />);
-    await screen.findByText("Fibra em gel decorada");
+    await screen.findByText("Cliente Simultâneo");
     const first = document.querySelector<HTMLElement>('[data-appointment-id="40"]')!;
     const second = document.querySelector<HTMLElement>('[data-appointment-id="41"]')!;
     expect(first).toHaveAttribute("data-event-lanes", "2");
