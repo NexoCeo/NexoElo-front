@@ -187,6 +187,26 @@ describe("Profissionais", () => {
     ).not.toHaveLength(0);
     expect(profissionalMock.criar).toHaveBeenCalledTimes(1);
   });
+  it("reabre o recorte usando a foto original, mesmo após aplicar o primeiro recorte", async () => {
+    profissionalMock.listar.mockResolvedValue([{
+      Id: 21, Nome: "Profissional Recorte", Email: "recorte@example.com",
+      Telefone: "", FotoPerfil: "uploads/foto-antiga.webp", VinculoStatus: "APROVADO",
+    }]);
+    render(<MemoryRouter><LanguageProvider><Profissionais /></LanguageProvider></MemoryRouter>);
+    await screen.findByText("Profissional Recorte");
+    fireEvent.click(screen.getByRole("button", { name: "Opções de Profissional Recorte" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Editar" }));
+    const dialog = screen.getByRole("dialog", { name: "Editar profissional" });
+    const original = new File(["original-sem-corte"], "foto-original.jpg", { type: "image/jpeg" });
+    fireEvent.change(within(dialog).getByLabelText("Foto do profissional"), {
+      target: { files: [original] },
+    });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Aplicar recorte" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "Ajustar recorte" }));
+    expect(vi.mocked(URL.createObjectURL)).toHaveBeenLastCalledWith(original);
+    fireEvent.click(within(dialog).getByRole("button", { name: "Cancelar recorte" }));
+  });
+
   it("reutiliza o modal de serviços para recortar e trocar a foto ao editar", async () => {
     profissionalMock.listar.mockResolvedValue([{
       Id: 11, Nome: "Profissional Teste", Email: "profissional@example.com",
