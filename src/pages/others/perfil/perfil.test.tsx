@@ -115,7 +115,29 @@ describe("Perfil", () => {
     expect(mocks.setUsuario).toHaveBeenLastCalledWith(
       expect.objectContaining({ Nome: "Empresa Renovada", Email: "renovada@mail.com" }),
     );
-    expect(await screen.findByText("Perfil atualizado com sucesso.")).toBeInTheDocument();
+    // A confirmação pertence ao toast global, não à página de perfil.
+    const toast = await screen.findByRole("status");
+    expect(within(toast).getByText("Perfil atualizado")).toBeInTheDocument();
+    expect(within(toast).getByText("Seus novos dados já estão visíveis no sistema.")).toBeInTheDocument();
+    expect(screen.queryByText("Perfil atualizado com sucesso.")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("status")).toHaveLength(1);
+  });
+
+  it("mostra falha de salvamento somente no componente global de notificações", async () => {
+    mocks.atualizarPerfilUsuario.mockRejectedValueOnce(new Error("Falha na API"));
+
+    render(<MemoryRouter><LanguageProvider><Perfil /></LanguageProvider></MemoryRouter>);
+    await screen.findByRole("heading", { name: "Empresa Teste" });
+    fireEvent.click(screen.getByRole("button", { name: "Editar perfil" }));
+    const dialog = screen.getByRole("dialog", { name: "Editar perfil" });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Salvar alterações" }));
+
+    const toast = await screen.findByRole("alert");
+    expect(within(toast).getByText("Perfil não salvo")).toBeInTheDocument();
+    expect(within(toast).getByText("Não foi possível salvar as alterações do perfil.")).toBeInTheDocument();
+    // Sem outro alerta repetido dentro do modal ou na página.
+    expect(within(dialog).queryByText("Não foi possível salvar as alterações do perfil.")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("alert")).toHaveLength(1);
   });
 
   it.each(["EMPRESA", "AUTONOMO", "PROFISSIONAL"])(
