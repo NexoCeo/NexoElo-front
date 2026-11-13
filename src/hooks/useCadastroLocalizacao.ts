@@ -53,32 +53,34 @@ function obterCoordenadas(): Promise<Coordenadas> {
     const onSuccess = ({ coords }: GeolocationPosition) =>
       resolve({ latitude: coords.latitude, longitude: coords.longitude });
 
-    const onFailure = (error: GeolocationPositionError) => {
-      if (error.code === 1) {
-        reject(new Error("Permita o acesso à localização nas configurações do navegador para continuar."));
-        return;
-      }
-
-      // GPS de alta precisão costuma falhar em ambientes internos e navegadores móveis.
-      // Tenta novamente usando a localização aproximada fornecida pela rede.
-      navigator.geolocation.getCurrentPosition(
-        onSuccess,
-        (fallbackError) => {
-          const messages: Record<number, string> = {
-            1: "A permissão de localização foi negada.",
-            2: "A localização do dispositivo está indisponível. Ative a localização e tente novamente.",
-            3: "A busca da localização excedeu o tempo limite. Tente novamente.",
-          };
-          reject(new Error(messages[fallbackError.code] || "Não foi possível obter sua localização."));
-        },
-        { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 },
-      );
+    const messages: Record<number, string> = {
+      1: "A permissão de localização foi negada.",
+      2: "A localização do dispositivo está indisponível. Ative a localização e tente novamente.",
+      3: "A busca da localização excedeu o tempo limite. Tente novamente.",
     };
 
+    const onHighAccuracyFailure = (error: GeolocationPositionError) => {
+      reject(new Error(messages[error.code] || "Não foi possível obter sua localização."));
+    };
+
+    // Para filtrar empresas precisamos apenas da cidade. A localização
+    // aproximada da rede é muito mais rápida que aguardar GPS de alta precisão.
     navigator.geolocation.getCurrentPosition(
       onSuccess,
-      onFailure,
-      { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 },
+      (error) => {
+        if (error.code === 1) {
+          reject(new Error("Permita o acesso à localização nas configurações do navegador para continuar."));
+          return;
+        }
+
+        // Apenas se a rede falhar, tente GPS para não bloquear o cadastro.
+        navigator.geolocation.getCurrentPosition(
+          onSuccess,
+          onHighAccuracyFailure,
+          { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 },
+        );
+      },
+      { enableHighAccuracy: false, timeout: 7000, maximumAge: 300000 },
     );
   });
 }
