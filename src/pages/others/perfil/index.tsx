@@ -265,6 +265,10 @@ export default function Perfil() {
           name={usuario?.Nome || t("profile.notProvided")}
           email={usuario?.Email}
           phone={usuario?.Telefone}
+          companyDetails={usuario?.Papel === "EMPRESA" ? {
+            tradeName: usuario.NomeFantasia,
+            cnpj: usuario.Cnpj,
+          } : undefined}
           avatarUrl={getProfileImageUrl(usuario?.FotoPerfil)}
           onPhotoChange={usuario && !loading ? (file) => openModal(file) : undefined}
           action={<button
