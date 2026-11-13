@@ -1,5 +1,7 @@
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { render } from "@/test/render-with-notifications";
+import { LanguageProvider } from "@/context/LanguageContext";
+import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Agendamento } from "@/types/agendamento";
 import type { Profissional } from "@/types/profissional";
@@ -29,7 +31,8 @@ vi.mock("@/context/ThemeContext", () => ({
   }),
 }));
 
-vi.mock("@/context/UserContext", () => ({
+vi.mock("@/context/UserContext", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@/context/UserContext")>(),
   useUser: () => ({
     usuario: { Id: 7, Nome: "Empresa Teste", Papel: "EMPRESA" },
   }),
@@ -87,6 +90,16 @@ function appointment(overrides: Partial<Agendamento> = {}): Agendamento {
   };
 }
 
+function renderAgenda() {
+  return render(
+    <MemoryRouter>
+      <LanguageProvider>
+        <Agenda />
+      </LanguageProvider>
+    </MemoryRouter>,
+  );
+}
+
 describe("Agenda", () => {
   beforeEach(() => {
     vi.useRealTimers();
@@ -105,7 +118,7 @@ describe("Agenda", () => {
   it("carrega e exibe os agendamentos do dia atual com os nomes resolvidos", async () => {
     agendaServiceMock.listarAgendaPorData.mockResolvedValue([appointment()]);
 
-    render(<Agenda />);
+    renderAgenda();
 
     expect(await screen.findByText("Vitor Cliente")).toBeInTheDocument();
     expect(screen.getByText("Serviço Teste 1")).toBeInTheDocument();
@@ -138,7 +151,7 @@ describe("Agenda", () => {
       }),
     ]);
 
-    render(<Agenda />);
+    renderAgenda();
     expect(await screen.findByText("Cliente Hidratação")).toBeInTheDocument();
 
     const first = document.querySelector<HTMLElement>('[data-appointment-id="30"]');
@@ -170,7 +183,7 @@ describe("Agenda", () => {
       }),
     ]);
 
-    render(<Agenda />);
+    renderAgenda();
     await screen.findByText("Cliente Simultâneo");
     const first = document.querySelector<HTMLElement>('[data-appointment-id="40"]')!;
     const second = document.querySelector<HTMLElement>('[data-appointment-id="41"]')!;
@@ -193,7 +206,7 @@ describe("Agenda", () => {
         }),
       ]);
 
-    render(<Agenda />);
+    renderAgenda();
 
     await waitFor(() => {
       expect(agendaServiceMock.listarAgendaPorData).toHaveBeenCalledWith(
@@ -228,7 +241,7 @@ describe("Agenda", () => {
         }),
       ]);
 
-    render(<Agenda />);
+    renderAgenda();
     expect(await screen.findByText("Vitor Cliente")).toBeInTheDocument();
 
     await act(async () => {
@@ -253,7 +266,7 @@ describe("Agenda", () => {
         appointment({ Id: 9, ClienteNome: "Atualização Automática" }),
       ]);
 
-    render(<Agenda />);
+    renderAgenda();
     expect(await screen.findByText("Vitor Cliente")).toBeInTheDocument();
 
     act(() => {
@@ -279,7 +292,7 @@ describe("Agenda", () => {
         appointment({ Id: 10, ClienteNome: "Cliente do Polling" }),
       ]);
 
-    render(<Agenda />);
+    renderAgenda();
     await act(async () => undefined);
     expect(screen.getByText("Vitor Cliente")).toBeInTheDocument();
 
@@ -302,7 +315,7 @@ describe("Agenda", () => {
         }),
       ]);
 
-    render(<Agenda />);
+    renderAgenda();
 
     await waitFor(() => {
       expect(agendaServiceMock.listarAgendaPorData).toHaveBeenCalledTimes(1);
@@ -331,7 +344,7 @@ describe("Agenda", () => {
     ]);
     agendaServiceMock.listarAgendaPorData.mockResolvedValue([]);
 
-    render(<Agenda />);
+    renderAgenda();
     fireEvent.click(screen.getByRole("button", { name: "Filtros da agenda" }));
 
     const professionalSelect = screen.getByRole("button", { name: /profissional todos os profissionais/i });
@@ -363,7 +376,7 @@ describe("Agenda", () => {
       Status: "CANCELADO",
     });
 
-    render(<Agenda />);
+    renderAgenda();
     expect(await screen.findByText("Vitor Cliente")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Cancelar agendamento de Vitor Cliente" }));
@@ -380,7 +393,7 @@ describe("Agenda", () => {
     agendaServiceMock.listarAgendaPorData.mockResolvedValue([appointment()]);
     agendaServiceMock.concluirAgendamentosDoDiaAtual.mockResolvedValue(2);
 
-    render(<Agenda />);
+    renderAgenda();
     expect(await screen.findByText("Vitor Cliente")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Fechar todos agendamentos" }));
