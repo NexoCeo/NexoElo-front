@@ -30,8 +30,6 @@ function Register() {
     TipoUsuario,
 
     nomeFantasia,
-    localizacao,
-
 
 
     empresas,
@@ -64,13 +62,6 @@ function Register() {
   } = useRegisterForm();
 
   const [previewUrl, setPreviewUrl] = useState("");
-  // A geolocalização pode encontrar coordenadas antes de a API resolver a cidade.
-  // Mantenha o indicador de progresso durante todo esse intervalo.
-  const identificandoCidade = !localizacao.cidadeId && (
-    localizacao.loading ||
-    localizacao.modo === "nao-selecionada" ||
-    localizacao.modo === "detectando"
-  );
 
   /*
    * Preview da foto de perfil
@@ -280,26 +271,19 @@ function Register() {
                     )
                   }
                   disabled={
-                    identificandoCidade ||
-                    loadingEmpresas ||
-                    !localizacao.cidadeId ||
-                    empresas.length === 0
+                    loadingEmpresas || empresas.length === 0
                   }
                   required
-                  aria-busy={identificandoCidade || loadingEmpresas}
+                  aria-busy={loadingEmpresas}
                 >
                   <option value={0}>
-                    {identificandoCidade
-                      ? t("auth.locatingCity")
-                      : loadingEmpresas
-                        ? t("auth.loadingCompanies")
-                        : empresasError
-                          ? t("auth.companiesUnavailable")
-                          : !localizacao.cidadeId
-                            ? t("auth.locationUnavailable")
-                            : empresas.length === 0
-                              ? t("auth.noCompanies")
-                              : t("auth.chooseCompany")}
+                    {loadingEmpresas
+                      ? t("auth.loadingCompanies")
+                      : empresasError
+                        ? t("auth.companiesUnavailable")
+                        : empresas.length === 0
+                          ? t("auth.noCompanies")
+                          : t("auth.chooseCompany")}
                   </option>
 
                   {empresas.map(
@@ -316,17 +300,15 @@ function Register() {
                 </select>
               </div>
 
-              {!identificandoCidade &&
-                !loadingEmpresas &&
+              {!loadingEmpresas &&
                 !empresasError &&
-                localizacao.cidadeId > 0 &&
                 empresas.length === 0 && (
                   <p
                     className={
                       styles.error
                     }
                   >
-                    {t("auth.noCompaniesHere")}
+                    {t("auth.noCompanies")}
                   </p>
                 )}
             </div>
@@ -384,7 +366,7 @@ function Register() {
           </div>
 
           {/* Botão cadastrar */}
-          <SubmitButton disabled={!isFormValid() || (TipoUsuario === "profissional" && (identificandoCidade || loadingEmpresas))} loading={loading}>{t("auth.register")}</SubmitButton>
+          <SubmitButton disabled={!isFormValid() || (TipoUsuario === "profissional" && loadingEmpresas)} loading={loading}>{t("auth.register")}</SubmitButton>
         </form>
       </div>
     </div>
