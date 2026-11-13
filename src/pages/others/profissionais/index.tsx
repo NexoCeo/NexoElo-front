@@ -35,6 +35,7 @@ import {
   criarProfissionalEmpresa,
   atualizarProfissionalEmpresa,
   listarProfissionaisEmpresa,
+  obterFotoOriginalProfissional,
 } from "@/services/profissional-service";
 import {
   CadastroLocalizacaoError,
@@ -265,13 +266,39 @@ export default function Profissionais() {
     setCropSource(URL.createObjectURL(file));
   }
 
-  function adjustProfessionalCrop() {
-    const source = fotoOriginal
-      ? URL.createObjectURL(fotoOriginal)
-      : getUploadedImageUrl(editingProfessional?.FotoPerfil);
-    if (!source) return;
+  async function adjustProfessionalCrop() {
     setFormError("");
-    setCropFilename(fotoOriginal?.name || editingProfessional?.Nome || "profissional");
+    if (fotoOriginal) {
+      setCropFilename(fotoOriginal.name);
+      setCropSource(URL.createObjectURL(fotoOriginal));
+      return;
+    }
+
+    const source = getUploadedImageUrl(editingProfessional?.FotoPerfil);
+    if (!source || !editingProfessional?.Id) return;
+
+    try {
+      const original = await obterFotoOriginalProfissional(editingProfessional.Id);
+      if (original) {
+        setFotoOriginal(original);
+        setCropFilename(original.name);
+        setCropSource(URL.createObjectURL(original));
+        return;
+      }
+      showNotification({
+        type: "warning",
+        title: "Foto original não disponível",
+        message: "Esta foto foi salva antes da preservação do arquivo original. Para recuperar a imagem completa, envie a foto novamente.",
+      });
+    } catch {
+      showNotification({
+        type: "warning",
+        title: "Não foi possível carregar a foto original",
+        message: "O recorte atual será usado. Você também pode selecionar a foto original novamente.",
+      });
+    }
+
+    setCropFilename(editingProfessional.Nome || "profissional");
     setCropSource(source);
   }
 
@@ -578,6 +605,7 @@ export default function Profissionais() {
         const atualizado = await atualizarProfissionalEmpresa(editingProfessional.Id, {
           Nome: nome.trim(), Email: email.trim(), Telefone: telefone.trim(),
           FotoPerfil: fotoPerfil,
+          FotoOriginal: fotoPerfil ? fotoOriginal : null,
         });
         setProfissionais(current => current.map(item => item.Id === atualizado.Id ? { ...item, ...atualizado, VinculoStatus: item.VinculoStatus } : item));
         closeModal();
@@ -597,6 +625,7 @@ export default function Profissionais() {
         email,
         telefone,
         fotoPerfil,
+        fotoOriginal,
         localizacao: localizacaoPayload,
       });
       await refreshProfissionais(access.profissional);
@@ -837,7 +866,7 @@ export default function Profissionais() {
               alt="Foto do profissional"
               onSelectFile={selectProfessionalPhoto}
               onAdjustCrop={fotoOriginal || getUploadedImageUrl(editingProfessional?.FotoPerfil)
-                ? adjustProfessionalCrop
+                ? () => void adjustProfessionalCrop()
                 : undefined}
               cropContent={cropSource ? (
                 <ServiceImageCrop
