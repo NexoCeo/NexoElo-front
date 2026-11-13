@@ -92,7 +92,7 @@ describe("campos de localizacao dos cadastros publicos", () => {
     );
 
     expectNoManualLocationFields();
-    expect(screen.getByText("Nome fantasia")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/nome fantasia|business name/i)).toBeInTheDocument();
     expect(screen.queryByText("CNPJ")).not.toBeInTheDocument();
     expect(screen.queryByPlaceholderText("Digite o CNPJ")).not.toBeInTheDocument();
   });
