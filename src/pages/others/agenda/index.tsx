@@ -19,6 +19,7 @@ import { createAgendaRealtimeClient } from "@/services/agenda-realtime-service";
 import type { Agendamento } from "@/types/agendamento";
 import type { Profissional } from "@/types/profissional";
 import styles from "./style.module.css";
+import { getTimelineBounds, layoutTimeline } from "./timeline-layout";
 import { formatPersonName } from "@/context/UserContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { usePageRevalidation } from "@/hooks/usePageRevalidation";
@@ -420,20 +421,25 @@ export default function Agenda() {
     cancelled: agendaItems.filter(item => item.status.trim().toUpperCase() === "CANCELADO").length,
     scheduled: agendaItems.filter(item => !["CONCLUIDO", "CONCLUÍDO", "CANCELADO"].includes(item.status.trim().toUpperCase())).length,
   }), [agendaItems]);
-  const timelineStart = 8;
-  const timelineEnd = 20;
-  const timelineItems = useMemo(() => agendaItems.map(item => {
-    const [hours, minutes] = item.horario.split(":").map(Number);
-    const startsAt = hours * 60 + minutes;
-    const duration = Math.max(30, 60);
-    return {
+  // A duração real do serviço determina a altura do card e os cruzamentos.
+  // Agendamentos simultâneos ficam em raias paralelas, sem mudar o horário.
+  const timelineSource = useMemo(() => {
+    const durations = new Map(agendamentos.map(item => [item.Id, item.DuracaoMinutos]));
+    return agendaItems.map(item => ({
       ...item,
-      start: Math.max(0, ((startsAt - timelineStart * 60) / ((timelineEnd - timelineStart) * 60)) * 100),
-      height: Math.max(5, (duration / ((timelineEnd - timelineStart) * 60)) * 100),
+      duracaoMinutos: durations.get(item.Id),
       cancelled: item.status.trim().toUpperCase() === "CANCELADO",
       completed: ["CONCLUIDO", "CONCLUÍDO"].includes(item.status.trim().toUpperCase()),
-    };
-  }), [agendaItems, agendamentos]);
+    }));
+  }, [agendaItems, agendamentos]);
+
+  const timelineBounds = useMemo(() => getTimelineBounds(timelineSource), [timelineSource]);
+  const timelineStart = timelineBounds.startHour;
+  const timelineEnd = timelineBounds.endHour;
+  const timelineItems = useMemo(() =>
+    layoutTimeline(timelineSource, timelineStart, timelineEnd),
+    [timelineSource, timelineStart, timelineEnd],
+  );
 
   async function handleStatusChange(
     agendamentoId: number,
@@ -681,7 +687,10 @@ export default function Agenda() {
           <span>{agendaItems.length} {agendaItems.length === 1 ? "agendamento" : "agendamentos"}</span>
         </div>
         <div className={styles.timelineViewport}>
-        <div className={styles.timelineCanvas}>
+        <div className={styles.timelineCanvas} style={{
+          height: `${(timelineEnd - timelineStart) * 60}px`,
+          minHeight: `${(timelineEnd - timelineStart) * 60}px`,
+        }}>
           {Array.from({length:timelineEnd-timelineStart+1}, (_, index) => (
             <div key={index} className={styles.hourRow} style={{top:`${index/(timelineEnd-timelineStart)*100}%`}}>
               <span>{String(timelineStart+index).padStart(2,"0")}:00</span>
@@ -690,9 +699,19 @@ export default function Agenda() {
           <div className={styles.timelineEvents}>
             {timelineItems.map(item => (
               <div key={item.Id}
-                className={`${styles.timelineEvent} ${item.completed ? styles.eventCompleted : ""} ${item.cancelled ? styles.eventCancelled : ""}`}
-                style={{top:`${Math.min(98,item.start)}%`,height:`${Math.min(item.height,100-Math.min(98,item.start))}%`}}
-                title={`${item.servico} — ${item.cliente} — ${item.horario}`}>
+                className={`${styles.timelineEvent} ${item.laneCount > 1 ? styles.timelineEventCompact : ""} ${item.completed ? styles.eventCompleted : ""} ${item.cancelled ? styles.eventCancelled : ""}`}
+                style={{
+                  top: `${item.top}%`,
+                  height: `${item.height}%`,
+                  left: `calc(${(item.lane / item.laneCount) * 100}% + 3px)`,
+                  width: `calc(${100 / item.laneCount}% - 6px)`,
+                  right: "auto",
+                }}
+                title={`${item.servico} — ${item.cliente} — ${item.horario} (${item.duracaoMinutos ?? 30} min)`}
+                aria-label={`${item.servico}, ${item.cliente}, ${item.horario}`}
+                data-appointment-id={item.Id}
+                data-event-lane={item.lane}
+                data-event-lanes={item.laneCount}>
                 <strong>{item.servico}</strong><small>{item.horario}</small>
               </div>
             ))}
