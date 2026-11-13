@@ -1,3 +1,4 @@
+import { normalizeUserData, formatEmailDisplay, formatPersonName } from "@/context/UserContext";
 import { carregarImagemOriginal } from "./imagem-original-service";
 import api from "./api";
 import { appendCadastroLocalizacao } from "./localizacao-service";
@@ -86,7 +87,7 @@ function normalizeProfissional(data: ApiRecord): Profissional {
     "User",
   ]);
 
-  return {
+  return normalizeUserData({
     Id: pickNumber(profissional, ["Id", "id", "UsuarioId", "usuarioId", "ProfissionalId", "profissionalId"])
       || pickNumber(data, ["ProfissionalId", "profissionalId", "UsuarioId", "usuarioId"]),
     Nome: pickString(profissional, ["Nome", "nome", "Name", "name"]),
@@ -95,7 +96,7 @@ function normalizeProfissional(data: ApiRecord): Profissional {
     FotoPerfil: pickString(profissional, ["FotoPerfil", "fotoPerfil"]),
     TipoUsuario: pickString(profissional, ["TipoUsuario", "tipoUsuario", "Papel", "papel"]).toUpperCase(),
     VinculoStatus: pickString(data, ["VinculoStatus", "vinculoStatus", "Status", "status"]),
-  };
+  });
 }
 
 export async function listarProfissionaisEmpresa(empresaId: number) {
@@ -109,10 +110,10 @@ export async function criarProfissionalEmpresa(
   payload: CreateProfissionalPayload,
 ): Promise<AcessoProfissionalCriado> {
   const formData = new FormData();
-  const nomeNormalizado = payload.nome.trim();
+  const nomeNormalizado = formatPersonName(payload.nome);
 
   formData.append("Nome", nomeNormalizado);
-  formData.append("Email", payload.email.trim());
+  formData.append("Email", formatEmailDisplay(payload.email));
   formData.append("Telefone", onlyDigits(payload.telefone));
   formData.append("TipoUsuario", "PROFISSIONAL");
   appendCadastroLocalizacao(formData, payload.localizacao);
@@ -135,8 +136,8 @@ export async function atualizarProfissionalEmpresa(
 ): Promise<Profissional> {
   if (dados.FotoPerfil) {
     const formData = new FormData();
-    formData.append("Nome", dados.Nome);
-    formData.append("Email", dados.Email);
+    formData.append("Nome", formatPersonName(dados.Nome));
+    formData.append("Email", formatEmailDisplay(dados.Email));
     formData.append("Telefone", dados.Telefone);
     formData.append("FotoPerfil", dados.FotoPerfil);
     if (dados.FotoOriginal) formData.append("FotoOriginal", dados.FotoOriginal);
@@ -149,7 +150,7 @@ export async function atualizarProfissionalEmpresa(
   }
   const { data } = await api.put<ApiRecord>(
     `/Usuario/empresa/profissionais/${profissionalId}`, {
-      Nome: dados.Nome, Email: dados.Email, Telefone: dados.Telefone,
+      Nome: formatPersonName(dados.Nome), Email: formatEmailDisplay(dados.Email), Telefone: dados.Telefone,
     },
   );
   return normalizeProfissional(data);
