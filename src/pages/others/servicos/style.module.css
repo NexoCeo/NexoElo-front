@@ -922,3 +922,15 @@
   outline-offset:1px;
   border-color:var(--theme-primary-text);
 }
+
+.cropLegacyHint {
+  color: var(--theme-text-muted);
+  background: var(--theme-surface-muted);
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+  margin: 0;
+}
