@@ -1,3 +1,4 @@
+import { carregarImagemOriginal } from "./imagem-original-service";
 import type { Usuario } from "@/context/UserContext";
 import api from "./api";
 
@@ -8,6 +9,7 @@ export type UpdatePerfilPayload = {
   Email: string;
   Telefone?: string;
   FotoPerfil?: File | null;
+  FotoOriginal?: File | null;
 };
 
 function pickString(data: ApiRecord, keys: string[]) {
@@ -59,6 +61,9 @@ export async function atualizarPerfilUsuario(id: number, payload: UpdatePerfilPa
 
   if (payload.FotoPerfil) {
     formData.append("FotoPerfil", payload.FotoPerfil);
+    if (payload.FotoOriginal) {
+      formData.append("FotoOriginal", payload.FotoOriginal);
+    }
   }
 
   const response = await api.put<ApiRecord>(`/Usuario/${id}/perfil`, formData, {
@@ -67,3 +72,6 @@ export async function atualizarPerfilUsuario(id: number, payload: UpdatePerfilPa
 
   return normalizeUsuario(response.data);
 }
+
+export const obterFotoOriginalUsuario = (id: number) =>
+  carregarImagemOriginal(`/Usuario/${id}/foto-original`);
