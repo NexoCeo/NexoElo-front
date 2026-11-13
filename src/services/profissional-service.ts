@@ -117,6 +117,7 @@ export async function criarProfissionalEmpresa(
   appendCadastroLocalizacao(formData, payload.localizacao);
   formData.append("EmpresaId", String(payload.empresaId));
   formData.append("FotoPerfil", payload.fotoPerfil);
+  if (payload.fotoOriginal) formData.append("FotoOriginal", payload.fotoOriginal);
 
   const response = await api.post<ApiRecord>("/Usuario/InserirProfissionalEmpresa", formData, {
     headers: { "Content-Type": "multipart/form-data" },
@@ -129,7 +130,7 @@ export async function criarProfissionalEmpresa(
 
 export async function atualizarProfissionalEmpresa(
   profissionalId: number,
-  dados: { Nome: string; Email: string; Telefone: string; FotoPerfil?: File | null },
+  dados: { Nome: string; Email: string; Telefone: string; FotoPerfil?: File | null; FotoOriginal?: File | null },
 ): Promise<Profissional> {
   if (dados.FotoPerfil) {
     const formData = new FormData();
@@ -137,6 +138,7 @@ export async function atualizarProfissionalEmpresa(
     formData.append("Email", dados.Email);
     formData.append("Telefone", dados.Telefone);
     formData.append("FotoPerfil", dados.FotoPerfil);
+    if (dados.FotoOriginal) formData.append("FotoOriginal", dados.FotoOriginal);
     const { data } = await api.put<ApiRecord>(
       `/Usuario/empresa/profissionais/${profissionalId}/com-foto`,
       formData,
