@@ -50,6 +50,7 @@ import type { Profissional } from "@/types/profissional";
 import type { Servico } from "@/types/servico";
 import {
   listarSolicitacoesVinculo,
+  listarHistoricoSolicitacoesVinculo,
   responderSolicitacaoVinculo,
   type SolicitacaoVinculo,
 } from "@/services/vinculo-service";
@@ -162,8 +163,12 @@ export default function Profissionais() {
   const [savingServicos, setSavingServicos] = useState(false);
   const [servicosError, setServicosError] = useState("");
   const [solicitacoesOpen, setSolicitacoesOpen] = useState(false);
+  const [vinculosTab, setVinculosTab] = useState<"solicitacoes" | "historico">("solicitacoes");
   const [solicitacoes, setSolicitacoes] = useState<SolicitacaoVinculo[]>([]);
   const [loadingSolicitacoes, setLoadingSolicitacoes] = useState(false);
+  const [historicoSolicitacoes, setHistoricoSolicitacoes] = useState<SolicitacaoVinculo[]>([]);
+  const [loadingHistorico, setLoadingHistorico] = useState(false);
+  const [historicoError, setHistoricoError] = useState("");
   const [respondendoId, setRespondendoId] = useState(0);
   const [solicitacoesError, setSolicitacoesError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -500,6 +505,7 @@ export default function Profissionais() {
   }
 
   async function openSolicitacoesModal() {
+    setVinculosTab("solicitacoes");
     setSolicitacoesOpen(true);
     setLoadingSolicitacoes(true);
     setSolicitacoesError("");
@@ -512,6 +518,23 @@ export default function Profissionais() {
       showNotification({ type: "error", title: "Solicitacoes indisponiveis", message });
     } finally {
       setLoadingSolicitacoes(false);
+    }
+  }
+
+  async function selecionarAbaVinculos(tab: "solicitacoes" | "historico") {
+    if (tab === vinculosTab) return;
+    setVinculosTab(tab);
+    if (tab === "historico") {
+      setLoadingHistorico(true);
+      setHistoricoError("");
+      try {
+        const data = await listarHistoricoSolicitacoesVinculo(empresaId);
+        setHistoricoSolicitacoes(data);
+      } catch {
+        setHistoricoError(t("pros.historyError"));
+      } finally {
+        setLoadingHistorico(false);
+      }
     }
   }
 
@@ -537,6 +560,11 @@ export default function Profissionais() {
       await responderSolicitacaoVinculo(empresaId, solicitacao.VinculoId, status);
       setSolicitacoes((items) =>
         items.filter((item) => item.VinculoId !== solicitacao.VinculoId),
+      );
+      // Mantém o histórico local coerente após a aprovação/recusa,
+      // mesmo antes da próxima consulta ao endpoint.
+      setHistoricoSolicitacoes((items) =>
+        [{ ...solicitacao, Status: status }, ...items.filter((item) => item.VinculoId !== solicitacao.VinculoId)],
       );
       if (status === "APROVADO") await refreshProfissionais();
       showNotification({
@@ -980,71 +1008,139 @@ export default function Profissionais() {
       )}
 
       {solicitacoesOpen && (
-        <div className={styles.modalBackdrop} role="presentation">
+        <div className={`${styles.modalBackdrop} ${styles.requestsBackdrop}`} role="presentation">
           <section
             className={`${styles.modal} ${styles.requestsModal}`}
             style={{ backgroundColor: theme.colors.background2 }}
             role="dialog"
             aria-modal="true"
-            aria-labelledby="solicitacoes-title"
+            aria-label={t("pros.linkRequests")}
           >
-            <header className={styles.modalHeader}>
-              <div>
-                <h2 id="solicitacoes-title" style={{ color: theme.colors.text }}>
-                  {t("pros.linkRequests")}
-                </h2>
-                <p style={{ color: theme.colors.inactive }}>
-                  {t("pros.requestsDescription")}
-                </p>
-              </div>
+            <div className={styles.requestsTabs} role="tablist" aria-label={t("pros.linkRequests")}>
               <button
+                id="vinculos-tab-solicitacoes"
                 type="button"
-                onClick={() => setSolicitacoesOpen(false)}
-                aria-label="Fechar solicitacoes"
+                role="tab"
+                aria-selected={vinculosTab === "solicitacoes"}
+                aria-controls="vinculos-panel"
+                className={vinculosTab === "solicitacoes" ? styles.requestsTabActive : ""}
+                onClick={() => void selecionarAbaVinculos("solicitacoes")}
               >
-                <FaTimes />
+                {t("pros.requestsTab")}
               </button>
-            </header>
+              <button
+                id="vinculos-tab-historico"
+                type="button"
+                role="tab"
+                aria-selected={vinculosTab === "historico"}
+                aria-controls="vinculos-panel"
+                className={vinculosTab === "historico" ? styles.requestsTabActive : ""}
+                onClick={() => void selecionarAbaVinculos("historico")}
+              >
+                {t("pros.historyTab")}
+              </button>
+            </div>
 
-            {loadingSolicitacoes ? (
-              <p className={styles.servicesFeedback}>{t("pros.requestsLoading")}</p>
-            ) : solicitacoes.length === 0 ? (
-              <p className={styles.servicesFeedback}>{t("pros.requestsEmpty")}</p>
-            ) : (
-              <div className={styles.requestsList}>
-                {solicitacoes.map((solicitacao) => (
-                  <article className={styles.requestItem} key={solicitacao.VinculoId}>
-                    <div>
-                      <strong>{solicitacao.Nome}</strong>
-                      <span>{formatEmailDisplay(solicitacao.Email) || solicitacao.Telefone || t("pros.contactMissing")}</span>
+            <div
+              className={styles.requestsPanel}
+              id="vinculos-panel"
+              role="tabpanel"
+              aria-labelledby={vinculosTab === "solicitacoes"
+                ? "vinculos-tab-solicitacoes" : "vinculos-tab-historico"}
+            >
+              <header className={styles.modalHeader}>
+                <div>
+                  <h2 style={{ color: theme.colors.text }}>
+                    {vinculosTab === "solicitacoes" ? t("pros.requests") : t("pros.historyTab")}
+                  </h2>
+                  <p style={{ color: theme.colors.inactive }}>
+                    {vinculosTab === "solicitacoes"
+                      ? t("pros.requestsDescription") : t("pros.historyDescription")}
+                  </p>
+                </div>
+                <button type="button" onClick={() => setSolicitacoesOpen(false)}
+                  aria-label="Fechar solicitacoes" title="Fechar">
+                  <FaTimes />
+                </button>
+              </header>
+
+              <div className={styles.requestsBody}>
+                {vinculosTab === "solicitacoes" ? (
+                  loadingSolicitacoes ? (
+                    <p className={styles.servicesFeedback}>{t("pros.requestsLoading")}</p>
+                  ) : solicitacoes.length === 0 ? (
+                    <p className={styles.servicesFeedback}>{t("pros.requestsEmpty")}</p>
+                  ) : (
+                    <div className={styles.requestsList}>
+                      {solicitacoes.map((solicitacao) => (
+                        <article className={styles.requestItem} key={solicitacao.VinculoId}>
+                          <div>
+                            <strong>{formatPersonName(solicitacao.Nome)}</strong>
+                            <span>{formatEmailDisplay(solicitacao.Email) || solicitacao.Telefone || t("pros.contactMissing")}</span>
+                          </div>
+                          <div className={styles.requestActions}>
+                            <button
+                              type="button"
+                              className={styles.rejectButton}
+                              onClick={() => responderSolicitacao(solicitacao, "RECUSADO")}
+                              disabled={Boolean(respondendoId)}
+                              aria-label={`Recusar vinculo de ${solicitacao.Nome}`}
+                              title={t("pros.reject")}
+                            >
+                              <FaTimes />
+                            </button>
+                            <button
+                              type="button"
+                              className={styles.approveButton}
+                              onClick={() => responderSolicitacao(solicitacao, "APROVADO")}
+                              disabled={Boolean(respondendoId)}
+                              aria-label={`Aprovar vinculo de ${solicitacao.Nome}`}
+                              title={t("pros.approve")}
+                            >
+                              <FaCheck />
+                            </button>
+                          </div>
+                        </article>
+                      ))}
                     </div>
-                    <div className={styles.requestActions}>
-                      <button
-                        type="button"
-                        className={styles.rejectButton}
-                        onClick={() => responderSolicitacao(solicitacao, "RECUSADO")}
-                        disabled={Boolean(respondendoId)}
-                        aria-label={`Recusar vinculo de ${solicitacao.Nome}`}
-                        title={t("pros.reject")}
-                      >
-                        <FaTimes />
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.approveButton}
-                        onClick={() => responderSolicitacao(solicitacao, "APROVADO")}
-                        disabled={Boolean(respondendoId)}
-                        aria-label={`Aprovar vinculo de ${solicitacao.Nome}`}
-                        title={t("pros.approve")}
-                      >
-                        <FaCheck />
-                      </button>
+                  )
+                ) : (
+                  loadingHistorico ? (
+                    <p className={styles.servicesFeedback}>{t("pros.historyLoading")}</p>
+                  ) : historicoError ? (
+                    <p className={styles.servicesFeedback} role="alert">{historicoError}</p>
+                  ) : historicoSolicitacoes.length === 0 ? (
+                    <p className={styles.servicesFeedback}>{t("pros.historyEmpty")}</p>
+                  ) : (
+                    <div className={styles.requestsList}>
+                      {historicoSolicitacoes.map((solicitacao) => (
+                        <article className={styles.requestItem} key={solicitacao.VinculoId}>
+                          <div>
+                            <strong>{formatPersonName(solicitacao.Nome)}</strong>
+                            <span>{formatEmailDisplay(solicitacao.Email) || solicitacao.Telefone || t("pros.contactMissing")}</span>
+                            {solicitacao.DataSolicitacao && !Number.isNaN(Date.parse(solicitacao.DataSolicitacao)) && (
+                              <small className={styles.requestDate}>
+                                {t("pros.requestedOn")} {new Intl.DateTimeFormat("pt-BR", {
+                                  day: "2-digit", month: "2-digit", year: "numeric",
+                                }).format(new Date(solicitacao.DataSolicitacao))}
+                              </small>
+                            )}
+                          </div>
+                          <span className={`${styles.historyStatus} ${solicitacao.Status === "APROVADO"
+                            ? styles.historyApproved : styles.historyRejected}`}>
+                            {solicitacao.Status === "APROVADO"
+                              ? t("pros.historyApproved") : t("pros.historyRejected")}
+                          </span>
+                        </article>
+                      ))}
                     </div>
-                  </article>
-                ))}
+                  )
+                )}
+                {vinculosTab === "solicitacoes" && solicitacoesError && (
+                  <p className={styles.error} role="alert">{solicitacoesError}</p>
+                )}
               </div>
-            )}
-            {solicitacoesError && <p className={styles.error}>{solicitacoesError}</p>}
+            </div>
           </section>
         </div>
       )}
