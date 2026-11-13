@@ -24,6 +24,8 @@ export type Usuario = {
   Papel: string;
   Slug: string;
   UrlPublica: string;
+  NomeFantasia?: string | null;
+  Cnpj?: string | null;
 };
 
 type UserContextType = {
