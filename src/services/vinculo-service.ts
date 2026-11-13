@@ -232,12 +232,13 @@ export async function listarSolicitacoesVinculo(
       item.profissionalTelefone ??
       null,
 
-    Status:
+    Status: formatUserCode(
       item.Status ??
       item.status ??
       item.VinculoStatus ??
       item.vinculoStatus ??
-      "PENDENTE",
+      "PENDENTE"
+    ),
 
     DataSolicitacao:
       item.DataSolicitacao ??
