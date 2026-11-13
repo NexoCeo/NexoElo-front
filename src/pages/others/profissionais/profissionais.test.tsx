@@ -21,10 +21,9 @@ vi.mock("@/context/ThemeContext", () => ({
   }),
 }));
 
-vi.mock("@/context/UserContext", () => ({
+vi.mock("@/context/UserContext", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@/context/UserContext")>(),
   useUser: () => ({ usuario: { Id: 7, Papel: "EMPRESA" } }),
-  formatPersonName: (name: string) => name,
-  formatEmailDisplay: (email: string) => email,
 }));
 
 vi.mock("@/services/profissional-service", () => ({
@@ -85,6 +84,38 @@ describe("Profissionais", () => {
     profissionalMock.original.mockResolvedValue(null);
     vinculoMock.listar.mockReset();
     vinculoMock.responder.mockReset();
+  });
+
+  it("preenche o modal com nome capitalizado e e-mail minúsculo, mesmo quando o banco devolve maiúsculas", async () => {
+    profissionalMock.listar.mockResolvedValue([{
+      Id: 33,
+      Nome: "FELIPE COSTA",
+      Email: "FELIPETESTE@GMAIL.COM",
+      Telefone: "",
+      FotoPerfil: "uploads/felipe.webp",
+      VinculoStatus: "APROVADO",
+    }]);
+
+    render(<MemoryRouter><LanguageProvider><Profissionais /></LanguageProvider></MemoryRouter>);
+
+    expect(await screen.findByText("Felipe Costa")).toBeInTheDocument();
+    expect(screen.getByText("felipeteste@gmail.com")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Opções de Felipe Costa" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Editar" }));
+
+    const dialog = screen.getByRole("dialog", { name: "Editar profissional" });
+    const nomeInput = within(dialog).getByPlaceholderText("Nome do profissional");
+    const emailInput = within(dialog).getByPlaceholderText("email@exemplo.com");
+    expect(nomeInput).toHaveValue("Felipe Costa");
+    expect(emailInput).toHaveValue("felipeteste@gmail.com");
+
+    fireEvent.change(nomeInput, { target: { value: "JOÃO DA SILVA" } });
+    fireEvent.blur(nomeInput);
+    fireEvent.change(emailInput, { target: { value: "JOAO@EXEMPLO.COM" } });
+    fireEvent.blur(emailInput);
+
+    expect(nomeInput).toHaveValue("João da Silva");
+    expect(emailInput).toHaveValue("joao@exemplo.com");
   });
 
   it("prepara as credenciais no WhatsApp depois de criar o profissional", async () => {
