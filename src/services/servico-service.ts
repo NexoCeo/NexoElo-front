@@ -56,6 +56,9 @@ export async function inserirServico(payload: CreateServicoPayload) {
   if (payload.ImagemServico) {
     formData.append("ImagemServico", payload.ImagemServico);
   }
+  if (payload.ImagemServico && payload.ImagemOriginal) {
+    formData.append("ImagemOriginal", payload.ImagemOriginal);
+  }
 
   const response = await api.post<Servico>("/Servico/InserirServicoComImagem", formData, {
     headers: { "Content-Type": "multipart/form-data" },
@@ -71,6 +74,9 @@ export async function atualizarServico(id: number, payload: UpdateServicoPayload
 
   if (payload.ImagemServico) {
     formData.append("ImagemServico", payload.ImagemServico);
+  }
+  if (payload.ImagemServico && payload.ImagemOriginal) {
+    formData.append("ImagemOriginal", payload.ImagemOriginal);
   }
 
   const response = await api.put<Servico>(`/Servico/${id}`, formData, {
