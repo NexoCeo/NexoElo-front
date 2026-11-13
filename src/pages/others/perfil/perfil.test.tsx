@@ -98,7 +98,7 @@ describe("Perfil", () => {
     fireEvent.change(within(dialog).getByLabelText("E-mail"), {
       target: { value: "renovada@mail.com" },
     });
-    fireEvent.click(within(dialog).getByRole("button", { name: "Salvar alteracoes" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "Salvar alterações" }));
 
     await waitFor(() => {
       expect(mocks.atualizarPerfilUsuario).toHaveBeenCalledWith(7, {
