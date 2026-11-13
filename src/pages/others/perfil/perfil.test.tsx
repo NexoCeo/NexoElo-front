@@ -18,6 +18,8 @@ const mocks = vi.hoisted(() => ({
     Papel: "EMPRESA",
     Slug: "empresa-teste",
     UrlPublica: "",
+    NomeFantasia: "Barbearia Shop",
+    Cnpj: "12345678000195",
   },
 }));
 
@@ -68,6 +70,8 @@ describe("Perfil", () => {
     Object.defineProperty(navigator, "languages", { configurable: true, value: ["pt-BR"] });
     mocks.usuario.Papel = "EMPRESA";
     mocks.usuario.FotoPerfil = "SEM_FOTO";
+    mocks.usuario.NomeFantasia = "Barbearia Shop";
+    mocks.usuario.Cnpj = "12345678000195";
     mocks.obterFotoOriginalUsuario.mockResolvedValue(null);
     Object.defineProperty(URL, "createObjectURL", { configurable: true, value: vi.fn(() => "blob:perfil-original") });
     Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: vi.fn() });
@@ -173,4 +177,41 @@ describe("Perfil", () => {
     await waitFor(() => expect(mocks.atualizarPerfilUsuario).toHaveBeenCalledWith(7,
       expect.objectContaining({ FotoOriginal: original })));
   });
+  it("exibe nome fantasia e CNPJ formatado abaixo dos contatos para empresa", async () => {
+    mocks.usuario.Papel = "EMPRESA";
+    render(<MemoryRouter><LanguageProvider><Perfil /></LanguageProvider></MemoryRouter>);
+
+    const companyName = await screen.findByRole("heading", { name: "Empresa Teste" });
+    expect(companyName).toBeInTheDocument();
+    expect(screen.getByText("Nome fantasia")).toBeInTheDocument();
+    expect(screen.getByText("Barbearia Shop")).toBeInTheDocument();
+    expect(screen.getByText("CNPJ")).toBeInTheDocument();
+    expect(screen.getByText("12.345.678/0001-95")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Editar perfil" })).toBeInTheDocument();
+  });
+
+  it.each(["AUTONOMO", "PROFISSIONAL"])(
+    "não exibe dados de empresa quando o papel é %s",
+    async (papel) => {
+      mocks.usuario.Papel = papel;
+      render(<MemoryRouter><LanguageProvider><Perfil /></LanguageProvider></MemoryRouter>);
+      await screen.findByRole("heading", { name: "Empresa Teste" });
+
+      expect(screen.queryByText("Nome fantasia")).not.toBeInTheDocument();
+      expect(screen.queryByText("CNPJ")).not.toBeInTheDocument();
+      expect(screen.queryByText("Barbearia Shop")).not.toBeInTheDocument();
+    },
+  );
+
+  it("identifica os campos ausentes sem inventar nome fantasia ou CNPJ", async () => {
+    mocks.usuario.NomeFantasia = "";
+    mocks.usuario.Cnpj = "";
+    render(<MemoryRouter><LanguageProvider><Perfil /></LanguageProvider></MemoryRouter>);
+    await screen.findByRole("heading", { name: "Empresa Teste" });
+
+    expect(screen.getByText("Nome fantasia")).toBeInTheDocument();
+    expect(screen.getByText("CNPJ")).toBeInTheDocument();
+    expect(screen.getAllByText("Não informado").length).toBeGreaterThanOrEqual(2);
+  });
+
 });
