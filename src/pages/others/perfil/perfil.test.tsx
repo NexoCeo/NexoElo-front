@@ -1,6 +1,7 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { render } from "@/test/render-with-notifications";
 import { MemoryRouter } from "react-router-dom";
+import { LanguageProvider } from "@/context/LanguageContext";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -76,14 +77,14 @@ describe("Perfil", () => {
   });
 
   it("carrega e apresenta os dados do usuario", async () => {
-    render(<MemoryRouter><Perfil /></MemoryRouter>);
+    render(<MemoryRouter><LanguageProvider><Perfil /></LanguageProvider></MemoryRouter>);
 
     expect(await screen.findByRole("heading", { name: "Empresa Teste" })).toBeInTheDocument();
     expect(mocks.obterPerfilUsuario).toHaveBeenCalledWith(7);
   });
 
   it("edita o perfil e atualiza o contexto imediatamente", async () => {
-    render(<MemoryRouter><Perfil /></MemoryRouter>);
+    render(<MemoryRouter><LanguageProvider><Perfil /></LanguageProvider></MemoryRouter>);
     await screen.findByRole("heading", { name: "Empresa Teste" });
     fireEvent.click(screen.getByRole("button", { name: "Editar perfil" }));
 
@@ -115,7 +116,7 @@ describe("Perfil", () => {
     "usa o mesmo modal compartilhado de perfil para o papel %s",
     async (papel) => {
       mocks.usuario.Papel = papel;
-      render(<MemoryRouter><Perfil /></MemoryRouter>);
+      render(<MemoryRouter><LanguageProvider><Perfil /></LanguageProvider></MemoryRouter>);
       await screen.findByRole("heading", { name: "Empresa Teste" });
       fireEvent.click(screen.getByRole("button", { name: "Editar perfil" }));
 
@@ -132,7 +133,7 @@ describe("Perfil", () => {
     "permite editar foto pelo avatar e preserva o original para o papel %s",
     async (papel) => {
       mocks.usuario.Papel = papel;
-      render(<MemoryRouter><Perfil /></MemoryRouter>);
+      render(<MemoryRouter><LanguageProvider><Perfil /></LanguageProvider></MemoryRouter>);
       await screen.findByRole("heading", { name: "Empresa Teste" });
 
       const original = new File(["imagem original"], "original.jpg", { type: "image/jpeg" });
@@ -157,7 +158,7 @@ describe("Perfil", () => {
     const original = new File(["foto integral"], "foto-original.png", { type: "image/png" });
     mocks.obterFotoOriginalUsuario.mockResolvedValue(original);
 
-    render(<MemoryRouter><Perfil /></MemoryRouter>);
+    render(<MemoryRouter><LanguageProvider><Perfil /></LanguageProvider></MemoryRouter>);
     await screen.findByRole("heading", { name: "Empresa Teste" });
     fireEvent.click(screen.getByRole("button", { name: "Editar perfil" }));
     const dialog = screen.getByRole("dialog", { name: "Editar perfil" });
