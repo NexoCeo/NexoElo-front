@@ -154,8 +154,9 @@ describe("Servicos", () => {
     fireEvent.click(screen.getByRole("menuitem", { name: "Editar" }));
     const dialog = screen.getByRole("dialog", { name: "Editar serviço" });
     fireEvent.click(within(dialog).getByRole("button", { name: "Ajustar recorte" }));
+    const aplicarRecorte = await within(dialog).findByRole("button", { name: "Aplicar recorte" });
     expect(within(dialog).getByRole("button", { name: "Salvar alterações" })).toBeDisabled();
-    fireEvent.click(await within(dialog).findByRole("button", { name: "Aplicar recorte" }));
+    fireEvent.click(aplicarRecorte);
     fireEvent.click(within(dialog).getByRole("button", { name: "Salvar alterações" }));
     await waitFor(() => expect(serviceMocks.atualizarServico).toHaveBeenCalledWith(2, {
       NomeServico: "Servico Teste", Valor: 150, TempoEstimadoMinutos: 60,
