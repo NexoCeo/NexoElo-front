@@ -1,4 +1,4 @@
-import { FaCamera, FaEnvelope, FaPhoneAlt } from "react-icons/fa";
+import { FaCamera, FaEnvelope, FaPhoneAlt, FaStore, FaIdCard } from "react-icons/fa";
 import styles from "./style.module.css";
 import { formatPersonName, formatEmailDisplay } from "@/context/UserContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -8,6 +8,7 @@ type ProfileOverviewProps = {
   role: string;
   email?: string | null;
   phone?: string | null;
+  companyDetails?: { tradeName?: string | null; cnpj?: string | null };
   avatarUrl?: string | null;
   className?: string;
   action?: React.ReactNode;
@@ -23,7 +24,14 @@ function formatPhone(value?: string | null, fallback = "Não informado") {
   return value || fallback;
 }
 
-export default function ProfileOverview({ name, role, email, phone, avatarUrl, className, action, subtitle, onPhotoChange, photoSaving = false }: ProfileOverviewProps) {
+function formatCnpj(value?: string | null) {
+  const normalized = value?.trim() ?? "";
+  const digits = normalized.replace(/\\D/g, "");
+  if (digits.length !== 14) return normalized;
+  return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8, 12)}-${digits.slice(12)}`;
+}
+
+export default function ProfileOverview({ name, role, email, phone, companyDetails, avatarUrl, className, action, subtitle, onPhotoChange, photoSaving = false }: ProfileOverviewProps) {
   const { t } = useLanguage();
   const displayName = formatPersonName(name);
   const initial = displayName.charAt(0) || "?";
@@ -56,6 +64,12 @@ export default function ProfileOverview({ name, role, email, phone, avatarUrl, c
       <dl className={styles.details}>
         <div><dt><FaEnvelope aria-hidden="true" /> {t("profile.email")}</dt><dd>{formatEmailDisplay(email) || t("profile.notProvided")}</dd></div>
         <div><dt><FaPhoneAlt aria-hidden="true" /> {t("profile.phone")}</dt><dd>{formatPhone(phone, t("profile.notProvided"))}</dd></div>
+        {companyDetails && (
+          <>
+            <div><dt><FaStore aria-hidden="true" /> {t("profile.tradeName")}</dt><dd>{companyDetails.tradeName?.trim() || t("profile.notProvided")}</dd></div>
+            <div><dt><FaIdCard aria-hidden="true" /> {t("profile.cnpj")}</dt><dd>{formatCnpj(companyDetails.cnpj) || t("profile.notProvided")}</dd></div>
+          </>
+        )}
       </dl>
       {action && <div className={styles.action}>{action}</div>}
     </section>
