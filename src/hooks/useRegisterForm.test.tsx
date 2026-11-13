@@ -59,7 +59,7 @@ describe("useRegisterForm pré-carregamento de empresas", () => {
     expect(result.current.TipoUsuario).toBe("autonomo");
     await waitFor(() => expect(result.current.empresas).toHaveLength(2));
     expect(mocks.listCompanies).toHaveBeenCalledOnce();
-    expect(mocks.listCompanies).toHaveBeenCalledWith(1701);
+    expect(mocks.listCompanies).toHaveBeenCalledWith();
 
     act(() => result.current.setTipoUsuario("profissional"));
     expect(result.current.empresas).toHaveLength(2);
@@ -73,14 +73,20 @@ describe("useRegisterForm pré-carregamento de empresas", () => {
     expect(mocks.listCompanies).toHaveBeenCalledOnce();
   });
 
-  it("não espera o papel Profissional para iniciar localização", async () => {
+  it("inicia o catálogo mesmo quando a localização não foi identificada", async () => {
     mocks.roleLocation = "nao-selecionada";
     mocks.cityId = 0;
 
     const { result } = renderHook(() => useRegisterForm(), { wrapper });
     expect(result.current.TipoUsuario).toBe("autonomo");
     await waitFor(() => expect(mocks.locationRequest).toHaveBeenCalledOnce());
-    expect(mocks.listCompanies).not.toHaveBeenCalled();
+    await waitFor(() => expect(result.current.empresas).toHaveLength(2));
+    expect(mocks.listCompanies).toHaveBeenCalledOnce();
+    expect(mocks.listCompanies).toHaveBeenCalledWith();
+
+    act(() => result.current.setTipoUsuario("profissional"));
+    expect(result.current.empresas).toHaveLength(2);
+    expect(mocks.listCompanies).toHaveBeenCalledOnce();
   });
 
   it("mantém indicador de carregamento enquanto a requisição iniciada anteriormente resolve", async () => {
