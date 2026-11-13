@@ -142,7 +142,13 @@ export default function ServiceImageCrop({ source, filename, onApply, onCancel }
           <button ref={closeButtonRef} type="button" aria-label="Fechar recorte" onClick={onCancel}>×</button>
         </header>
         <div className={styles.cropEditor}>
-      <p className={styles.cropHint}>Arraste a foto para posicionar e use o controle para ajustar o zoom.</p>
+      {source.startsWith("blob:") || source.startsWith("data:") ? (
+        <p className={styles.cropHint}>Arraste a foto para posicionar e use o controle para ajustar o zoom.</p>
+      ) : (
+        <p className={styles.cropLegacyHint}>
+          O arquivo original não foi preservado neste cadastro. O zoom de 100% mostra somente o recorte salvo. Envie a foto completa para recuperar o enquadramento.
+        </p>
+      )}
       <div ref={viewportRef} className={styles.cropViewport}
         aria-label="Área de recorte quadrado da imagem. Arraste para reposicionar ou use as setas do teclado."
         role="group"
