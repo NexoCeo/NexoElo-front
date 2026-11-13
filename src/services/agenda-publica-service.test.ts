@@ -25,8 +25,24 @@ describe("pré-carregamento de empresas para cadastro", () => {
     const cached = await listarEmpresasParaCadastro();
     expect(cached).toEqual(companies);
     expect(apiMock.get).toHaveBeenCalledOnce();
-    expect(window.sessionStorage.getItem("nexoelo:cadastro-empresas:v1:0"))
+    expect(window.sessionStorage.getItem("nexoelo:cadastro-empresas:v2:0"))
       .toContain("Barbearia Shop");
+  });
+
+  it("normaliza nomes de empresas recebidos em caixa alta, preservando marcas já formatadas", async () => {
+    apiMock.get.mockResolvedValue({
+      data: [
+        { IdUsuario: 601, Nome: "BARBEARIA DO PEDRO" },
+        { IdUsuario: 602, Nome: "BARBEARIA TESTE LTDA" },
+        { IdUsuario: 603, Nome: "NexoCeo" },
+      ],
+    });
+    const companies = await listarEmpresasParaCadastro(9010);
+    expect(companies).toEqual([
+      { Id: 601, Nome: "Barbearia do Pedro" },
+      { Id: 602, Nome: "Barbearia Teste Ltda" },
+      { Id: 603, Nome: "NexoCeo" },
+    ]);
   });
 
   it("reaproveita a lista em cache quando a mesma cidade é consultada novamente", async () => {
