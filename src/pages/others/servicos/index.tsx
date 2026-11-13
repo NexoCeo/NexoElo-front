@@ -3,7 +3,7 @@ import { isAxiosError } from "axios";
 import { consultarAssinatura, type AssinaturaAtual } from "@/services/assinatura-service";
 import UpgradePlanModal from "@/components/upgrade-plan-modal";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FaCloudUploadAlt, FaCropAlt, FaEllipsisV, FaImage, FaPen, FaPlus, FaTimes, FaSearch, FaClock, FaTags, FaDollarSign, FaCheckCircle } from "react-icons/fa";
+import { FaEllipsisV, FaImage, FaPen, FaPlus, FaSearch, FaClock, FaTags, FaDollarSign, FaCheckCircle } from "react-icons/fa";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
@@ -16,6 +16,7 @@ import type { Servico } from "@/types/servico";
 import { getUploadedImageUrl } from "@/components/header/profile-image";
 import styles from "./style.module.css";
 import ServiceImageCrop from "./service-image-crop";
+import { EntityEditorModal, EntityImageField } from "@/components/entity-editor-modal";
 import { useLanguage } from "@/context/LanguageContext";
 import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
@@ -469,86 +470,40 @@ export default function Servicos() {
         onClose={() => setUpgradePlan(null)}
         onViewPlans={() => { window.location.assign(`/${isEmpresa ? "empresa" : "autonomo"}/assinatura`); }} />}
       {modalOpen && (
-        <div className={styles.modalBackdrop} role="presentation">
-          <section
-            className={styles.modal}
-            style={{ backgroundColor: theme.colors.background2 }}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="servico-modal-title"
-          >
-            <header className={styles.modalHeader}>
-              <div>
-                <h2 id="servico-modal-title" style={{ color: theme.colors.text }}>
-                  {editingServico ? t("services.editTitle") : t("services.createTitle")}
-                </h2>
-              </div>
-              <button type="button" onClick={closeModal} aria-label="Fechar modal" title="Fechar">
-                <FaTimes aria-hidden="true" />
-              </button>
-            </header>
-
-            <form className={styles.form} onSubmit={handleSubmit}>
-              <div className={styles.imageField}>
-                <div className={styles.imageFieldHeading}>
-                  <strong>{t("services.image")}</strong>
-                </div>
-
-                {!cropSource && (
-                  <div className={styles.imagePickerCard}>
-                    <div className={styles.imageLargePreview} aria-label="Prévia da imagem do serviço">
-                      {imagemPreviewUrl ? (
-                        <img src={imagemPreviewUrl} alt="Foto atual do serviço" />
-                      ) : (
-                        <FaImage aria-hidden="true" />
-                      )}
-                    </div>
-                    <div className={styles.imagePickerContent}>
-                      <strong>{imagemServico ? "Nova imagem pronta" : imagemPreviewUrl ? "Imagem atual do serviço" : "Adicione uma foto"}</strong>
-
-                      <div className={styles.imagePickerActions}>
-                        <label className={styles.imageUploadAction}>
-                          <FaCloudUploadAlt aria-hidden="true" />
-                          {imagemPreviewUrl ? "Trocar foto" : "Escolher foto"}
-                          <input
-                            type="file"
-                            accept="image/png,image/jpeg,image/webp"
-                            aria-label={t("services.image")}
-                            onChange={(event) => {
-                              selectImageForCrop(event.target.files?.[0] ?? null);
-                              event.currentTarget.value = "";
-                            }}
-                          />
-                        </label>
-                        {imagemPreviewUrl && (
-                          <button type="button" className={styles.cropEditButton} onClick={() => {
-                            if (imagemServico) {
-                              setCropFilename(imagemServico.name);
-                              setCropSource(URL.createObjectURL(imagemServico));
-                            } else {
-                              cropExistingImage();
-                            }
-                          }}>
-                            <FaCropAlt aria-hidden="true" /> Ajustar recorte
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {cropSource && (
-                  <ServiceImageCrop source={cropSource} filename={cropFilename}
-                    onCancel={() => setCropSource("")}
-                    onApply={(file) => {
-                      setImagemServico(file);
-                      setCropSource("");
-                      setFormError("");
-                    }}
-                  />
-                )}
-
-              </div>
+        <EntityEditorModal
+          title={editingServico ? t("services.editTitle") : t("services.createTitle")}
+          onClose={closeModal}
+          busy={saving}
+          cropOpen={Boolean(cropSource)}
+        >
+          <form className={styles.form} onSubmit={handleSubmit}>
+            <EntityImageField
+              label={t("services.image")}
+              alt="Foto atual do serviço"
+              previewUrl={imagemPreviewUrl}
+              selectedFile={imagemServico}
+              onSelectFile={selectImageForCrop}
+              onAdjustCrop={() => {
+                if (imagemServico) {
+                  setCropFilename(imagemServico.name);
+                  setCropSource(URL.createObjectURL(imagemServico));
+                } else {
+                  cropExistingImage();
+                }
+              }}
+              cropContent={cropSource ? (
+                <ServiceImageCrop
+                  source={cropSource}
+                  filename={cropFilename}
+                  onCancel={() => setCropSource("")}
+                  onApply={(file) => {
+                    setImagemServico(file);
+                    setCropSource("");
+                    setFormError("");
+                  }}
+                />
+              ) : null}
+            />
 
               <label>
                 {t("services.name")}
@@ -602,8 +557,7 @@ export default function Servicos() {
                   : editingServico ? t("common.save") : t("services.create")}
               </button>
             </form>
-          </section>
-        </div>
+        </EntityEditorModal>
       )}
 
 
