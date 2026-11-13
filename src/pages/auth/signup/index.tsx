@@ -38,6 +38,7 @@ function Register() {
     empresaId,
 
     loadingEmpresas,
+    empresasError,
     loading,
 
     showPassword,
@@ -63,6 +64,8 @@ function Register() {
   } = useRegisterForm();
 
   const [previewUrl, setPreviewUrl] = useState("");
+  const identificandoCidade = localizacao.modo === "nao-selecionada" ||
+    localizacao.modo === "detectando";
 
   /*
    * Preview da foto de perfil
@@ -272,19 +275,26 @@ function Register() {
                     )
                   }
                   disabled={
+                    identificandoCidade ||
                     loadingEmpresas ||
                     !localizacao.cidadeId ||
                     empresas.length === 0
                   }
                   required
+                  aria-busy={identificandoCidade || loadingEmpresas}
                 >
                   <option value={0}>
-                    {loadingEmpresas
-                      ? t("auth.loadingCompanies")
-                      : empresas.length ===
-                          0
-                        ? t("auth.noCompanies")
-                        : t("auth.chooseCompany")}
+                    {identificandoCidade
+                      ? t("auth.locatingCity")
+                      : loadingEmpresas
+                        ? t("auth.loadingCompanies")
+                        : empresasError
+                          ? t("auth.companiesUnavailable")
+                          : !localizacao.cidadeId
+                            ? t("auth.locationUnavailable")
+                            : empresas.length === 0
+                              ? t("auth.noCompanies")
+                              : t("auth.chooseCompany")}
                   </option>
 
                   {empresas.map(
@@ -301,7 +311,9 @@ function Register() {
                 </select>
               </div>
 
-              {!loadingEmpresas &&
+              {!identificandoCidade &&
+                !loadingEmpresas &&
+                !empresasError &&
                 localizacao.cidadeId > 0 &&
                 empresas.length === 0 && (
                   <p
@@ -367,7 +379,7 @@ function Register() {
           </div>
 
           {/* Botão cadastrar */}
-          <SubmitButton disabled={!isFormValid() || loadingEmpresas} loading={loading}>{t("auth.register")}</SubmitButton>
+          <SubmitButton disabled={!isFormValid() || (TipoUsuario === "profissional" && (identificandoCidade || loadingEmpresas))} loading={loading}>{t("auth.register")}</SubmitButton>
         </form>
       </div>
     </div>
