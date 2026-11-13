@@ -57,17 +57,17 @@ export default function ProfileOverview({ name, role, email, phone, companyDetai
         )}
       </div>
       <div className={styles.heading}>
-        <h2>{displayName}</h2>
+        <h2 title={displayName}>{displayName}</h2>
         <span className={styles.role}>{role}</span>
         {subtitle && <p>{subtitle}</p>}
       </div>
       <dl className={styles.details}>
-        <div><dt><FaEnvelope aria-hidden="true" /> {t("profile.email")}</dt><dd>{formatEmailDisplay(email) || t("profile.notProvided")}</dd></div>
-        <div><dt><FaPhoneAlt aria-hidden="true" /> {t("profile.phone")}</dt><dd>{formatPhone(phone, t("profile.notProvided"))}</dd></div>
+        <div><dt><FaEnvelope aria-hidden="true" /> {t("profile.email")}</dt><dd title={formatEmailDisplay(email) || t("profile.notProvided")}>{formatEmailDisplay(email) || t("profile.notProvided")}</dd></div>
+        <div><dt><FaPhoneAlt aria-hidden="true" /> {t("profile.phone")}</dt><dd title={formatPhone(phone, t("profile.notProvided"))}>{formatPhone(phone, t("profile.notProvided"))}</dd></div>
         {companyDetails && (
           <>
-            <div><dt><FaStore aria-hidden="true" /> {t("profile.tradeName")}</dt><dd>{companyDetails.tradeName?.trim() || t("profile.notProvided")}</dd></div>
-            <div><dt><FaIdCard aria-hidden="true" /> {t("profile.cnpj")}</dt><dd>{formatCnpj(companyDetails.cnpj) || t("profile.notProvided")}</dd></div>
+            <div><dt><FaStore aria-hidden="true" /> {t("profile.tradeName")}</dt><dd title={companyDetails.tradeName?.trim() || t("profile.notProvided")}>{companyDetails.tradeName?.trim() || t("profile.notProvided")}</dd></div>
+            <div><dt><FaIdCard aria-hidden="true" /> {t("profile.cnpj")}</dt><dd title={formatCnpj(companyDetails.cnpj) || t("profile.notProvided")}>{formatCnpj(companyDetails.cnpj) || t("profile.notProvided")}</dd></div>
           </>
         )}
       </dl>
