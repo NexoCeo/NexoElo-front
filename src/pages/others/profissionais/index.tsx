@@ -27,7 +27,7 @@ import {
 } from "react-icons/fa";
 import { useTheme } from "@/context/ThemeContext";
 import { getProfileImageUrl, getUploadedImageUrl } from "@/components/header/profile-image";
-import { EntityEditorModal, EntityImageField } from "@/components/entity-editor-modal";
+import { EntityEditorModal, EntityImageField, EntityEditorForm, EntityEditorField, EntityEditorError, EntityEditorSubmit } from "@/components/entity-editor-modal";
 import ServiceImageCrop from "../servicos/service-image-crop";
 import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
@@ -822,7 +822,7 @@ export default function Profissionais() {
           busy={saving}
           cropOpen={Boolean(cropSource)}
         >
-          <form className={`${styles.form} ${styles.editorForm}`} onSubmit={handleCreateProfissional}>
+          <EntityEditorForm onSubmit={handleCreateProfissional}>
             <EntityImageField
               label="Foto do profissional"
               previewUrl={previewUrl || (editingProfessional
@@ -848,56 +848,38 @@ export default function Profissionais() {
               ) : null}
             />
 
-              <label>
-                {t("profile.name")}
-                <div className={styles.inputWrap}>
-                  <input
-                    type="text"
-                    value={nome}
-                    onChange={(event) => setNome(event.target.value)}
-                    placeholder={t("pros.namePlaceholder")}
-                  />
-                  <FaUser />
-                </div>
-              </label>
+              <EntityEditorField label={t("profile.name")} icon={<FaUser />}>
+                <input
+                  type="text"
+                  value={nome}
+                  onChange={(event) => setNome(event.target.value)}
+                  placeholder={t("pros.namePlaceholder")}
+                />
+              </EntityEditorField>
 
-              <label>
-                {t("profile.email")}
-                <div className={styles.inputWrap}>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder="email@exemplo.com"
-                  />
-                  <FaEnvelope />
-                </div>
-              </label>
+              <EntityEditorField label={t("profile.email")} icon={<FaEnvelope />}>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="email@exemplo.com"
+                />
+              </EntityEditorField>
 
-              <label>
-                {t("profile.phone")}
-                <div className={styles.inputWrap}>
-                  <input
-                    type="tel"
-                    value={telefone}
-                    onChange={(event) => setTelefone(event.target.value)}
-                    placeholder="(11) 99999-9999"
-                  />
-                  <FaPhoneAlt />
-                </div>
-              </label>
+              <EntityEditorField label={t("profile.phone")} icon={<FaPhoneAlt />}>
+                <input
+                  type="tel"
+                  value={telefone}
+                  onChange={(event) => setTelefone(event.target.value)}
+                  placeholder="(11) 99999-9999"
+                />
+              </EntityEditorField>
 
-              {formError && <p className={styles.error}>{formError}</p>}
-
-              <button
-                className={styles.submitButton}
-                type="submit"
-                disabled={!canSubmit}
-                style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
-              >
+              <EntityEditorError message={formError} />
+              <EntityEditorSubmit disabled={!canSubmit}>
                 {saving ? t("pros.creating") : editingProfessional ? "Salvar alterações" : t("pros.create")}
-              </button>
-            </form>
+              </EntityEditorSubmit>
+            </EntityEditorForm>
         </EntityEditorModal>
       )}
 
