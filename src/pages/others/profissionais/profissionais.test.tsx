@@ -230,8 +230,9 @@ describe("Profissionais", () => {
     expect(within(dialog).getByAltText("Foto do profissional")).toHaveAttribute("src", expect.stringContaining("profissional.png"));
     expect(within(dialog).getByRole("button", { name: "Ajustar recorte" })).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole("button", { name: "Ajustar recorte" }));
+    const aplicarRecorte = await within(dialog).findByRole("button", { name: "Aplicar recorte" });
     expect(within(dialog).getByRole("button", { name: "Salvar alterações" })).toBeDisabled();
-    fireEvent.click(await within(dialog).findByRole("button", { name: "Aplicar recorte" }));
+    fireEvent.click(aplicarRecorte);
     fireEvent.click(within(dialog).getByRole("button", { name: "Salvar alterações" }));
 
     await waitFor(() => {
