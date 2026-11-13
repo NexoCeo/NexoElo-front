@@ -1,5 +1,5 @@
 import { carregarImagemOriginal } from "./imagem-original-service";
-import type { Usuario } from "@/context/UserContext";
+import { normalizeUsuario as normalizeContextUsuario, formatPersonName, formatEmailDisplay, type Usuario } from "@/context/UserContext";
 import api from "./api";
 
 type ApiRecord = Record<string, unknown>;
@@ -37,7 +37,7 @@ function pickNumber(data: ApiRecord, keys: string[]) {
 }
 
 function normalizeUsuario(data: ApiRecord): Usuario {
-  return {
+  return normalizeContextUsuario({
     Id: pickNumber(data, ["Id", "id"]),
     Nome: pickString(data, ["Nome", "nome"]),
     Email: pickString(data, ["Email", "email"]),
@@ -48,7 +48,7 @@ function normalizeUsuario(data: ApiRecord): Usuario {
     UrlPublica: pickString(data, ["UrlPublica", "urlPublica"]),
     NomeFantasia: pickString(data, ["NomeFantasia", "nomeFantasia"]),
     Cnpj: pickString(data, ["Cnpj", "cnpj", "CNPJ"]),
-  };
+  });
 }
 
 export async function obterPerfilUsuario(id: number) {
@@ -58,8 +58,8 @@ export async function obterPerfilUsuario(id: number) {
 
 export async function atualizarPerfilUsuario(id: number, payload: UpdatePerfilPayload) {
   const formData = new FormData();
-  formData.append("Nome", payload.Nome);
-  formData.append("Email", payload.Email);
+  formData.append("Nome", formatPersonName(payload.Nome));
+  formData.append("Email", formatEmailDisplay(payload.Email));
   formData.append("Telefone", payload.Telefone ?? "");
   if (payload.Cnpj !== undefined) formData.append("Cnpj", payload.Cnpj);
 
