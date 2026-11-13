@@ -2,6 +2,11 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { LanguageProvider } from "@/context/LanguageContext";
+const registerState = vi.hoisted(() => ({
+  role: "empresa",
+  companies: [] as Array<{ Id: number; Nome: string }>,
+  companiesLoading: false,
+}));
 
 vi.mock("@/context/ThemeContext", () => ({
   useTheme: () => ({
@@ -23,12 +28,13 @@ vi.mock("@/hooks/useRegisterForm", () => ({
     nome: "",
     email: "",
     senha: "",
-    TipoUsuario: "empresa",
+    TipoUsuario: registerState.role,
     nomeFantasia: "",
-    localizacao: { cidadeId: 0 },
-    empresas: [],
+    localizacao: { cidadeId: 0, modo: "detectando", loading: true },
+    empresas: registerState.companies,
     empresaId: 0,
-    loadingEmpresas: false,
+    loadingEmpresas: registerState.companiesLoading,
+    empresasError: "",
     showPassword: false,
     error: "",
     emailError: "",
@@ -80,7 +86,12 @@ function expectNoManualLocationFields() {
 }
 
 describe("campos de localizacao dos cadastros publicos", () => {
-  afterEach(cleanup);
+  afterEach(() => {
+    cleanup();
+    registerState.role = "empresa";
+    registerState.companies = [];
+    registerState.companiesLoading = false;
+  });
 
   it("nao exibe pais, estado ou cidade no cadastro global", () => {
     render(
@@ -95,6 +106,28 @@ describe("campos de localizacao dos cadastros publicos", () => {
     expect(screen.getByPlaceholderText(/nome fantasia|business name/i)).toBeInTheDocument();
     expect(screen.queryByText("CNPJ")).not.toBeInTheDocument();
     expect(screen.queryByPlaceholderText("Digite o CNPJ")).not.toBeInTheDocument();
+  });
+
+  it("não bloqueia a seleção de uma empresa pronta no cache quando o GPS ainda está detectando", () => {
+    registerState.role = "profissional";
+    registerState.companies = [{ Id: 42, Nome: "Empresa Pré-carregada" }];
+    registerState.companiesLoading = false;
+
+    render(
+      <MemoryRouter>
+        <LanguageProvider>
+          <Register />
+        </LanguageProvider>
+      </MemoryRouter>,
+    );
+
+    const selects = screen.getAllByRole("combobox");
+    const companySelect = selects[selects.length - 1];
+
+    expect(companySelect).toBeEnabled();
+    expect(companySelect).toHaveAttribute("aria-busy", "false");
+    expect(screen.getByRole("option", { name: "Empresa Pré-carregada" }))
+      .toHaveValue("42");
   });
 
   it("nao exibe pais, estado ou cidade no cadastro do cliente final", () => {
