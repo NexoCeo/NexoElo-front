@@ -1,3 +1,4 @@
+import { carregarImagemOriginal } from "./imagem-original-service";
 import api from "./api";
 import type {
   CreateServicoPayload,
@@ -85,3 +86,6 @@ export async function atualizarServico(id: number, payload: UpdateServicoPayload
 
   return normalizeServico(response.data);
 }
+
+export const obterImagemOriginalServico = (id: number) =>
+  carregarImagemOriginal(`/Servico/${id}/imagem-original`);
