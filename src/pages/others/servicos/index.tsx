@@ -37,6 +37,8 @@ export default function Servicos() {
   const [valor, setValor] = useState("");
   const [tempoEstimadoMinutos, setTempoEstimadoMinutos] = useState("30");
   const [imagemServico, setImagemServico] = useState<File | null>(null);
+  // Mantém o arquivo escolhido intacto: um segundo recorte nunca parte do WebP já recortado.
+  const [imagemOriginal, setImagemOriginal] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -144,6 +146,7 @@ export default function Servicos() {
       return;
     }
     setFormError("");
+    setImagemOriginal(file);
     setCropFilename(file.name);
     setCropSource(URL.createObjectURL(file));
   }
@@ -186,6 +189,7 @@ export default function Servicos() {
     setValor("");
     setTempoEstimadoMinutos("30");
     setImagemServico(null);
+    setImagemOriginal(null);
     setCropSource("");
     setEditingServico(null);
     setFormError("");
@@ -211,6 +215,7 @@ export default function Servicos() {
     setValor(String(servico.Valor).replace(".", ","));
     setTempoEstimadoMinutos(String(servico.TempoEstimadoMinutos));
     setImagemServico(null);
+    setImagemOriginal(null);
     setCropSource("");
     setFormError("");
     setOpenMenuId(null);
@@ -484,10 +489,11 @@ export default function Servicos() {
               selectedFile={imagemServico}
               onSelectFile={selectImageForCrop}
               onAdjustCrop={() => {
-                if (imagemServico) {
-                  setCropFilename(imagemServico.name);
-                  setCropSource(URL.createObjectURL(imagemServico));
+                if (imagemOriginal) {
+                  setCropFilename(imagemOriginal.name);
+                  setCropSource(URL.createObjectURL(imagemOriginal));
                 } else {
+                  // Para arquivos legados sem original salvo, usa a imagem atual do servidor.
                   cropExistingImage();
                 }
               }}
