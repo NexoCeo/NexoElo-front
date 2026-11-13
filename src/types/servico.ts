@@ -17,9 +17,10 @@ export type CreateServicoPayload = {
   Valor: number;
   TempoEstimadoMinutos: number;
   ImagemServico?: File | null;
+  ImagemOriginal?: File | null;
 };
 
 export type UpdateServicoPayload = Pick<
   CreateServicoPayload,
-  "NomeServico" | "Valor" | "TempoEstimadoMinutos" | "ImagemServico"
+  "NomeServico" | "Valor" | "TempoEstimadoMinutos" | "ImagemServico" | "ImagemOriginal"
 >;
