@@ -145,6 +145,8 @@ export default function Profissionais() {
   const [whatsAppShare, setWhatsAppShare] = useState<WhatsAppShare | null>(null);
 
   const [fotoPerfil, setFotoPerfil] = useState<File | null>(null);
+  // Preserva a foto selecionada sem recorte para permitir reajustar o zoom quantas vezes quiser.
+  const [fotoOriginal, setFotoOriginal] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [cropSource, setCropSource] = useState("");
   const [cropFilename, setCropFilename] = useState("profissional");
@@ -258,17 +260,18 @@ export default function Profissionais() {
       return;
     }
     setFormError("");
+    setFotoOriginal(file);
     setCropFilename(file.name);
     setCropSource(URL.createObjectURL(file));
   }
 
   function adjustProfessionalCrop() {
-    const source = fotoPerfil
-      ? URL.createObjectURL(fotoPerfil)
+    const source = fotoOriginal
+      ? URL.createObjectURL(fotoOriginal)
       : getUploadedImageUrl(editingProfessional?.FotoPerfil);
     if (!source) return;
     setFormError("");
-    setCropFilename(fotoPerfil?.name || editingProfessional?.Nome || "profissional");
+    setCropFilename(fotoOriginal?.name || editingProfessional?.Nome || "profissional");
     setCropSource(source);
   }
 
@@ -345,6 +348,7 @@ export default function Profissionais() {
   function resetForm() {
     setEditingProfessional(null);
     setFotoPerfil(null);
+    setFotoOriginal(null);
     setCropSource("");
     setNome("");
     setEmail("");
@@ -360,6 +364,7 @@ export default function Profissionais() {
     setEmail(profissional.Email);
     setTelefone(profissional.Telefone ?? "");
     setFotoPerfil(null);
+    setFotoOriginal(null);
     setCropSource("");
     setFormError("");
     setModalOpen(true);
@@ -831,7 +836,7 @@ export default function Profissionais() {
               selectedFile={fotoPerfil}
               alt="Foto do profissional"
               onSelectFile={selectProfessionalPhoto}
-              onAdjustCrop={fotoPerfil || getUploadedImageUrl(editingProfessional?.FotoPerfil)
+              onAdjustCrop={fotoOriginal || getUploadedImageUrl(editingProfessional?.FotoPerfil)
                 ? adjustProfessionalCrop
                 : undefined}
               cropContent={cropSource ? (
