@@ -161,6 +161,7 @@ describe("Servicos", () => {
     await waitFor(() => expect(serviceMocks.atualizarServico).toHaveBeenCalledWith(2, {
       NomeServico: "Servico Teste", Valor: 150, TempoEstimadoMinutos: 60,
       ImagemServico: expect.objectContaining({ name: "servico-recortada.webp", type: "image/webp" }),
+      ImagemOriginal: null,
     }));
   });
 
