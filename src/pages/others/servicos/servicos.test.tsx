@@ -119,7 +119,6 @@ describe("Servicos", () => {
         Valor: 45,
         TempoEstimadoMinutos: 45,
         ImagemServico: expect.objectContaining({ name: "servico-recortada.webp", type: "image/webp" }),
-      ImagemOriginal: null,
         ImagemOriginal: imagem,
       });
     });
