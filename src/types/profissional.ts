@@ -14,6 +14,7 @@ export type CreateProfissionalPayload = {
   email: string;
   telefone: string;
   fotoPerfil: File;
+  fotoOriginal?: File | null;
   localizacao: CadastroLocalizacaoPayload;
 };
 
