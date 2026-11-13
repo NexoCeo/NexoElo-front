@@ -1,6 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
+import { LanguageProvider } from "@/context/LanguageContext";
 
 vi.mock("@/context/ThemeContext", () => ({
   useTheme: () => ({
@@ -84,7 +85,9 @@ describe("campos de localizacao dos cadastros publicos", () => {
   it("nao exibe pais, estado ou cidade no cadastro global", () => {
     render(
       <MemoryRouter>
-        <Register />
+        <LanguageProvider>
+          <Register />
+        </LanguageProvider>
       </MemoryRouter>,
     );
 
@@ -97,7 +100,9 @@ describe("campos de localizacao dos cadastros publicos", () => {
   it("nao exibe pais, estado ou cidade no cadastro do cliente final", () => {
     render(
       <MemoryRouter>
-        <ClienteFinalRegister />
+        <LanguageProvider>
+          <ClienteFinalRegister />
+        </LanguageProvider>
       </MemoryRouter>,
     );
 
