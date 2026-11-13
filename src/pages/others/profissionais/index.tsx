@@ -386,6 +386,8 @@ export default function Profissionais() {
 
   function openEditModal(profissional: Profissional) {
     setOpenMenuId(null);
+    // Normalização explícita dos dados da API antes de popular os inputs.
+    // Não depende da formatação visual aplicada aos cards da listagem.
     setEditingProfessional(profissional);
     setNome(formatPersonName(profissional.Nome));
     setEmail(formatEmailDisplay(profissional.Email));
@@ -887,6 +889,8 @@ export default function Profissionais() {
                   type="text"
                   value={nome}
                   onChange={(event) => setNome(event.target.value)}
+                  onBlur={(event) => setNome(formatPersonName(event.target.value))}
+                  autoCapitalize="words"
                   placeholder={t("pros.namePlaceholder")}
                 />
               </EntityEditorField>
@@ -896,6 +900,10 @@ export default function Profissionais() {
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
+                  onBlur={(event) => setEmail(formatEmailDisplay(event.target.value))}
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                   placeholder="email@exemplo.com"
                 />
               </EntityEditorField>
