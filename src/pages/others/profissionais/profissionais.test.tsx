@@ -97,7 +97,7 @@ describe("Profissionais", () => {
 
     const { container } = render(<MemoryRouter><LanguageProvider><Profissionais /></LanguageProvider></MemoryRouter>);
     fireEvent.click(screen.getByRole("button", { name: /novo profissional/i }));
-    fireEvent.change(screen.getByPlaceholderText("Nome do profissional"), {
+    fireEvent.change(await screen.findByPlaceholderText("Nome do profissional"), {
       target: { value: "Profissional Teste" },
     });
     fireEvent.change(screen.getByPlaceholderText("email@exemplo.com"), {
@@ -128,7 +128,7 @@ describe("Profissionais", () => {
     vinculoMock.responder.mockResolvedValue(undefined);
 
     render(<MemoryRouter><LanguageProvider><Profissionais /></LanguageProvider></MemoryRouter>);
-    fireEvent.click(screen.getByRole("button", { name: /solicitacoes de vinculo/i }));
+    fireEvent.click(screen.getByRole("button", { name: /solicitações de vínculo/i }));
 
     expect(await screen.findByText("Profissional Pendente")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Aprovar vinculo de Profissional Pendente" }));
@@ -165,7 +165,7 @@ describe("Profissionais", () => {
     });
     const { container } = render(<MemoryRouter><LanguageProvider><Profissionais /></LanguageProvider></MemoryRouter>);
     fireEvent.click(screen.getByRole("button", { name: /novo profissional/i }));
-    fireEvent.change(screen.getByPlaceholderText("Nome do profissional"), {
+    fireEvent.change(await screen.findByPlaceholderText("Nome do profissional"), {
       target: { value: "Profissional Teste" },
     });
     fireEvent.change(screen.getByPlaceholderText("email@exemplo.com"), {
