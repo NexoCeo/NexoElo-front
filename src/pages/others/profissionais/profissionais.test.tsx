@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { render } from "@/test/render-with-notifications";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -10,6 +10,7 @@ const vinculoMock = vi.hoisted(() => ({
 const profissionalMock = vi.hoisted(() => ({
   listar: vi.fn(),
   criar: vi.fn(),
+  atualizar: vi.fn(),
 }));
 
 vi.mock("@/context/ThemeContext", () => ({
@@ -25,6 +26,7 @@ vi.mock("@/context/UserContext", () => ({
 vi.mock("@/services/profissional-service", () => ({
   listarProfissionaisEmpresa: profissionalMock.listar,
   criarProfissionalEmpresa: profissionalMock.criar,
+  atualizarProfissionalEmpresa: profissionalMock.atualizar,
 }));
 
 vi.mock("@/hooks/useCadastroLocalizacao", () => ({
@@ -52,6 +54,17 @@ vi.mock("@/services/vinculo-service", () => ({
   responderSolicitacaoVinculo: vinculoMock.responder,
 }));
 
+vi.mock("../servicos/service-image-crop", () => ({
+  default: ({ onApply, onCancel }: { onApply: (file: File) => void; onCancel: () => void }) => (
+    <div>
+      <button type="button" onClick={() => onApply(new File(["imagem"], "profissional-recortada.webp", { type: "image/webp" }))}>
+        Aplicar recorte
+      </button>
+      <button type="button" onClick={onCancel}>Cancelar recorte</button>
+    </div>
+  ),
+}));
+
 import Profissionais from "./index";
 
 describe("Profissionais", () => {
@@ -61,6 +74,7 @@ describe("Profissionais", () => {
     profissionalMock.listar.mockReset();
     profissionalMock.listar.mockResolvedValue([]);
     profissionalMock.criar.mockReset();
+    profissionalMock.atualizar.mockReset();
     vinculoMock.listar.mockReset();
     vinculoMock.responder.mockReset();
   });
@@ -93,6 +107,7 @@ describe("Profissionais", () => {
         files: [new File([new Uint8Array([1])], "foto.png", { type: "image/png" })],
       },
     });
+    fireEvent.click(screen.getByRole("button", { name: "Aplicar recorte" }));
     fireEvent.click(screen.getByRole("button", { name: "Criar profissional" }));
 
     const whatsappLink = await screen.findByRole("link", { name: /enviar pelo whatsapp/i });
@@ -160,6 +175,7 @@ describe("Profissionais", () => {
         files: [new File([new Uint8Array([1])], "foto.png", { type: "image/png" })],
       },
     });
+    fireEvent.click(screen.getByRole("button", { name: "Aplicar recorte" }));
     fireEvent.click(screen.getByRole("button", { name: "Criar profissional" }));
 
     expect(
@@ -167,4 +183,35 @@ describe("Profissionais", () => {
     ).not.toHaveLength(0);
     expect(profissionalMock.criar).toHaveBeenCalledTimes(1);
   });
+  it("reutiliza o modal de serviços para recortar e trocar a foto ao editar", async () => {
+    profissionalMock.listar.mockResolvedValue([{
+      Id: 11, Nome: "Profissional Teste", Email: "profissional@example.com",
+      Telefone: "27999999999", FotoPerfil: "uploads/profissional.png", VinculoStatus: "APROVADO",
+    }]);
+    profissionalMock.atualizar.mockResolvedValue({
+      Id: 11, Nome: "Profissional Teste", Email: "profissional@example.com",
+      Telefone: "27999999999", FotoPerfil: "uploads/recortada.webp",
+      VinculoStatus: "APROVADO",
+    });
+    render(<MemoryRouter><Profissionais /></MemoryRouter>);
+    await screen.findByText("Profissional Teste");
+    fireEvent.click(screen.getByRole("button", { name: "Opções de Profissional Teste" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Editar" }));
+
+    const dialog = screen.getByRole("dialog", { name: "Editar profissional" });
+    expect(within(dialog).getByAltText("Foto do profissional")).toHaveAttribute("src", expect.stringContaining("profissional.png"));
+    expect(within(dialog).getByRole("button", { name: "Ajustar recorte" })).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Ajustar recorte" }));
+    expect(within(dialog).getByRole("button", { name: "Salvar alterações" })).toBeDisabled();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Aplicar recorte" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "Salvar alterações" }));
+
+    await waitFor(() => {
+      expect(profissionalMock.atualizar).toHaveBeenCalledWith(11, {
+        Nome: "Profissional Teste", Email: "profissional@example.com", Telefone: "27999999999",
+        FotoPerfil: expect.objectContaining({ name: "profissional-recortada.webp", type: "image/webp" }),
+      });
+    });
+  });
+
 });
