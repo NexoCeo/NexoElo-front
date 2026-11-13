@@ -141,42 +141,32 @@ export function useRegisterForm() {
   }, [localizacaoModo, usarLocalizacaoAtual]);
 
   /*
-   * Pré-carregar a lista da cidade assim que ela é identificada.
-   * Alternar o papel não reinicia a consulta nem apaga a seleção.
-   * O serviço deduplica solicitações e mantém cache temporário por cidade.
+   * Pré-carregamento independente: a consulta inicia na montagem do cadastro,
+   * sem esperar localização, cidade ou troca de papel. O serviço guarda a
+   * resposta em cache e reutiliza requisições simultâneas.
    */
   useEffect(() => {
-    if (!localizacao.cidadeId) {
-      setEmpresas([]);
-      setEmpresaId(0);
-      setLoadingEmpresas(false);
-      setEmpresasError("");
-      return;
-    }
-
     let active = true;
     setLoadingEmpresas(true);
     setEmpresasError("");
-    setEmpresas([]);
-    setEmpresaId(0);
 
-    void listarEmpresasParaCadastro(localizacao.cidadeId)
+    void listarEmpresasParaCadastro()
       .then(data => {
-        if (!active) return;
-        setEmpresas(data);
+        if (active) setEmpresas(data);
       })
       .catch(err => {
         console.error("Erro ao pré-carregar empresas:", err);
-        if (!active) return;
-        setEmpresasError("Não foi possível carregar as empresas desta cidade.");
-        setEmpresas([]);
+        if (active) {
+          setEmpresasError("Não foi possível carregar as empresas.");
+          setEmpresas([]);
+        }
       })
       .finally(() => {
         if (active) setLoadingEmpresas(false);
       });
 
     return () => { active = false; };
-  }, [localizacao.cidadeId]);
+  }, []);
 
   /*
    * Submit
