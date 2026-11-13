@@ -11,6 +11,7 @@ import {
   atualizarServico,
   inserirServico,
   listarServicosPorEmpresa,
+  obterImagemOriginalServico,
 } from "@/services/servico-service";
 import type { Servico } from "@/types/servico";
 import { getUploadedImageUrl } from "@/components/header/profile-image";
@@ -151,10 +152,38 @@ export default function Servicos() {
     setCropSource(URL.createObjectURL(file));
   }
 
-  function cropExistingImage() {
-    const existingUrl = getUploadedImageUrl(editingServico?.ImagemServico);
+  async function adjustServiceCrop() {
+    if (imagemOriginal) {
+      setCropFilename(imagemOriginal.name);
+      setCropSource(URL.createObjectURL(imagemOriginal));
+      return;
+    }
+
+    if (!editingServico?.Id) return;
+    try {
+      const original = await obterImagemOriginalServico(editingServico.Id);
+      if (original) {
+        setImagemOriginal(original);
+        setCropFilename(original.name);
+        setCropSource(URL.createObjectURL(original));
+        return;
+      }
+      showNotification({
+        type: "warning",
+        title: "Imagem original não disponível",
+        message: "Esta imagem foi salva antes da preservação do arquivo original. Envie a imagem completa novamente para recuperar o enquadramento.",
+      });
+    } catch {
+      showNotification({
+        type: "warning",
+        title: "Não foi possível carregar a imagem original",
+        message: "Você pode continuar com o recorte existente ou selecionar a imagem original novamente.",
+      });
+    }
+
+    const existingUrl = getUploadedImageUrl(editingServico.ImagemServico);
     if (!existingUrl) return;
-    setCropFilename(editingServico?.NomeServico || "servico");
+    setCropFilename(editingServico.NomeServico || "servico");
     setCropSource(existingUrl);
   }
 
@@ -273,6 +302,7 @@ export default function Servicos() {
         Valor: valorNumber,
         TempoEstimadoMinutos: tempoEstimadoNumber,
         ImagemServico: imagemServico,
+        ImagemOriginal: imagemServico ? imagemOriginal : null,
       };
 
       if (editingServico) {
@@ -488,15 +518,7 @@ export default function Servicos() {
               previewUrl={imagemPreviewUrl}
               selectedFile={imagemServico}
               onSelectFile={selectImageForCrop}
-              onAdjustCrop={() => {
-                if (imagemOriginal) {
-                  setCropFilename(imagemOriginal.name);
-                  setCropSource(URL.createObjectURL(imagemOriginal));
-                } else {
-                  // Para arquivos legados sem original salvo, usa a imagem atual do servidor.
-                  cropExistingImage();
-                }
-              }}
+              onAdjustCrop={() => void adjustServiceCrop()}
               cropContent={cropSource ? (
                 <ServiceImageCrop
                   source={cropSource}
