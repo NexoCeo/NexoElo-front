@@ -64,8 +64,13 @@ function Register() {
   } = useRegisterForm();
 
   const [previewUrl, setPreviewUrl] = useState("");
-  const identificandoCidade = localizacao.modo === "nao-selecionada" ||
-    localizacao.modo === "detectando";
+  // A geolocalização pode encontrar coordenadas antes de a API resolver a cidade.
+  // Mantenha o indicador de progresso durante todo esse intervalo.
+  const identificandoCidade = !localizacao.cidadeId && (
+    localizacao.loading ||
+    localizacao.modo === "nao-selecionada" ||
+    localizacao.modo === "detectando"
+  );
 
   /*
    * Preview da foto de perfil
