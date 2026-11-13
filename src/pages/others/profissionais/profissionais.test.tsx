@@ -12,6 +12,7 @@ const profissionalMock = vi.hoisted(() => ({
   listar: vi.fn(),
   criar: vi.fn(),
   atualizar: vi.fn(),
+  original: vi.fn(),
 }));
 
 vi.mock("@/context/ThemeContext", () => ({
@@ -30,6 +31,7 @@ vi.mock("@/services/profissional-service", () => ({
   listarProfissionaisEmpresa: profissionalMock.listar,
   criarProfissionalEmpresa: profissionalMock.criar,
   atualizarProfissionalEmpresa: profissionalMock.atualizar,
+  obterFotoOriginalProfissional: profissionalMock.original,
 }));
 
 vi.mock("@/hooks/useCadastroLocalizacao", () => ({
@@ -79,6 +81,8 @@ describe("Profissionais", () => {
     profissionalMock.listar.mockResolvedValue([]);
     profissionalMock.criar.mockReset();
     profissionalMock.atualizar.mockReset();
+    profissionalMock.original.mockReset();
+    profissionalMock.original.mockResolvedValue(null);
     vinculoMock.listar.mockReset();
     vinculoMock.responder.mockReset();
   });
@@ -227,13 +231,14 @@ describe("Profissionais", () => {
     expect(within(dialog).getByRole("button", { name: "Ajustar recorte" })).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole("button", { name: "Ajustar recorte" }));
     expect(within(dialog).getByRole("button", { name: "Salvar alterações" })).toBeDisabled();
-    fireEvent.click(within(dialog).getByRole("button", { name: "Aplicar recorte" }));
+    fireEvent.click(await within(dialog).findByRole("button", { name: "Aplicar recorte" }));
     fireEvent.click(within(dialog).getByRole("button", { name: "Salvar alterações" }));
 
     await waitFor(() => {
       expect(profissionalMock.atualizar).toHaveBeenCalledWith(11, {
         Nome: "Profissional Teste", Email: "profissional@example.com", Telefone: "27999999999",
         FotoPerfil: expect.objectContaining({ name: "profissional-recortada.webp", type: "image/webp" }),
+        FotoOriginal: null,
       });
     });
   });
@@ -255,7 +260,7 @@ describe("Profissionais", () => {
     const dialog = screen.getByRole("dialog", { name: "Editar profissional" });
     expect(within(dialog).getByPlaceholderText("(11) 99999-9999")).toHaveValue("");
     fireEvent.click(within(dialog).getByRole("button", { name: "Ajustar recorte" }));
-    fireEvent.click(within(dialog).getByRole("button", { name: "Aplicar recorte" }));
+    fireEvent.click(await within(dialog).findByRole("button", { name: "Aplicar recorte" }));
     const submit = within(dialog).getByRole("button", { name: "Salvar alterações" });
     expect(submit).toBeEnabled();
     fireEvent.click(submit);
@@ -264,6 +269,7 @@ describe("Profissionais", () => {
       expect(profissionalMock.atualizar).toHaveBeenCalledWith(12, {
         Nome: "Jacinto Abreu", Email: "jacinto@example.com", Telefone: "",
         FotoPerfil: expect.objectContaining({ name: "profissional-recortada.webp" }),
+        FotoOriginal: null,
       });
     });
   });
@@ -291,7 +297,7 @@ describe("Profissionais", () => {
     await waitFor(() => {
       expect(profissionalMock.atualizar).toHaveBeenCalledWith(13, {
         Nome: "Nome Atualizado", Email: "teste@example.com",
-        Telefone: "", FotoPerfil: null,
+        Telefone: "", FotoPerfil: null, FotoOriginal: null,
       });
     });
   });
