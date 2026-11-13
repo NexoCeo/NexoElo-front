@@ -707,7 +707,7 @@ export default function Agenda() {
                   width: `calc(${100 / item.laneCount}% - 6px)`,
                   right: "auto",
                 }}
-                title={`${item.servico} — ${item.cliente} — ${item.horario} (${item.duracaoMinutos ?? 30} min)`}
+                title={`${item.servico} — ${item.cliente} — ${item.horario}${item.duracaoMinutos ? ` (${item.duracaoMinutos} min)` : ""}`}
                 aria-label={`${item.servico}, ${item.cliente}, ${item.horario}`}
                 data-appointment-id={item.Id}
                 data-event-lane={item.lane}
