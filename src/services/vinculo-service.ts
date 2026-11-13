@@ -191,14 +191,8 @@ type SolicitacaoVinculoApi = {
   DataSolicitacao?: string | null;
 };
 
-export async function listarSolicitacoesVinculo(
-  empresaId: number,
-): Promise<SolicitacaoVinculo[]> {
-  const response = await api.get<SolicitacaoVinculoApi[]>(
-    `/vinculos/empresa/${empresaId}/solicitacoes`,
-  );
-
-  return response.data.map((item) => normalizeUserData({
+function normalizarSolicitacaoVinculo(item: SolicitacaoVinculoApi): SolicitacaoVinculo {
+  return normalizeUserData({
     VinculoId:
       item.VinculoId ??
       item.vinculoId ??
@@ -244,7 +238,25 @@ export async function listarSolicitacoesVinculo(
       item.DataSolicitacao ??
       item.dataSolicitacao ??
       null,
-  }));
+  });
+}
+
+export async function listarSolicitacoesVinculo(
+  empresaId: number,
+): Promise<SolicitacaoVinculo[]> {
+  const response = await api.get<SolicitacaoVinculoApi[]>(
+    `/vinculos/empresa/${empresaId}/solicitacoes`,
+  );
+  return response.data.map(normalizarSolicitacaoVinculo);
+}
+
+export async function listarHistoricoSolicitacoesVinculo(
+  empresaId: number,
+): Promise<SolicitacaoVinculo[]> {
+  const response = await api.get<SolicitacaoVinculoApi[]>(
+    `/vinculos/empresa/${empresaId}/solicitacoes/historico`,
+  );
+  return response.data.map(normalizarSolicitacaoVinculo);
 }
 
 /* =========================================================
