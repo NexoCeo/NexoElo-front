@@ -22,9 +22,8 @@ vi.mock("@/hooks/useRegisterForm", () => ({
     nome: "",
     email: "",
     senha: "",
-    TipoUsuario: "",
+    TipoUsuario: "empresa",
     nomeFantasia: "",
-    cnpj: "",
     localizacao: { cidadeId: 0 },
     empresas: [],
     empresaId: 0,
@@ -39,7 +38,6 @@ vi.mock("@/hooks/useRegisterForm", () => ({
     setSenha: vi.fn(),
     setTipoUsuario: vi.fn(),
     setNomeFantasia: vi.fn(),
-    setCnpj: vi.fn(),
     setEmpresaId: vi.fn(),
     setShowPassword: vi.fn(),
     isFormValid: () => false,
@@ -91,6 +89,9 @@ describe("campos de localizacao dos cadastros publicos", () => {
     );
 
     expectNoManualLocationFields();
+    expect(screen.getByText("Nome fantasia")).toBeInTheDocument();
+    expect(screen.queryByText("CNPJ")).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText("Digite o CNPJ")).not.toBeInTheDocument();
   });
 
   it("nao exibe pais, estado ou cidade no cadastro do cliente final", () => {
