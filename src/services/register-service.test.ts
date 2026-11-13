@@ -35,6 +35,26 @@ describe("Register", () => {
     expect(form.has("CidadeFk")).toBe(false);
   });
 
+  it("cadastra empresa com nome fantasia sem enviar CNPJ", async () => {
+    apiMock.post.mockResolvedValue({ data: { Id: 11 } });
+
+    await Register(
+      null,
+      "Barbearia Shop Ltda",
+      "barbearia@example.com",
+      "senha-segura",
+      "EMPRESA",
+      { latitude: -19.0183, longitude: -40.5367 },
+      "Barbearia Shop",
+      "",
+    );
+
+    const form = apiMock.post.mock.calls[0][1] as FormData;
+    expect(form.get("TipoUsuario")).toBe("EMPRESA");
+    expect(form.get("NomeFantasia")).toBe("Barbearia Shop");
+    expect(form.has("Cnpj")).toBe(false);
+  });
+
   it("envia somente coordenadas quando a localizacao e automatica", async () => {
     apiMock.post.mockResolvedValue({ data: { Id: 10 } });
 
