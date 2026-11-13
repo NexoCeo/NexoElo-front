@@ -88,6 +88,36 @@ export async function obterSlugUsuario(usuarioId: number) {
 const EMPRESAS_CACHE_MS = 3 * 60 * 1000;
 const empresasCache = new Map<number, { data: EmpresaCadastro[]; expiresAt: number }>();
 const empresasPendentes = new Map<number, Promise<EmpresaCadastro[]>>();
+const EMPRESAS_CACHE_PREFIX = "nexoelo:cadastro-empresas:v1:";
+
+function lerEmpresasCacheSessao(key: number) {
+  if (typeof window === "undefined") return null;
+  try {
+    const value = window.sessionStorage.getItem(EMPRESAS_CACHE_PREFIX + key);
+    if (!value) return null;
+    const cached: { expiresAt: number; data: EmpresaCadastro[] } = JSON.parse(value);
+    if (
+      !Array.isArray(cached.data) ||
+      !Number.isFinite(cached.expiresAt) ||
+      cached.expiresAt <= Date.now()
+    ) {
+      window.sessionStorage.removeItem(EMPRESAS_CACHE_PREFIX + key);
+      return null;
+    }
+    return cached;
+  } catch {
+    return null; // armazenamento privado/desabilitado: cache em memória continua ativo
+  }
+}
+
+function salvarEmpresasCacheSessao(key: number, value: { expiresAt: number; data: EmpresaCadastro[] }) {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(EMPRESAS_CACHE_PREFIX + key, JSON.stringify(value));
+  } catch {
+    // Navegadores que bloqueiam storage ou excedem quota seguem usando memória.
+  }
+}
 
 export async function listarEmpresasParaCadastro(
   cidadeId?: number,
@@ -100,6 +130,12 @@ export async function listarEmpresasParaCadastro(
 
   const pending = empresasPendentes.get(key);
   if (pending) return pending;
+
+  const sessionCached = lerEmpresasCacheSessao(key);
+  if (sessionCached) {
+    empresasCache.set(key, sessionCached);
+    return sessionCached.data;
+  }
 
   const request = (async () => {
     // Sem cidadeId, a API responde com o catálogo público de empresas
@@ -120,10 +156,12 @@ export async function listarEmpresasParaCadastro(
       }))
       .filter((empresa) => empresa.Id > 0);
 
-    empresasCache.set(key, {
+    const updatedCache = {
       data: companies,
       expiresAt: Date.now() + EMPRESAS_CACHE_MS,
-    });
+    };
+    empresasCache.set(key, updatedCache);
+    salvarEmpresasCacheSessao(key, updatedCache);
     return companies;
   })();
 
