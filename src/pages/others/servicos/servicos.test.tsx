@@ -124,6 +124,22 @@ describe("Servicos", () => {
     expect(screen.queryByRole("dialog", { name: "Novo serviço" })).not.toBeInTheDocument();
   });
 
+  it("reabre o recorte a partir da imagem original, não do último WebP gerado", async () => {
+    render(<MemoryRouter><LanguageProvider><Servicos /></LanguageProvider></MemoryRouter>);
+    await screen.findByText("Servico Teste");
+    fireEvent.click(screen.getByRole("button", { name: "Novo serviço" }));
+    const dialog = await screen.findByRole("dialog", { name: "Novo serviço" });
+    const original = new File(["original"], "original.png", { type: "image/png" });
+    fireEvent.change(within(dialog).getByLabelText("Imagem do serviço"), {
+      target: { files: [original] },
+    });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Aplicar recorte" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "Ajustar recorte" }));
+    const createUrl = vi.mocked(URL.createObjectURL);
+    expect(createUrl).toHaveBeenLastCalledWith(original);
+    fireEvent.click(within(dialog).getByRole("button", { name: "Cancelar recorte" }));
+  });
+
   it("permite ajustar recorte da imagem ja cadastrada no modal de edicao", async () => {
     serviceMocks.listarServicosPorEmpresa.mockResolvedValue([{
       Id: 2, NomeServico: "Servico Teste", Valor: 150,
