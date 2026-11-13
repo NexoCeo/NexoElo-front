@@ -1016,7 +1016,8 @@ export default function Profissionais() {
             aria-modal="true"
             aria-label={t("pros.linkRequests")}
           >
-            <div className={styles.requestsTabs} role="tablist" aria-label={t("pros.linkRequests")}>
+            <div className={styles.requestsTopBar}>
+              <div className={styles.requestsTabs} role="tablist" aria-label={t("pros.linkRequests")}>
               <button
                 id="vinculos-tab-solicitacoes"
                 type="button"
@@ -1039,6 +1040,16 @@ export default function Profissionais() {
               >
                 {t("pros.historyTab")}
               </button>
+              </div>
+              <button
+                type="button"
+                className={styles.requestsCloseButton}
+                onClick={() => setSolicitacoesOpen(false)}
+                aria-label="Fechar solicitacoes"
+                title="Fechar"
+              >
+                <FaTimes />
+              </button>
             </div>
 
             <div
@@ -1058,10 +1069,7 @@ export default function Profissionais() {
                       ? t("pros.requestsDescription") : t("pros.historyDescription")}
                   </p>
                 </div>
-                <button type="button" onClick={() => setSolicitacoesOpen(false)}
-                  aria-label="Fechar solicitacoes" title="Fechar">
-                  <FaTimes />
-                </button>
+
               </header>
 
               <div className={styles.requestsBody}>
