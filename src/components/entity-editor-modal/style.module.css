@@ -102,3 +102,29 @@
   .imageLargePreview{width:65px;height:65px;flex-basis:65px}
   .imagePickerActions{align-items:flex-start}
 }
+
+/* Edição compartilhada: mesmos controles e mesmos estados nas duas páginas. */
+.editorForm { display:grid;gap:10px;min-width:0; }
+.editorField { display:grid;gap:5px;min-width:0;line-height:1.2;font-size:13px;font-weight:700;color:var(--theme-text); }
+.fieldControl,.fieldWithIcon {position:relative;display:block;min-width:0;}
+.fieldControl input,.fieldWithIcon input {
+  box-sizing:border-box;display:block;width:100%;min-width:0;min-height:40px;
+  padding:0 11px;border:1px solid var(--theme-border-strong);
+  border-radius:6px;background:var(--theme-surface-muted);color:var(--theme-text);
+  font:inherit;font-weight:500;
+}
+.fieldWithIcon input {padding-right:42px;}
+.fieldControl input:focus-visible,.fieldWithIcon input:focus-visible {
+  outline:2px solid var(--theme-focus);outline-offset:1px;border-color:var(--theme-primary-text);
+}
+.fieldIcon {position:absolute;display:grid;place-items:center;right:12px;top:50%;
+  transform:translateY(-50%);color:var(--theme-text-muted);pointer-events:none;}
+.editorError {margin:0;color:var(--theme-error);font-size:13px;line-height:1.4;}
+.editorSubmit {
+  box-sizing:border-box;width:100%;min-height:43px;margin-top:2px;padding:8px 12px;
+  border:0;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;
+  background:var(--theme-primary);color:var(--theme-on-primary);font:inherit;font-size:13px;font-weight:750;
+  cursor:pointer;
+}
+.editorSubmit:disabled {opacity:.62;cursor:not-allowed}
+.editorSubmit:focus-visible {outline:2px solid var(--theme-focus);outline-offset:2px}
