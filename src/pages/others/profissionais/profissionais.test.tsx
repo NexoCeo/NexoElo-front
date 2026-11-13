@@ -22,6 +22,8 @@ vi.mock("@/context/ThemeContext", () => ({
 
 vi.mock("@/context/UserContext", () => ({
   useUser: () => ({ usuario: { Id: 7, Papel: "EMPRESA" } }),
+  formatPersonName: (name: string) => name,
+  formatEmailDisplay: (email: string) => email,
 }));
 
 vi.mock("@/services/profissional-service", () => ({
