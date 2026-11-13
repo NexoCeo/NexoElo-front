@@ -7,6 +7,7 @@ const serviceMocks = vi.hoisted(() => ({
   consultarAssinatura: vi.fn(),
   inserirServico: vi.fn(),
   listarServicosPorEmpresa: vi.fn(),
+  obterImagemOriginalServico: vi.fn(),
 }));
 
 vi.mock("@/context/ThemeContext", () => ({
@@ -51,6 +52,7 @@ describe("Servicos", () => {
     Object.defineProperty(URL, "createObjectURL", { configurable: true, value: vi.fn(() => "blob:service-test") });
     Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: vi.fn() });
     serviceMocks.consultarAssinatura.mockResolvedValue({ AcessoAtivo: true, Plano: "GRATIS" });
+    serviceMocks.obterImagemOriginalServico.mockResolvedValue(null);
     serviceMocks.listarServicosPorEmpresa.mockResolvedValue([
       {
         Id: 2,
@@ -117,6 +119,8 @@ describe("Servicos", () => {
         Valor: 45,
         TempoEstimadoMinutos: 45,
         ImagemServico: expect.objectContaining({ name: "servico-recortada.webp", type: "image/webp" }),
+      ImagemOriginal: null,
+        ImagemOriginal: imagem,
       });
     });
     expect(await screen.findByText("Serviço cadastrado")).toBeInTheDocument();
@@ -152,7 +156,7 @@ describe("Servicos", () => {
     const dialog = screen.getByRole("dialog", { name: "Editar serviço" });
     fireEvent.click(within(dialog).getByRole("button", { name: "Ajustar recorte" }));
     expect(within(dialog).getByRole("button", { name: "Salvar alterações" })).toBeDisabled();
-    fireEvent.click(within(dialog).getByRole("button", { name: "Aplicar recorte" }));
+    fireEvent.click(await within(dialog).findByRole("button", { name: "Aplicar recorte" }));
     fireEvent.click(within(dialog).getByRole("button", { name: "Salvar alterações" }));
     await waitFor(() => expect(serviceMocks.atualizarServico).toHaveBeenCalledWith(2, {
       NomeServico: "Servico Teste", Valor: 150, TempoEstimadoMinutos: 60,
@@ -186,6 +190,7 @@ describe("Servicos", () => {
         Valor: 180,
         TempoEstimadoMinutos: 75,
         ImagemServico: null,
+        ImagemOriginal: null,
       });
     });
     expect(await screen.findByText("Servico Atualizado")).toBeInTheDocument();
