@@ -83,28 +83,30 @@ export async function obterSlugUsuario(usuarioId: number) {
   return pickString(response.data, ["Slug", "slug"]);
 }
 
-// Cache de sessão por cidade: o cadastro consulta antes de o papel ser escolhido,
-// e voltar à página não precisa consultar novamente dentro deste intervalo.
+// Cache compartilhado por sessão: 0 = catálogo independente de localização.
+ // Consultas filtradas por cidade continuam disponíveis em outros fluxos.
 const EMPRESAS_CACHE_MS = 3 * 60 * 1000;
 const empresasCache = new Map<number, { data: EmpresaCadastro[]; expiresAt: number }>();
 const empresasPendentes = new Map<number, Promise<EmpresaCadastro[]>>();
 
 export async function listarEmpresasParaCadastro(
-  cidadeId: number,
+  cidadeId?: number,
 ): Promise<EmpresaCadastro[]> {
-  if (!Number.isInteger(cidadeId) || cidadeId <= 0) return [];
+  if (cidadeId !== undefined && (!Number.isInteger(cidadeId) || cidadeId <= 0)) return [];
 
-  const cached = empresasCache.get(cidadeId);
+  const key = cidadeId ?? 0;
+  const cached = empresasCache.get(key);
   if (cached && cached.expiresAt > Date.now()) return cached.data;
 
-  const pending = empresasPendentes.get(cidadeId);
+  const pending = empresasPendentes.get(key);
   if (pending) return pending;
 
   const request = (async () => {
-    const response = await api.get<ApiRecord[]>(
-      "/Profissional/empresas",
-      { params: { cidadeId } },
-    );
+    // Sem cidadeId, a API responde com o catálogo público de empresas
+    // imediatamente, sem aguardar geolocalização ou seleção de papel.
+    const response = cidadeId === undefined
+      ? await api.get<ApiRecord[]>("/Profissional/empresas")
+      : await api.get<ApiRecord[]>("/Profissional/empresas", { params: { cidadeId } });
 
     const companies = response.data
       .map((empresa) => ({
@@ -118,19 +120,19 @@ export async function listarEmpresasParaCadastro(
       }))
       .filter((empresa) => empresa.Id > 0);
 
-    empresasCache.set(cidadeId, {
+    empresasCache.set(key, {
       data: companies,
       expiresAt: Date.now() + EMPRESAS_CACHE_MS,
     });
     return companies;
   })();
 
-  empresasPendentes.set(cidadeId, request);
+  empresasPendentes.set(key, request);
   try {
     return await request;
   } finally {
-    if (empresasPendentes.get(cidadeId) === request) {
-      empresasPendentes.delete(cidadeId);
+    if (empresasPendentes.get(key) === request) {
+      empresasPendentes.delete(key);
     }
   }
 }
