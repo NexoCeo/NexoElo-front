@@ -387,8 +387,8 @@ export default function Profissionais() {
   function openEditModal(profissional: Profissional) {
     setOpenMenuId(null);
     setEditingProfessional(profissional);
-    setNome(profissional.Nome);
-    setEmail(profissional.Email);
+    setNome(formatPersonName(profissional.Nome));
+    setEmail(formatEmailDisplay(profissional.Email));
     setTelefone(profissional.Telefone ?? "");
     setFotoPerfil(null);
     setFotoOriginal(null);
