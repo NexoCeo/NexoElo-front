@@ -168,10 +168,16 @@ export default function Profissionais() {
 
   const empresaId = usuario?.Id ?? 0;
   const isEmpresa = usuario?.Papel === "EMPRESA";
+  // No cadastro o telefone é obrigatório; na edição um profissional pode
+  // não ter telefone informado. Nesse caso, mudar apenas a foto deve ser válido.
+  const validName = nome.trim().length >= (editingProfessional ? 1 : 3);
+  const validPhone = editingProfessional
+    ? !telefone.trim() || validatePhone(telefone)
+    : validatePhone(telefone);
   const canSubmit =
-    nome.trim().length >= 3 &&
+    validName &&
     validateEmail(email) &&
-    validatePhone(telefone) &&
+    validPhone &&
     (Boolean(fotoPerfil) || Boolean(editingProfessional)) &&
     !cropSource &&
     !saving;
@@ -528,7 +534,7 @@ export default function Profissionais() {
       return;
     }
 
-    if (nome.trim().length < 3) {
+    if (nome.trim().length < (editingProfessional ? 1 : 3)) {
       const message = "Informe o nome do profissional.";
       setFormError(message);
       showNotification({ type: "warning", title: "Nome incompleto", message });
@@ -542,7 +548,7 @@ export default function Profissionais() {
       return;
     }
 
-    if (!validatePhone(telefone)) {
+    if (telefone.trim() ? !validatePhone(telefone) : !editingProfessional) {
       const message = "Informe um telefone valido.";
       setFormError(message);
       showNotification({ type: "warning", title: "Telefone invalido", message });
@@ -555,7 +561,7 @@ export default function Profissionais() {
     }
 
     if (!fotoPerfil && !editingProfessional) {
-      const message = "Selecione uma foto de perfil."
+      const message = "Selecione uma foto de perfil.";
       setFormError(message);
       showNotification({ type: "warning", title: "Foto obrigatoria", message });
       return;
