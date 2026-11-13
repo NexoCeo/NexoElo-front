@@ -187,6 +187,11 @@ describe("Profissionais", () => {
 
     const dialog = screen.getByRole("dialog", { name: "Vínculo profissionais" });
     expect(dialog.className).toContain("requestsModal");
+    const closeButton = within(dialog).getByRole("button", { name: "Fechar solicitacoes" });
+    const topBar = closeButton.parentElement!;
+    expect(topBar.className).toContain("requestsTopBar");
+    expect(within(topBar).getByRole("tablist", { name: "Vínculo profissionais" })).toBeInTheDocument();
+    expect(within(dialog).getByRole("tabpanel").contains(closeButton)).toBe(false);
     expect(within(dialog).getByRole("tab", { name: "Solicitações" }))
       .toHaveAttribute("aria-selected", "true");
     expect(within(dialog).getByRole("tab", { name: "Histórico de solicitações" }))
@@ -203,6 +208,8 @@ describe("Profissionais", () => {
     expect(within(dialog).getByRole("tab", { name: "Solicitações" }))
       .toHaveAttribute("aria-selected", "true");
     expect(vinculoMock.listar).toHaveBeenCalledTimes(1);
+    fireEvent.click(closeButton);
+    expect(screen.queryByRole("dialog", { name: "Vínculo profissionais" })).not.toBeInTheDocument();
   });
 
   it("exibe no histórico as solicitações aprovadas e recusadas sem botões de decisão", async () => {
