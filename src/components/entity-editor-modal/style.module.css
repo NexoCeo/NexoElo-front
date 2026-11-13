@@ -112,6 +112,7 @@
   padding:0 11px;border:1px solid var(--theme-border-strong);
   border-radius:6px;background:var(--theme-surface-muted);color:var(--theme-text);
   font:inherit;font-weight:500;
+  text-transform:none;
 }
 .fieldWithIcon input {padding-right:42px;}
 .fieldControl input:focus-visible,.fieldWithIcon input:focus-visible {
