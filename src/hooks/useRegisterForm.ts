@@ -85,6 +85,7 @@ export function useRegisterForm() {
 
   // Estados de carregamento
   const [loadingEmpresas, setLoadingEmpresas] = useState(false);
+  const [empresasError, setEmpresasError] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Interface
@@ -130,93 +131,52 @@ export function useRegisterForm() {
   };
 
   /*
-   * Obter localizacao para listar empresas proximas
+   * Detectar a localização ao abrir /global/register, enquanto a pessoa
+   * preenche os demais campos. Antes só começava ao escolher Profissional.
    */
   useEffect(() => {
-    if (
-      TipoUsuario === "profissional" &&
-      localizacaoModo === "nao-selecionada"
-    ) {
+    if (localizacaoModo === "nao-selecionada") {
       void usarLocalizacaoAtual().catch(() => undefined);
     }
-  }, [
-    TipoUsuario,
-    localizacaoModo,
-    usarLocalizacaoAtual,
-  ]);
+  }, [localizacaoModo, usarLocalizacaoAtual]);
 
   /*
-   * Carregar empresas da mesma cidade
-   *
-   * Executado somente quando:
-   * - papel = profissional
-   * - uma cidade foi selecionada
+   * Pré-carregar a lista da cidade assim que ela é identificada.
+   * Alternar o papel não reinicia a consulta nem apaga a seleção.
+   * O serviço deduplica solicitações e mantém cache temporário por cidade.
    */
-
   useEffect(() => {
-    if (
-      TipoUsuario !== "profissional" ||
-      !localizacao.cidadeId
-    ) {
+    if (!localizacao.cidadeId) {
       setEmpresas([]);
       setEmpresaId(0);
       setLoadingEmpresas(false);
+      setEmpresasError("");
       return;
     }
 
     let active = true;
+    setLoadingEmpresas(true);
+    setEmpresasError("");
+    setEmpresas([]);
+    setEmpresaId(0);
 
-    async function loadEmpresas() {
-      try {
-        setLoadingEmpresas(true);
-        setError("");
-
-        // Evita exibir empresas da cidade anterior
+    void listarEmpresasParaCadastro(localizacao.cidadeId)
+      .then(data => {
+        if (!active) return;
+        setEmpresas(data);
+      })
+      .catch(err => {
+        console.error("Erro ao pré-carregar empresas:", err);
+        if (!active) return;
+        setEmpresasError("Não foi possível carregar as empresas desta cidade.");
         setEmpresas([]);
-        setEmpresaId(0);
+      })
+      .finally(() => {
+        if (active) setLoadingEmpresas(false);
+      });
 
-        const data =
-          await listarEmpresasParaCadastro(
-            localizacao.cidadeId
-          );
-
-        if (!active) {
-          return;
-        }
-
-        setEmpresas(data ?? []);
-      } catch (err) {
-        console.error(
-          "Erro ao carregar empresas:",
-          err
-        );
-
-        if (active) {
-          setEmpresas([]);
-          setEmpresaId(0);
-
-          const message =
-            "Nao foi possivel carregar as empresas desta cidade.";
-          setError(message);
-          showNotification({
-            type: "error",
-            title: "Empresas indisponiveis",
-            message,
-          });
-        }
-      } finally {
-        if (active) {
-          setLoadingEmpresas(false);
-        }
-      }
-    }
-
-    loadEmpresas();
-
-    return () => {
-      active = false;
-    };
-  }, [localizacao.cidadeId, showNotification, TipoUsuario]);
+    return () => { active = false; };
+  }, [localizacao.cidadeId]);
 
   /*
    * Submit
@@ -445,6 +405,7 @@ export function useRegisterForm() {
 
     // Loading
     loadingEmpresas,
+    empresasError,
     loading,
 
     // Interface
