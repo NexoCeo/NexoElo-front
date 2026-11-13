@@ -812,7 +812,7 @@ export default function Profissionais() {
                   <div className={styles.cardActions}>
                     <div className={styles.actionsMenu}>
                       <button type="button" className={styles.menuTrigger}
-                        aria-label={`Opções de ${profissional.Nome}`} aria-haspopup="menu"
+                        aria-label={`Opções de ${formatPersonName(profissional.Nome)}`} aria-haspopup="menu"
                         aria-expanded={openMenuId === profissional.Id}
                         onClick={(event) => {
                           const rect = event.currentTarget.getBoundingClientRect();
