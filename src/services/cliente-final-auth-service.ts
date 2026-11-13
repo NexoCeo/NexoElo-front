@@ -1,3 +1,4 @@
+import { normalizeUserData } from "@/context/UserContext";
 import api from "./api";
 import { saveClienteFinalSession } from "./cliente-final-auth-token";
 import { appendCadastroLocalizacao } from "./localizacao-service";
@@ -73,13 +74,13 @@ function normalizeClienteFinal(data: ApiRecord): ClienteFinal {
   const cliente = pickObject(data, ["usuario", "Usuario", "cliente", "Cliente", "clienteFinal", "ClienteFinal", "user", "User"]);
   const tipoUsuario = pickString(cliente, ["TipoUsuario", "tipoUsuario", "Papel", "papel"]).toUpperCase();
 
-  return {
+  return normalizeUserData({
     Id: pickNumber(cliente, ["Id", "id", "ClienteId", "clienteId"]),
     Nome: pickString(cliente, ["Nome", "nome", "NomeCliente", "nomeCliente", "Name", "name"]),
     Email: pickString(cliente, ["Email", "email"]),
     Telefone: pickString(cliente, ["Telefone", "telefone", "TelefoneCliente", "telefoneCliente"]),
     TipoUsuario: tipoUsuario,
-  };
+  });
 }
 
 export async function loginClienteFinal({ login, senha }: ClienteFinalLoginPayload) {
