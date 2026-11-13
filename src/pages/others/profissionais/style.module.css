@@ -445,13 +445,14 @@
 }
 
 @media (max-width: 760px) {
-  .requestsBackdrop {
+  .modalBackdrop.requestsBackdrop {
     padding: 12px;
     place-items: center;
   }
-  .requestsModal {
+  .modal.requestsModal {
     width: min(620px, 100%);
     height: min(580px, calc(100dvh - 24px));
+    max-height: none;
     padding: 14px;
     gap: 12px;
   }
