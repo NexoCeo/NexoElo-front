@@ -1,3 +1,4 @@
+import { carregarImagemOriginal } from "./imagem-original-service";
 import api from "./api";
 import { appendCadastroLocalizacao } from "./localizacao-service";
 import type {
@@ -153,3 +154,6 @@ export async function atualizarProfissionalEmpresa(
   );
   return normalizeProfissional(data);
 }
+
+export const obterFotoOriginalProfissional = (id: number) =>
+  carregarImagemOriginal(`/Usuario/empresa/profissionais/${id}/foto-original`);
