@@ -386,8 +386,8 @@ describe("Agenda", () => {
     await waitFor(() => {
       expect(agendaServiceMock.atualizarStatusAgendamento).toHaveBeenCalledWith(6, "CANCELADO");
     });
-    expect(await screen.findByText("Agendamento cancelado.")).toBeInTheDocument();
-    expect(screen.getByText("CANCELADO")).toBeInTheDocument();
+    expect(await screen.findByText("O status foi atualizado na agenda.")).toBeInTheDocument();
+    expect(screen.getByText("Cancelado")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Cancelar agendamento de Vitor Cliente" })).not.toBeInTheDocument();
   });
 
@@ -403,6 +403,6 @@ describe("Agenda", () => {
     await waitFor(() => {
       expect(agendaServiceMock.concluirAgendamentosDoDiaAtual).toHaveBeenCalledTimes(1);
     });
-    expect(await screen.findByText("2 agendamentos concluídos.")).toBeInTheDocument();
+    expect(await screen.findByText("2 agendamentos foram concluídos.")).toBeInTheDocument();
   });
 });
