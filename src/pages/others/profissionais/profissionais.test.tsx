@@ -137,7 +137,7 @@ describe("Profissionais", () => {
       expect(vinculoMock.responder).toHaveBeenCalledWith(7, 21, "APROVADO");
     });
     expect(screen.queryByText("Profissional Pendente")).not.toBeInTheDocument();
-    expect(screen.getByText(/foi vinculado a empresa/i)).toBeInTheDocument();
+    expect(await screen.findByText(/agora faz parte da empresa/i)).toBeInTheDocument();
   });
 
   it("nao exibe pais, estado ou cidade ao abrir o cadastro do profissional", async () => {
