@@ -70,6 +70,7 @@ import Profissionais from "./index";
 
 describe("Profissionais", () => {
   beforeEach(() => {
+    Object.defineProperty(window.navigator, "languages", { configurable: true, value: ["pt-BR"] });
     URL.createObjectURL = vi.fn(() => "blob:foto-profissional");
     URL.revokeObjectURL = vi.fn();
     profissionalMock.listar.mockReset();
