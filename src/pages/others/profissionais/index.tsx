@@ -11,7 +11,6 @@ import {
   FaEllipsisV,
   FaLink,
   FaPhoneAlt,
-  FaPlus,
   FaSave,
   FaCheck,
   FaTimes,
