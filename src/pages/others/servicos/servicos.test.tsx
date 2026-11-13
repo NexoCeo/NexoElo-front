@@ -196,4 +196,29 @@ describe("Servicos", () => {
     expect(await screen.findByText("Servico Atualizado")).toBeInTheDocument();
     expect(screen.queryByText("Servico Teste")).not.toBeInTheDocument();
   });
+
+  it("usa a imagem integral armazenada ao reabrir o recorte de um serviço", async () => {
+    const original = new File(["foto inteira"], "foto-inteira.jpg", { type: "image/jpeg" });
+    serviceMocks.listarServicosPorEmpresa.mockResolvedValue([{
+      Id: 2, NomeServico: "Servico Teste", Valor: 150,
+      TempoEstimadoMinutos: 60, ImagemServico: "uploads/recorte.webp",
+    }]);
+    serviceMocks.obterImagemOriginalServico.mockResolvedValue(original);
+
+    render(<MemoryRouter><LanguageProvider><Servicos /></LanguageProvider></MemoryRouter>);
+    await screen.findByText("Servico Teste");
+    fireEvent.click(screen.getByRole("button", { name: "Opções de Servico Teste" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Editar" }));
+    const dialog = screen.getByRole("dialog", { name: "Editar serviço" });
+
+    fireEvent.click(within(dialog).getByRole("button", { name: "Ajustar recorte" }));
+    const aplicar = await within(dialog).findByRole("button", { name: "Aplicar recorte" });
+    expect(serviceMocks.obterImagemOriginalServico).toHaveBeenCalledWith(2);
+    expect(vi.mocked(URL.createObjectURL)).toHaveBeenLastCalledWith(original);
+    fireEvent.click(aplicar);
+    fireEvent.click(within(dialog).getByRole("button", { name: "Salvar alterações" }));
+
+    await waitFor(() => expect(serviceMocks.atualizarServico).toHaveBeenCalledWith(2,
+      expect.objectContaining({ ImagemOriginal: original })));
+  });
 });
