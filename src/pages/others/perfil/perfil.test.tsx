@@ -41,6 +41,8 @@ vi.mock("@/context/UserContext", () => ({
     usuario: mocks.usuario,
     setUsuario: mocks.setUsuario,
   }),
+  formatPersonName: (name: string) => name,
+  formatEmailDisplay: (email: string) => email,
 }));
 
 vi.mock("@/services/usuario-service", () => ({
