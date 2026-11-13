@@ -218,4 +218,62 @@ describe("Profissionais", () => {
     });
   });
 
+  it("permite salvar somente o novo recorte mesmo quando o telefone anterior está vazio", async () => {
+    profissionalMock.listar.mockResolvedValue([{
+      Id: 12, Nome: "Jacinto Abreu", Email: "jacinto@example.com",
+      Telefone: "", FotoPerfil: "uploads/jacinto.png", VinculoStatus: "APROVADO",
+    }]);
+    profissionalMock.atualizar.mockResolvedValue({
+      Id: 12, Nome: "Jacinto Abreu", Email: "jacinto@example.com",
+      Telefone: "", FotoPerfil: "uploads/jacinto-recortada.webp", VinculoStatus: "APROVADO",
+    });
+
+    render(<MemoryRouter><LanguageProvider><Profissionais /></LanguageProvider></MemoryRouter>);
+    await screen.findByText("Jacinto Abreu");
+    fireEvent.click(screen.getByRole("button", { name: "Opções de Jacinto Abreu" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Editar" }));
+    const dialog = screen.getByRole("dialog", { name: "Editar profissional" });
+    expect(within(dialog).getByPlaceholderText("(11) 99999-9999")).toHaveValue("");
+    fireEvent.click(within(dialog).getByRole("button", { name: "Ajustar recorte" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "Aplicar recorte" }));
+    const submit = within(dialog).getByRole("button", { name: "Salvar alterações" });
+    expect(submit).toBeEnabled();
+    fireEvent.click(submit);
+
+    await waitFor(() => {
+      expect(profissionalMock.atualizar).toHaveBeenCalledWith(12, {
+        Nome: "Jacinto Abreu", Email: "jacinto@example.com", Telefone: "",
+        FotoPerfil: expect.objectContaining({ name: "profissional-recortada.webp" }),
+      });
+    });
+  });
+
+  it("permite salvar somente o nome sem exigir uma nova foto nem telefone", async () => {
+    profissionalMock.listar.mockResolvedValue([{
+      Id: 13, Nome: "Nome Original", Email: "teste@example.com",
+      Telefone: "", FotoPerfil: "uploads/original.png", VinculoStatus: "APROVADO",
+    }]);
+    profissionalMock.atualizar.mockResolvedValue({
+      Id: 13, Nome: "Nome Atualizado", Email: "teste@example.com",
+      Telefone: "", FotoPerfil: "uploads/original.png", VinculoStatus: "APROVADO",
+    });
+    render(<MemoryRouter><LanguageProvider><Profissionais /></LanguageProvider></MemoryRouter>);
+    await screen.findByText("Nome Original");
+    fireEvent.click(screen.getByRole("button", { name: "Opções de Nome Original" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Editar" }));
+    const dialog = screen.getByRole("dialog", { name: "Editar profissional" });
+    fireEvent.change(within(dialog).getByPlaceholderText("Nome do profissional"), {
+      target: { value: "Nome Atualizado" },
+    });
+    const submit = within(dialog).getByRole("button", { name: "Salvar alterações" });
+    expect(submit).toBeEnabled();
+    fireEvent.click(submit);
+    await waitFor(() => {
+      expect(profissionalMock.atualizar).toHaveBeenCalledWith(13, {
+        Nome: "Nome Atualizado", Email: "teste@example.com",
+        Telefone: "", FotoPerfil: null,
+      });
+    });
+  });
+
 });
