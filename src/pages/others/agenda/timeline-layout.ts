@@ -105,8 +105,5 @@ export function layoutTimeline<T extends TimelineSource>(
   }
   if (cluster.length) finishCluster();
 
-  return positions.map(({ visualEnd: _visualEnd, ...event }) => {
-    void _visualEnd;
-    return event;
-  });
+  return positions;
 }
