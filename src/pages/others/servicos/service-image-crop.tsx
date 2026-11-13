@@ -6,6 +6,12 @@ const OUTPUT_SIZE = 640;
 // Um enquadramento inicial ligeiramente ampliado deixa margem para arrastar
 // mesmo quando a imagem original ja e quadrada.
 const INITIAL_ZOOM = 1.25;
+const MAX_ZOOM = 3;
+
+// Em 100%, toda a imagem original cabe na area de edicao. O zoom
+// inicial continua preenchendo o quadrado como antes, sem perder a fonte.
+const getCoverFactor = (width: number, height: number) =>
+  width > 0 && height > 0 ? Math.max(width, height) / Math.min(width, height) : 1;
 
 type Props = {
   source: string;
@@ -53,7 +59,7 @@ export default function ServiceImageCrop({ source, filename, onApply, onCancel }
   useEffect(() => {
     setPosition(current => {
       const scale = imageSize.width && imageSize.height
-        ? Math.max(viewportSize / imageSize.width, viewportSize / imageSize.height) * zoom : 1;
+        ? Math.min(viewportSize / imageSize.width, viewportSize / imageSize.height) * zoom : 1;
       return {
         x: Math.max(-Math.max(0, (imageSize.width * scale - viewportSize) / 2),
           Math.min(Math.max(0, (imageSize.width * scale - viewportSize) / 2), current.x)),
@@ -64,8 +70,9 @@ export default function ServiceImageCrop({ source, filename, onApply, onCancel }
   }, [imageSize.width, imageSize.height, viewportSize, zoom]);
 
   const baseScale = imageSize.width && imageSize.height
-    ? Math.max(viewportSize / imageSize.width, viewportSize / imageSize.height)
+    ? Math.min(viewportSize / imageSize.width, viewportSize / imageSize.height)
     : 1;
+  const maxZoom = MAX_ZOOM * getCoverFactor(imageSize.width, imageSize.height);
   const displayedWidth = imageSize.width * baseScale * zoom;
   const displayedHeight = imageSize.height * baseScale * zoom;
   const maxX = Math.max(0, (displayedWidth - viewportSize) / 2);
@@ -76,9 +83,9 @@ export default function ServiceImageCrop({ source, filename, onApply, onCancel }
     setPosition({ x: clamp(x, maxX), y: clamp(y, maxY) });
 
   function changeZoom(nextZoom: number) {
-    const next = Math.max(1, Math.min(3, nextZoom));
+    const next = Math.max(1, Math.min(maxZoom, nextZoom));
     if (next === 1) {
-      // Zoom mínimo: enquadramento central da fonte original, sem deslocamento residual.
+      // Zoom mínimo: a imagem inteira, centralizada, sem recorte ou arraste anterior.
       setZoom(1);
       setPosition({ x: 0, y: 0 });
       return;
@@ -176,7 +183,10 @@ export default function ServiceImageCrop({ source, filename, onApply, onCancel }
           alt="Prévia do recorte"
           draggable={false}
           onLoad={(event) => {
-            setImageSize({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight });
+            const { naturalWidth, naturalHeight } = event.currentTarget;
+            setImageSize({ width: naturalWidth, height: naturalHeight });
+            setZoom(INITIAL_ZOOM * getCoverFactor(naturalWidth, naturalHeight));
+            setPosition({ x: 0, y: 0 });
             setError("");
           }}
           onError={() => setError("Não foi possível carregar a imagem. Escolha outro arquivo.")}
@@ -196,7 +206,7 @@ export default function ServiceImageCrop({ source, filename, onApply, onCancel }
         className={styles.cropZoom}
         type="range"
         min="1"
-        max="3"
+        max={maxZoom}
         step="0.05"
         value={zoom}
         aria-label="Zoom da imagem"
