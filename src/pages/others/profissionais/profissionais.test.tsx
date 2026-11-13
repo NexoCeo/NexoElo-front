@@ -1,6 +1,7 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { render } from "@/test/render-with-notifications";
 import { MemoryRouter } from "react-router-dom";
+import { LanguageProvider } from "@/context/LanguageContext";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const vinculoMock = vi.hoisted(() => ({
@@ -91,7 +92,7 @@ describe("Profissionais", () => {
       senhaTemporaria: "SenhaTemporaria9!",
     });
 
-    const { container } = render(<MemoryRouter><Profissionais /></MemoryRouter>);
+    const { container } = render(<MemoryRouter><LanguageProvider><Profissionais /></LanguageProvider></MemoryRouter>);
     fireEvent.click(screen.getByRole("button", { name: /novo profissional/i }));
     fireEvent.change(screen.getByPlaceholderText("Nome do profissional"), {
       target: { value: "Profissional Teste" },
@@ -123,7 +124,7 @@ describe("Profissionais", () => {
     ]);
     vinculoMock.responder.mockResolvedValue(undefined);
 
-    render(<MemoryRouter><Profissionais /></MemoryRouter>);
+    render(<MemoryRouter><LanguageProvider><Profissionais /></LanguageProvider></MemoryRouter>);
     fireEvent.click(screen.getByRole("button", { name: /solicitacoes de vinculo/i }));
 
     expect(await screen.findByText("Profissional Pendente")).toBeInTheDocument();
@@ -137,7 +138,7 @@ describe("Profissionais", () => {
   });
 
   it("nao exibe pais, estado ou cidade ao abrir o cadastro do profissional", async () => {
-    render(<MemoryRouter><Profissionais /></MemoryRouter>);
+    render(<MemoryRouter><LanguageProvider><Profissionais /></LanguageProvider></MemoryRouter>);
 
     fireEvent.click(screen.getByRole("button", { name: /novo profissional/i }));
 
@@ -159,7 +160,7 @@ describe("Profissionais", () => {
         },
       },
     });
-    const { container } = render(<MemoryRouter><Profissionais /></MemoryRouter>);
+    const { container } = render(<MemoryRouter><LanguageProvider><Profissionais /></LanguageProvider></MemoryRouter>);
     fireEvent.click(screen.getByRole("button", { name: /novo profissional/i }));
     fireEvent.change(screen.getByPlaceholderText("Nome do profissional"), {
       target: { value: "Profissional Teste" },
@@ -193,7 +194,7 @@ describe("Profissionais", () => {
       Telefone: "27999999999", FotoPerfil: "uploads/recortada.webp",
       VinculoStatus: "APROVADO",
     });
-    render(<MemoryRouter><Profissionais /></MemoryRouter>);
+    render(<MemoryRouter><LanguageProvider><Profissionais /></LanguageProvider></MemoryRouter>);
     await screen.findByText("Profissional Teste");
     fireEvent.click(screen.getByRole("button", { name: "Opções de Profissional Teste" }));
     fireEvent.click(screen.getByRole("menuitem", { name: "Editar" }));
