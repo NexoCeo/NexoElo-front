@@ -186,7 +186,7 @@ describe("Profissionais", () => {
     fireEvent.click(screen.getByRole("button", { name: "Vínculo profissionais" }));
 
     const dialog = screen.getByRole("dialog", { name: "Vínculo profissionais" });
-    expect(dialog).toHaveClass(expect.stringContaining("requestsModal"));
+    expect(dialog.className).toContain("requestsModal");
     expect(within(dialog).getByRole("tab", { name: "Solicitações" }))
       .toHaveAttribute("aria-selected", "true");
     expect(within(dialog).getByRole("tab", { name: "Histórico de solicitações" }))
