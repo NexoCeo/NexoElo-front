@@ -30,7 +30,6 @@ function Register() {
     TipoUsuario,
 
     nomeFantasia,
-    cnpj,
     localizacao,
 
 
@@ -53,7 +52,6 @@ function Register() {
     setTipoUsuario,
 
     setNomeFantasia,
-    setCnpj,
 
 
     setEmpresaId,
@@ -342,26 +340,6 @@ function Register() {
                 <InputGeneric type="text" name="nomeFantasia" value={nomeFantasia} onChange={setNomeFantasia} placeholder={t("auth.enterBusinessName")} icon={<FaUser size={15} />} />
               </div>
 
-              {/* CNPJ */}
-              <div
-                className={
-                  styles.formGroup
-                }
-              >
-                <label
-                  className={
-                    styles.label
-                  }
-                  style={{
-                    color:
-                      theme.colors.text,
-                  }}
-                >
-                  CNPJ
-                </label>
-
-                <InputGeneric type="text" name="cnpj" value={cnpj} onChange={setCnpj} placeholder={t("auth.enterCnpj")} icon={<FaUser size={15} />}                />
-              </div>
             </>
           )}
 
