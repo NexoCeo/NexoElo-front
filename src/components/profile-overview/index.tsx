@@ -1,6 +1,6 @@
 import { FaCamera, FaEnvelope, FaPhoneAlt, FaStore, FaIdCard } from "react-icons/fa";
 import styles from "./style.module.css";
-import { formatPersonName, formatEmailDisplay } from "@/context/UserContext";
+import { formatPersonName, formatEmailDisplay, formatPhoneDisplay, formatCnpjDisplay } from "@/context/UserContext";
 import { useLanguage } from "@/context/LanguageContext";
 
 type ProfileOverviewProps = {
@@ -16,20 +16,6 @@ type ProfileOverviewProps = {
   onPhotoChange?: (file: File) => void;
   photoSaving?: boolean;
 };
-
-function formatPhone(value?: string | null, fallback = "Não informado") {
-  const digits = value?.replace(/\D/g, "") ?? "";
-  if (digits.length === 11) return `(${digits.slice(0,2)}) ${digits.slice(2,7)}-${digits.slice(7)}`;
-  if (digits.length === 10) return `(${digits.slice(0,2)}) ${digits.slice(2,6)}-${digits.slice(6)}`;
-  return value || fallback;
-}
-
-function formatCnpj(value?: string | null) {
-  const normalized = value?.trim() ?? "";
-  const identifier = normalized.toUpperCase().replace(/[^A-Z0-9]/g, "");
-  if (!/^[A-Z0-9]{12}[0-9]{2}$/.test(identifier)) return normalized;
-  return `${identifier.slice(0, 2)}.${identifier.slice(2, 5)}.${identifier.slice(5, 8)}/${identifier.slice(8, 12)}-${identifier.slice(12)}`;
-}
 
 export default function ProfileOverview({ name, role, email, phone, companyDetails, avatarUrl, className, action, subtitle, onPhotoChange, photoSaving = false }: ProfileOverviewProps) {
   const { t } = useLanguage();
@@ -63,11 +49,11 @@ export default function ProfileOverview({ name, role, email, phone, companyDetai
       </div>
       <dl className={styles.details}>
         <div><dt><FaEnvelope aria-hidden="true" /> {t("profile.email")}</dt><dd title={formatEmailDisplay(email) || t("profile.notProvided")}>{formatEmailDisplay(email) || t("profile.notProvided")}</dd></div>
-        <div><dt><FaPhoneAlt aria-hidden="true" /> {t("profile.phone")}</dt><dd title={formatPhone(phone, t("profile.notProvided"))}>{formatPhone(phone, t("profile.notProvided"))}</dd></div>
+        <div><dt><FaPhoneAlt aria-hidden="true" /> {t("profile.phone")}</dt><dd title={formatPhoneDisplay(phone) || t("profile.notProvided")}>{formatPhoneDisplay(phone) || t("profile.notProvided")}</dd></div>
         {companyDetails && (
           <>
-            <div><dt><FaStore aria-hidden="true" /> {t("profile.tradeName")}</dt><dd title={companyDetails.tradeName?.trim() || t("profile.notProvided")}>{companyDetails.tradeName?.trim() || t("profile.notProvided")}</dd></div>
-            <div><dt><FaIdCard aria-hidden="true" /> {t("profile.cnpj")}</dt><dd title={formatCnpj(companyDetails.cnpj) || t("profile.notProvided")}>{formatCnpj(companyDetails.cnpj) || t("profile.notProvided")}</dd></div>
+            <div><dt><FaStore aria-hidden="true" /> {t("profile.tradeName")}</dt><dd title={formatPersonName(companyDetails.tradeName) || t("profile.notProvided")}>{formatPersonName(companyDetails.tradeName) || t("profile.notProvided")}</dd></div>
+            <div><dt><FaIdCard aria-hidden="true" /> {t("profile.cnpj")}</dt><dd title={formatCnpjDisplay(companyDetails.cnpj) || t("profile.notProvided")}>{formatCnpjDisplay(companyDetails.cnpj) || t("profile.notProvided")}</dd></div>
           </>
         )}
       </dl>
