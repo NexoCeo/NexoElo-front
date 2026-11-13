@@ -38,13 +38,12 @@ vi.mock("@/context/ThemeContext", () => ({
   }),
 }));
 
-vi.mock("@/context/UserContext", () => ({
+vi.mock("@/context/UserContext", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@/context/UserContext")>(),
   useUser: () => ({
     usuario: mocks.usuario,
     setUsuario: mocks.setUsuario,
   }),
-  formatPersonName: (name: string) => name,
-  formatEmailDisplay: (email: string) => email,
 }));
 
 vi.mock("@/services/usuario-service", () => ({
