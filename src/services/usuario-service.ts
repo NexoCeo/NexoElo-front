@@ -8,6 +8,7 @@ export type UpdatePerfilPayload = {
   Nome: string;
   Email: string;
   Telefone?: string;
+  Cnpj?: string;
   FotoPerfil?: File | null;
   FotoOriginal?: File | null;
 };
@@ -60,6 +61,7 @@ export async function atualizarPerfilUsuario(id: number, payload: UpdatePerfilPa
   formData.append("Nome", payload.Nome);
   formData.append("Email", payload.Email);
   formData.append("Telefone", payload.Telefone ?? "");
+  if (payload.Cnpj !== undefined) formData.append("Cnpj", payload.Cnpj);
 
   if (payload.FotoPerfil) {
     formData.append("FotoPerfil", payload.FotoPerfil);
