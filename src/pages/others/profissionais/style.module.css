@@ -348,8 +348,43 @@
   overflow: hidden;
 }
 
-.requestsTabs {
+/* Abas e ação de fechar ficam na mesma linha, no topo do modal. */
+.requestsTopBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
   flex: 0 0 auto;
+}
+
+.requestsCloseButton {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: inline-grid;
+  place-items: center;
+  align-self: center;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--theme-text-muted);
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.requestsCloseButton:hover {
+  background: var(--theme-glass-strong);
+  color: var(--theme-text);
+}
+
+.requestsCloseButton:focus-visible {
+  outline: 2px solid var(--theme-primary-text);
+  outline-offset: 2px;
+}
+
+.requestsTabs {
+  flex: 1 1 auto;
   min-width: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -396,10 +431,10 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: 18px;
-  border: 1px solid var(--theme-border-strong);
-  border-radius: 10px;
-  background: var(--theme-surface-muted);
+  padding: 4px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .requestsPanel .modalHeader {
@@ -457,7 +492,15 @@
     gap: 12px;
   }
   .requestsPanel {
-    padding: 12px;
+    padding: 4px 0 0;
+  }
+  .requestsTopBar {
+    gap: 6px;
+  }
+  .requestsCloseButton {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
   }
   .requestsTabs button {
     font-size: 12px;
