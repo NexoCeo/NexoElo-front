@@ -6,7 +6,28 @@ vi.mock("./api", () => ({ default: apiMock }));
 import { listarEmpresasParaCadastro } from "./agenda-publica-service";
 
 describe("pré-carregamento de empresas para cadastro", () => {
-  beforeEach(() => apiMock.get.mockReset());
+  beforeEach(() => {
+    apiMock.get.mockReset();
+    window.sessionStorage.clear();
+  });
+
+  it("pré-carrega o catálogo inteiro sem consultar GPS ou pedir cidade", async () => {
+    apiMock.get.mockResolvedValue({
+      data: [{ IdUsuario: 990, Nome: "Barbearia Shop" }],
+    });
+
+    const companies = await listarEmpresasParaCadastro();
+    expect(companies).toEqual([{ Id: 990, Nome: "Barbearia Shop" }]);
+    expect(apiMock.get).toHaveBeenCalledOnce();
+    expect(apiMock.get).toHaveBeenCalledWith("/Profissional/empresas");
+
+    // Navegações futuras usam o resultado em cache em vez de acessar a API.
+    const cached = await listarEmpresasParaCadastro();
+    expect(cached).toEqual(companies);
+    expect(apiMock.get).toHaveBeenCalledOnce();
+    expect(window.sessionStorage.getItem("nexoelo:cadastro-empresas:v1:0"))
+      .toContain("Barbearia Shop");
+  });
 
   it("reaproveita a lista em cache quando a mesma cidade é consultada novamente", async () => {
     apiMock.get.mockResolvedValue({
