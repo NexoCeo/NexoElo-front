@@ -51,9 +51,9 @@ describe("useCadastroLocalizacao", () => {
       expect.any(Function),
       expect.any(Function),
       {
-        enableHighAccuracy: true,
-        timeout: 20000,
-        maximumAge: 0,
+        enableHighAccuracy: false,
+        timeout: 7000,
+        maximumAge: 300000,
       },
     );
     await waitFor(() => expect(result.current.cidadeId).toBe(3));
@@ -79,13 +79,13 @@ describe("useCadastroLocalizacao", () => {
       }
     });
 
-    expect(failure).toMatchObject({ message: "A permissao de localizacao foi negada." });
+    expect(failure).toMatchObject({ message: "Permita o acesso à localização nas configurações do navegador para continuar." });
     expect(result.current.modo).toBe("erro");
     expect(result.current.payload).toBeNull();
     expect(localizacaoMock.resolver).not.toHaveBeenCalled();
   });
 
-  it("propaga a mensagem do backend quando a cidade nao esta cadastrada", async () => {
+  it("mantém coordenadas válidas mesmo quando a cidade não pode ser resolvida", async () => {
     localizacaoMock.resolver.mockRejectedValue({
       isAxiosError: true,
       response: {
@@ -98,22 +98,46 @@ describe("useCadastroLocalizacao", () => {
     });
     const { result } = renderHook(() => useCadastroLocalizacao());
 
-    let failure: unknown;
+    let payload: unknown;
     await act(async () => {
-      try {
-        await result.current.usarLocalizacaoAtual();
-      } catch (error) {
-        failure = error;
-      }
+      payload = await result.current.usarLocalizacaoAtual();
     });
 
-    expect(failure).toMatchObject({
-      message: "A cidade identificada nao existe no cadastro de regioes.",
-    });
-    expect(result.current.error).toBe(
-      "A cidade identificada nao existe no cadastro de regioes.",
-    );
-    expect(result.current.modo).toBe("erro");
-    expect(result.current.payload).toBeNull();
+    // A resolução da cidade é complementar; o cadastro ainda pode
+    // aproveitar as coordenadas, mas não deve inventar empresas locais.
+    expect(payload).toEqual({ latitude: -19.0183, longitude: -40.5367 });
+    expect(result.current.modo).toBe("automatica");
+    expect(result.current.cidadeId).toBe(0);
+    expect(result.current.payload).toEqual(payload);
   });
+  it("usa GPS apenas se a localização aproximada falhar", async () => {
+    localizacaoMock.resolver.mockResolvedValue({ CidadeId: 3 });
+    const position = {
+      coords: { latitude: -19.0183, longitude: -40.5367 },
+    } as GeolocationPosition;
+    const getCurrentPosition = vi.fn((
+      success: PositionCallback,
+      failure: PositionErrorCallback,
+      options: PositionOptions,
+    ) => {
+      if (options.enableHighAccuracy) success(position);
+      else failure({ code: 3 } as GeolocationPositionError);
+    });
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: { getCurrentPosition },
+    });
+
+    const { result } = renderHook(() => useCadastroLocalizacao());
+    await act(async () => { await result.current.usarLocalizacaoAtual(); });
+
+    expect(getCurrentPosition).toHaveBeenCalledTimes(2);
+    expect(getCurrentPosition).toHaveBeenLastCalledWith(
+      expect.any(Function),
+      expect.any(Function),
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 },
+    );
+    expect(result.current.cidadeId).toBe(3);
+  });
+
 });
