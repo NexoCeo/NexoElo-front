@@ -1,3 +1,4 @@
+import { normalizeUsuario as normalizeContextUsuario } from "@/context/UserContext";
 import api from "./api";
 import { saveAuthSession } from "./auth-token";
 
@@ -48,7 +49,7 @@ function pickNumber(data: ApiRecord, keys: string[]) {
 function normalizeUsuario(usuario: ApiRecord) {
   const papel = pickString(usuario, ["Papel", "papel", "TipoUsuario", "tipoUsuario", "role", "Role"]);
 
-  return {
+  return normalizeContextUsuario({
     Id: pickNumber(usuario, ["Id", "id", "UsuarioId", "usuarioId"]),
     Nome: pickString(usuario, ["Nome", "nome", "Name", "name"]) ?? "",
     Email: pickString(usuario, ["Email", "email"]) ?? "",
@@ -57,7 +58,9 @@ function normalizeUsuario(usuario: ApiRecord) {
     Papel: papel?.toUpperCase() ?? "",
     Slug: pickString(usuario, ["Slug", "slug"]) ?? "",
     UrlPublica: pickString(usuario, ["UrlPublica", "urlPublica"]) ?? "",
-  };
+    NomeFantasia: pickString(usuario, ["NomeFantasia", "nomeFantasia"]) ?? "",
+    Cnpj: pickString(usuario, ["Cnpj", "cnpj", "CNPJ"]) ?? "",
+  });
 }
 
 export async function Login(email: string, senha: string) {
