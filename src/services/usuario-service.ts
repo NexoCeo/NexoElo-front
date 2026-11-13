@@ -45,6 +45,8 @@ function normalizeUsuario(data: ApiRecord): Usuario {
     Papel: pickString(data, ["Papel", "papel", "TipoUsuario", "tipoUsuario"]).toUpperCase(),
     Slug: pickString(data, ["Slug", "slug"]),
     UrlPublica: pickString(data, ["UrlPublica", "urlPublica"]),
+    NomeFantasia: pickString(data, ["NomeFantasia", "nomeFantasia"]),
+    Cnpj: pickString(data, ["Cnpj", "cnpj", "CNPJ"]),
   };
 }
 
