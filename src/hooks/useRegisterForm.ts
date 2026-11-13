@@ -75,7 +75,6 @@ export function useRegisterForm() {
 
   // Dados específicos de empresa
   const [nomeFantasia, setNomeFantasia] = useState("");
-  const [cnpj, setCnpj] = useState("");
 
   // Localização
 
@@ -124,10 +123,7 @@ export function useRegisterForm() {
     }
 
     if (TipoUsuario === "empresa") {
-      return (
-        nomeFantasia.trim().length > 0 &&
-        cnpj.trim().length > 0
-      );
+      return nomeFantasia.trim().length > 0;
     }
 
     return true;
@@ -280,12 +276,9 @@ export function useRegisterForm() {
 
     if (
       TipoUsuario === "empresa" &&
-      (
-        !nomeFantasia.trim() ||
-        !cnpj.trim()
-      )
+      !nomeFantasia.trim()
     ) {
-      const message = "Preencha Nome Fantasia e CNPJ para empresas.";
+      const message = "Preencha o nome fantasia para empresas.";
       setError(message);
       showNotification({ type: "warning", title: "Dados da empresa incompletos", message });
       return;
@@ -352,9 +345,8 @@ export function useRegisterForm() {
           ? nomeFantasia.trim()
           : "",
 
-        papelEnum === "EMPRESA"
-          ? cnpj.trim()
-          : "",
+        // O CNPJ pode ser preenchido mais tarde em Perfil > Editar perfil.
+        "",
 
         papelEnum === "PROFISSIONAL"
           ? empresaId
@@ -443,7 +435,6 @@ export function useRegisterForm() {
     senha,
     TipoUsuario,
     nomeFantasia,
-    cnpj,
 
     // Localizacao
     localizacao,
@@ -470,7 +461,6 @@ export function useRegisterForm() {
     setSenha,
     setTipoUsuario,
     setNomeFantasia,
-    setCnpj,
 
     setEmpresaId,
     setShowPassword,
