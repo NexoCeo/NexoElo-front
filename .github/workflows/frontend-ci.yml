@@ -14,4 +14,4 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - run: npm run test -- src/pages/cliente-final/agendar/agendar.test.tsx src/services/cliente-final-auth-token.test.ts src/pages/others/servicos/servicos.test.tsx src/pages/others/profissionais/profissionais.test.tsx
+      - run: npm run test -- src/pages/cliente-final/agendar/agendar.test.tsx src/services/cliente-final-auth-token.test.ts src/pages/others/servicos/servicos.test.tsx src/pages/others/servicos/service-image-crop.test.tsx src/pages/others/profissionais/profissionais.test.tsx
