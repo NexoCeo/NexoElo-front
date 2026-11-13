@@ -27,7 +27,7 @@ import {
   FaClock,
 } from "react-icons/fa";
 import { useTheme } from "@/context/ThemeContext";
-import { getProfileImageUrl } from "@/components/header/profile-image";
+import { getProfileImageUrl, getUploadedImageUrl } from "@/components/header/profile-image";
 import { EntityEditorModal, EntityImageField } from "@/components/entity-editor-modal";
 import ServiceImageCrop from "../servicos/service-image-crop";
 import { useUser } from "@/context/UserContext";
@@ -258,9 +258,13 @@ export default function Profissionais() {
   }
 
   function adjustProfessionalCrop() {
-    if (!fotoPerfil) return;
-    setCropFilename(fotoPerfil.name);
-    setCropSource(URL.createObjectURL(fotoPerfil));
+    const source = fotoPerfil
+      ? URL.createObjectURL(fotoPerfil)
+      : getUploadedImageUrl(editingProfessional?.FotoPerfil);
+    if (!source) return;
+    setFormError("");
+    setCropFilename(fotoPerfil?.name || editingProfessional?.Nome || "profissional");
+    setCropSource(source);
   }
 
   useEffect(() => {
@@ -563,6 +567,7 @@ export default function Profissionais() {
       if (editingProfessional) {
         const atualizado = await atualizarProfissionalEmpresa(editingProfessional.Id, {
           Nome: nome.trim(), Email: email.trim(), Telefone: telefone.trim(),
+          FotoPerfil: fotoPerfil,
         });
         setProfissionais(current => current.map(item => item.Id === atualizado.Id ? { ...item, ...atualizado, VinculoStatus: item.VinculoStatus } : item));
         closeModal();
@@ -815,14 +820,15 @@ export default function Profissionais() {
           <form className={`${styles.form} ${styles.editorForm}`} onSubmit={handleCreateProfissional}>
             <EntityImageField
               label="Foto do profissional"
-              previewUrl={editingProfessional
+              previewUrl={previewUrl || (editingProfessional
                 ? getProfileImageUrl(editingProfessional.FotoPerfil)
-                : previewUrl}
-              selectedFile={editingProfessional ? null : fotoPerfil}
+                : "")}
+              selectedFile={fotoPerfil}
               alt="Foto do profissional"
-              onSelectFile={editingProfessional ? undefined : selectProfessionalPhoto}
-              onAdjustCrop={editingProfessional ? undefined : adjustProfessionalCrop}
-              readonlyHint={editingProfessional ? "A foto é atualizada pelo próprio profissional em seu perfil." : undefined}
+              onSelectFile={selectProfessionalPhoto}
+              onAdjustCrop={fotoPerfil || getUploadedImageUrl(editingProfessional?.FotoPerfil)
+                ? adjustProfessionalCrop
+                : undefined}
               cropContent={cropSource ? (
                 <ServiceImageCrop
                   source={cropSource}
