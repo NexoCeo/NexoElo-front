@@ -303,4 +303,33 @@ describe("Profissionais", () => {
     });
   });
 
+
+  it("reabre foto persistida a partir do original, nao do WebP recortado", async () => {
+    const original = new File(["foto inteira"], "profissional-original.jpg", { type: "image/jpeg" });
+    profissionalMock.listar.mockResolvedValue([{
+      Id: 18, Nome: "Profissional Original", Email: "original@example.com",
+      Telefone: "", FotoPerfil: "uploads/recortada.webp", VinculoStatus: "APROVADO",
+    }]);
+    profissionalMock.original.mockResolvedValue(original);
+    profissionalMock.atualizar.mockResolvedValue({
+      Id: 18, Nome: "Profissional Original", Email: "original@example.com",
+      Telefone: "", FotoPerfil: "uploads/nova-foto.webp", VinculoStatus: "APROVADO",
+    });
+
+    render(<MemoryRouter><LanguageProvider><Profissionais /></LanguageProvider></MemoryRouter>);
+    await screen.findByText("Profissional Original");
+    fireEvent.click(screen.getByRole("button", { name: "Opções de Profissional Original" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Editar" }));
+    const dialog = screen.getByRole("dialog", { name: "Editar profissional" });
+
+    fireEvent.click(within(dialog).getByRole("button", { name: "Ajustar recorte" }));
+    const aplicar = await within(dialog).findByRole("button", { name: "Aplicar recorte" });
+    expect(profissionalMock.original).toHaveBeenCalledWith(18);
+    expect(vi.mocked(URL.createObjectURL)).toHaveBeenLastCalledWith(original);
+    fireEvent.click(aplicar);
+    fireEvent.click(within(dialog).getByRole("button", { name: "Salvar alterações" }));
+
+    await waitFor(() => expect(profissionalMock.atualizar).toHaveBeenCalledWith(18,
+      expect.objectContaining({ FotoOriginal: original })));
+  });
 });
