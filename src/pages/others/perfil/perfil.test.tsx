@@ -63,6 +63,7 @@ import Perfil from "./index";
 describe("Perfil", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    Object.defineProperty(navigator, "languages", { configurable: true, value: ["pt-BR"] });
     mocks.usuario.Papel = "EMPRESA";
     mocks.usuario.FotoPerfil = "SEM_FOTO";
     mocks.obterFotoOriginalUsuario.mockResolvedValue(null);
