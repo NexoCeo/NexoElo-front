@@ -16,7 +16,7 @@ import type { Servico } from "@/types/servico";
 import { getUploadedImageUrl } from "@/components/header/profile-image";
 import styles from "./style.module.css";
 import ServiceImageCrop from "./service-image-crop";
-import { EntityEditorModal, EntityImageField } from "@/components/entity-editor-modal";
+import { EntityEditorModal, EntityImageField, EntityEditorForm, EntityEditorField, EntityEditorError, EntityEditorSubmit } from "@/components/entity-editor-modal";
 import { useLanguage } from "@/context/LanguageContext";
 import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
@@ -476,7 +476,7 @@ export default function Servicos() {
           busy={saving}
           cropOpen={Boolean(cropSource)}
         >
-          <form className={styles.form} onSubmit={handleSubmit}>
+          <EntityEditorForm onSubmit={handleSubmit}>
             <EntityImageField
               label={t("services.image")}
               alt="Foto atual do serviço"
@@ -505,8 +505,7 @@ export default function Servicos() {
               ) : null}
             />
 
-              <label>
-                {t("services.name")}
+              <EntityEditorField label={t("services.name")}>
                 <input
                   type="text"
                   value={nomeServico}
@@ -514,10 +513,9 @@ export default function Servicos() {
                   placeholder={t("services.exampleName")}
                   autoFocus
                 />
-              </label>
+              </EntityEditorField>
 
-              <label>
-                {t("common.value")}
+              <EntityEditorField label={t("common.value")}>
                 <input
                   type="text"
                   inputMode="decimal"
@@ -525,7 +523,7 @@ export default function Servicos() {
                   onChange={(event) => setValor(event.target.value)}
                   placeholder={t("services.examplePrice")}
                 />
-              </label>
+              </EntityEditorField>
 
               <div className={styles.fieldGroup}>
                 <label htmlFor="service-duration">{t("services.estimated")}</label>
@@ -544,19 +542,13 @@ export default function Servicos() {
                 </div>
               </div>
 
-              {formError && <p className={styles.formError}>{formError}</p>}
-
-              <button
-                className={styles.submitButton}
-                type="submit"
-                disabled={!canSubmit}
-                style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}
-              >
+              <EntityEditorError message={formError} />
+              <EntityEditorSubmit disabled={!canSubmit}>
                 {saving
                   ? t("services.saving")
                   : editingServico ? t("common.save") : t("services.create")}
-              </button>
-            </form>
+              </EntityEditorSubmit>
+            </EntityEditorForm>
         </EntityEditorModal>
       )}
 
