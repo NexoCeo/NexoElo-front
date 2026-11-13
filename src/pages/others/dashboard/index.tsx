@@ -275,7 +275,7 @@ export default function Dashboard({ initialAgenda }: { initialAgenda?: Dashboard
                 </button>
               </div>
             </div>
-          )
+          )}
         </div>
 
         <div className={styles.mobileAppointments} aria-live="polite">
