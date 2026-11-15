@@ -902,7 +902,7 @@ export default function Profissionais() {
                           }}>
                             <FaUserSlash aria-hidden="true" /> Desvincular profissional
                           </button>
-                          <button type="button" role="menuitem" onClick={() => {
+                          <button type="button" role="menuitem" className={profissional.VinculoStatus?.toUpperCase() === "INATIVO" ? styles.activateAction : styles.deactivateAction} onClick={() => {
                             setOpenMenuId(null);
                             setPendingProfessionalAction({ profissional, status: profissional.VinculoStatus?.toUpperCase() === "INATIVO" ? "APROVADO" : "INATIVO" });
                           }}>
