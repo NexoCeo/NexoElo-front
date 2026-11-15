@@ -122,6 +122,51 @@ describe("ClienteFinalAgendar", () => {
     expect(mocks.criarAgendamento).toHaveBeenCalledTimes(1);
   });
 
+
+  it("permite adicionar servicos de profissionais diferentes na mesma reserva", async () => {
+    mocks.listarResponsaveisAgendamento.mockResolvedValue([
+      { Id: 7, Nome: "Empresa Teste", TipoUsuario: "EMPRESA" },
+    ]);
+    mocks.listarProfissionaisAgendamento.mockResolvedValue([
+      { Id: 9, Nome: "Ana", VinculoStatus: "APROVADO" },
+      { Id: 10, Nome: "Maria", VinculoStatus: "APROVADO" },
+    ]);
+    mocks.listarServicosPorProfissional.mockImplementation(async (id: number) => id === 9
+      ? [{ Id: 2, NomeServico: "Corte", Valor: 50, TempoEstimadoMinutos: 30 }]
+      : [{ Id: 3, NomeServico: "Escova", Valor: 70, TempoEstimadoMinutos: 45 }]);
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/agendar"]}>
+        <LanguageProvider>
+          <Routes>
+            <Route path="/cliente-final/agendar" element={<ClienteFinalAgendar />} />
+            <Route path="/cliente-final/home" element={<div>Pagina inicial do cliente</div>} />
+          </Routes>
+        </LanguageProvider>
+      </MemoryRouter>,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: /Empresa Teste/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Ana/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Corte/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Adicionar serviços de outro profissional/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Maria/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Escova/i }));
+    expect(screen.getByText(/75 min/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Escolher horário/i }));
+    fireEvent.change(screen.getByLabelText(/Data|Date/i), { target: { value: "2099-08-20" } });
+    await waitFor(() => expect(mocks.listarHorariosDisponiveis).toHaveBeenCalledWith({
+      responsavelId: 7, profissionalId: 10, servicoId: 2, servicoIds: [2, 3],
+      atendimentos: [{ ServicoId: 2, ProfissionalId: 9 }, { ServicoId: 3, ProfissionalId: 10 }],
+      data: "2099-08-20",
+    }));
+    fireEvent.click(await screen.findByRole("button", { name: "08:30" }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar agendamento" }));
+    await waitFor(() => expect(mocks.criarAgendamento).toHaveBeenCalledWith(expect.objectContaining({
+      ResponsavelId: 7, ProfissionalId: 9, ServicoIds: [2, 3],
+      Atendimentos: [{ ServicoId: 2, ProfissionalId: 9 }, { ServicoId: 3, ProfissionalId: 10 }],
+    })));
+    expect(mocks.criarAgendamento).toHaveBeenCalledTimes(1);
+  });
+
   it("mostra profissionais de empresa e permite retornar ao catalogo", async () => {
     mocks.listarResponsaveisAgendamento.mockResolvedValue([
       { Id: 7, Nome: "Empresa Teste", TipoUsuario: "EMPRESA", FotoPerfil: "uploads/empresa.png" },
