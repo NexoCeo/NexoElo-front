@@ -9,6 +9,9 @@ import {
   FaEnvelope,
   FaPen,
   FaEllipsisV,
+  FaUserSlash,
+  FaUserCheck,
+  FaUserLock,
   FaLink,
   FaPhoneAlt,
   FaSave,
@@ -36,6 +39,7 @@ import {
   atualizarProfissionalEmpresa,
   listarProfissionaisEmpresa,
   obterFotoOriginalProfissional,
+  alterarStatusVinculoProfissional,
 } from "@/services/profissional-service";
 import {
   CadastroLocalizacaoError,
@@ -139,6 +143,8 @@ export default function Profissionais() {
   const [saving, setSaving] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [pendingProfessionalAction, setPendingProfessionalAction] = useState<{ profissional: Profissional; status: "APROVADO" | "INATIVO" | "DESVINCULADO" } | null>(null);
+  const [updatingProfessionalStatus, setUpdatingProfessionalStatus] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
   const [editingProfessional, setEditingProfessional] = useState<Profissional | null>(null);
   const [upgradePlan, setUpgradePlan] = useState<{ plan: "BASICO" | "INTERMEDIARIO"; limit: number } | null>(null);
@@ -387,6 +393,32 @@ export default function Profissionais() {
     setTelefone("");
     localizacao.reset();
     setFormError("");
+  }
+
+
+  async function confirmProfessionalAction() {
+    if (!pendingProfessionalAction || !empresaId || updatingProfessionalStatus) return;
+    const { profissional, status } = pendingProfessionalAction;
+    try {
+      setUpdatingProfessionalStatus(true);
+      await alterarStatusVinculoProfissional(empresaId, profissional.Id, status);
+      // Uma nova consulta mantém a listagem e os contadores sincronizados com o banco.
+      const atualizados = await listarProfissionaisEmpresa(empresaId);
+      setProfissionais(atualizados);
+      setPendingProfessionalAction(null);
+      showNotification({
+        type: "success",
+        title: status === "DESVINCULADO" ? "Profissional desvinculado" : status === "INATIVO" ? "Profissional inativado" : "Profissional ativado",
+        message: `${formatPersonName(profissional.Nome)}: situação atualizada com sucesso.`,
+      });
+    } catch (err) {
+      const message = isAxiosError<ApiError>(err)
+        ? getApiErrorMessage(err.response?.data, "Não foi possível atualizar a situação do profissional.")
+        : "Não foi possível atualizar a situação do profissional.";
+      showNotification({ type: "error", title: "Alteração não realizada", message });
+    } finally {
+      setUpdatingProfessionalStatus(false);
+    }
   }
 
   function openEditModal(profissional: Profissional) {
@@ -834,7 +866,7 @@ export default function Profissionais() {
                   <div className={styles.professionalPhone}>{profissional.Telefone || t("pros.notProvided")}</div>
                   <div className={styles.professionalStatus}>
                     <span className={styles.status}>
-                      {profissional.VinculoStatus?.toUpperCase() === "APROVADO" ? t("status.approved") : profissional.VinculoStatus?.toUpperCase() === "PENDENTE" ? t("status.pending") : profissional.VinculoStatus?.toUpperCase() === "RECUSADO" ? t("status.rejected") : t("status.linked")}
+                      {profissional.VinculoStatus?.toUpperCase() === "APROVADO" ? t("status.approved") : profissional.VinculoStatus?.toUpperCase() === "PENDENTE" ? t("status.pending") : profissional.VinculoStatus?.toUpperCase() === "RECUSADO" ? t("status.rejected") : profissional.VinculoStatus?.toUpperCase() === "INATIVO" ? "Inativo" : t("status.linked")}
                     </span>
                   </div>
                   <div className={styles.cardActions}>
@@ -844,7 +876,7 @@ export default function Profissionais() {
                         aria-expanded={openMenuId === profissional.Id}
                         onClick={(event) => {
                           const rect = event.currentTarget.getBoundingClientRect();
-                          const menuHeight = 90;
+                          const menuHeight = 190;
                           setMenuPosition({
                             top: rect.bottom + menuHeight + 8 > window.innerHeight ? Math.max(8, rect.top - menuHeight - 6) : rect.bottom + 6,
                             right: Math.max(8, window.innerWidth - rect.right),
@@ -863,6 +895,20 @@ export default function Profissionais() {
                           }}>
                             <FaLink aria-hidden="true" /> Vincular serviços
                           </button>
+                          <div className={styles.menuDivider} role="separator" />
+                          <button type="button" role="menuitem" className={styles.dangerAction} onClick={() => {
+                            setOpenMenuId(null);
+                            setPendingProfessionalAction({ profissional, status: "DESVINCULADO" });
+                          }}>
+                            <FaUserSlash aria-hidden="true" /> Desvincular profissional
+                          </button>
+                          <button type="button" role="menuitem" onClick={() => {
+                            setOpenMenuId(null);
+                            setPendingProfessionalAction({ profissional, status: profissional.VinculoStatus?.toUpperCase() === "INATIVO" ? "APROVADO" : "INATIVO" });
+                          }}>
+                            {profissional.VinculoStatus?.toUpperCase() === "INATIVO" ? <FaUserCheck aria-hidden="true" /> : <FaUserLock aria-hidden="true" />}
+                            {profissional.VinculoStatus?.toUpperCase() === "INATIVO" ? "Ativar profissional" : "Inativar profissional"}
+                          </button>
                         </div>, document.body)
                       )}
                     </div>
@@ -874,6 +920,32 @@ export default function Profissionais() {
         )}
       </section>
 
+
+      {pendingProfessionalAction && (
+        <div className={styles.confirmBackdrop} role="presentation" onMouseDown={event => {
+          if (event.target === event.currentTarget && !updatingProfessionalStatus) setPendingProfessionalAction(null);
+        }}>
+          <section className={styles.confirmDialog} role="dialog" aria-modal="true" aria-labelledby="confirm-professional-title">
+            <h2 id="confirm-professional-title">
+              {pendingProfessionalAction.status === "DESVINCULADO" ? "Desvincular profissional?" :
+               pendingProfessionalAction.status === "INATIVO" ? "Inativar profissional?" : "Ativar profissional?"}
+            </h2>
+            <p>
+              {pendingProfessionalAction.status === "DESVINCULADO"
+                ? `O vínculo de ${formatPersonName(pendingProfessionalAction.profissional.Nome)} com esta empresa será encerrado. O cadastro e o histórico de agendamentos serão preservados.`
+                : pendingProfessionalAction.status === "INATIVO"
+                  ? `${formatPersonName(pendingProfessionalAction.profissional.Nome)} deixará de receber novos agendamentos até ser ativado novamente.`
+                  : `${formatPersonName(pendingProfessionalAction.profissional.Nome)} voltará a receber novos agendamentos.`}
+            </p>
+            <div className={styles.confirmActions}>
+              <button type="button" className={styles.secondaryButton} disabled={updatingProfessionalStatus} onClick={() => setPendingProfessionalAction(null)}>Cancelar</button>
+              <button type="button" className={styles.submitButton} disabled={updatingProfessionalStatus} onClick={() => void confirmProfessionalAction()}>
+                {updatingProfessionalStatus ? "Salvando..." : "Confirmar"}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
       {upgradePlan && <UpgradePlanModal open={true} plan={upgradePlan.plan}
         resource="PROFISSIONAL" limit={upgradePlan.limit}
         onClose={() => setUpgradePlan(null)}
