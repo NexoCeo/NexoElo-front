@@ -824,7 +824,7 @@ export default function ClienteFinalAgendar() {
                     <div className={styles.sectionHeading}><div><h2>Revise seu agendamento</h2><p>Confira as informações antes de confirmar.</p></div></div>
                     <div className={styles.reviewList}>
                       <div><span>Prestador</span><strong>{formatPersonName(selectedResponsavel?.Nome ?? "")}</strong></div>
-                      {responsavelEhEmpresa && <div><span>Profissional</span><strong>{formatPersonName(selectedProfissional?.Nome ?? "")}</strong></div>}
+                      {responsavelEhEmpresa && <div><span>Profissional</span><strong>{multiplosProfissionais ? "Vários profissionais" : formatPersonName(selectedProfissional?.Nome ?? "")}</strong></div>}
                       <div><span>Serviços</span><strong>{selectedServicos.map(item => item.NomeServico).join(" + ")}</strong></div>
                       {responsavelEhEmpresa && selecoes.length > 0 && <div><span>Atendimentos</span><strong>{selecoes.map(item => `${item.servico.NomeServico} — ${formatPersonName(profissionais.find(pro => pro.Id === item.profissionalId)?.Nome ?? "Profissional")}`).join(" · ")}</strong></div>}
                       <div><span>Duração total</span><strong>{totalDuracao} min</strong></div>
