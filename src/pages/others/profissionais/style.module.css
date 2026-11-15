@@ -1472,3 +1472,22 @@
 .confirmDialog h2 { margin: 0 0 12px; font-size: 19px; }
 .confirmDialog p { margin: 0 0 20px; line-height: 1.5; color: var(--theme-text-muted); }
 .confirmActions { display: flex; justify-content: flex-end; gap: 10px; }
+
+/* Feedback de ações de profissionais no mouse e na navegação por teclado. */
+.menuPopover button.deactivateAction:hover,
+.menuPopover button.deactivateAction:focus,
+.menuPopover button.deactivateAction:focus-visible,
+.menuPopover button.dangerAction:hover,
+.menuPopover button.dangerAction:focus,
+.menuPopover button.dangerAction:focus-visible {
+  background: rgba(220, 38, 38, .16);
+  color: #f87171;
+  outline-color: #dc2626;
+}
+.menuPopover button.activateAction:hover,
+.menuPopover button.activateAction:focus,
+.menuPopover button.activateAction:focus-visible {
+  background: rgba(22, 163, 74, .16);
+  color: #4ade80;
+  outline-color: #16a34a;
+}
