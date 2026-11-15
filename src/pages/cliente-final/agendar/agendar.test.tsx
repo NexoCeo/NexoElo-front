@@ -73,6 +73,7 @@ describe("ClienteFinalAgendar", () => {
     fireEvent.click(screen.getByRole("button", { name: /Autonomo Teste/i }));
     expect(await screen.findByAltText("Imagem do servico Corte")).toHaveAttribute("src", expect.stringContaining("/uploads/corte.png"));
     fireEvent.click(screen.getByRole("button", { name: /Corte/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Escolher horário/i }));
     expect(await screen.findByRole("heading", { name: "Escolha a data e o horário" })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText(/Data|Date/i), { target: { value: "2099-08-20" } });
     fireEvent.click(await screen.findByRole("button", { name: "08:30" }));
@@ -80,10 +81,45 @@ describe("ClienteFinalAgendar", () => {
     fireEvent.click(screen.getByRole("button", { name: "Confirmar agendamento" }));
     await waitFor(() => expect(mocks.criarAgendamento).toHaveBeenCalledWith({
       ClienteId: 4, ResponsavelId: 7, ProfissionalId: undefined,
-      ServicoId: 2, DataAgendamento: "2099-08-20T08:30:00",
+      ServicoId: 2, ServicoIds: [2], DataAgendamento: "2099-08-20T08:30:00",
     }));
     expect(await screen.findByText("Pagina inicial do cliente")).toBeInTheDocument();
     expect(sessionStorage.getItem("nexoelo-booking-draft:4:marketplace")).toBeNull();
+  });
+
+
+  it("seleciona dois servicos, soma valores e duracao e envia uma unica reserva", async () => {
+    mocks.listarServicosPorEmpresa.mockResolvedValue([
+      { Id: 2, NomeServico: "Corte", Valor: 50, TempoEstimadoMinutos: 30 },
+      { Id: 3, NomeServico: "Escova", Valor: 70, TempoEstimadoMinutos: 45 },
+    ]);
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/agendar"]}>
+        <LanguageProvider>
+          <Routes>
+            <Route path="/cliente-final/agendar" element={<ClienteFinalAgendar />} />
+            <Route path="/cliente-final/home" element={<div>Pagina inicial do cliente</div>} />
+          </Routes>
+        </LanguageProvider>
+      </MemoryRouter>,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: /Autonomo Teste/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Corte/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Escova/i }));
+    expect(screen.getByText(/75 min/)).toBeInTheDocument();
+    expect(screen.getByText(/R\\$\\s?120,00/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Escolher horário/i }));
+    fireEvent.change(screen.getByLabelText(/Data|Date/i), { target: { value: "2099-08-20" } });
+    await waitFor(() => expect(mocks.listarHorariosDisponiveis).toHaveBeenCalledWith({
+      responsavelId: 7, profissionalId: undefined, servicoId: 2, servicoIds: [2, 3], data: "2099-08-20",
+    }));
+    fireEvent.click(await screen.findByRole("button", { name: "08:30" }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar agendamento" }));
+    await waitFor(() => expect(mocks.criarAgendamento).toHaveBeenCalledWith({
+      ClienteId: 4, ResponsavelId: 7, ProfissionalId: undefined,
+      ServicoId: 2, ServicoIds: [2, 3], DataAgendamento: "2099-08-20T08:30:00",
+    }));
+    expect(mocks.criarAgendamento).toHaveBeenCalledTimes(1);
   });
 
   it("mostra profissionais de empresa e permite retornar ao catalogo", async () => {
@@ -114,7 +150,7 @@ describe("ClienteFinalAgendar", () => {
     render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><LanguageProvider><ClienteFinalAgendar /></LanguageProvider></MemoryRouter>);
     expect(await screen.findByRole("heading", { name: "Revise seu agendamento" })).toBeInTheDocument();
     await waitFor(() => expect(mocks.listarHorariosDisponiveis).toHaveBeenCalledWith({
-      responsavelId: 7, profissionalId: undefined, servicoId: 2, data: "2099-08-20",
+      responsavelId: 7, profissionalId: undefined, servicoId: 2, servicoIds: [2], data: "2099-08-20",
     }));
     expect(await screen.findByRole("button", { name: "Confirmar agendamento" })).toBeEnabled();
     expect(screen.getByText("Corte")).toBeInTheDocument();
