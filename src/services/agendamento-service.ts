@@ -154,6 +154,7 @@ export async function listarHorariosDisponiveis(params: {
   profissionalId?: number;
   servicoId: number;
   servicoIds?: number[];
+  atendimentos?: { ServicoId: number; ProfissionalId: number }[];
   data: string;
 }) {
   // Arrays são enviados como parâmetros repetidos (servicoIds=1&servicoIds=2),
@@ -164,6 +165,7 @@ export async function listarHorariosDisponiveis(params: {
   query.set("servicoId", String(params.servicoId));
   query.set("data", params.data);
   for (const id of params.servicoIds ?? []) query.append("servicoIds", String(id));
+  if (params.atendimentos?.length) query.set("atendimentos", JSON.stringify(params.atendimentos));
   const response = await api.get<ApiRecord[]>(`/Agendamento/horarios-disponiveis?${query.toString()}`);
 
   return Array.isArray(response.data)
