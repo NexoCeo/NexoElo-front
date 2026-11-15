@@ -47,5 +47,6 @@ export type CreateAgendamentoPayload = {
   ProfissionalId?: number;
   ServicoId: number;
   ServicoIds?: number[];
+  Atendimentos?: { ServicoId: number; ProfissionalId: number }[];
   DataAgendamento: string;
 };
