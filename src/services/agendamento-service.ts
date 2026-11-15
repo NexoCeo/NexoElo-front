@@ -156,9 +156,15 @@ export async function listarHorariosDisponiveis(params: {
   servicoIds?: number[];
   data: string;
 }) {
-  const response = await api.get<ApiRecord[]>("/Agendamento/horarios-disponiveis", {
-    params,
-  });
+  // Arrays são enviados como parâmetros repetidos (servicoIds=1&servicoIds=2),
+  // formato aceito diretamente pelo binder de listas do ASP.NET Core.
+  const query = new URLSearchParams();
+  query.set("responsavelId", String(params.responsavelId));
+  if (params.profissionalId) query.set("profissionalId", String(params.profissionalId));
+  query.set("servicoId", String(params.servicoId));
+  query.set("data", params.data);
+  for (const id of params.servicoIds ?? []) query.append("servicoIds", String(id));
+  const response = await api.get<ApiRecord[]>(`/Agendamento/horarios-disponiveis?${query.toString()}`);
 
   return Array.isArray(response.data)
     ? response.data.map(normalizeHorarioDisponivel)
