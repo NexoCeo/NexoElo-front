@@ -153,6 +153,7 @@ export async function listarHorariosDisponiveis(params: {
   responsavelId: number;
   profissionalId?: number;
   servicoId: number;
+  servicoIds?: number[];
   data: string;
 }) {
   const response = await api.get<ApiRecord[]>("/Agendamento/horarios-disponiveis", {
