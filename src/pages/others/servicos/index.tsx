@@ -520,7 +520,7 @@ export default function Servicos() {
                             <FaPen aria-hidden="true" />
                             {t("common.edit")}
                           </button>
-                          <button type="button" role="menuitem" onClick={() => {
+                          <button type="button" role="menuitem" className={servico.Ativo === false ? styles.activateAction : styles.deactivateAction} onClick={() => {
                             setOpenMenuId(null);
                             setConfirmarAtivo(servico);
                           }}>
