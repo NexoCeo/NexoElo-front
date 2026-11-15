@@ -158,3 +158,12 @@ export async function atualizarProfissionalEmpresa(
 
 export const obterFotoOriginalProfissional = (id: number) =>
   carregarImagemOriginal(`/Usuario/empresa/profissionais/${id}/foto-original`);
+
+/** Gerencia somente o vínculo do profissional com a empresa autenticada. */
+export async function alterarStatusVinculoProfissional(
+  empresaId: number,
+  profissionalId: number,
+  status: "APROVADO" | "INATIVO" | "DESVINCULADO",
+): Promise<void> {
+  await api.patch(`/Vinculos/empresa/${empresaId}/profissionais/${profissionalId}/status`, { status });
+}
