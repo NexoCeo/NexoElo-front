@@ -945,3 +945,19 @@
 
 .confirmActions .secondaryButton { min-height: 42px; padding: 0 18px; border: 1px solid var(--theme-border-strong); border-radius: 10px; background: transparent; color: var(--theme-text); cursor: pointer; font-weight: 600; }
 .confirmActions button:disabled { opacity: .65; cursor: not-allowed; }
+
+/* Ações de ativar/inativar: feedback semântico no hover e no foco por teclado. */
+.menuPopover button.deactivateAction:hover,
+.menuPopover button.deactivateAction:focus,
+.menuPopover button.deactivateAction:focus-visible {
+  background: rgba(220, 38, 38, .16);
+  color: #f87171;
+  outline-color: #dc2626;
+}
+.menuPopover button.activateAction:hover,
+.menuPopover button.activateAction:focus,
+.menuPopover button.activateAction:focus-visible {
+  background: rgba(22, 163, 74, .16);
+  color: #4ade80;
+  outline-color: #16a34a;
+}
