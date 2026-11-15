@@ -942,3 +942,6 @@
 .confirmDialog h2 { margin: 0 0 12px; font-size: 19px; }
 .confirmDialog p { margin: 0 0 20px; line-height: 1.5; color: var(--theme-text-muted); }
 .confirmActions { display: flex; justify-content: flex-end; gap: 10px; }
+
+.confirmActions .secondaryButton { min-height: 42px; padding: 0 18px; border: 1px solid var(--theme-border-strong); border-radius: 10px; background: transparent; color: var(--theme-text); cursor: pointer; font-weight: 600; }
+.confirmActions button:disabled { opacity: .65; cursor: not-allowed; }
