@@ -7,6 +7,7 @@ export type Servico = {
   Valor: number;
   TempoEstimadoMinutos: number;
   ImagemServico?: string;
+  Ativo?: boolean;
 };
 
 export type CreateServicoPayload = {
