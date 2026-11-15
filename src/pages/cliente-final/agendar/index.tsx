@@ -51,7 +51,9 @@ type ApiError = string | {
 
 type BookingSection = "responsavel" | "profissional" | "servico" | "horario" | "confirmacao";
 
+type SelectedService = { profissionalId: number; servico: Servico };
 type BookingDraft = {
+  selecoes?: SelectedService[];
   responsavelId: number;
   profissionalId: number;
   servicoId: number;
@@ -79,6 +81,7 @@ function readBookingDraft(key: string): BookingDraft | null {
         typeof draft.expandedSection !== "string" ||
         !bookingSections.includes(draft.expandedSection as BookingSection)) return null;
     if (draft.servicoIds !== undefined && (!Array.isArray(draft.servicoIds) || !draft.servicoIds.every(id => Number.isSafeInteger(id) && id > 0))) return null;
+    if (draft.selecoes && (!Array.isArray(draft.selecoes) || !draft.selecoes.every(item => Number.isSafeInteger(item.profissionalId) && item.profissionalId > 0 && Number.isSafeInteger(item.servico?.Id)))) return null;
     return draft as BookingDraft;
   } catch {
     return null;
@@ -160,7 +163,8 @@ export default function ClienteFinalAgendar() {
   const [horariosDisponiveis, setHorariosDisponiveis] = useState<HorarioDisponivel[]>([]);
   const [responsavelId, setResponsavelId] = useState(draft?.responsavelId ?? 0);
   const [profissionalId, setProfissionalId] = useState(draft?.profissionalId ?? 0);
-  const [servicoIds, setServicoIds] = useState<number[]>(draft?.servicoIds?.length ? draft.servicoIds : draft?.servicoId ? [draft.servicoId] : []);
+  const [selecoes, setSelecoes] = useState<SelectedService[]>(draft?.selecoes ?? []);
+  const [servicoIds, setServicoIds] = useState<number[]>(draft?.selecoes?.length ? draft.selecoes.map(item => item.servico.Id) : draft?.servicoIds?.length ? draft.servicoIds : draft?.servicoId ? [draft.servicoId] : []);
   const servicoId = servicoIds[0] ?? 0;
   const [dataSelecionada, setDataSelecionada] = useState(draft?.dataSelecionada ?? "");
   const [dataAgendamento, setDataAgendamento] = useState(draft?.dataAgendamento ?? "");
@@ -189,7 +193,11 @@ export default function ClienteFinalAgendar() {
   const selectedProfissional = profissionais.find(
     (profissional) => profissional.Id === profissionalId,
   );
-  const selectedServicos = servicoIds.map(id => servicos.find(servico => servico.Id === id)).filter((servico): servico is Servico => Boolean(servico));
+  const selectedServicos = responsavelId && selectedResponsavel?.TipoUsuario === "EMPRESA" && selecoes.length
+    ? selecoes.map(item => item.servico)
+    : servicoIds.map(id => servicos.find(servico => servico.Id === id)).filter((servico): servico is Servico => Boolean(servico));
+  const atendimentos = selecoes.map(item => ({ ServicoId: item.servico.Id, ProfissionalId: item.profissionalId }));
+  const multiplosProfissionais = new Set(atendimentos.map(item => item.ProfissionalId)).size > 1;
   const totalValor = selectedServicos.reduce((total, servico) => total + Number(servico.Valor || 0), 0);
   const totalDuracao = selectedServicos.reduce((total, servico) => total + Number(servico.TempoEstimadoMinutos || 0), 0);
   const responsavelEhEmpresa = selectedResponsavel?.TipoUsuario === "EMPRESA";
@@ -207,14 +215,14 @@ export default function ClienteFinalAgendar() {
         sessionStorage.removeItem(storageKey);
       } else {
         sessionStorage.setItem(storageKey, JSON.stringify({
-          responsavelId, profissionalId, servicoId, servicoIds, dataSelecionada,
+          responsavelId, profissionalId, servicoId, servicoIds, selecoes, dataSelecionada,
           dataAgendamento, expandedSection: etapaAtual,
         } satisfies BookingDraft));
       }
     } catch {
       // O agendamento continua funcionando mesmo com armazenamento indisponivel.
     }
-  }, [storageKey, responsavelId, profissionalId, servicoId, servicoIds, dataSelecionada, dataAgendamento, etapaAtual, success]);
+  }, [storageKey, responsavelId, profissionalId, servicoId, servicoIds, selecoes, dataSelecionada, dataAgendamento, etapaAtual, success]);
 
   const dataFormatada = dataSelecionada ? new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(dataSelecionada + "T12:00:00")) : "";
 
@@ -244,6 +252,7 @@ export default function ClienteFinalAgendar() {
               setResponsavelId(data[0].Id);
               setProfissionalId(0);
               setServicoIds([]);
+              setSelecoes([]);
               setDataSelecionada("");
               setDataAgendamento("");
               setExpandedSection(data[0].TipoUsuario === "EMPRESA" ? "profissional" : "servico");
@@ -348,12 +357,17 @@ export default function ClienteFinalAgendar() {
 
         if (active) {
           setServicos(data);
-          const validos = servicoIds.filter(id => data.some(item => item.Id === id));
-          if (validos.length !== servicoIds.length) {
-            setServicoIds(validos);
-            setDataSelecionada("");
-            setDataAgendamento("");
-            setExpandedSection("servico");
+          if (!responsavelEhEmpresa) {
+            const validos = servicoIds.filter(id => data.some(item => item.Id === id));
+            if (validos.length !== servicoIds.length) {
+              setServicoIds(validos);
+              resetSchedule();
+              setExpandedSection("servico");
+            }
+          } else {
+            // Outros profissionais mantêm suas seleções ao trocar de catálogo.
+            setSelecoes(previous => previous.filter(item =>
+              item.profissionalId !== profissionalId || data.some(servico => servico.Id === item.servico.Id)));
           }
         }
       } catch {
@@ -404,6 +418,7 @@ export default function ClienteFinalAgendar() {
           profissionalId: responsavelEhEmpresa ? profissionalId : undefined,
           servicoId,
           servicoIds,
+          atendimentos: responsavelEhEmpresa ? atendimentos : undefined,
           data: dataSelecionada,
         });
 
@@ -440,6 +455,7 @@ export default function ClienteFinalAgendar() {
     responsavelId,
     selectedResponsavel,
     servicoIds.join(','),
+    selecoes.map(item => `${item.profissionalId}:${item.servico.Id}`).join(','),
     servicoId,
     showNotification,
   ]);
@@ -459,6 +475,7 @@ export default function ClienteFinalAgendar() {
     setProfissionalId(0);
     setServicos([]);
     setServicoIds([]);
+    setSelecoes([]);
     resetSchedule();
     setError("");
     setSuccess("");
@@ -468,7 +485,7 @@ export default function ClienteFinalAgendar() {
   function handleProfissionalChange(nextProfissionalId: number) {
     setProfissionalId(nextProfissionalId);
     setServicos([]);
-    setServicoIds([]);
+    // Preserva serviços escolhidos dos outros profissionais.
     resetSchedule();
     setError("");
     setSuccess("");
@@ -476,9 +493,24 @@ export default function ClienteFinalAgendar() {
   }
 
   function handleServicoChange(nextServicoId: number) {
-    setServicoIds(current => current.includes(nextServicoId)
-      ? current.filter(id => id !== nextServicoId)
-      : [...current, nextServicoId]);
+    if (responsavelEhEmpresa) {
+      const escolhido = servicos.find(item => item.Id === nextServicoId);
+      if (!escolhido || !profissionalId) return;
+      const existente = selecoes.some(item => item.servico.Id === nextServicoId);
+      const proximas = existente
+        ? selecoes.filter(item => item.servico.Id !== nextServicoId)
+        : [...selecoes, { profissionalId, servico: escolhido }];
+      if (proximas.length > 12) {
+        showNotification({ type: "warning", title: "Limite de serviços", message: "Selecione até 12 serviços por agendamento." });
+        return;
+      }
+      setSelecoes(proximas);
+      setServicoIds(proximas.map(item => item.servico.Id));
+    } else {
+      setServicoIds(current => current.includes(nextServicoId)
+        ? current.filter(id => id !== nextServicoId)
+        : [...current, nextServicoId]);
+    }
     resetSchedule();
     setError("");
     setSuccess("");
@@ -542,7 +574,8 @@ export default function ClienteFinalAgendar() {
       await criarAgendamento({
         ClienteId: cliente.Id,
         ResponsavelId: responsavelId,
-        ProfissionalId: responsavelEhEmpresa ? profissionalId : undefined,
+        ProfissionalId: responsavelEhEmpresa ? (selecoes[0]?.profissionalId ?? profissionalId) : undefined,
+        Atendimentos: responsavelEhEmpresa && selecoes.length ? atendimentos : undefined,
         ServicoId: servicoId,
         ServicoIds: servicoIds,
         DataAgendamento: dataAgendamento,
@@ -690,8 +723,8 @@ export default function ClienteFinalAgendar() {
             {etapaAtual === "servico" && (
               <section className={styles.bookingPanel}>
                 <div className={styles.sectionHeading}>
-                  <div><h2>Serviços disponíveis</h2><p>Selecione um ou mais serviços para o mesmo horário.</p></div>
-                  {responsavelEhEmpresa && <button type="button" className={styles.textAction} onClick={() => setExpandedSection("profissional")}>Trocar profissional</button>}
+                  <div><h2>Serviços disponíveis</h2><p>Selecione os serviços desejados. Você também pode escolher outro profissional da empresa.</p></div>
+                  {responsavelEhEmpresa && <button type="button" className={styles.textAction} onClick={() => setExpandedSection("profissional")}>Escolher outro profissional</button>}
                 </div>
                 {responsavelEhEmpresa && selectedProfissional && <p className={styles.selectedProfessional}>Com {formatPersonName(selectedProfissional.Nome)}</p>}
                 {loadingServicos ? <LoadingState label={t("client.servicesLoading")} variant="client-services" compact /> :
@@ -709,6 +742,20 @@ export default function ClienteFinalAgendar() {
                       </button>
                     ))}
                   </div>}
+                {responsavelEhEmpresa && selecoes.length > 0 && (
+                  <div className={styles.multipleProfessionalSummary}>
+                    <strong>Serviços selecionados</strong>
+                    {selecoes.map(item => (
+                      <div key={item.servico.Id} className={styles.selectedAssignment}>
+                        <span>{item.servico.NomeServico} — {formatPersonName(profissionais.find(pro => pro.Id === item.profissionalId)?.Nome ?? "Profissional")}</span>
+                        <button type="button" aria-label={`Remover ${item.servico.NomeServico}`} onClick={() => handleServicoChange(item.servico.Id)}>Remover</button>
+                      </div>
+                    ))}
+                    <button type="button" className={styles.otherProfessionalButton} onClick={() => setExpandedSection("profissional")}>
+                      <FaUser aria-hidden="true" /> Adicionar serviços de outro profissional
+                    </button>
+                  </div>
+                )}
                 {servicoIds.length > 0 && (
                   <div className={styles.servicesSelectionFooter}>
                     <div><strong>{servicoIds.length} {servicoIds.length === 1 ? "serviço" : "serviços"}</strong><span>{totalDuracao} min · {formatCurrency(totalValor)}</span></div>
@@ -722,7 +769,7 @@ export default function ClienteFinalAgendar() {
               <section className={styles.bookingPanel}>
                 <div className={styles.sectionHeading}><div><h2>Escolha a data e o horário</h2><p>Horários atualizados conforme a disponibilidade do prestador.</p></div></div>
                 <div className={styles.selectionSummary}>
-                  <span><strong>{selectedServicos.map(item => item.NomeServico).join(" + ")}</strong> · {totalDuracao} min · {formatCurrency(totalValor)}</span>
+                  <span><strong>{selectedServicos.map(item => item.NomeServico).join(" + ")}</strong> · {totalDuracao} min · {formatCurrency(totalValor)} {multiplosProfissionais ? "· Vários profissionais" : ""}</span>
                   <button type="button" className={styles.textAction} onClick={() => setExpandedSection("servico")}>Alterar serviços</button>
                 </div>
                 <div className={styles.scheduleLayout}>
@@ -767,6 +814,7 @@ export default function ClienteFinalAgendar() {
                       <div><span>Prestador</span><strong>{formatPersonName(selectedResponsavel?.Nome ?? "")}</strong></div>
                       {responsavelEhEmpresa && <div><span>Profissional</span><strong>{formatPersonName(selectedProfissional?.Nome ?? "")}</strong></div>}
                       <div><span>Serviços</span><strong>{selectedServicos.map(item => item.NomeServico).join(" + ")}</strong></div>
+                      {responsavelEhEmpresa && selecoes.length > 0 && <div><span>Atendimentos</span><strong>{selecoes.map(item => `${item.servico.NomeServico} — ${formatPersonName(profissionais.find(pro => pro.Id === item.profissionalId)?.Nome ?? "Profissional")}`).join(" · ")}</strong></div>}
                       <div><span>Duração total</span><strong>{totalDuracao} min</strong></div>
                       <div><span>Data e horário</span><strong>{dataFormatada} · {selectedHorario?.Horario}</strong></div>
                       <div className={styles.reviewTotal}><span>Valor total</span><strong>{formatCurrency(totalValor)}</strong></div>
