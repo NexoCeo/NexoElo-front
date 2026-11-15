@@ -788,3 +788,38 @@
   }
   .heroContent h2 { font-size: 18px; }
 }
+
+/* Seleção múltipla de atendimentos em um único horário. */
+.catalogServiceSelected {
+  border-color: var(--theme-primary) !important;
+  background: var(--theme-primary-soft);
+}
+.servicesSelectionFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 15px 16px;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 13px;
+}
+.servicesSelectionFooter > div { display: flex; flex-direction: column; gap: 4px; }
+.servicesSelectionFooter span { color: var(--theme-text-muted); font-size: 13px; }
+.servicesSelectionFooter button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  background: var(--theme-primary);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+@media(max-width:560px) {
+  .servicesSelectionFooter { flex-direction: column; align-items: stretch; }
+  .servicesSelectionFooter button { width: 100%; }
+}
