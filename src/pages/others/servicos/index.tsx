@@ -3,12 +3,13 @@ import { isAxiosError } from "axios";
 import { consultarAssinatura, type AssinaturaAtual } from "@/services/assinatura-service";
 import UpgradePlanModal from "@/components/upgrade-plan-modal";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FaEllipsisV, FaImage, FaPen, FaPlus, FaSearch, FaClock, FaTags, FaDollarSign, FaCheckCircle } from "react-icons/fa";
+import { FaEllipsisV, FaImage, FaPen, FaPlus, FaSearch, FaClock, FaTags, FaDollarSign, FaCheckCircle, FaPowerOff, FaCheck } from "react-icons/fa";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
 import { useNotification } from "@/context/NotificationContext";
 import {
   atualizarServico,
+  alterarAtivoServico,
   inserirServico,
   listarServicosPorEmpresa,
   obterImagemOriginalServico,
@@ -45,6 +46,8 @@ export default function Servicos() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingServico, setEditingServico] = useState<Servico | null>(null);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [confirmarAtivo, setConfirmarAtivo] = useState<Servico | null>(null);
+  const [alterandoAtivo, setAlterandoAtivo] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
   const [imagemPreviewUrl, setImagemPreviewUrl] = useState("");
   const [cropSource, setCropSource] = useState("");
@@ -350,6 +353,32 @@ export default function Servicos() {
     }
   }
 
+
+  async function confirmarAlteracaoAtivo() {
+    if (!confirmarAtivo || !ownerId || alterandoAtivo) return;
+    const proximoAtivo = confirmarAtivo.Ativo === false;
+    try {
+      setAlterandoAtivo(true);
+      await alterarAtivoServico(confirmarAtivo.Id, proximoAtivo);
+      setServicos(current => current.map(item =>
+        item.Id === confirmarAtivo.Id ? { ...item, Ativo: proximoAtivo } : item));
+      setConfirmarAtivo(null);
+      showNotification({
+        type: "success",
+        title: proximoAtivo ? "Serviço ativado" : "Serviço inativado",
+        message: `${confirmarAtivo.NomeServico} foi ${proximoAtivo ? "ativado" : "inativado"} com sucesso.`,
+      });
+      void fetchServicos(true);
+    } catch (error) {
+      const message = isAxiosError(error)
+        ? (typeof error.response?.data?.message === "string" ? error.response.data.message : "Não foi possível alterar o serviço.")
+        : "Não foi possível alterar o serviço.";
+      showNotification({ type: "error", title: "Alteração não realizada", message });
+    } finally {
+      setAlterandoAtivo(false);
+    }
+  }
+
   return (
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
       {error && <p className={styles.error}>{error}</p>}
@@ -446,6 +475,7 @@ export default function Servicos() {
                         <strong style={{ color: theme.colors.text }}>
                           {servico.NomeServico || t("services.unnamed")}
                         </strong>
+                        {servico.Ativo === false && <span className={styles.inactiveLabel}>Inativo</span>}
                         <span className={styles.cardDuration}>
                           <FaClock aria-hidden="true" /> {servico.TempoEstimadoMinutos || 0} min
                         </span>
@@ -470,7 +500,7 @@ export default function Servicos() {
                         aria-expanded={openMenuId === servico.Id}
                         onClick={(event) => {
                           const rect = event.currentTarget.getBoundingClientRect();
-                          const menuHeight = 48;
+                          const menuHeight = 98;
                           setMenuPosition({
                             top: rect.bottom + menuHeight + 8 > window.innerHeight ? Math.max(8, rect.top - menuHeight - 6) : rect.bottom + 6,
                             right: Math.max(8, window.innerWidth - rect.right),
@@ -490,6 +520,13 @@ export default function Servicos() {
                             <FaPen aria-hidden="true" />
                             {t("common.edit")}
                           </button>
+                          <button type="button" role="menuitem" onClick={() => {
+                            setOpenMenuId(null);
+                            setConfirmarAtivo(servico);
+                          }}>
+                            {servico.Ativo === false ? <FaCheck aria-hidden="true" /> : <FaPowerOff aria-hidden="true" />}
+                            {servico.Ativo === false ? "Ativar serviço" : "Inativar serviço"}
+                          </button>
                         </div>, document.body)
                       )}
                     </div>
@@ -501,6 +538,27 @@ export default function Servicos() {
         )}
       </section>
 
+
+      {confirmarAtivo && (
+        <div className={styles.confirmBackdrop} role="presentation" onMouseDown={event => {
+          if (event.target === event.currentTarget && !alterandoAtivo) setConfirmarAtivo(null);
+        }}>
+          <section className={styles.confirmDialog} role="dialog" aria-modal="true" aria-labelledby="confirm-service-title">
+            <h2 id="confirm-service-title">{confirmarAtivo.Ativo === false ? "Ativar serviço?" : "Inativar serviço?"}</h2>
+            <p>
+              {confirmarAtivo.Ativo === false
+                ? `O serviço "${confirmarAtivo.NomeServico}" voltará a ficar disponível para novos agendamentos.`
+                : `O serviço "${confirmarAtivo.NomeServico}" deixará de estar disponível para novos agendamentos. Os agendamentos existentes serão preservados.`}
+            </p>
+            <div className={styles.confirmActions}>
+              <button type="button" className={styles.secondaryButton} disabled={alterandoAtivo} onClick={() => setConfirmarAtivo(null)}>Cancelar</button>
+              <button type="button" className={styles.primaryButton} disabled={alterandoAtivo} onClick={() => void confirmarAlteracaoAtivo()}>
+                {alterandoAtivo ? "Salvando..." : "Confirmar"}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
       {upgradePlan && <UpgradePlanModal open={true} plan={upgradePlan.plan} limit={upgradePlan.limit}
         onClose={() => setUpgradePlan(null)}
         onViewPlans={() => { window.location.assign(`/${isEmpresa ? "empresa" : "autonomo"}/assinatura`); }} />}
