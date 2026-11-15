@@ -81,7 +81,7 @@ describe("ClienteFinalAgendar", () => {
     fireEvent.click(screen.getByRole("button", { name: "Confirmar agendamento" }));
     await waitFor(() => expect(mocks.criarAgendamento).toHaveBeenCalledWith({
       ClienteId: 4, ResponsavelId: 7, ProfissionalId: undefined,
-      ServicoId: 2, ServicoIds: [2], DataAgendamento: "2099-08-20T08:30:00",
+      ServicoId: 2, ServicoIds: [2], Atendimentos: undefined, DataAgendamento: "2099-08-20T08:30:00",
     }));
     expect(await screen.findByText("Pagina inicial do cliente")).toBeInTheDocument();
     expect(sessionStorage.getItem("nexoelo-booking-draft:4:marketplace")).toBeNull();
