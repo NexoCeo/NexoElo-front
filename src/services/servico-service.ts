@@ -16,6 +16,7 @@ function normalizeServico(servico: Partial<Servico>): Servico {
     Valor: Number(servico.Valor ?? 0),
     TempoEstimadoMinutos: Number(servico.TempoEstimadoMinutos ?? 0),
     ImagemServico: servico.ImagemServico ?? "",
+    Ativo: servico.Ativo ?? true,
   };
 }
 
@@ -89,3 +90,7 @@ export async function atualizarServico(id: number, payload: UpdateServicoPayload
 
 export const obterImagemOriginalServico = (id: number) =>
   carregarImagemOriginal(`/Servico/${id}/imagem-original`);
+
+export async function alterarAtivoServico(id: number, ativo: boolean): Promise<void> {
+  await api.patch(`/Servico/${id}/ativo`, { ativo });
+}
