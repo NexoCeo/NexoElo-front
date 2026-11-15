@@ -366,8 +366,15 @@ export default function ClienteFinalAgendar() {
             }
           } else {
             // Outros profissionais mantêm suas seleções ao trocar de catálogo.
-            setSelecoes(previous => previous.filter(item =>
-              item.profissionalId !== profissionalId || data.some(servico => servico.Id === item.servico.Id)));
+            setSelecoes(previous => {
+              const validos = previous.filter(item =>
+                item.profissionalId !== profissionalId || data.some(servico => servico.Id === item.servico.Id));
+              if (validos.length !== previous.length) {
+                setServicoIds(validos.map(item => item.servico.Id));
+                setDataAgendamento("");
+              }
+              return validos;
+            });
           }
         }
       } catch {
@@ -748,7 +755,12 @@ export default function ClienteFinalAgendar() {
                     {selecoes.map(item => (
                       <div key={item.servico.Id} className={styles.selectedAssignment}>
                         <span>{item.servico.NomeServico} — {formatPersonName(profissionais.find(pro => pro.Id === item.profissionalId)?.Nome ?? "Profissional")}</span>
-                        <button type="button" aria-label={`Remover ${item.servico.NomeServico}`} onClick={() => handleServicoChange(item.servico.Id)}>Remover</button>
+                        <button type="button" aria-label={`Remover ${item.servico.NomeServico}`} onClick={() => {
+                          const proximas = selecoes.filter(selected => selected.servico.Id !== item.servico.Id);
+                          setSelecoes(proximas);
+                          setServicoIds(proximas.map(selected => selected.servico.Id));
+                          resetSchedule();
+                        }}>Remover</button>
                       </div>
                     ))}
                     <button type="button" className={styles.otherProfessionalButton} onClick={() => setExpandedSection("profissional")}>
