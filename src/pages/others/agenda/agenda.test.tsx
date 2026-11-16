@@ -7,6 +7,9 @@ import type { Agendamento } from "@/types/agendamento";
 import type { Profissional } from "@/types/profissional";
 import { listarProfissionaisEmpresa } from "@/services/profissional-service";
 
+const userRole = vi.hoisted(() => ({ current: "EMPRESA" as "EMPRESA" | "PROFISSIONAL", id: 7 }));
+const vinculoMock = vi.hoisted(() => ({ obterStatusVinculoProfissional: vi.fn() }));
+
 const agendaServiceMock = vi.hoisted(() => ({
   listarAgendaPorData: vi.fn(),
   atualizarStatusAgendamento: vi.fn(),
@@ -34,7 +37,7 @@ vi.mock("@/context/ThemeContext", () => ({
 vi.mock("@/context/UserContext", async (importOriginal) => ({
   ...await importOriginal<typeof import("@/context/UserContext")>(),
   useUser: () => ({
-    usuario: { Id: 7, Nome: "Empresa Teste", Papel: "EMPRESA" },
+    usuario: { Id: userRole.id, Nome: "Empresa Teste", Papel: userRole.current },
   }),
 }));
 
@@ -67,6 +70,9 @@ vi.mock("@/services/agenda-realtime-service", () => ({
 
 vi.mock("@/services/profissional-service", () => ({
   listarProfissionaisEmpresa: vi.fn().mockResolvedValue([]),
+}));
+vi.mock("@/services/vinculo-service", () => ({
+  obterStatusVinculoProfissional: vinculoMock.obterStatusVinculoProfissional,
 }));
 vi.mock("@/services/funcionamento-service", () => ({
   obterFuncionamento: vi.fn().mockResolvedValue({
@@ -115,6 +121,12 @@ describe("Agenda", () => {
     Object.defineProperty(navigator, "languages", { configurable: true, value: ["pt-BR"] });
     vi.useRealTimers();
     vi.setSystemTime(new Date(2026, 7, 10, 10, 0, 0));
+    userRole.current = "EMPRESA";
+    userRole.id = 7;
+    vinculoMock.obterStatusVinculoProfissional.mockReset();
+    vinculoMock.obterStatusVinculoProfissional.mockResolvedValue({
+      status: "APROVADO", empresaId: 7,
+    });
     agendaServiceMock.listarAgendaPorData.mockReset();
     vi.mocked(listarProfissionaisEmpresa).mockResolvedValue([]);
     agendaServiceMock.atualizarStatusAgendamento.mockReset();
@@ -151,6 +163,16 @@ describe("Agenda", () => {
     expect(await screen.findByText("09:00")).toBeInTheDocument();
     expect(screen.getByText("17:00")).toBeInTheDocument();
     expect(screen.queryByText("20:00")).not.toBeInTheDocument();
+  });
+
+  it("consulta o funcionamento da empresa para o profissional, sem requisitar seu ID", async () => {
+    userRole.current = "PROFISSIONAL";
+    userRole.id = 21;
+    agendaServiceMock.listarAgendaPorData.mockResolvedValue([]);
+    renderAgenda();
+    await waitFor(() => expect(vinculoMock.obterStatusVinculoProfissional).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(obterFuncionamento).toHaveBeenCalledWith(7));
+    expect(obterFuncionamento).not.toHaveBeenCalledWith(21);
   });
 
   it("preserva 13h30 e 14h sem sobrepor cards de serviços consecutivos", async () => {
