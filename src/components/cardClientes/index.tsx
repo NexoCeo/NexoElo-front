@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as R
 import { FaCalendarXmark, FaCheck, FaXmark, FaScissors } from "react-icons/fa6";
 import styles from "./style.module.css";
 import LoadingState from "@/components/loading-state";
+import { defaultProfileImg, getUploadedImageUrl } from "@/components/header/profile-image";
 import { useLanguage } from "@/context/LanguageContext";
 
 export type AgendaCardItem = {
@@ -9,6 +10,7 @@ export type AgendaCardItem = {
   cliente: string;
   servico: string;
   profissional: string;
+  profissionais?: { Id: number; Nome: string; FotoPerfil?: string | null }[];
   horario: string;
   status: string;
   valor: string;
@@ -140,12 +142,21 @@ const labelStatus = (status: string) => {
               </div>
               <div className={compactAgenda ? styles.compactProfessional : undefined} data-label="Profissional" data-column={2}>
                 <span className={styles.professionalList}>
-                  {appointment.profissional.split(" + ").map((nome) => (
-                    <span key={nome} className={styles.professionalEntry}>
-                      {compactAgenda && <span className={styles.professionalAvatar} aria-hidden="true">{nome.trim().split(/\s+/).slice(0, 2).map(parte => parte[0]).join("").toUpperCase()}</span>}
-                      <span>{nome}</span>
-                    </span>
-                  ))}
+                  {(appointment.profissionais?.length ? appointment.profissionais :
+                    appointment.profissional.split(" + ").map((nome, index) => ({ Id: index, Nome: nome, FotoPerfil: null })))
+                    .map((profissional) => {
+                      const nome = profissional.Nome;
+                      const fotoUrl = getUploadedImageUrl(profissional.FotoPerfil);
+                      return (
+                        <span key={profissional.Id || nome} className={styles.professionalEntry}>
+                          {compactAgenda && (fotoUrl
+                            ? <img className={styles.professionalPhoto} src={fotoUrl} alt={`Foto de ${nome}`}
+                                onError={event => { event.currentTarget.src = defaultProfileImg; }} />
+                            : <span className={styles.professionalAvatar} aria-hidden="true">{nome.trim().split(/\s+/).slice(0, 2).map(parte => parte[0]).join("").toUpperCase()}</span>)}
+                          <span>{nome}</span>
+                        </span>
+                      );
+                    })}
                 </span>
               </div>
               <div className={styles.time} data-label="Horário" data-column={3}><span>{appointment.horario}</span></div>
