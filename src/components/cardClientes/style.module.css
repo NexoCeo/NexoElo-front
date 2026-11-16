@@ -508,3 +508,14 @@
   .agendaCompact .initialAvatar{width:25px;height:25px;flex-basis:25px;font-size:9px}
   .agendaCompact .statusBadge{font-size:9px;padding:4px 6px}
 }
+
+/* Mostra todos os profissionais de um agendamento multiprofissional. */
+.professionalList { display:flex; flex-direction:column; gap:5px; min-width:0; width:100%; }
+.professionalEntry { display:flex; align-items:center; gap:7px; min-width:0; }
+.professionalEntry > span:last-child { overflow-wrap:anywhere; }
+.agendaCompact .compactProfessional > .professionalList {
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+}
+.agendaCompact .professionalEntry .professionalAvatar { flex-shrink:0; }
