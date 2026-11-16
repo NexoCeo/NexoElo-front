@@ -29,3 +29,8 @@
 .itemHeading{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;min-width:0;flex-wrap:wrap}
 .itemHeading strong{flex:1 1 auto;min-width:0}
 .itemTimestamp{flex:0 0 auto;max-width:100%;white-space:nowrap;font-size:10px;line-height:1.6;font-weight:500;color:var(--theme-text-muted);font-variant-numeric:tabular-nums}
+
+/* Indicadores ficam sempre no canto superior direito do card, sem deslocar o título ou a data. */
+.item{position:relative;padding-right:30px}
+.unreadDot{position:absolute;top:18px;right:14px;margin:0}
+.read{position:absolute;top:16px;right:12px;margin:0}
