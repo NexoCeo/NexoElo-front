@@ -68,8 +68,18 @@ vi.mock("@/services/agenda-realtime-service", () => ({
 vi.mock("@/services/profissional-service", () => ({
   listarProfissionaisEmpresa: vi.fn().mockResolvedValue([]),
 }));
+vi.mock("@/services/funcionamento-service", () => ({
+  obterFuncionamento: vi.fn().mockResolvedValue({
+    UsuarioFk: 7,
+    Domingo: false, Segunda: true, Terca: true, Quarta: true,
+    Quinta: true, Sexta: true, Sabado: false,
+    HorarioAbertura: "09:00", HorarioFechamento: "17:00",
+    Intervalos: [], HorariosPorDia: {},
+  }),
+}));
 
 import Agenda from "./index";
+import { obterFuncionamento } from "@/services/funcionamento-service";
 
 function appointment(overrides: Partial<Agendamento> = {}): Agendamento {
   return {
@@ -132,6 +142,15 @@ describe("Agenda", () => {
       undefined,
       expect.any(AbortSignal),
     );
+  });
+
+  it("exibe escala do funcionamento da empresa e oculta horários fixos", async () => {
+    agendaServiceMock.listarAgendaPorData.mockResolvedValue([]);
+    renderAgenda();
+    await waitFor(() => expect(obterFuncionamento).toHaveBeenCalledWith(7));
+    expect(await screen.findByText("09:00")).toBeInTheDocument();
+    expect(screen.getByText("17:00")).toBeInTheDocument();
+    expect(screen.queryByText("20:00")).not.toBeInTheDocument();
   });
 
   it("preserva 13h30 e 14h sem sobrepor cards de serviços consecutivos", async () => {
