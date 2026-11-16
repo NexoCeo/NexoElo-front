@@ -139,8 +139,14 @@ const labelStatus = (status: string) => {
                 <span>{appointment.servico}</span>
               </div>
               <div className={compactAgenda ? styles.compactProfessional : undefined} data-label="Profissional" data-column={2}>
-                {compactAgenda && <span className={styles.professionalAvatar} aria-hidden="true">{appointment.profissional.trim().split(/\s+/).slice(0, 2).map(name => name[0]).join("").toUpperCase()}</span>}
-                <span>{appointment.profissional}</span>
+                <span className={styles.professionalList}>
+                  {appointment.profissional.split(" + ").map((nome) => (
+                    <span key={nome} className={styles.professionalEntry}>
+                      {compactAgenda && <span className={styles.professionalAvatar} aria-hidden="true">{nome.trim().split(/\s+/).slice(0, 2).map(parte => parte[0]).join("").toUpperCase()}</span>}
+                      <span>{nome}</span>
+                    </span>
+                  ))}
+                </span>
               </div>
               <div className={styles.time} data-label="Horário" data-column={3}><span>{appointment.horario}</span></div>
               <div data-label="Status" data-column={4}>
