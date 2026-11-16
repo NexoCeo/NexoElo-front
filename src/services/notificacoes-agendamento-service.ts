@@ -5,6 +5,7 @@ export type NotificacaoAgendamento = {
   Titulo: string;
   Mensagem: string;
   DataAgendamento: string;
+  CriadaEm?: string;
   Lida: boolean;
 };
 export async function listarNotificacoesAgendamento() {
