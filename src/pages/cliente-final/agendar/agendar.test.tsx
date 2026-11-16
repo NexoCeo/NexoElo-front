@@ -117,7 +117,7 @@ describe("ClienteFinalAgendar", () => {
     fireEvent.click(screen.getByRole("button", { name: "Confirmar agendamento" }));
     await waitFor(() => expect(mocks.criarAgendamento).toHaveBeenCalledWith({
       ClienteId: 4, ResponsavelId: 7, ProfissionalId: undefined,
-      ServicoId: 2, ServicoIds: [2, 3], DataAgendamento: "2099-08-20T08:30:00",
+      ServicoId: 2, ServicoIds: [2, 3], Atendimentos: undefined, DataAgendamento: "2099-08-20T08:30:00",
     }));
     expect(mocks.criarAgendamento).toHaveBeenCalledTimes(1);
   });
@@ -182,7 +182,7 @@ describe("ClienteFinalAgendar", () => {
     expect(await screen.findByAltText("Foto de Profissional Teste")).toHaveAttribute("src", expect.stringContaining("/uploads/profissional.png"));
     fireEvent.click(screen.getByRole("button", { name: /Profissional Teste/i }));
     expect(await screen.findByAltText("Imagem do servico Coloracao")).toHaveAttribute("src", expect.stringContaining("/uploads/coloracao.webp"));
-    fireEvent.click(screen.getByRole("button", { name: "Trocar profissional" }));
+    fireEvent.click(screen.getByRole("button", { name: "Escolher outro profissional" }));
     expect(await screen.findByRole("button", { name: /Profissional Teste/i })).toBeInTheDocument();
   });
 
