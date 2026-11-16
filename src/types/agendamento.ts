@@ -39,6 +39,7 @@ export type Agendamento = {
   ClienteNome: string;
   ServicoNome: string;
   ProfissionalNome: string;
+  Profissionais?: { Id: number; Nome: string; FotoPerfil?: string | null }[];
 };
 
 export type CreateAgendamentoPayload = {
