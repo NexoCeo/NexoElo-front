@@ -23,6 +23,10 @@ import {
   listarResponsaveisAgendamento,
 } from "@/services/agendamento-service";
 import { obterAgendaPublica } from "@/services/agenda-publica-service";
+import {
+  consultarPagamentoPublico, iniciarPagamentoOnline, registrarPagamentoPresencial,
+  type ConfiguracaoPagamento
+} from "@/services/pagamentos-agendamento-service";
 import { getClienteFinalUser } from "@/services/cliente-final-auth-token";
 import {
   listarServicosPorEmpresa,
@@ -170,6 +174,9 @@ export default function ClienteFinalAgendar() {
   const [dataAgendamento, setDataAgendamento] = useState(draft?.dataAgendamento ?? "");
   const [refreshHorarios, setRefreshHorarios] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [configPagamento, setConfigPagamento] = useState<ConfiguracaoPagamento | null>(null);
+  const [loadingPagamento, setLoadingPagamento] = useState(false);
+  const [metodoPagamento, setMetodoPagamento] = useState<"PRESENCIAL" | "ONLINE">("PRESENCIAL");
   const [loadingResponsaveis, setLoadingResponsaveis] = useState(false);
   const [loadingProfissionais, setLoadingProfissionais] = useState(false);
   const [loadingServicos, setLoadingServicos] = useState(false);
@@ -223,6 +230,27 @@ export default function ClienteFinalAgendar() {
       // O agendamento continua funcionando mesmo com armazenamento indisponivel.
     }
   }, [storageKey, responsavelId, profissionalId, servicoId, servicoIds, selecoes, dataSelecionada, dataAgendamento, etapaAtual, success]);
+
+  useEffect(() => {
+    if (!responsavelId) { setConfigPagamento(null); return; }
+    let active = true;
+    setLoadingPagamento(true);
+    setConfigPagamento(null);
+    void consultarPagamentoPublico(responsavelId)
+      .then(config => {
+        if (!active) return;
+        setConfigPagamento(config);
+        setMetodoPagamento(config.Modalidade === "ONLINE" ? "ONLINE" : "PRESENCIAL");
+      })
+      .catch(() => {
+        if (active) showNotification({
+          type: "error", title: "Pagamento indisponível",
+          message: "Não foi possível consultar as formas de pagamento deste estabelecimento."
+        });
+      })
+      .finally(() => { if(active) setLoadingPagamento(false); });
+    return () => { active = false; };
+  }, [responsavelId, showNotification]);
 
   const dataFormatada = dataSelecionada ? new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(dataSelecionada + "T12:00:00")) : "";
 
@@ -579,9 +607,16 @@ export default function ClienteFinalAgendar() {
       return;
     }
 
+    if (!configPagamento || loadingPagamento ||
+        (metodoPagamento === "ONLINE" && !configPagamento.OnlineDisponivel) ||
+        (metodoPagamento === "PRESENCIAL" && configPagamento.Modalidade === "ONLINE")) {
+      showNotification({type:"warning",title:"Selecione a forma de pagamento",message:"Esta modalidade não está disponível para o estabelecimento."});
+      return;
+    }
+
     try {
       setLoading(true);
-      await criarAgendamento({
+      const criado = await criarAgendamento({
         ClienteId: cliente.Id,
         ResponsavelId: responsavelId,
         ProfissionalId: responsavelEhEmpresa ? (selecoes[0]?.profissionalId ?? profissionalId) : undefined,
@@ -590,6 +625,25 @@ export default function ClienteFinalAgendar() {
         ServicoIds: servicoIds,
         DataAgendamento: dataAgendamento,
       });
+      // A reserva existe antes do encaminhamento à Stripe.
+      // Caso o checkout falhe, o cliente poderá retomar o pagamento no histórico.
+      const data = criado as {Id?:number;id?:number};
+      const idCriado = Number(data.Id ?? data.id);
+      try {
+        if (!Number.isInteger(idCriado) || idCriado <= 0) throw new Error("ID do agendamento indisponível.");
+        if (metodoPagamento === "ONLINE") {
+          await iniciarPagamentoOnline(idCriado);
+          return;
+        }
+        await registrarPagamentoPresencial(idCriado);
+      } catch {
+        showNotification({
+          type:"warning", title:"Agendamento criado",
+          message:"A reserva foi feita, mas não foi possível registrar o pagamento. Consulte seu histórico para continuar."
+        });
+        navigate("/cliente-final/home", { replace: true });
+        return;
+      }
       // O agendamento foi confirmado pela API: nao manter o rascunho,
       // nem exibir uma etapa intermediaria de sucesso.
       try {
@@ -834,6 +888,26 @@ export default function ClienteFinalAgendar() {
                       <div><span>Data e horário</span><strong>{dataFormatada} · {selectedHorario?.Horario}</strong></div>
                       <div className={styles.reviewTotal}><span>Valor total</span><strong>{formatCurrency(totalValor)}</strong></div>
                     </div>
+                    <fieldset className={styles.paymentChoice}>
+                      <legend>Como deseja pagar?</legend>
+                      {loadingPagamento && <p>Carregando formas de pagamento...</p>}
+                      {!loadingPagamento && !configPagamento && <p>As opções de pagamento não estão disponíveis no momento.</p>}
+                      {configPagamento && configPagamento.Modalidade !== "ONLINE" && (
+                        <label><input type="radio" name="pagamento" checked={metodoPagamento === "PRESENCIAL"}
+                          onChange={() => setMetodoPagamento("PRESENCIAL")} />
+                          <span><strong>Pagar no estabelecimento</strong><small>Pagamento diretamente ao prestador após o atendimento.</small></span>
+                        </label>
+                      )}
+                      {configPagamento && configPagamento.Modalidade !== "PRESENCIAL" && (
+                        <label><input type="radio" name="pagamento" checked={metodoPagamento === "ONLINE"}
+                          disabled={!configPagamento.OnlineDisponivel}
+                          onChange={() => setMetodoPagamento("ONLINE")} />
+                          <span><strong>Pagar agora pela Stripe</strong>
+                            <small>{configPagamento.OnlineDisponivel ? "Pagamento seguro, destinado ao estabelecimento." :
+                              "O estabelecimento ainda não habilitou sua conta recebedora."}</small></span>
+                        </label>
+                      )}
+                    </fieldset>
                     <button type="button" className={styles.textAction} onClick={() => setExpandedSection("horario")}>Alterar data ou horário</button>
                   </>
                 )}
@@ -846,7 +920,7 @@ export default function ClienteFinalAgendar() {
             {(etapaAtual === "horario" || etapaAtual === "confirmacao") && !success && (
               <div className={styles.bookingFooter}>
                 {etapaAtual === "confirmacao" && <button type="submit" className={styles.footerConfirm}
-                  disabled={loading || loadingHorarios || !dataAgendamento || !selectedHorario}>
+                  disabled={loading || loadingHorarios || loadingPagamento || !configPagamento || !dataAgendamento || !selectedHorario || (metodoPagamento === "ONLINE" && !configPagamento.OnlineDisponivel)}>
                   {loading ? "Agendando..." : cliente ? "Confirmar agendamento" : "Entrar para agendar"}
                 </button>}
                 {etapaAtual === "horario" && <span className={styles.footerHint}>Selecione um horário para continuar</span>}
