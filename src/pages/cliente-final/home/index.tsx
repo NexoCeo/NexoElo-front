@@ -19,6 +19,7 @@ import {
   listarHistoricoAgendamentos,
 } from "@/services/agendamento-service";
 import { getClienteFinalUser } from "@/services/cliente-final-auth-token";
+import { consultarPagamentoAgendamento, iniciarPagamentoOnline, type EstadoPagamento } from "@/services/pagamentos-agendamento-service";
 import { logout } from "@/services/logout-service";
 import { useNotification } from "@/context/NotificationContext";
 import type { Agendamento } from "@/types/agendamento";
@@ -125,6 +126,29 @@ function AppointmentCard({
   updatingId: number | null;
   onStatusChange: (agendamentoId: number, status: "CANCELADO" | "CONCLUIDO") => void;
 }) {
+  const [payment, setPayment] = useState<EstadoPagamento | null>(null);
+  const [openingPayment, setOpeningPayment] = useState(false);
+  const { showNotification } = useNotification();
+
+  useEffect(() => {
+    if (!isScheduled(appointment)) return;
+    let active = true;
+    void consultarPagamentoAgendamento(appointment.Id)
+      .then(data => { if(active) setPayment(data); })
+      .catch(() => { if(active) setPayment(null); });
+    return () => { active = false; };
+  }, [appointment.Id, appointment.Status]);
+
+  async function retomarPagamento() {
+    try {
+      setOpeningPayment(true);
+      await iniciarPagamentoOnline(appointment.Id);
+    } catch {
+      showNotification({type:"error",title:"Não foi possível abrir o pagamento",message:"Tente novamente ou entre em contato com o estabelecimento."});
+      setOpeningPayment(false);
+    }
+  }
+
   return (
     <article className={styles.appointmentCard}>
       <div className={styles.appointmentDate}>
@@ -149,6 +173,17 @@ function AppointmentCard({
         <strong>{formatCurrency(appointment.ValorServico || appointment.Valor || 0)}</strong>
       </div>
 
+      {payment && (
+        <div className={styles.paymentStatus}>
+          {payment.status === "PAGO" ? <span>Pagamento confirmado</span> :
+           payment.status === "PENDENTE" && payment.metodo === "PRESENCIAL" ?
+            <span>Pagamento presencial pendente</span> :
+           payment.metodo === "ONLINE" && payment.status === "PENDENTE" ?
+            <button type="button" disabled={openingPayment} onClick={() => void retomarPagamento()}>
+              {openingPayment ? "Abrindo checkout..." : "Continuar pagamento online"}
+            </button> : null}
+        </div>
+      )}
       {isScheduled(appointment) && (
         <div className={styles.appointmentActions} aria-label="Ações do agendamento">
           <button
