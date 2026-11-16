@@ -829,3 +829,10 @@
 .selectedAssignment { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; }
 .selectedAssignment button { border: 0; background: transparent; color: #f87171; cursor: pointer; }
 .otherProfessionalButton { width: fit-content; border: 1px solid var(--theme-border-strong); border-radius: 9px; padding: 10px 13px; color: var(--theme-text); background: var(--theme-surface); cursor: pointer; display: flex; align-items: center; gap: 8px; }
+
+.paymentChoice{display:grid;gap:12px;padding:16px;margin:18px 0;border:1px solid var(--theme-border-strong);border-radius:12px}
+.paymentChoice legend{font-weight:700;padding:0 6px}
+.paymentChoice label{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--theme-border-strong);border-radius:9px;cursor:pointer}
+.paymentChoice input{accent-color:#2563eb}
+.paymentChoice label span{display:grid;gap:5px}
+.paymentChoice small{color:var(--theme-text-muted)}
