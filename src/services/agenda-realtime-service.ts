@@ -4,7 +4,6 @@ import {
   LogLevel,
   type HubConnection,
 } from "@microsoft/signalr";
-import { API_ORIGIN } from "./api";
 
 export type AgendaRealtimeStatus =
   | "connecting"
@@ -33,10 +32,23 @@ export function createAgendaRealtimeClient({
   onAgendaUpdated,
   onStatusChange,
 }: AgendaRealtimeOptions): AgendaRealtimeClient {
+  // A Vercel não mantém corretamente o transporte LongPolling do SignalR
+  // através do rewrite /hubs/* (502). Por padrão, a aplicação usa o
+  // revalidador/polling HTTP das páginas, sem abrir conexões que falhariam.
+  // Uma URL direta de hub pode ser habilitada via variável de ambiente
+  // quando o backend estiver acessível com a autenticação adequada.
+  const directHubUrl = import.meta.env.VITE_AGENDA_SIGNALR_URL?.trim();
+  if (!directHubUrl) {
+    return {
+      start: () => { onStatusChange("offline"); },
+      stop: async () => undefined,
+    };
+  }
+
   const connection: HubConnection = new HubConnectionBuilder()
-    .withUrl(`${API_ORIGIN}/hubs/agenda`, {
+    .withUrl(directHubUrl, {
       withCredentials: true,
-      transport: HttpTransportType.LongPolling,
+      transport: HttpTransportType.WebSockets | HttpTransportType.LongPolling,
     })
     .configureLogging(LogLevel.Warning)
     .withAutomaticReconnect([0, 2_000, 5_000, 10_000])
