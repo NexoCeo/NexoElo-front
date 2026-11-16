@@ -1289,3 +1289,17 @@
 
 /* Dia sem expediente: não exibir uma grade artificial de horários. */
 .timelineClosed { display:flex; align-items:center; justify-content:center; flex:1; min-height:280px; padding:24px; color:var(--theme-text-muted); text-align:center; font-size:14px; }
+
+/* Alternância crescente/decrescente apenas na lista de agendamentos. */
+.listPanelActions { display:flex; align-items:center; gap:10px; flex:0 0 auto; }
+.sortDirectionButton {
+  width:32px; height:32px; display:inline-flex; justify-content:center; align-items:center;
+  border:1px solid transparent; border-radius:9px; background:transparent;
+  color:var(--theme-text-muted); cursor:pointer; transition:background .15s,color .15s,border-color .15s;
+}
+.sortDirectionButton:hover, .sortDirectionButton:focus-visible {
+  background:var(--theme-surface-muted); color:var(--theme-text);
+  border-color:var(--theme-border-strong);
+}
+.sortDirectionButton:focus-visible { outline:2px solid var(--theme-primary); outline-offset:2px; }
+.sortDirectionButton[aria-pressed="true"] { color:var(--theme-primary-text); }
