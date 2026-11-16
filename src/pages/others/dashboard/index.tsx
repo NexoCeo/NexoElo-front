@@ -21,6 +21,10 @@ import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
 type DashboardRange = "today" | "week";
 
+function isScheduled(appointment: Agendamento) {
+  return appointment.Status?.trim().toUpperCase() === "AGENDADO";
+}
+
 export type DashboardInitialAgenda = {
   appointments: Agendamento[];
   failed: boolean;
@@ -139,7 +143,7 @@ export default function Dashboard({ initialAgenda }: { initialAgenda?: Dashboard
   const role = usuario?.Papel?.toUpperCase();
   const isProfessional = role === "PROFISSIONAL";
   const [range, setRange] = useState<DashboardRange>("today");
-  const [appointments, setAppointments] = useState<Agendamento[]>(() => initialAgenda?.appointments ?? []);
+  const [appointments, setAppointments] = useState<Agendamento[]>(() => (initialAgenda?.appointments ?? []).filter(isScheduled));
   const [loading, setLoading] = useState(!initialAgenda);
   const [hasLoaded, setHasLoaded] = useState(Boolean(initialAgenda));
   const [error, setError] = useState(() => initialAgenda?.failed ? t("dashboard.loadError") : "");
@@ -165,10 +169,11 @@ export default function Dashboard({ initialAgenda }: { initialAgenda?: Dashboard
           formatAgendaDateParam(period.end),
         );
       }
-      setAppointments(nextAppointments);
+      const scheduledAppointments = nextAppointments.filter(isScheduled);
+      setAppointments(scheduledAppointments);
       storeCachedCount(
         dashboardCountCacheKey(usuario.Id, isProfessional, range, now),
-        nextAppointments.length,
+        scheduledAppointments.length,
       );
     } catch {
       const message = t("dashboard.loadError");
@@ -192,7 +197,7 @@ export default function Dashboard({ initialAgenda }: { initialAgenda?: Dashboard
     if (initialAgenda && !initialAgenda.failed && usuario?.Id) {
       storeCachedCount(
         dashboardCountCacheKey(usuario.Id, isProfessional, range, new Date()),
-        initialAgenda.appointments.length,
+        initialAgenda.appointments.filter(isScheduled).length,
       );
     }
   }, [initialAgenda, isProfessional, range, usuario?.Id]);
