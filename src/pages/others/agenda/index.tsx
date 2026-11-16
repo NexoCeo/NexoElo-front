@@ -134,6 +134,7 @@ export default function Agenda() {
   const [profissionalId, setProfissionalId] = useState(0);
 
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
+  const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("asc");
   const [funcionamento, setFuncionamento] = useState<FuncionamentoConfig | null>(null);
   const timelineViewportRef = useRef<HTMLDivElement>(null);
 
@@ -432,6 +433,12 @@ export default function Agenda() {
           };
         });
     }, [agendamentos]);
+
+  // Ordena apenas os cards da lista; a linha do tempo mantém a ordem cronológica.
+  const orderedAgendaItems = useMemo(() => [...agendaItems].sort((a, b) => {
+    const order = a.horario.localeCompare(b.horario) || a.Id - b.Id;
+    return orderDirection === "asc" ? order : -order;
+  }), [agendaItems, orderDirection]);
 
   const selectedPeriodLabel = formatSelectedDate(selectedDate, lang === "pt" ? "pt-BR" : "en-US");
 
@@ -759,11 +766,25 @@ export default function Agenda() {
       <section className={styles.content} aria-label="Agendamentos do dia">
         <header className={styles.listPanelHeader} title={lastUpdatedLabel}>
           <h2>Agendamentos do dia</h2>
-          <span className={styles.appointmentCount} aria-label={`${agendaItems.length} agendamentos`} aria-live="polite">{agendaItems.length}</span>
+          <div className={styles.listPanelActions}>
+            <button
+              type="button"
+              className={styles.sortDirectionButton}
+              onClick={() => setOrderDirection(current => current === "asc" ? "desc" : "asc")}
+              title={orderDirection === "asc" ? "Ordenar do mais tarde para o mais cedo" : "Ordenar do mais cedo para o mais tarde"}
+              aria-label={orderDirection === "asc" ? "Ordenar agendamentos por horário decrescente" : "Ordenar agendamentos por horário crescente"}
+              aria-pressed={orderDirection === "desc"}
+            >
+              <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
+                <path d="M3 5h18M6.5 12h11M10 19h4" />
+              </svg>
+            </button>
+            <span className={styles.appointmentCount} aria-label={`${agendaItems.length} agendamentos`} aria-live="polite">{agendaItems.length}</span>
+          </div>
         </header>
         <Card
           compactAgenda
-          agendamentos={agendaItems}
+          agendamentos={orderedAgendaItems}
           focusAppointmentId={Number.isSafeInteger(requestedAppointmentId) && requestedAppointmentId > 0 ? requestedAppointmentId : undefined}
           loading={loading}
           error={error}
