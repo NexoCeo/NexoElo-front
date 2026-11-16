@@ -5,6 +5,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   criarAgendamento: vi.fn(),
+  consultarPagamentoPublico: vi.fn(),
+  registrarPagamentoPresencial: vi.fn(),
+  iniciarPagamentoOnline: vi.fn(),
   obterAgendaPublica: vi.fn(),
   listarHorariosDisponiveis: vi.fn(),
   listarProfissionaisAgendamento: vi.fn(),
@@ -18,6 +21,12 @@ vi.mock("@/services/agendamento-service", () => ({
   listarHorariosDisponiveis: mocks.listarHorariosDisponiveis,
   listarProfissionaisAgendamento: mocks.listarProfissionaisAgendamento,
   listarResponsaveisAgendamento: mocks.listarResponsaveisAgendamento,
+}));
+
+vi.mock("@/services/pagamentos-agendamento-service", () => ({
+  consultarPagamentoPublico: mocks.consultarPagamentoPublico,
+  registrarPagamentoPresencial: mocks.registrarPagamentoPresencial,
+  iniciarPagamentoOnline: mocks.iniciarPagamentoOnline,
 }));
 
 vi.mock("@/services/agenda-publica-service", () => ({
@@ -53,6 +62,11 @@ describe("ClienteFinalAgendar", () => {
       { DataAgendamento: "2099-08-20T08:30:00", Horario: "08:30" },
     ]);
     mocks.criarAgendamento.mockResolvedValue({ Id: 42 });
+    mocks.consultarPagamentoPublico.mockResolvedValue({
+      Modalidade: "PRESENCIAL", OnlineDisponivel: false, ContaConectada: false
+    });
+    mocks.registrarPagamentoPresencial.mockResolvedValue(undefined);
+
   });
 
   it("permite buscar prestadores, escolher servico, horario e confirmar sem alterar o payload", async () => {
@@ -78,7 +92,7 @@ describe("ClienteFinalAgendar", () => {
     fireEvent.change(screen.getByLabelText(/Data|Date/i), { target: { value: "2099-08-20" } });
     fireEvent.click(await screen.findByRole("button", { name: "08:30" }));
     expect(screen.getByRole("heading", { name: "Revise seu agendamento" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Confirmar agendamento" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Confirmar agendamento" }));
     await waitFor(() => expect(mocks.criarAgendamento).toHaveBeenCalledWith({
       ClienteId: 4, ResponsavelId: 7, ProfissionalId: undefined,
       ServicoId: 2, ServicoIds: [2], Atendimentos: undefined, DataAgendamento: "2099-08-20T08:30:00",
