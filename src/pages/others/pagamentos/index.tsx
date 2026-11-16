@@ -64,8 +64,14 @@ export default function ConfiguracaoPagamentos() {
   }
 
   async function conectar() {
-    try { await conectarContaRecebedora(); }
-    catch { showNotification({type:"error",title:"Stripe indisponível",message:"Não foi possível iniciar a conexão da conta recebedora."}); }
+    try {
+      await conectarContaRecebedora();
+    } catch (error) {
+      const response = error as { response?: { data?: { erro?: string } } };
+      const message = response?.response?.data?.erro ||
+        "Não foi possível iniciar a conexão da conta recebedora. Consulte os logs do backend.";
+      showNotification({type:"error",title:"Stripe indisponível",message});
+    }
   }
 
   return (
