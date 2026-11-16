@@ -41,3 +41,17 @@ export async function consultarPagamentoAgendamento(id: number) {
   const { data } = await api.get<EstadoPagamento>(`/pagamentos-agendamento/agendamento/${id}`);
   return data;
 }
+
+export type PagamentoPresencialPendente = {
+  AgendamentoId: number;
+  Cliente: string;
+  Valor: number;
+  DataAgendamento: string;
+};
+export async function listarPagamentosPresenciaisPendentes() {
+  const { data } = await api.get<PagamentoPresencialPendente[]>("/pagamentos-agendamento/pendentes");
+  return data;
+}
+export async function confirmarRecebimentoPresencial(agendamentoId: number) {
+  await api.patch(`/pagamentos-agendamento/agendamento/${agendamentoId}/confirmar-presencial`);
+}
