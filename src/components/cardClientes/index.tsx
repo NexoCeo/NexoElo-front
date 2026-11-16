@@ -10,6 +10,7 @@ export type AgendaCardItem = {
   cliente: string;
   servico: string;
   profissional: string;
+  podeAlterar?: boolean;
   profissionais?: { Id: number; Nome: string; FotoPerfil?: string | null }[];
   horario: string;
   status: string;
@@ -167,7 +168,7 @@ const labelStatus = (status: string) => {
               </div>
               <div className={styles.value} data-label="Valor" data-column={5}>{appointment.valor}</div>
               <div className={styles.actions} data-label="Ações" data-column={6}>
-                {appointment.status.trim().toUpperCase() === "AGENDADO" && onStatusChange ? (
+                {appointment.status.trim().toUpperCase() === "AGENDADO" && onStatusChange && appointment.podeAlterar !== false ? (
                   <>
                     <button
                       type="button"
