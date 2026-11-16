@@ -21,6 +21,7 @@ import type { Profissional } from "@/types/profissional";
 import styles from "./style.module.css";
 import { getOperatingTimelineBounds, layoutTimeline } from "./timeline-layout";
 import { obterFuncionamento } from "@/services/funcionamento-service";
+import { obterStatusVinculoProfissional } from "@/services/vinculo-service";
 import type { FuncionamentoConfig } from "@/types/funcionamento";
 import { formatPersonName } from "@/context/UserContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -175,9 +176,24 @@ export default function Agenda() {
     }
     let active = true;
     setFuncionamento(null);
-    void obterFuncionamento(usuario.Id)
-      .then(config => { if (active) setFuncionamento(config); })
-      .catch(() => {
+
+    const carregarFuncionamento = async () => {
+      try {
+        let responsavelId = usuario.Id;
+        if (usuario.Papel === "PROFISSIONAL") {
+          // A jornada do profissional segue o funcionamento da empresa.
+          // A consulta é autorizada no backend somente para vínculos aprovados.
+          const vinculo = await obterStatusVinculoProfissional();
+          if (!active) return;
+          if (vinculo.status !== "APROVADO" || !vinculo.empresaId) {
+            return;
+          }
+          responsavelId = vinculo.empresaId;
+        }
+
+        const config = await obterFuncionamento(responsavelId);
+        if (active) setFuncionamento(config);
+      } catch {
         if (active) {
           setFuncionamento(null);
           showNotification({
@@ -186,9 +202,11 @@ export default function Agenda() {
             message: "Não foi possível consultar os horários de funcionamento.",
           });
         }
-      });
+      }
+    };
+    void carregarFuncionamento();
     return () => { active = false; };
-  }, [usuario?.Id, showNotification]);
+  }, [usuario?.Id, usuario?.Papel, showNotification]);
 
   useEffect(() => {
     if (timelineViewportRef.current) timelineViewportRef.current.scrollTop = 0;
