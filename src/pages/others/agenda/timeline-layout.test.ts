@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { getTimelineBounds, layoutTimeline } from "./timeline-layout";
+import { getTimelineBounds, getOperatingTimelineBounds, layoutTimeline } from "./timeline-layout";
+import type { FuncionamentoConfig } from "@/types/funcionamento";
 
 describe("linha do tempo da agenda", () => {
   it("mantém eventos consecutivos em uma única coluna e separa os cards visualmente", () => {
@@ -57,5 +58,35 @@ describe("linha do tempo da agenda", () => {
     expect(bounds).toEqual({ startHour: 7, endHour: 22 });
     const layout = layoutTimeline([{ Id: 1, horario: "07:30", duracaoMinutos: 30 }], bounds.startHour, bounds.endHour);
     expect(layout[0].top).toBeCloseTo(100 * 30 / (15 * 60));
+  });
+});
+
+describe("escala conforme funcionamento", () => {
+  const funcionamento: FuncionamentoConfig = {
+    UsuarioFk: 7, Domingo: false, Segunda: true, Terca: true, Quarta: true,
+    Quinta: true, Sexta: true, Sabado: false,
+    HorarioAbertura: "08:30", HorarioFechamento: "17:15",
+    Intervalos: [], HorariosPorDia: {
+      Terca: { Inicio: "10:00", Fim: "16:00", Intervalos: [] },
+    },
+  };
+  it("usa abertura e fechamento com arredondamento apenas na escala", () => {
+    expect(getOperatingTimelineBounds([], funcionamento, 1)).toEqual({
+      startHour: 8, endHour: 18, closed: false,
+    });
+  });
+  it("respeita dias com horário diferente", () => {
+    expect(getOperatingTimelineBounds([], funcionamento, 2)).toEqual({
+      startHour: 10, endHour: 16, closed: false,
+    });
+  });
+  it("não inventa horário em um dia fechado", () => {
+    expect(getOperatingTimelineBounds([], funcionamento, 0)).toEqual({
+      startHour: 0, endHour: 0, closed: true,
+    });
+  });
+  it("preserva agendamento antigo fora do expediente", () => {
+    expect(getOperatingTimelineBounds([{ Id: 9, horario: "07:30", duracaoMinutos: 30 }], funcionamento, 1))
+      .toEqual({ startHour: 7, endHour: 18, closed: false });
   });
 });
