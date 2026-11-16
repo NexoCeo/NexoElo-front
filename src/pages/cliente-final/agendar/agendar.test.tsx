@@ -107,7 +107,7 @@ describe("ClienteFinalAgendar", () => {
     fireEvent.click(await screen.findByRole("button", { name: /Corte/i }));
     fireEvent.click(screen.getByRole("button", { name: /Escova/i }));
     expect(screen.getByText(/75 min/)).toBeInTheDocument();
-    expect(screen.getByText(/R\\$\\s?120,00/)).toBeInTheDocument();
+    expect(screen.getByText(/R\$\s?120,00/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Escolher horário/i }));
     fireEvent.change(screen.getByLabelText(/Data|Date/i), { target: { value: "2099-08-20" } });
     await waitFor(() => expect(mocks.listarHorariosDisponiveis).toHaveBeenCalledWith({
