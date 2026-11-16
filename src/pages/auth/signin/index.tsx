@@ -19,8 +19,6 @@ export default function Login() {
     email,
     senha,
     showPassword,
-    error,
-    emailError,
     loading,
     setEmail,
     setSenha,
@@ -64,7 +62,6 @@ export default function Login() {
                 value={email} 
                 onChange={setEmail} 
               />
-              {emailError && <p className={styles.error}>{emailError}</p>}
             </div>
 
             {/* Senha */}
@@ -77,8 +74,6 @@ export default function Login() {
               />
             </div>
 
-            {/* Erro */}
-            {error && <p className={styles.error}>{error}</p>}
           </div>
 
           
