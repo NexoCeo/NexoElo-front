@@ -519,3 +519,13 @@
   text-overflow:clip;
 }
 .agendaCompact .professionalEntry .professionalAvatar { flex-shrink:0; }
+
+/* Foto real do profissional; mantém as iniciais quando não existe imagem. */
+.agendaCompact .professionalPhoto {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--theme-surface-muted);
+}
