@@ -34,3 +34,23 @@
 .item{position:relative;padding-right:30px}
 .unreadDot{position:absolute;top:18px;right:14px;margin:0}
 .read{position:absolute;top:16px;right:12px;margin:0}
+
+/* Semântica visual do evento de agendamento: azul/agendado, verde/concluído, vermelho/cancelado.
+   A cor também alcança o ponto de não lida e a indicação de acesso. */
+.appointmentScheduled{--notification-status:#3b82f6;--notification-status-bg:rgba(59,130,246,.14)}
+.appointmentCompleted{--notification-status:#10b981;--notification-status-bg:rgba(16,185,129,.14)}
+.appointmentCanceled{--notification-status:#f87171;--notification-status-bg:rgba(248,113,113,.14)}
+.appointmentScheduled .itemIcon,.appointmentCompleted .itemIcon,.appointmentCanceled .itemIcon{
+  background:var(--notification-status-bg);color:var(--notification-status)
+}
+.appointmentScheduled .unreadDot,.appointmentCompleted .unreadDot,.appointmentCanceled .unreadDot{
+  background:var(--notification-status)
+}
+.appointmentScheduled .itemText small,.appointmentCompleted .itemText small,.appointmentCanceled .itemText small{
+  color:var(--notification-status)
+}
+.appointmentScheduled:hover,.appointmentScheduled:focus-visible,
+.appointmentCompleted:hover,.appointmentCompleted:focus-visible,
+.appointmentCanceled:hover,.appointmentCanceled:focus-visible{
+  background:var(--notification-status-bg)
+}
