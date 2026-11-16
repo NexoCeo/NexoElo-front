@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useNotification } from "@/context/NotificationContext";
 import {
   conectarContaRecebedora, consultarMinhaConfiguracaoPagamento,
-  salvarModalidadePagamento, type ConfiguracaoPagamento,
+  salvarModalidadePagamento, listarPagamentosPresenciaisPendentes, confirmarRecebimentoPresencial,
+  type PagamentoPresencialPendente, type ConfiguracaoPagamento,
   type ModalidadePagamento
 } from "@/services/pagamentos-agendamento-service";
 import styles from "./style.module.css";
@@ -19,6 +20,26 @@ export default function ConfiguracaoPagamentos() {
   const [modo, setModo] = useState<ModalidadePagamento>("PRESENCIAL");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [recebimentos, setRecebimentos] = useState<PagamentoPresencialPendente[]>([]);
+  const [confirmando, setConfirmando] = useState<number | null>(null);
+  useEffect(() => {
+    let active = true;
+    void listarPagamentosPresenciaisPendentes()
+      .then(items => {if(active) setRecebimentos(items);})
+      .catch(() => undefined);
+    return () => {active=false;};
+  }, []);
+  async function confirmarRecebimento(id: number) {
+    try {
+      setConfirmando(id);
+      await confirmarRecebimentoPresencial(id);
+      setRecebimentos(items => items.filter(item => item.AgendamentoId !== id));
+      showNotification({type:"success",title:"Pagamento registrado",message:"Recebimento presencial confirmado."});
+    } catch {
+      showNotification({type:"error",title:"Não foi possível confirmar",message:"Verifique a situação do pagamento antes de tentar novamente."});
+    } finally {setConfirmando(null);}
+  }
+
   useEffect(() => {
     let active = true;
     void consultarMinhaConfiguracaoPagamento().then(data => {
@@ -76,6 +97,26 @@ export default function ConfiguracaoPagamentos() {
           </div>
           <button type="button" className={styles.primary} disabled={saving || modo === config?.Modalidade}
             onClick={() => void salvar()}>{saving ? "Salvando..." : "Salvar configuração"}</button>
+        </section>
+        <section className={styles.panel}>
+          <h2>Pagamentos presenciais pendentes</h2>
+          <p>Confirme somente valores que já foram recebidos diretamente no estabelecimento.</p>
+          {recebimentos.length === 0 ? <p>Nenhum recebimento pendente.</p> :
+            <div className={styles.receivables}>
+              {recebimentos.map(item => (
+                <div className={styles.receivable} key={item.AgendamentoId}>
+                  <span>
+                    <strong>{item.Cliente} · Agendamento #{item.AgendamentoId}</strong>
+                    <small>{new Intl.DateTimeFormat("pt-BR",{dateStyle:"short",timeStyle:"short"}).format(new Date(item.DataAgendamento))}</small>
+                  </span>
+                  <strong>{item.Valor.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</strong>
+                  <button type="button" className={styles.secondary} disabled={confirmando !== null}
+                    onClick={() => void confirmarRecebimento(item.AgendamentoId)}>
+                    {confirmando === item.AgendamentoId ? "Confirmando..." : "Marcar como recebido"}
+                  </button>
+                </div>
+              ))}
+            </div>}
         </section>
       </>}
     </main>
