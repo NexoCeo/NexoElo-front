@@ -372,6 +372,7 @@ export default function Agenda() {
               agendamento.ServicoNome ||
               `Serviço #${agendamento.ServicoId}`,
 
+            profissionais: agendamento.Profissionais?.map(item => ({ ...item, Nome: formatPersonName(item.Nome) })),
             profissional:
               formatPersonName(agendamento.ProfissionalNome) ||
               `Profissional #${
