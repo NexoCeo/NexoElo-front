@@ -19,7 +19,9 @@ import { createAgendaRealtimeClient } from "@/services/agenda-realtime-service";
 import type { Agendamento } from "@/types/agendamento";
 import type { Profissional } from "@/types/profissional";
 import styles from "./style.module.css";
-import { getTimelineBounds, layoutTimeline } from "./timeline-layout";
+import { getOperatingTimelineBounds, layoutTimeline } from "./timeline-layout";
+import { obterFuncionamento } from "@/services/funcionamento-service";
+import type { FuncionamentoConfig } from "@/types/funcionamento";
 import { formatPersonName } from "@/context/UserContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { usePageRevalidation } from "@/hooks/usePageRevalidation";
@@ -132,6 +134,8 @@ export default function Agenda() {
   const [profissionalId, setProfissionalId] = useState(0);
 
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
+  const [funcionamento, setFuncionamento] = useState<FuncionamentoConfig | null>(null);
+  const timelineViewportRef = useRef<HTMLDivElement>(null);
 
   const [loading, setLoading] = useState(false);
 
@@ -161,6 +165,32 @@ export default function Agenda() {
     useRef<(silent?: boolean) => Promise<void>>(
       async () => undefined,
     );
+
+  useEffect(() => {
+    if (!usuario?.Id) {
+      setFuncionamento(null);
+      return;
+    }
+    let active = true;
+    setFuncionamento(null);
+    void obterFuncionamento(usuario.Id)
+      .then(config => { if (active) setFuncionamento(config); })
+      .catch(() => {
+        if (active) {
+          setFuncionamento(null);
+          showNotification({
+            type: "error",
+            title: "Funcionamento indisponível",
+            message: "Não foi possível consultar os horários de funcionamento.",
+          });
+        }
+      });
+    return () => { active = false; };
+  }, [usuario?.Id, showNotification]);
+
+  useEffect(() => {
+    if (timelineViewportRef.current) timelineViewportRef.current.scrollTop = 0;
+  }, [selectedDateKey]);
 
   const loadAgenda = useCallback(
     async (
@@ -434,7 +464,11 @@ export default function Agenda() {
     }));
   }, [agendaItems, agendamentos]);
 
-  const timelineBounds = useMemo(() => getTimelineBounds(timelineSource), [timelineSource]);
+  const selectedWeekday = selectedDate.getDay();
+  const timelineBounds = useMemo(
+    () => getOperatingTimelineBounds(timelineSource, funcionamento, selectedWeekday),
+    [timelineSource, funcionamento, selectedWeekday],
+  );
   const timelineStart = timelineBounds.startHour;
   const timelineEnd = timelineBounds.endHour;
   const timelineItems = useMemo(() =>
@@ -687,7 +721,9 @@ export default function Agenda() {
           <h2>{selectedPeriodLabel}</h2>
           <span>{agendaItems.length} {agendaItems.length === 1 ? "agendamento" : "agendamentos"}</span>
         </div>
-        <div className={styles.timelineViewport}>
+        {timelineBounds.closed && timelineSource.length === 0 ? (
+          <div className={styles.timelineClosed}>Estabelecimento fechado nesta data.</div>
+        ) : <div className={styles.timelineViewport} ref={timelineViewportRef}>
         <div className={styles.timelineCanvas} style={{
           height: `${(timelineEnd - timelineStart) * 60}px`,
           minHeight: `${(timelineEnd - timelineStart) * 60}px`,
@@ -718,7 +754,7 @@ export default function Agenda() {
             ))}
           </div>
         </div>
-        </div>
+        </div>}
       </section>
       <section className={styles.content} aria-label="Agendamentos do dia">
         <header className={styles.listPanelHeader} title={lastUpdatedLabel}>
