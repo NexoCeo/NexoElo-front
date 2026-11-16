@@ -26,6 +26,25 @@ function formatBookingNotification(message: string): string {
       prefix + formatPersonName(professional) + suffix);
 }
 
+/** Exibe a criação da notificação na hora local do dispositivo, sem confundi-la com o horário do atendimento. */
+function formatNotificationTimestamp(value?: string | null): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return null;
+  const now = new Date();
+  const sameDay = date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate();
+  const hour = new Intl.DateTimeFormat("pt-BR", {
+    hour: "2-digit", minute: "2-digit", hour12: false,
+  }).format(date);
+  if (sameDay) return `Hoje, ${hour}`;
+  const calendarDate = new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+  }).format(date);
+  return `${calendarDate}, ${hour}`;
+}
+
 export default function NotificationBell() {
   const { t } = useLanguage();
   const { usuario } = useUser();
@@ -159,7 +178,14 @@ export default function NotificationBell() {
           key={`agendamento:${item.Id}`} onClick={() => openAppointment(item)}>
           <span className={styles.itemIcon}><FaCalendarCheck /></span>
           <span className={styles.itemText}>
-            <strong>{item.Titulo}</strong>
+            <span className={styles.itemHeading}>
+              <strong>{item.Titulo}</strong>
+              {formatNotificationTimestamp(item.CriadaEm) && (
+                <time className={styles.itemTimestamp} dateTime={item.CriadaEm}>
+                  {formatNotificationTimestamp(item.CriadaEm)}
+                </time>
+              )}
+            </span>
             <span>{formatBookingNotification(item.Mensagem)}</span>
             <small>{t("notification.view")}</small>
           </span>
@@ -170,7 +196,14 @@ export default function NotificationBell() {
             key={item.VinculoId} onClick={() => openRequest(item)}>
           <span className={styles.itemIcon}><FaUserClock /></span>
           <span className={styles.itemText}>
-            <strong>{t("notification.linkRequest")}</strong>
+            <span className={styles.itemHeading}>
+              <strong>{t("notification.linkRequest")}</strong>
+              {formatNotificationTimestamp(item.DataSolicitacao) && (
+                <time className={styles.itemTimestamp} dateTime={item.DataSolicitacao!}>
+                  {formatNotificationTimestamp(item.DataSolicitacao)}
+                </time>
+              )}
+            </span>
             <span>{item.Nome || t("notification.someone")} {t("notification.requestSuffix")}</span>
             <small>{t("notification.view")}</small>
           </span>
