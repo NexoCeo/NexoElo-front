@@ -78,6 +78,14 @@ function normalizeAgendamento(agendamento: ApiRecord): Agendamento {
     ClienteNome: pickString(agendamento, ["ClienteNome", "clienteNome"]),
     ServicoNome: pickString(agendamento, ["ServicoNome", "servicoNome"]),
     ProfissionalNome: pickString(agendamento, ["ProfissionalNome", "profissionalNome"]),
+    Profissionais: (Array.isArray(agendamento.Profissionais) ? agendamento.Profissionais :
+      Array.isArray(agendamento.profissionais) ? agendamento.profissionais : [])
+      .filter((item): item is ApiRecord => Boolean(item) && typeof item === "object" && !Array.isArray(item))
+      .map(item => ({
+        Id: pickNumber(item, ["Id", "id"]),
+        Nome: pickString(item, ["Nome", "nome"]),
+        FotoPerfil: pickString(item, ["FotoPerfil", "fotoPerfil"]) || null,
+      })),
   };
 }
 
