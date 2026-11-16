@@ -461,6 +461,9 @@ export default function ClienteFinalAgendar() {
     responsavelEhEmpresa,
     responsavelId,
     selectedResponsavel,
+    // Ao restaurar um rascunho os serviços chegam após o prestador.
+    // Revalidar a disponibilidade quando o catálogo terminar de carregar.
+    servicos,
     servicoIds.join(','),
     selecoes.map(item => `${item.profissionalId}:${item.servico.Id}`).join(','),
     servicoId,
