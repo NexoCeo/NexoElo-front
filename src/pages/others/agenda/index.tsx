@@ -155,6 +155,7 @@ export default function Agenda() {
 
   const podeGerenciar =
     usuario?.Papel === "EMPRESA" || usuario?.Papel === "AUTONOMO";
+  const isProfissional = usuario?.Papel === "PROFISSIONAL";
 
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [closingDay, setClosingDay] = useState(false);
@@ -404,6 +405,12 @@ export default function Agenda() {
               `Serviço #${agendamento.ServicoId}`,
 
             profissionais: agendamento.Profissionais?.map(item => ({ ...item, Nome: formatPersonName(item.Nome) })),
+            podeAlterar: isProfissional
+              ? Boolean(usuario?.Id && (
+                  agendamento.Profissionais?.some(item => item.Id === usuario.Id) ||
+                  agendamento.ProfissionalId === usuario.Id
+                ))
+              : podeGerenciar,
             profissional:
               formatPersonName(agendamento.ProfissionalNome) ||
               `Profissional #${
@@ -432,7 +439,7 @@ export default function Agenda() {
               ),
           };
         });
-    }, [agendamentos]);
+    }, [agendamentos, isProfissional, podeGerenciar, usuario?.Id]);
 
   // Ordena apenas os cards da lista; a linha do tempo mantém a ordem cronológica.
   const orderedAgendaItems = useMemo(() => [...agendaItems].sort((a, b) => {
@@ -790,7 +797,7 @@ export default function Agenda() {
           error={error}
           selectedDateLabel={selectedPeriodLabel}
           updatingId={updatingId}
-          onStatusChange={podeGerenciar ? handleStatusChange : undefined}
+          onStatusChange={podeGerenciar || isProfissional ? handleStatusChange : undefined}
         />
         <div className={styles.closeDayAction}>        {podeGerenciar && (
           <button
