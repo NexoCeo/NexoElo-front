@@ -108,12 +108,12 @@ function getApiError(error: unknown) {
 
 function isUpcoming(appointment: Agendamento) {
   const status = appointment.Status.trim().toUpperCase();
-  return (
-    new Date(appointment.DataAgendamento).getTime() >= Date.now() &&
-    status !== "CANCELADO" &&
+  // O início do horário não encerra o agendamento: somente o status final
+  // o transfere para Anteriores. Assim, atrasos não ocultam reservas ativas.
+  return status !== "CANCELADO" &&
     status !== "CONCLUIDO" &&
-    status !== "CONCLUÍDO"
-  );
+    status !== "CONCLUÍDO" &&
+    status !== "ENCERRADO";
 }
 
 function AppointmentCard({
