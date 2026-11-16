@@ -81,6 +81,24 @@ describe("Dashboard", () => {
     expect(screen.getByRole("heading", { name: "Compromissos desta semana" })).toBeInTheDocument();
   });
 
+  it("mostra somente agendados, excluindo concluídos e cancelados do dashboard", async () => {
+    sessionStorage.setItem("usuario", JSON.stringify({ Id: 7, Papel: "EMPRESA" }));
+    const base = {
+      ClienteId: 3, ProfissionalId: 8, EmpresaId: 7, ServicoId: 2,
+      DataAgendamento: new Date().toISOString(), Valor: 0, Taxa: 0, ValorServico: 85,
+      ServicoNome: "Corte", ProfissionalNome: "Profissional Teste",
+    };
+    agendaMocks.listarPorData.mockResolvedValue([
+      { ...base, Id: 1, Status: "AGENDADO", ClienteNome: "Cliente ativo" },
+      { ...base, Id: 2, Status: "CONCLUIDO", ClienteNome: "Cliente concluído" },
+      { ...base, Id: 3, Status: "CANCELADO", ClienteNome: "Cliente cancelado" },
+    ]);
+    renderDashboard();
+    expect(await screen.findByText("Cliente ativo")).toBeInTheDocument();
+    expect(screen.queryByText("Cliente concluído")).not.toBeInTheDocument();
+    expect(screen.queryByText("Cliente cancelado")).not.toBeInTheDocument();
+  });
+
   it.each([
     ["EMPRESA", "Dashboard da Empresa", "/empresa/agenda"],
     ["AUTONOMO", "Dashboard do Autônomo", "/autonomo/agenda"],
