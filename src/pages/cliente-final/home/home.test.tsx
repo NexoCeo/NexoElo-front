@@ -168,6 +168,46 @@ describe("ClienteFinalHome", () => {
     expect(mocks.atualizarStatusAgendamento).not.toHaveBeenCalled();
   });
 
+  it("mantém agendamento iniciado entre os próximos enquanto estiver AGENDADO", async () => {
+    mocks.listarHistoricoAgendamentos.mockResolvedValue([
+      {
+        Id: 17, ClienteId: 4, ProfissionalId: 9, EmpresaId: 7, ServicoId: 2,
+        DataAgendamento: "2020-08-20T08:30:00",
+        Valor: 120, Taxa: 0, ValorServico: 120, Status: "AGENDADO",
+        ClienteNome: "Joana Vitória", ServicoNome: "Escova e prancha + Hidratação",
+        ProfissionalNome: "Roberta Silva + Maria Eduarda",
+      },
+    ]);
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/home"]}>
+        <ClienteFinalHome />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText("Escova e prancha + Hidratação")).toBeInTheDocument();
+    expect(screen.getByText("Próximo atendimento")).toBeInTheDocument();
+    expect(screen.getByText("Roberta Silva + Maria Eduarda")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "Histórico" }));
+    expect(screen.getByRole("heading", { name: "Próximos" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Anteriores" })).not.toBeInTheDocument();
+  });
+
+  it("move agendamentos finalizados para Anteriores mesmo que a data seja futura", async () => {
+    mocks.listarHistoricoAgendamentos.mockResolvedValue([
+      {
+        Id: 18, ClienteId: 4, ProfissionalId: 9, EmpresaId: 7, ServicoId: 3,
+        DataAgendamento: "2099-08-20T08:30:00",
+        Valor: 50, Taxa: 0, ValorServico: 50, Status: "CONCLUIDO",
+        ClienteNome: "Vitor Cliente", ServicoNome: "Corte",
+        ProfissionalNome: "Profissional Teste",
+      },
+    ]);
+    render(<MemoryRouter initialEntries={["/cliente-final/home"]}><ClienteFinalHome /></MemoryRouter>);
+    expect(await screen.findByText("Nenhum atendimento agendado")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "Histórico" }));
+    expect(screen.getByRole("heading", { name: "Anteriores" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Próximos" })).not.toBeInTheDocument();
+  });
+
   it("permite ao cliente concluir um agendamento ativo", async () => {
     mocks.atualizarStatusAgendamento.mockResolvedValue({
       Id: 12,
