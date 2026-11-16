@@ -1286,3 +1286,6 @@
   .professionalSelect,
   .professionalSelectValue > svg:last-child { transition: none; }
 }
+
+/* Dia sem expediente: não exibir uma grade artificial de horários. */
+.timelineClosed { display:flex; align-items:center; justify-content:center; flex:1; min-height:280px; padding:24px; color:var(--theme-text-muted); text-align:center; font-size:14px; }
