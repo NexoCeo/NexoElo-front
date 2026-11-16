@@ -45,6 +45,20 @@ function formatNotificationTimestamp(value?: string | null): string | null {
   return `${calendarDate}, ${hour}`;
 }
 
+type AppointmentTone = "scheduled" | "completed" | "canceled";
+
+function getAppointmentTone(item: NotificacaoAgendamento): AppointmentTone {
+  const evento = item.EventoTipo?.trim().toUpperCase();
+  if (evento === "STATUS_CONCLUIDO") return "completed";
+  if (evento === "STATUS_CANCELADO") return "canceled";
+  if (evento === "CRIACAO") return "scheduled";
+  // Compatibilidade com notificações criadas antes de a API retornar EventoTipo.
+  const titulo = item.Titulo.toLocaleLowerCase("pt-BR");
+  if (titulo.includes("concluíd") || titulo.includes("concluid")) return "completed";
+  if (titulo.includes("cancelad")) return "canceled";
+  return "scheduled";
+}
+
 export default function NotificationBell() {
   const { t } = useLanguage();
   const { usuario } = useUser();
@@ -174,7 +188,11 @@ export default function NotificationBell() {
           <strong>{tab === "unread" ? t("notification.emptyUnread") : t("notification.emptyAll")}</strong>
           <span>{t("notification.empty")}</span>
         </div>}
-        {visibleAppointments.map(item => <button type="button" className={styles.item}
+        {visibleAppointments.map(item => {
+          const tone = getAppointmentTone(item);
+          const toneClass = tone === "completed" ? styles.appointmentCompleted :
+            tone === "canceled" ? styles.appointmentCanceled : styles.appointmentScheduled;
+          return <button type="button" className={`${styles.item} ${toneClass}`}
           key={`agendamento:${item.Id}`} onClick={() => openAppointment(item)}>
           <span className={styles.itemIcon}><FaCalendarCheck /></span>
           <span className={styles.itemText}>
@@ -191,7 +209,8 @@ export default function NotificationBell() {
           </span>
           {item.Lida ? <FaCheck className={styles.read} aria-label={t("notification.read")} /> :
             <span className={styles.unreadDot} aria-label={t("notification.unreadOne")} />}
-        </button>)}
+        </button>;
+        })}
         {visible.map(item => <button type="button" className={styles.item}
             key={item.VinculoId} onClick={() => openRequest(item)}>
           <span className={styles.itemIcon}><FaUserClock /></span>
