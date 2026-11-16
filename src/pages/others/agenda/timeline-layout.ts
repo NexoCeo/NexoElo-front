@@ -1,3 +1,5 @@
+import type { DiaFuncionamentoKey, FuncionamentoConfig } from "@/types/funcionamento";
+
 /**
  * Posição visual dos agendamentos na linha do tempo.
  *
@@ -106,4 +108,41 @@ export function layoutTimeline<T extends TimelineSource>(
   if (cluster.length) finishCluster();
 
   return positions;
+}
+
+/** A escala da agenda segue o funcionamento daquele dia, não um intervalo fixo. */
+export function getOperatingTimelineBounds(
+  items: TimelineSource[],
+  config: FuncionamentoConfig | null,
+  weekday: number,
+) {
+  if (!config) return { ...getTimelineBounds(items), closed: false };
+  const days: DiaFuncionamentoKey[] = ["Domingo", "Segunda", "Terca", "Quarta", "Quinta", "Sexta", "Sabado"];
+  const day = days[weekday];
+  if (!day || !config[day]) {
+    if (items.length === 0) return { startHour: 0, endHour: 0, closed: true };
+    const first = Math.min(...items.map(item => Number(item.horario.slice(0, 2))));
+    const last = Math.max(...items.map(item => {
+      const [hour, minute] = item.horario.split(":").map(Number);
+      return Math.ceil((hour * 60 + minute + (item.duracaoMinutos || 30)) / 60);
+    }));
+    return { ...getTimelineBounds(items, Math.max(0, first), Math.max(last, first + 1)), closed: true };
+  }
+  const hours = config.HorariosPorDia?.[day];
+  const opening = hours?.Inicio ?? config.HorarioAbertura;
+  const closing = hours?.Fim ?? config.HorarioFechamento;
+  const parseMinutes = (value: string) => {
+    const match = /^(\d{1,2}):(\d{2})/.exec(value);
+    if (!match) return Number.NaN;
+    return Number(match[1]) * 60 + Number(match[2]);
+  };
+  const start = parseMinutes(opening);
+  const end = parseMinutes(closing);
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+    return { ...getTimelineBounds(items), closed: false };
+  }
+  return {
+    ...getTimelineBounds(items, Math.floor(start / 60), Math.ceil(end / 60)),
+    closed: false,
+  };
 }
