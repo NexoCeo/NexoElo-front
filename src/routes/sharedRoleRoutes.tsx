@@ -24,6 +24,7 @@ import Relatorios from "@/pages/others/relatorios";
 import AnaliseDados from "@/pages/others/analise-dados";
 import WhatsAppBusiness from "@/pages/others/whatsapp-business";
 import MinhaAssinatura from "@/pages/others/assinatura";
+import ConfiguracaoPagamentos from "@/pages/others/pagamentos";
 import AssinaturaGate from "@/components/assinatura-gate";
 
 type SharedRoleRoutesProps = {
@@ -167,6 +168,8 @@ export default function SharedRoleRoutes({
         path="assinatura"
         element={<ProtectedRoute><MinhaAssinatura /></ProtectedRoute>}
       />
+
+      {!requireApprovedProfessional && <Route path="pagamentos" element={<ProtectedRoute><ConfiguracaoPagamentos /></ProtectedRoute>} />}
 
       <Route
         path="perfil"
