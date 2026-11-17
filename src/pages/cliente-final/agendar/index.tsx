@@ -16,6 +16,11 @@ import {
   FaClock,
   FaImage,
   FaUser,
+  FaExchangeAlt,
+  FaLayerGroup,
+  FaTag,
+  FaTimes,
+  FaUserPlus,
 } from "react-icons/fa";
 import {
   criarAgendamento,
@@ -856,51 +861,128 @@ export default function ClienteFinalAgendar() {
             )}
 
             {etapaAtual === "servico" && (
-              <section className={styles.bookingPanel}>
-                <div className={styles.sectionHeading}>
-                  <div><h2>Serviços disponíveis</h2><p>Selecione os serviços desejados. Você também pode escolher outro profissional da empresa.</p></div>
-                  {responsavelEhEmpresa && <button type="button" className={styles.textAction} onClick={() => setExpandedSection("profissional")}>Escolher outro profissional</button>}
-                </div>
-                {responsavelEhEmpresa && selectedProfissional && <p className={styles.selectedProfessional}>Com {formatPersonName(selectedProfissional.Nome)}</p>}
-                {loadingServicos ? <LoadingState label={t("client.servicesLoading")} variant="client-services" compact /> :
-                  servicos.length === 0 ? <p className={styles.emptyState}>{t("client.servicesEmpty")}</p> :
-                  <div className={styles.serviceList}>
-                    {servicos.map((servico) => (
-                      <button type="button" key={servico.Id} className={`${styles.catalogService} ${servicoIds.includes(servico.Id) ? styles.catalogServiceSelected : ""}`} aria-pressed={servicoIds.includes(servico.Id)} onClick={() => handleServicoChange(servico.Id)}>
-                        <ServicePhoto source={servico.ImagemServico} name={servico.NomeServico} />
-                        <span className={styles.serviceDetails}>
-                          <strong>{servico.NomeServico}</strong>
-                          <small><FaClock aria-hidden="true" /> {servico.TempoEstimadoMinutos} min</small>
-                          <b>{formatCurrency(servico.Valor)}</b>
-                        </span>
-                        <span className={styles.serviceAction}>{servicoIds.includes(servico.Id) ? <><FaCheck aria-hidden="true" /> Selecionado</> : "Adicionar"}</span>
-                      </button>
-                    ))}
-                  </div>}
-                {responsavelEhEmpresa && selecoes.length > 0 && (
-                  <div className={styles.multipleProfessionalSummary}>
-                    <strong>Serviços selecionados</strong>
-                    {selecoes.map(item => (
-                      <div key={item.servico.Id} className={styles.selectedAssignment}>
-                        <span>{item.servico.NomeServico} — {formatPersonName(profissionais.find(pro => pro.Id === item.profissionalId)?.Nome ?? "Profissional")}</span>
-                        <button type="button" aria-label={`Remover ${item.servico.NomeServico}`} onClick={() => {
-                          const proximas = selecoes.filter(selected => selected.servico.Id !== item.servico.Id);
-                          setSelecoes(proximas);
-                          setServicoIds(proximas.map(selected => selected.servico.Id));
-                          resetSchedule();
-                        }}>Remover</button>
-                      </div>
-                    ))}
-                    <button type="button" className={styles.otherProfessionalButton} onClick={() => setExpandedSection("profissional")}>
-                      <FaUser aria-hidden="true" /> Adicionar serviços de outro profissional
+              <section className={styles.serviceSelectionPanel} aria-label="Escolha os serviços">
+                <div className={styles.serviceSelectionHeader}>
+                  <div>
+                    <h2>Escolha os serviços</h2>
+                    <p>{responsavelEhEmpresa && selectedProfissional
+                      ? "Selecione os serviços desejados com " + formatPersonName(selectedProfissional.Nome) + "."
+                      : "Selecione os serviços que deseja agendar."}</p>
+                  </div>
+                  {responsavelEhEmpresa && (
+                    <button type="button" className={styles.switchProfessionalButton}
+                      onClick={() => setExpandedSection("profissional")}>
+                      <FaExchangeAlt aria-hidden="true" />
+                      Trocar profissional
                     </button>
+                  )}
+                </div>
+
+                {loadingServicos ? (
+                  <LoadingState label={t("client.servicesLoading")} variant="client-services" compact />
+                ) : servicos.length === 0 ? (
+                  <p className={styles.emptyState}>{t("client.servicesEmpty")}</p>
+                ) : (
+                  <div className={styles.serviceOptions}>
+                    {servicos.map((servico) => {
+                      const selected = servicoIds.includes(servico.Id);
+                      return (
+                        <button
+                          type="button"
+                          key={servico.Id}
+                          className={styles.serviceOption + (selected ? " " + styles.serviceOptionSelected : "")}
+                          aria-pressed={selected}
+                          onClick={() => handleServicoChange(servico.Id)}
+                        >
+                          <ServicePhoto source={servico.ImagemServico} name={servico.NomeServico} />
+                          <span className={styles.serviceOptionBody}>
+                            <strong>{servico.NomeServico}</strong>
+                            <span className={styles.serviceOptionMeta}>
+                              <span><FaClock aria-hidden="true" /> {servico.TempoEstimadoMinutos} min</span>
+                              <span className={styles.serviceOptionSeparator} aria-hidden="true" />
+                              <span><FaTag aria-hidden="true" /> {formatCurrency(servico.Valor)}</span>
+                            </span>
+                          </span>
+                          <span className={styles.serviceOptionCheckbox} aria-hidden="true">
+                            {selected && <FaCheck />}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
-                {servicoIds.length > 0 && (
-                  <div className={styles.servicesSelectionFooter}>
-                    <div><strong>{servicoIds.length} {servicoIds.length === 1 ? "serviço" : "serviços"}</strong><span>{totalDuracao} min · {formatCurrency(totalValor)}</span></div>
-                    <button type="button" onClick={advanceToSchedule}>Escolher horário <FaArrowRight aria-hidden="true" /></button>
-                  </div>
+
+                {selectedServicos.length > 0 && (
+                  <>
+                    <section className={styles.selectedServicesPanel} aria-label="Serviços selecionados">
+                      <h3>Serviços selecionados ({selectedServicos.length})</h3>
+                      <div className={styles.selectedServicesList}>
+                        {responsavelEhEmpresa
+                          ? selecoes.map((item) => (
+                            <div className={styles.selectedServiceItem} key={item.servico.Id}>
+                              <ServicePhoto source={item.servico.ImagemServico} name={item.servico.NomeServico} />
+                              <span className={styles.selectedServiceInfo}>
+                                <strong>{item.servico.NomeServico}</strong>
+                                <small>Com {formatPersonName(profissionais.find(pro => pro.Id === item.profissionalId)?.Nome ?? "Profissional")}</small>
+                              </span>
+                              <span className={styles.selectedServiceDuration}>
+                                <FaClock aria-hidden="true" /> {item.servico.TempoEstimadoMinutos} min
+                              </span>
+                              <strong className={styles.selectedServicePrice}>{formatCurrency(item.servico.Valor)}</strong>
+                              <button type="button" className={styles.removeSelectedService}
+                                aria-label={"Remover " + item.servico.NomeServico}
+                                onClick={() => handleServicoChange(item.servico.Id)}>
+                                <FaTimes aria-hidden="true" />
+                              </button>
+                            </div>
+                          ))
+                          : selectedServicos.map((servico) => (
+                            <div className={styles.selectedServiceItem} key={servico.Id}>
+                              <ServicePhoto source={servico.ImagemServico} name={servico.NomeServico} />
+                              <span className={styles.selectedServiceInfo}>
+                                <strong>{servico.NomeServico}</strong>
+                                <small>{formatPersonName(selectedResponsavel?.Nome ?? "")}</small>
+                              </span>
+                              <span className={styles.selectedServiceDuration}>
+                                <FaClock aria-hidden="true" /> {servico.TempoEstimadoMinutos} min
+                              </span>
+                              <strong className={styles.selectedServicePrice}>{formatCurrency(servico.Valor)}</strong>
+                              <button type="button" className={styles.removeSelectedService}
+                                aria-label={"Remover " + servico.NomeServico}
+                                onClick={() => handleServicoChange(servico.Id)}>
+                                <FaTimes aria-hidden="true" />
+                              </button>
+                            </div>
+                          ))}
+                      </div>
+                      {responsavelEhEmpresa && (
+                        <button type="button" className={styles.addOtherProfessionalButton}
+                          onClick={() => setExpandedSection("profissional")}>
+                          <FaUserPlus aria-hidden="true" />
+                          Adicionar serviços de outro profissional
+                          <FaArrowRight aria-hidden="true" />
+                        </button>
+                      )}
+                    </section>
+
+                    <div className={styles.bookingSelectionTotals} aria-label="Resumo do agendamento">
+                      <div>
+                        <FaLayerGroup aria-hidden="true" />
+                        <strong>{selectedServicos.length} {selectedServicos.length === 1 ? "serviço" : "serviços"}</strong>
+                      </div>
+                      <div>
+                        <FaClock aria-hidden="true" />
+                        <span><strong>{totalDuracao} min</strong><small>Duração total</small></span>
+                      </div>
+                      <div>
+                        <FaTag aria-hidden="true" />
+                        <span><strong>{formatCurrency(totalValor)}</strong><small>Valor total</small></span>
+                      </div>
+                    </div>
+                    <button type="button" className={styles.chooseTimeButton} onClick={advanceToSchedule}>
+                      Escolher horário <FaArrowRight aria-hidden="true" />
+                    </button>
+                  </>
                 )}
               </section>
             )}

@@ -1172,3 +1172,465 @@
     font-size: 15px;
   }
 }
+
+/* Seleção de serviços: catálogo legível e resumo persistente dos profissionais. */
+.serviceSelectionPanel {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  width: 100%;
+}
+
+.serviceSelectionHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.serviceSelectionHeader > div {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.serviceSelectionHeader h2 {
+  margin: 0 0 5px;
+  color: var(--theme-text);
+  font-size: clamp(16px, 2.3vw, 21px);
+  line-height: 1.25;
+}
+
+.serviceSelectionHeader p {
+  margin: 0;
+  color: var(--theme-text-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.switchProfessionalButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  min-height: 33px;
+  padding: 7px 10px;
+  border: 1px solid var(--theme-primary-text);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--theme-primary-text);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.serviceOptions {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+}
+
+.serviceOption {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  width: 100%;
+  min-height: 79px;
+  padding: 10px 12px;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 13px;
+  background: var(--theme-surface);
+  color: var(--theme-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+
+.serviceOption:hover {
+  border-color: var(--theme-primary-text);
+}
+
+.serviceOptionSelected {
+  border-color: var(--theme-primary);
+  background: var(--theme-primary-soft);
+}
+
+.serviceOption .servicePhoto,
+.selectedServiceItem .servicePhoto {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 58px;
+  width: 58px;
+  height: 58px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--theme-surface-muted);
+  color: var(--theme-primary-text);
+}
+
+.serviceOption .servicePhoto img,
+.selectedServiceItem .servicePhoto img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.serviceOptionBody {
+  display: grid;
+  gap: 9px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.serviceOptionBody > strong {
+  font-size: 14px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.serviceOptionMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  color: var(--theme-primary-text);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.serviceOptionMeta > span:not(.serviceOptionSeparator) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.serviceOptionMeta svg {
+  flex: 0 0 auto;
+  width: 13px;
+  height: 13px;
+}
+
+.serviceOptionSeparator {
+  align-self: stretch;
+  width: 1px;
+  min-height: 15px;
+  background: var(--theme-border-strong);
+}
+
+.serviceOptionCheckbox {
+  display: grid;
+  place-items: center;
+  flex: 0 0 23px;
+  width: 23px;
+  height: 23px;
+  border: 1.5px solid var(--theme-primary-text);
+  border-radius: 6px;
+  color: white;
+}
+
+.serviceOptionSelected .serviceOptionCheckbox {
+  border-color: var(--theme-primary);
+  background: var(--theme-primary);
+}
+
+.serviceOptionCheckbox svg {
+  width: 13px;
+  height: 13px;
+}
+
+.selectedServicesPanel {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 13px;
+}
+
+.selectedServicesPanel h3 {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.selectedServicesList {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.selectedServiceItem {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 7px;
+  border-radius: 9px;
+  background: var(--theme-surface);
+}
+
+.selectedServiceItem .servicePhoto {
+  flex-basis: 39px;
+  width: 39px;
+  height: 39px;
+  border-radius: 7px;
+}
+
+.selectedServiceInfo {
+  display: grid;
+  flex: 1 1 auto;
+  gap: 3px;
+  min-width: 0;
+}
+
+.selectedServiceInfo strong {
+  font-size: 12px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.selectedServiceInfo small {
+  color: var(--theme-text-muted);
+  font-size: 11px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.selectedServiceDuration {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  color: var(--theme-text-muted);
+  font-size: 11px;
+}
+
+.selectedServiceDuration svg {
+  width: 11px;
+  height: 11px;
+}
+
+.selectedServicePrice {
+  flex: 0 0 auto;
+  padding-left: 8px;
+  border-left: 1px solid var(--theme-border-strong);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.removeSelectedService {
+  display: grid;
+  place-items: center;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--theme-text);
+  cursor: pointer;
+}
+
+.removeSelectedService svg {
+  width: 12px;
+  height: 12px;
+}
+
+.addOtherProfessionalButton {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 39px;
+  padding: 9px 11px;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--theme-text);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.addOtherProfessionalButton svg:first-child {
+  color: var(--theme-primary-text);
+}
+
+.addOtherProfessionalButton svg:last-child {
+  margin-left: auto;
+}
+
+.bookingSelectionTotals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-width: 0;
+  padding: 12px 4px;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 12px;
+  background: var(--theme-surface);
+}
+
+.bookingSelectionTotals > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 0 8px;
+}
+
+.bookingSelectionTotals > div + div {
+  border-left: 1px solid var(--theme-border-strong);
+}
+
+.bookingSelectionTotals > div > svg {
+  flex: 0 0 auto;
+  width: 17px;
+  height: 17px;
+  color: var(--theme-primary-text);
+}
+
+.bookingSelectionTotals > div:first-child {
+  flex-direction: column;
+  gap: 5px;
+}
+
+.bookingSelectionTotals > div span {
+  display: grid;
+  gap: 3px;
+}
+
+.bookingSelectionTotals strong {
+  font-size: 12px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.bookingSelectionTotals small {
+  color: var(--theme-text-muted);
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+.chooseTimeButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 48px;
+  padding: 12px;
+  width: 100%;
+  border: 0;
+  border-radius: 11px;
+  background: var(--theme-primary);
+  color: var(--theme-on-primary);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.switchProfessionalButton:hover,
+.addOtherProfessionalButton:hover,
+.removeSelectedService:hover {
+  border-color: var(--theme-primary-text);
+}
+
+.switchProfessionalButton:focus-visible,
+.addOtherProfessionalButton:focus-visible,
+.removeSelectedService:focus-visible,
+.serviceOption:focus-visible,
+.chooseTimeButton:focus-visible {
+  outline: 2px solid var(--theme-primary-text);
+  outline-offset: 2px;
+}
+
+.chooseTimeButton:hover {
+  filter: brightness(1.06);
+}
+
+@media (max-width: 560px) {
+  .serviceSelectionPanel {
+    gap: 12px;
+  }
+  .serviceSelectionHeader {
+    gap: 8px;
+  }
+  .serviceSelectionHeader h2 {
+    font-size: 16px;
+  }
+  .serviceSelectionHeader p {
+    font-size: 11px;
+  }
+  .switchProfessionalButton {
+    max-width: 115px;
+    font-size: 10px;
+  }
+  .serviceOption {
+    min-height: 69px;
+    gap: 9px;
+    padding: 9px;
+  }
+  .serviceOption .servicePhoto {
+    flex-basis: 53px;
+    width: 53px;
+    height: 53px;
+  }
+  .serviceOptionBody > strong {
+    font-size: 13px;
+  }
+  .serviceOptionMeta {
+    gap: 7px;
+    font-size: 11px;
+  }
+  .selectedServicesPanel {
+    padding: 10px;
+  }
+  .selectedServiceItem {
+    gap: 6px;
+    padding: 6px;
+  }
+  .selectedServiceItem .servicePhoto {
+    flex-basis: 33px;
+    width: 33px;
+    height: 33px;
+  }
+  .selectedServiceDuration {
+    font-size: 10px;
+  }
+  .selectedServicePrice {
+    padding-left: 5px;
+    font-size: 11px;
+  }
+  .bookingSelectionTotals > div {
+    gap: 6px;
+    padding: 0 5px;
+  }
+  .bookingSelectionTotals strong {
+    font-size: 11px;
+  }
+  .bookingSelectionTotals > div > svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+@media (max-width: 350px) {
+  .selectedServiceDuration {
+    display: none;
+  }
+  .bookingSelectionTotals > div {
+    gap: 4px;
+    padding: 0 3px;
+  }
+}

@@ -141,6 +141,45 @@ describe("ClienteFinalAgendar", () => {
   });
 
 
+  it("mostra resumo visual, permite remover serviços e recalcula duração e valor", async () => {
+    mocks.listarServicosPorEmpresa.mockResolvedValue([
+      { Id: 2, NomeServico: "Fibra em gel decorada", Valor: 75, TempoEstimadoMinutos: 60, ImagemServico: "uploads/fibra.webp" },
+      { Id: 3, NomeServico: "Hidratação", Valor: 90, TempoEstimadoMinutos: 60, ImagemServico: "uploads/hidratacao.webp" },
+    ]);
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/agendar"]}>
+        <LanguageProvider><ClienteFinalAgendar /></LanguageProvider>
+      </MemoryRouter>,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: /Autonomo Teste/i }));
+
+    const fibra = await screen.findByRole("button", { name: /Fibra em gel decorada/i });
+    const hidratacao = screen.getByRole("button", { name: /Hidratação/i });
+    expect(fibra).toHaveAttribute("aria-pressed", "false");
+    expect(screen.queryByRole("region", { name: "Serviços selecionados" })).not.toBeInTheDocument();
+
+    fireEvent.click(fibra);
+    expect(fibra).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("heading", { name: "Serviços selecionados (1)" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Resumo do agendamento" })).toHaveTextContent("60 min");
+    expect(screen.getByRole("region", { name: "Resumo do agendamento" })).toHaveTextContent(/75,00/);
+
+    fireEvent.click(hidratacao);
+    expect(screen.getByRole("heading", { name: "Serviços selecionados (2)" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Resumo do agendamento" })).toHaveTextContent("120 min");
+    expect(screen.getByRole("region", { name: "Resumo do agendamento" })).toHaveTextContent(/165,00/);
+
+    fireEvent.click(screen.getByRole("button", { name: "Remover Fibra em gel decorada" }));
+    expect(screen.getByRole("heading", { name: "Serviços selecionados (1)" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Resumo do agendamento" })).toHaveTextContent("60 min");
+    expect(screen.getByRole("region", { name: "Resumo do agendamento" })).toHaveTextContent(/90,00/);
+    expect(fibra).toHaveAttribute("aria-pressed", "false");
+
+    fireEvent.click(screen.getByRole("button", { name: "Remover Hidratação" }));
+    expect(screen.queryByRole("region", { name: "Serviços selecionados" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Escolher horário/ })).not.toBeInTheDocument();
+  });
+
   it("permite adicionar servicos de profissionais diferentes na mesma reserva", async () => {
     mocks.listarResponsaveisAgendamento.mockResolvedValue([
       { Id: 7, Nome: "Empresa Teste", TipoUsuario: "EMPRESA" },
@@ -209,7 +248,7 @@ describe("ClienteFinalAgendar", () => {
     expect(professionalCard).toHaveTextContent("Conhecer serviços e horários");
     fireEvent.click(professionalCard);
     expect(await screen.findByAltText("Imagem do servico Coloracao")).toHaveAttribute("src", expect.stringContaining("/uploads/coloracao.webp"));
-    fireEvent.click(screen.getByRole("button", { name: "Escolher outro profissional" }));
+    fireEvent.click(screen.getByRole("button", { name: "Trocar profissional" }));
     expect(await screen.findByRole("button", { name: /Profissional Teste/i })).toBeInTheDocument();
   });
 
