@@ -197,6 +197,8 @@ describe("ClienteFinalAgendar", () => {
     ]);
     render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><LanguageProvider><ClienteFinalAgendar /></LanguageProvider></MemoryRouter>);
     fireEvent.click(await screen.findByRole("button", { name: /Empresa Teste/i }));
+    expect(screen.getByTestId("professional-selection-panel")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Com quem deseja agendar?" })).toBeInTheDocument();
     expect(await screen.findByAltText("Foto de Profissional Teste")).toHaveAttribute("src", expect.stringContaining("/uploads/profissional.png"));
     fireEvent.click(screen.getByRole("button", { name: /Profissional Teste/i }));
     expect(await screen.findByAltText("Imagem do servico Coloracao")).toHaveAttribute("src", expect.stringContaining("/uploads/coloracao.webp"));

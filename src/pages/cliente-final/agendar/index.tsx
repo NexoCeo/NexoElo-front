@@ -806,7 +806,7 @@ export default function ClienteFinalAgendar() {
 
           <form className={styles.bookingForm} onSubmit={handleSubmit}>
             {responsavelEhEmpresa && etapaAtual === "profissional" && (
-              <section className={styles.bookingPanel}>
+              <section className={`${styles.bookingPanel} ${styles.professionalSelectionPanel}`} data-testid="professional-selection-panel">
                 <div className={styles.sectionHeading}><div><h2>Com quem deseja agendar?</h2><p>Selecione o profissional que vai atender você.</p></div></div>
                 {loadingProfissionais ? <LoadingState label={t("client.professionalsLoading")} variant="client-professionals" compact /> :
                   profissionais.length === 0 ? <p className={styles.emptyState}>{t("client.professionalsEmpty")}</p> :

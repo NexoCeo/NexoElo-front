@@ -1103,3 +1103,73 @@
     height: 28px;
   }
 }
+
+/* Prestador selecionado: cabecalho mais compacto, sem alterar a vitrine publica. */
+.bookingPage .providerHero {
+  min-height: 0;
+  padding: 11px 14px;
+  border-radius: 13px;
+}
+
+.bookingPage .heroContent {
+  gap: 12px;
+}
+
+.bookingPage .heroContent .profilePhoto {
+  flex: 0 0 58px;
+  width: 58px;
+  height: 58px;
+  min-width: 58px;
+  min-height: 58px;
+  border: 0;
+  border-radius: 11px;
+  box-shadow: none;
+}
+
+.bookingPage .heroContent > div {
+  gap: 6px;
+}
+
+.bookingPage .heroContent h2 {
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.bookingPage .heroBadge {
+  padding: 4px 8px;
+  font-size: 10px;
+}
+
+/* O painel da etapa "Profissional" nao deve ter outra moldura nem fundo
+   envolvendo os cards individuais. As outras etapas mantem seu estilo. */
+.bookingPage .professionalSelectionPanel {
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.bookingPage .professionalSelectionPanel .providerList {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 9px;
+}
+
+@media (max-width: 420px) {
+  .bookingPage .providerHero {
+    padding: 10px 12px;
+  }
+
+  .bookingPage .heroContent .profilePhoto {
+    flex-basis: 52px;
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    min-height: 52px;
+  }
+
+  .bookingPage .heroContent h2 {
+    font-size: 15px;
+  }
+}
