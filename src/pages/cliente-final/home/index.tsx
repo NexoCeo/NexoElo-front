@@ -4,11 +4,17 @@ import { createAgendaRealtimeClient } from "@/services/agenda-realtime-service";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FaCalendarAlt,
+  FaCalendarPlus,
+  FaChevronDown,
+  FaChevronUp,
+  FaCreditCard,
   FaCheck,
   FaCheckCircle,
   FaClock,
   FaCut,
   FaHistory,
+  FaInfoCircle,
+  FaLayerGroup,
   FaHome,
   FaPlus,
   FaSignOutAlt,
@@ -129,11 +135,18 @@ function AppointmentCard({
   appointment,
   updatingId,
   onStatusChange,
+  history = false,
+  initiallyExpanded = false,
+  onRebook,
 }: {
   appointment: Agendamento;
   updatingId: number | null;
   onStatusChange: (agendamentoId: number, status: "CANCELADO" | "CONCLUIDO") => void;
+  history?: boolean;
+  initiallyExpanded?: boolean;
+  onRebook?: (appointment: Agendamento) => void;
 }) {
+  const [expanded, setExpanded] = useState(initiallyExpanded);
   const [payment, setPayment] = useState<EstadoPagamento | null>(null);
   const [openingPayment, setOpeningPayment] = useState(false);
   const { showNotification } = useNotification();
@@ -159,6 +172,139 @@ function AppointmentCard({
       });
       setOpeningPayment(false);
     }
+  }
+
+  if (history) {
+    const status = appointment.Status.trim().toUpperCase();
+    const completed = status === "CONCLUIDO" || status === "CONCLUÍDO";
+    const cancelled = status === "CANCELADO";
+    const services = appointment.ServicosDetalhados?.length
+      ? appointment.ServicosDetalhados
+      : [{
+          Id: appointment.ServicoId,
+          Nome: appointment.ServicoNome || `Serviço #${appointment.ServicoId}`,
+          ProfissionalNome: appointment.ProfissionalNome || "Profissional não informado",
+        }];
+    const detailsId = `history-appointment-details-${appointment.Id}`;
+
+    return (
+      <article className={styles.historyAppointmentCard}>
+        <button
+          type="button"
+          className={styles.historyAppointmentToggle}
+          aria-expanded={expanded}
+          aria-controls={detailsId}
+          aria-label={`${expanded ? "Recolher" : "Exibir"} detalhes do agendamento de ${appointment.ServicoNome || `serviço ${appointment.ServicoId}`}`}
+          onClick={() => setExpanded(current => !current)}
+        >
+          <span className={styles.appointmentDate}>
+            <span className={styles.appointmentIcon}><FaCalendarAlt aria-hidden="true" /></span>
+            <span className={styles.appointmentDateInfo}>
+              <time dateTime={appointment.DataAgendamento}>{formatAppointmentDate(appointment.DataAgendamento)}</time>
+              <strong>{formatAppointmentTime(appointment.DataAgendamento)}</strong>
+            </span>
+          </span>
+          <span className={styles.historyHeaderRight}>
+            <span className={`${styles.statusBadge} ${styles.historyStatusBadge} ${statusClass(appointment.Status)}`}>
+              {completed && <FaCheckCircle aria-hidden="true" />}
+              {cancelled && <FaTimesCircle aria-hidden="true" />}
+              {statusLabel(appointment.Status)}
+            </span>
+            {expanded
+              ? <FaChevronUp className={styles.historyChevron} aria-hidden="true" />
+              : <FaChevronDown className={styles.historyChevron} aria-hidden="true" />}
+          </span>
+        </button>
+
+        {expanded && (
+          <div className={styles.historyAppointmentContent} id={detailsId}>
+            <div className={styles.historyServicesHeading}>
+              <FaLayerGroup aria-hidden="true" />
+              <h3>{completed ? "Serviços realizados" : cancelled ? "Serviços do agendamento" : "Serviços agendados"}</h3>
+            </div>
+            <ul className={styles.historyServicesList}>
+              {services.map((service, index) => (
+                <li key={`${service.Id}-${index}`} className={styles.historyServiceItem}>
+                  <span className={`${styles.historyServiceCheck} ${cancelled ? styles.historyServiceCancelled : ""}`}>
+                    {cancelled ? <FaTimesCircle aria-hidden="true" /> :
+                      completed ? <FaCheckCircle aria-hidden="true" /> : <FaClock aria-hidden="true" />}
+                  </span>
+                  <div>
+                    <strong>{service.Nome}</strong>
+                    <span>{formatPersonName(service.ProfissionalNome) || "Profissional não informado"}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            <div className={styles.historyAppointmentSummary}>
+              <div className={styles.historySummaryRow}>
+                <FaInfoCircle aria-hidden="true" />
+                <span>Situação</span>
+                <strong className={completed ? styles.historyCompletedText : cancelled ? styles.historyCancelledText : styles.historyScheduledText}>
+                  {statusLabel(appointment.Status)}
+                </strong>
+              </div>
+              <div className={styles.historySummaryRow}>
+                <FaCreditCard aria-hidden="true" />
+                <span>Valor total</span>
+                <strong>{formatCurrency(appointment.ValorServico || appointment.Valor || 0)}</strong>
+              </div>
+            </div>
+
+            {cancelled && appointment.MotivoCancelamento && (
+              <p className={styles.historyCancellationReason}>Motivo: {appointment.MotivoCancelamento}</p>
+            )}
+
+            {payment && (
+              <div className={styles.paymentStatus}>
+                {payment.status === "PAGO" ? <span>Pagamento confirmado</span> :
+                 payment.status === "PENDENTE" && payment.metodo === "PRESENCIAL" ?
+                  <span>Pagamento presencial pendente</span> :
+                 payment.metodo === "ONLINE" && payment.status === "PENDENTE" ?
+                  <button type="button" disabled={openingPayment} onClick={() => void retomarPagamento()}>
+                    {openingPayment ? "Abrindo checkout..." : "Continuar pagamento online"}
+                  </button> : null}
+              </div>
+            )}
+
+            {isScheduled(appointment) ? (
+              <div className={styles.appointmentActions} aria-label="Ações do agendamento">
+                <button
+                  type="button"
+                  className={styles.cancelAction}
+                  onClick={() => onStatusChange(appointment.Id, "CANCELADO")}
+                  disabled={updatingId === appointment.Id}
+                  aria-label={`Cancelar agendamento de ${appointment.ServicoNome || `serviço ${appointment.ServicoId}`}`}
+                >
+                  <FaTimes aria-hidden="true" />
+                  <span>Cancelar</span>
+                </button>
+                <button
+                  type="button"
+                  className={styles.completeAction}
+                  onClick={() => onStatusChange(appointment.Id, "CONCLUIDO")}
+                  disabled={updatingId === appointment.Id}
+                  aria-label={`Concluir agendamento de ${appointment.ServicoNome || `serviço ${appointment.ServicoId}`}`}
+                >
+                  <FaCheck aria-hidden="true" />
+                  <span>Concluir</span>
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className={styles.historyRebookButton}
+                onClick={() => onRebook?.(appointment)}
+              >
+                <FaCalendarPlus aria-hidden="true" />
+                Agendar novamente
+              </button>
+            )}
+          </div>
+        )}
+      </article>
+    );
   }
 
   return (
@@ -348,6 +494,17 @@ export default function ClienteFinalHome() {
     [appointments],
   );
 
+  function handleRebook(appointment: Agendamento) {
+    // Um novo agendamento usa o prestador original, sem copiar data e horários passados.
+    navigate("/cliente-final/agendar", {
+      state: {
+        repeatBooking: {
+          responsavelId: appointment.ResponsavelId || appointment.EmpresaId || appointment.ProfissionalId || 0,
+        },
+      },
+    });
+  }
+
   async function handleLogout() {
     try {
       await logout();
@@ -393,7 +550,14 @@ export default function ClienteFinalHome() {
     try {
       const updated = await atualizarStatusAgendamento(agendamentoId, status);
       setAppointments((items) => items.map((item) => (
-        item.Id === agendamentoId ? { ...item, ...updated } : item
+        item.Id === agendamentoId ? {
+          ...item,
+          ...updated,
+          ResponsavelId: updated.ResponsavelId || item.ResponsavelId,
+          ServicosDetalhados: updated.ServicosDetalhados?.length
+            ? updated.ServicosDetalhados
+            : item.ServicosDetalhados,
+        } : item
       )));
       setStatusFeedback({
         kind: "success",
@@ -612,12 +776,15 @@ export default function ClienteFinalHome() {
                       <span>{filteredHistoryUpcoming.length}</span>
                     </div>
                     <div className={styles.appointmentList}>
-                      {filteredHistoryUpcoming.map((appointment) => (
+                      {filteredHistoryUpcoming.map((appointment, index) => (
                         <AppointmentCard
                           key={appointment.Id}
                           appointment={appointment}
                           updatingId={updatingId}
                           onStatusChange={handleStatusChange}
+                          history
+                          initiallyExpanded={index === 0}
+                          onRebook={handleRebook}
                         />
                       ))}
                     </div>
@@ -631,12 +798,16 @@ export default function ClienteFinalHome() {
                       <span>{filteredHistoryPrevious.length}</span>
                     </div>
                     <div className={styles.appointmentList}>
-                      {filteredHistoryPrevious.map((appointment) => (
+                      {filteredHistoryPrevious.map((appointment, index) => (
                         <AppointmentCard
                           key={appointment.Id}
                           appointment={appointment}
                           updatingId={updatingId}
                           onStatusChange={handleStatusChange}
+                          history
+                          initiallyExpanded={index === 0 &&
+                            ["CONCLUIDO", "CONCLUÍDO"].includes(appointment.Status.trim().toUpperCase())}
+                          onRebook={handleRebook}
                         />
                       ))}
                     </div>
