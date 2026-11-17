@@ -93,7 +93,7 @@ describe("ClienteFinalAgendar", () => {
     fireEvent.click(screen.getByRole("button", { name: /Corte/i }));
     fireEvent.click(screen.getByRole("button", { name: /Escolher horário/i }));
     expect(await screen.findByRole("heading", { name: "Escolha a data e o horário" })).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText(/Data|Date/i), { target: { value: "2099-08-20" } });
+    fireEvent.change(screen.getByLabelText(/^Data$/i, { selector: "input" }), { target: { value: "2099-08-20" } });
     const timeChoice = await screen.findByRole("button", { name: "08:30" });
     fireEvent.click(timeChoice);
     expect(timeChoice).toHaveAttribute("aria-pressed", "true");
@@ -130,7 +130,7 @@ describe("ClienteFinalAgendar", () => {
     expect(screen.getByText(/75 min/)).toBeInTheDocument();
     expect(screen.getByText(/R\$\s?120,00/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Escolher horário/i }));
-    fireEvent.change(screen.getByLabelText(/Data|Date/i), { target: { value: "2099-08-20" } });
+    fireEvent.change(screen.getByLabelText(/^Data$/i, { selector: "input" }), { target: { value: "2099-08-20" } });
     await waitFor(() => expect(mocks.listarHorariosDisponiveis).toHaveBeenCalledWith({
       responsavelId: 7, profissionalId: undefined, servicoId: 2, servicoIds: [2, 3], data: "2099-08-20",
     }));
@@ -257,7 +257,7 @@ describe("ClienteFinalAgendar", () => {
     fireEvent.click(await screen.findByRole("button", { name: /Escova/i }));
     expect(screen.getByText(/75 min/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Escolher horário/i }));
-    fireEvent.change(screen.getByLabelText(/Data|Date/i), { target: { value: "2099-08-20" } });
+    fireEvent.change(screen.getByLabelText(/^Data$/i, { selector: "input" }), { target: { value: "2099-08-20" } });
     await waitFor(() => expect(mocks.listarHorariosDisponiveis).toHaveBeenCalledWith({
       responsavelId: 7, profissionalId: 10, servicoId: 2, servicoIds: [2, 3],
       atendimentos: [{ ServicoId: 2, ProfissionalId: 9 }, { ServicoId: 3, ProfissionalId: 10 }],
