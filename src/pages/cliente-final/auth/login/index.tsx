@@ -12,7 +12,6 @@ export default function ClienteFinalLogin() {
     login,
     senha,
     showPassword,
-    error,
     loading,
     redirectTo,
     setLogin,
@@ -64,8 +63,6 @@ export default function ClienteFinalLogin() {
             </button>
           </div>
         </label>
-
-        {error && <p className={styles.error}>{error}</p>}
 
         <button className={styles.submit} type="submit" disabled={!isFormValid() || loading} style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}>
           {loading ? t("auth.signingIn") : t("auth.login")}
