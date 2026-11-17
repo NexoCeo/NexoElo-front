@@ -634,6 +634,7 @@ describe("ClienteFinalHome", () => {
     await waitFor(() => {
       expect(mocks.atualizarStatusAgendamento).toHaveBeenCalledWith(12, "CONCLUIDO");
     });
-    expect(await screen.findByText("Agendamento concluído.")).toBeInTheDocument();
+    expect(await screen.findByText("Agendamento concluído")).toBeInTheDocument();
+    expect(screen.queryByText("Agendamento concluído.")).not.toBeInTheDocument();
   });
 });
