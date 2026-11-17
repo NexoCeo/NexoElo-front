@@ -10,6 +10,7 @@ import ClienteFinalLogin from "@/pages/cliente-final/auth/login";
 import ClienteFinalRegister from "@/pages/cliente-final/auth/register";
 import ClienteFinalAgendar from "@/pages/cliente-final/agendar";
 import ClienteFinalHome from "@/pages/cliente-final/home";
+import ClienteFinalPreferencias from "@/pages/cliente-final/preferencias";
 
 import { getClienteFinalUser } from "@/services/cliente-final-auth-token";
 
@@ -49,6 +50,15 @@ export default function ClienteFinalRoutes() {
         element={
           <ClienteFinalProtectedRoute>
             <ClienteFinalHome />
+          </ClienteFinalProtectedRoute>
+        }
+      />
+
+      <Route
+        path="preferencias"
+        element={
+          <ClienteFinalProtectedRoute>
+            <ClienteFinalPreferencias />
           </ClienteFinalProtectedRoute>
         }
       />

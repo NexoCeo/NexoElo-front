@@ -79,3 +79,13 @@ export async function atualizarPerfilUsuario(id: number, payload: UpdatePerfilPa
 
 export const obterFotoOriginalUsuario = (id: number) =>
   carregarImagemOriginal(`/Usuario/${id}/foto-original`);
+
+export type AlterarSenhaClientePayload = {
+  SenhaAtual: string;
+  ConfirmarSenhaAtual: string;
+  NovaSenha: string;
+};
+
+export async function alterarSenhaCliente(payload: AlterarSenhaClientePayload) {
+  await api.post("/Usuario/cliente/alterar-senha", payload);
+}

@@ -1,0 +1,153 @@
+.container {
+  min-height: 100dvh;
+  background: var(--theme-background);
+  color: var(--theme-text);
+}
+
+.topbar {
+  height: 66px;
+  display: flex;
+  align-items: center;
+  padding: 0 max(16px, calc((100vw - 1040px) / 2));
+  border-bottom: 1px solid var(--theme-bottom);
+  background: var(--theme-surface);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand img {
+  display: block;
+  width: 27px;
+  height: 27px;
+  object-fit: contain;
+}
+
+.brand strong {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.content {
+  width: min(100%, 590px);
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 25px;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  color: var(--theme-primary-text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.back:hover {
+  text-decoration: underline;
+}
+
+.back:focus-visible,
+.preferencesCard select:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: 3px;
+}
+
+.heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.headingIcon {
+  width: 45px;
+  height: 45px;
+  flex: 0 0 45px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--theme-primary-soft);
+  color: var(--theme-primary-text);
+}
+
+.heading h1 {
+  margin: 1px 0 6px;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.heading p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--theme-text-muted);
+}
+
+.preferencesCard {
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 14px;
+  background: var(--theme-surface);
+}
+
+.preferencesCard label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.preferencesCard label:not(:first-child) {
+  margin-top: 14px;
+}
+
+.preferencesCard label svg {
+  color: var(--theme-primary-text);
+}
+
+.preferencesCard select {
+  width: 100%;
+  min-height: 44px;
+  padding: 9px 10px;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 9px;
+  background: var(--theme-background);
+  color: var(--theme-text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.preferencesCard select:disabled {
+  opacity: .65;
+}
+
+.preferencesCard p {
+  margin: 3px 0 0;
+  color: var(--theme-text-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.preferencesCard .note {
+  margin-top: 12px;
+}
+
+@media (max-width: 560px) {
+  .topbar { height: 58px; }
+  .content { padding: 18px 12px 32px; }
+  .heading h1 { font-size: 20px; }
+  .preferencesCard { padding: 16px; }
+}

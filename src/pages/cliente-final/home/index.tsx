@@ -1,7 +1,8 @@
 import LoadingState from "@/components/loading-state";
+import Modal from "@/components/modal";
 import logoNexoCeo from "@/assets/logoNexoCeo.png";
 import { createAgendaRealtimeClient } from "@/services/agenda-realtime-service";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   FaCalendarAlt,
   FaCalendarPlus,
@@ -27,7 +28,7 @@ import {
 } from "react-icons/fa";
 import type { IconType } from "react-icons";
 import { isAxiosError } from "axios";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   atualizarStatusAgendamento,
   listarHistoricoAgendamentos,
@@ -35,6 +36,7 @@ import {
 import { getClienteFinalUser } from "@/services/cliente-final-auth-token";
 import { consultarPagamentoAgendamento, iniciarPagamentoOnline, type EstadoPagamento } from "@/services/pagamentos-agendamento-service";
 import { logout } from "@/services/logout-service";
+import { alterarSenhaCliente } from "@/services/usuario-service";
 import { useNotification } from "@/context/NotificationContext";
 import type { Agendamento } from "@/types/agendamento";
 import styles from "./style.module.css";
@@ -45,34 +47,6 @@ import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
 type HomeSection = "home" | "historico" | "perfil";
 type HistoryStatusFilter = "all" | "completed" | "cancelled";
-type ProfileSettingsPanel = "preferences" | null;
-
-type ClientPreferences = {
-  favoriteProfessional: string;
-  favoriteService: string;
-};
-
-const EMPTY_CLIENT_PREFERENCES: ClientPreferences = {
-  favoriteProfessional: "",
-  favoriteService: "",
-};
-
-function readClientPreferences(userId?: number): ClientPreferences {
-  if (!userId) return { ...EMPTY_CLIENT_PREFERENCES };
-  try {
-    const saved = localStorage.getItem(`nexoelo-client-preferences:${userId}`);
-    if (!saved) return { ...EMPTY_CLIENT_PREFERENCES };
-    const parsed = JSON.parse(saved) as Partial<ClientPreferences>;
-    return {
-      favoriteProfessional: typeof parsed.favoriteProfessional === "string" ? parsed.favoriteProfessional : "",
-      favoriteService: typeof parsed.favoriteService === "string" ? parsed.favoriteService : "",
-    };
-  } catch {
-    return { ...EMPTY_CLIENT_PREFERENCES };
-  }
-}
-
-
 type ApiError = {
   erro?: string;
   message?: string;
@@ -419,13 +393,20 @@ function AppointmentCard({
 
 export default function ClienteFinalHome() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t, lang } = useLanguage();
   const { showNotification } = useNotification();
   const cliente = getClienteFinalUser();
-  const [activeSection, setActiveSection] = useState<HomeSection>("home");
+  const returnSection = (location.state as { section?: HomeSection } | null)?.section;
+  const [activeSection, setActiveSection] = useState<HomeSection>(returnSection === "perfil" ? "perfil" : "home");
   const [historyFilter, setHistoryFilter] = useState<HistoryStatusFilter>("all");
-  const [profileSettingsPanel, setProfileSettingsPanel] = useState<ProfileSettingsPanel>(null);
-  const [clientPreferences, setClientPreferences] = useState<ClientPreferences>(() => readClientPreferences(cliente?.Id));
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [passwordBusy, setPasswordBusy] = useState(false);
+  const [passwordFields, setPasswordFields] = useState({
+    senhaAtual: "",
+    confirmarSenhaAtual: "",
+    novaSenha: "",
+  });
   const [appointments, setAppointments] = useState<Agendamento[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -523,40 +504,6 @@ export default function ClienteFinalHome() {
     [appointments],
   );
 
-  const favoriteProfessionalOptions = useMemo(
-    () => Array.from(new Set(appointments.flatMap((appointment) =>
-      appointment.ServicosDetalhados?.length
-        ? appointment.ServicosDetalhados.map((item) => formatPersonName(item.ProfissionalNome))
-        : appointment.ProfissionalNome.split(" + ").map(formatPersonName),
-    ).filter(Boolean))).sort((a, b) => a.localeCompare(b, "pt-BR")),
-    [appointments],
-  );
-
-  const favoriteServiceOptions = useMemo(
-    () => Array.from(new Set(appointments.flatMap((appointment) =>
-      appointment.ServicosDetalhados?.length
-        ? appointment.ServicosDetalhados.map((item) => item.Nome.trim())
-        : appointment.ServicoNome.split(" + ").map((name) => name.trim()),
-    ).filter(Boolean))).sort((a, b) => a.localeCompare(b, "pt-BR")),
-    [appointments],
-  );
-
-  function updateClientPreference(field: keyof ClientPreferences, value: string) {
-    const nextPreferences = { ...clientPreferences, [field]: value };
-    setClientPreferences(nextPreferences);
-    if (cliente?.Id) {
-      try {
-        localStorage.setItem(`nexoelo-client-preferences:${cliente.Id}`, JSON.stringify(nextPreferences));
-      } catch {
-        showNotification({
-          type: "warning",
-          title: "Preferência não salva",
-          message: "Não foi possível salvar sua preferência neste navegador.",
-        });
-      }
-    }
-  }
-
   function handleRebook(appointment: Agendamento) {
     // Um novo agendamento usa o prestador original, sem copiar data e horários passados.
     navigate("/cliente-final/agendar", {
@@ -566,6 +513,78 @@ export default function ClienteFinalHome() {
         },
       },
     });
+  }
+
+
+  function closePasswordModal() {
+    if (passwordBusy) return;
+    setPasswordModalOpen(false);
+    setPasswordFields({ senhaAtual: "", confirmarSenhaAtual: "", novaSenha: "" });
+  }
+
+  async function handleChangePassword(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (passwordBusy) return;
+
+    const { senhaAtual, confirmarSenhaAtual, novaSenha } = passwordFields;
+    if (!senhaAtual || !confirmarSenhaAtual || !novaSenha) {
+      showNotification({
+        type: "warning",
+        title: "Campos obrigatórios",
+        message: "Preencha a senha atual, a confirmação da senha atual e a nova senha.",
+      });
+      return;
+    }
+    if (senhaAtual !== confirmarSenhaAtual) {
+      showNotification({
+        type: "warning",
+        title: "Confirmação incorreta",
+        message: "A confirmação da senha atual não confere.",
+      });
+      return;
+    }
+    if (novaSenha.length < 8) {
+      showNotification({
+        type: "warning",
+        title: "Senha muito curta",
+        message: "A nova senha deve conter pelo menos 8 caracteres.",
+      });
+      return;
+    }
+    if (novaSenha === senhaAtual) {
+      showNotification({
+        type: "warning",
+        title: "Escolha outra senha",
+        message: "A nova senha deve ser diferente da senha atual.",
+      });
+      return;
+    }
+
+    setPasswordBusy(true);
+    try {
+      await alterarSenhaCliente({
+        SenhaAtual: senhaAtual,
+        ConfirmarSenhaAtual: confirmarSenhaAtual,
+        NovaSenha: novaSenha,
+      });
+      setPasswordModalOpen(false);
+      setPasswordFields({ senhaAtual: "", confirmarSenhaAtual: "", novaSenha: "" });
+      showNotification({
+        type: "success",
+        title: "Senha alterada",
+        message: "Sua senha foi atualizada com sucesso.",
+      });
+    } catch (error) {
+      const apiError = isAxiosError(error) ? error.response?.data as ApiError | undefined : undefined;
+      showNotification({
+        type: "error",
+        title: "Não foi possível alterar a senha",
+        message: apiError?.message || apiError?.erro ||
+          "Verifique sua senha atual e tente novamente.",
+      });
+    } finally {
+      setPasswordBusy(false);
+    }
   }
 
   async function handleLogout() {
@@ -895,10 +914,8 @@ export default function ClienteFinalHome() {
             <div className={styles.profileSettings} aria-label={lang === "pt" ? "Opções da conta" : "Account options"}>
               <button
                 type="button"
-                className={`${styles.profileSettingsAction} ${profileSettingsPanel === "preferences" ? styles.profileSettingsActionSelected : ""}`}
-                aria-expanded={profileSettingsPanel === "preferences"}
-                aria-controls="client-profile-preferences"
-                onClick={() => setProfileSettingsPanel((current) => current === "preferences" ? null : "preferences")}
+                className={styles.profileSettingsAction}
+                onClick={() => navigate("/cliente-final/preferencias")}
               >
                 <span className={styles.profileSettingsIcon}><FaCalendarAlt aria-hidden="true" /></span>
                 <span className={styles.profileSettingsCopy}>
@@ -913,7 +930,7 @@ export default function ClienteFinalHome() {
               <button
                 type="button"
                 className={styles.profileSettingsAction}
-                onClick={() => navigate("/global/recuperarSenha")}
+                onClick={() => setPasswordModalOpen(true)}
               >
                 <span className={styles.profileSettingsIcon}><FaLock aria-hidden="true" /></span>
                 <span className={styles.profileSettingsCopy}>
@@ -940,48 +957,79 @@ export default function ClienteFinalHome() {
                 <FaChevronRight className={styles.profileSettingsChevron} aria-hidden="true" />
               </button>
 
-              {profileSettingsPanel === "preferences" && (
-                <section
-                  id="client-profile-preferences"
-                  className={styles.profilePreferences}
-                  aria-label={lang === "pt" ? "Minhas preferências" : "My preferences"}
-                >
-                  <h3>{lang === "pt" ? "Minhas preferências" : "My preferences"}</h3>
-                  <label htmlFor="client-favorite-professional">
-                    {lang === "pt" ? "Profissional favorito" : "Favorite professional"}
-                  </label>
-                  <select
-                    id="client-favorite-professional"
-                    value={clientPreferences.favoriteProfessional}
-                    onChange={(event) => updateClientPreference("favoriteProfessional", event.target.value)}
-                  >
-                    <option value="">{lang === "pt" ? "Nenhum selecionado" : "None selected"}</option>
-                    {favoriteProfessionalOptions.map((name) => (
-                      <option key={name} value={name}>{name}</option>
-                    ))}
-                  </select>
-                  <label htmlFor="client-favorite-service">
-                    {lang === "pt" ? "Serviço favorito" : "Favorite service"}
-                  </label>
-                  <select
-                    id="client-favorite-service"
-                    value={clientPreferences.favoriteService}
-                    onChange={(event) => updateClientPreference("favoriteService", event.target.value)}
-                  >
-                    <option value="">{lang === "pt" ? "Nenhum selecionado" : "None selected"}</option>
-                    {favoriteServiceOptions.map((name) => (
-                      <option key={name} value={name}>{name}</option>
-                    ))}
-                  </select>
-                  <p>{lang === "pt"
-                    ? "As opções são baseadas nos seus agendamentos e ficam salvas neste navegador."
-                    : "Options come from your appointments and are saved in this browser."}</p>
-                </section>
-              )}
             </div>
           </section>
         )}
       </main>
+      <Modal
+        open={passwordModalOpen}
+        title={lang === "pt" ? "Alterar senha" : "Change password"}
+        onClose={closePasswordModal}
+        busy={passwordBusy}
+        actions={
+          <>
+            <button
+              type="button"
+              className={styles.changePasswordCancel}
+              disabled={passwordBusy}
+              onClick={closePasswordModal}
+            >
+              {lang === "pt" ? "Cancelar" : "Cancel"}
+            </button>
+            <button
+              type="submit"
+              form="client-change-password-form"
+              className={styles.changePasswordSave}
+              disabled={passwordBusy}
+            >
+              {passwordBusy
+                ? (lang === "pt" ? "Salvando..." : "Saving...")
+                : (lang === "pt" ? "Salvar senha" : "Save password")}
+            </button>
+          </>
+        }
+      >
+        <form
+          id="client-change-password-form"
+          className={styles.changePasswordForm}
+          aria-label={lang === "pt" ? "Formulário de alteração de senha" : "Change password form"}
+          onSubmit={(event) => void handleChangePassword(event)}
+        >
+          <label htmlFor="client-password-current">{lang === "pt" ? "Senha atual" : "Current password"}</label>
+          <input
+            id="client-password-current"
+            type="password"
+            required
+            autoComplete="current-password"
+            disabled={passwordBusy}
+            value={passwordFields.senhaAtual}
+            onChange={(event) => setPasswordFields((current) => ({ ...current, senhaAtual: event.target.value }))}
+          />
+          <label htmlFor="client-password-confirm-current">
+            {lang === "pt" ? "Confirmar senha atual" : "Confirm current password"}
+          </label>
+          <input
+            id="client-password-confirm-current"
+            type="password"
+            required
+            autoComplete="off"
+            disabled={passwordBusy}
+            value={passwordFields.confirmarSenhaAtual}
+            onChange={(event) => setPasswordFields((current) => ({ ...current, confirmarSenhaAtual: event.target.value }))}
+          />
+          <label htmlFor="client-password-new">{lang === "pt" ? "Senha nova" : "New password"}</label>
+          <input
+            id="client-password-new"
+            type="password"
+            required
+            minLength={8}
+            autoComplete="new-password"
+            disabled={passwordBusy}
+            value={passwordFields.novaSenha}
+            onChange={(event) => setPasswordFields((current) => ({ ...current, novaSenha: event.target.value }))}
+          />
+        </form>
+      </Modal>
     </div>
   );
 }
