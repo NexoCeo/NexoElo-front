@@ -12,6 +12,7 @@ import {
   FaArrowLeft,
   FaArrowRight,
   FaSearch,
+  FaStore,
   FaClock,
   FaImage,
   FaUser,
@@ -703,7 +704,7 @@ export default function ClienteFinalAgendar() {
             <label className={styles.searchBox}>
               <FaSearch aria-hidden="true" />
               <span className={styles.visuallyHidden}>Buscar prestador</span>
-              <input type="search" placeholder="Busque pelo nome do estabelecimento ou profissional" value={buscaPrestador}
+              <input type="search" placeholder="Busque pelo nome do estabelecimento" value={buscaPrestador}
                 onChange={(event) => setBuscaPrestador(event.target.value)} />
             </label>
             <div className={styles.filterPills} role="group" aria-label="Filtrar prestadores">
@@ -718,23 +719,43 @@ export default function ClienteFinalAgendar() {
             </div>
           </div>
           <div className={styles.sectionHeading}>
-            <div><h2>Explore os prestadores</h2><p>Encontre o atendimento que combina com você</p></div>
-            {!loadingResponsaveis && <span>{prestadoresFiltrados.length} {prestadoresFiltrados.length === 1 ? "resultado" : "resultados"}</span>}
+            <div className={styles.discoveryHeadingText}>
+              <div className={styles.discoveryHeadingTitle}>
+                <FaStore aria-hidden="true" />
+                <h2>Explore os prestadores</h2>
+              </div>
+              <p>Encontre o atendimento que combina com você</p>
+            </div>
+            {!loadingResponsaveis && (
+              <span className={styles.discoveryResultCount} aria-live="polite">
+                {prestadoresFiltrados.length} {prestadoresFiltrados.length === 1 ? "resultado" : "resultados"}
+              </span>
+            )}
           </div>
           {loadingResponsaveis ? <LoadingState label={t("client.providersLoading")} variant="client-providers" compact /> :
             responsaveis.length === 0 ? <p className={styles.emptyState}>{t("client.providersEmpty")}</p> :
             prestadoresFiltrados.length === 0 ? <p className={styles.emptyState}>Nenhum prestador corresponde à sua busca.</p> :
             <div className={styles.providerList}>
               {prestadoresFiltrados.map((responsavel) => (
-                <button type="button" key={responsavel.Id} className={styles.providerCard}
+                <button type="button" key={responsavel.Id}
+                  className={`${styles.providerCard} ${styles.discoveryProviderCard}`}
                   onClick={() => handleResponsavelChange(responsavel.Id)}>
                   <ProfilePhoto source={responsavel.FotoPerfil} name={responsavel.Nome} />
                   <span className={styles.providerDetails}>
                     <strong>{formatPersonName(responsavel.Nome)}</strong>
-                    <small>{responsavel.TipoUsuario === "EMPRESA" ? <><FaBuilding /> Empresa</> : <><FaUser /> Autônomo</>}</small>
-                    <span className={styles.providerHint}>Conhecer serviços e horários</span>
+                    <span className={styles.discoveryProviderType}>
+                      {responsavel.TipoUsuario === "EMPRESA"
+                        ? <><FaBuilding aria-hidden="true" /><span className={`${styles.discoveryTypeBadge} ${styles.discoveryCompanyBadge}`}>Empresa</span></>
+                        : <><FaUser aria-hidden="true" /><span className={`${styles.discoveryTypeBadge} ${styles.discoverySelfEmployedBadge}`}>Autônomo</span></>}
+                    </span>
+                    <span className={styles.providerHint}>
+                      <FaCalendarAlt aria-hidden="true" />
+                      <span>Conhecer serviços e horários</span>
+                    </span>
                   </span>
-                  <FaArrowRight className={styles.providerArrow} aria-hidden="true" />
+                  <span className={styles.discoveryProviderArrow} aria-hidden="true">
+                    <FaArrowRight />
+                  </span>
                 </button>
               ))}
             </div>}

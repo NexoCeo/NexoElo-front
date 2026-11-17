@@ -836,3 +836,270 @@
 .paymentChoice input{accent-color:#2563eb}
 .paymentChoice label span{display:grid;gap:5px}
 .paymentChoice small{color:var(--theme-text-muted)}
+
+/* Descoberta de prestadores: hierarquia visual melhorada sem afetar a
+   vitrine e os passos de agendamento que reutilizam .providerCard. */
+.discovery {
+  gap: 20px;
+  min-width: 0;
+}
+
+.discovery .searchPanel {
+  gap: 12px;
+  padding: 15px;
+  border-radius: 16px;
+}
+
+.discovery .searchBox {
+  min-width: 0;
+  min-height: 46px;
+  gap: 11px;
+  padding: 0 13px;
+  border-radius: 12px;
+}
+
+.discovery .searchBox svg {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+}
+
+.discovery .searchBox input {
+  min-width: 0;
+  font-size: 13px;
+}
+
+.discovery .searchBox input::placeholder {
+  color: var(--theme-text-muted);
+  opacity: 1;
+}
+
+.discovery .filterPills {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.discovery .filterPills button {
+  min-width: 0;
+  min-height: 36px;
+  padding: 8px 9px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.discovery .sectionHeading {
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.discoveryHeadingText {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.discoveryHeadingTitle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 5px;
+}
+
+.discoveryHeadingTitle svg {
+  flex: 0 0 auto;
+  width: 17px;
+  height: 17px;
+  color: var(--theme-primary-text);
+}
+
+.discovery .sectionHeading h2 {
+  margin: 0;
+  font-size: clamp(17px, 2.4vw, 22px);
+  line-height: 1.25;
+}
+
+.discovery .sectionHeading p {
+  max-width: 310px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.discovery .sectionHeading .discoveryResultCount {
+  flex: 0 0 auto;
+  padding: 7px 9px;
+  border-radius: 999px;
+  background: var(--theme-surface-muted);
+  color: var(--theme-text-muted);
+  font-size: 11px;
+  line-height: 1.1;
+}
+
+.discovery .providerList {
+  gap: 10px;
+}
+
+.discovery .discoveryProviderCard {
+  min-height: 86px;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+}
+
+.discovery .discoveryProviderCard .profilePhoto {
+  display: block;
+  flex: 0 0 60px;
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+}
+
+.discovery .discoveryProviderCard .providerDetails {
+  gap: 5px;
+}
+
+.discovery .discoveryProviderCard .providerDetails > strong {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.discoveryProviderType {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  color: var(--theme-text-muted);
+  font-size: 11px;
+}
+
+.discoveryProviderType > svg {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+}
+
+.discoveryTypeBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.1;
+}
+
+.discoverySelfEmployedBadge {
+  color: var(--theme-primary-text);
+  background: var(--theme-primary-soft);
+}
+
+.discoveryCompanyBadge {
+  color: var(--theme-success-text);
+  background: var(--theme-success-soft);
+}
+
+.discovery .providerHint {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.discovery .providerHint svg {
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+}
+
+.discoveryProviderArrow {
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--theme-primary-soft);
+  color: var(--theme-primary-text);
+}
+
+.discoveryProviderArrow svg {
+  width: 14px;
+  height: 14px;
+}
+
+.discovery .discoveryProviderCard:focus-visible,
+.discovery .filterPills button:focus-visible {
+  outline: 2px solid var(--theme-primary-text);
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .marketplace {
+    padding: 18px 14px 80px;
+  }
+  .discovery .providerList {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 420px) {
+  .marketplace {
+    padding: 15px 12px 76px;
+  }
+
+  .discovery {
+    gap: 17px;
+  }
+
+  .discovery .searchPanel {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .discovery .sectionHeading h2 {
+    font-size: 16px;
+  }
+
+  .discovery .sectionHeading p {
+    font-size: 11px;
+  }
+
+  .discovery .sectionHeading .discoveryResultCount {
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+
+  .discovery .filterPills {
+    gap: 7px;
+  }
+
+  .discovery .filterPills button {
+    font-size: 11px;
+    padding: 7px 5px;
+  }
+
+  .discovery .discoveryProviderCard {
+    gap: 10px;
+    padding: 9px 10px;
+    min-height: 78px;
+  }
+
+  .discovery .discoveryProviderCard .profilePhoto {
+    flex-basis: 54px;
+    width: 54px;
+    height: 54px;
+  }
+
+  .discovery .discoveryProviderCard .providerDetails > strong {
+    font-size: 13px;
+  }
+
+  .discoveryProviderArrow {
+    flex-basis: 28px;
+    width: 28px;
+    height: 28px;
+  }
+}

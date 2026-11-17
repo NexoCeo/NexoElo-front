@@ -251,6 +251,35 @@ describe("ClienteFinalAgendar", () => {
     expect(screen.getByRole("searchbox", { name: "Buscar prestador" })).toBeInTheDocument();
   });
 
+  it("exibe contagem, categorias e atalhos de serviços na descoberta sem mudar a navegação", async () => {
+    mocks.listarResponsaveisAgendamento.mockResolvedValue([
+      { Id: 7, Nome: "Autonomo Teste", TipoUsuario: "AUTONOMO" },
+      { Id: 8, Nome: "Empresa Teste", TipoUsuario: "EMPRESA" },
+    ]);
+
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/agendar"]}>
+        <LanguageProvider><ClienteFinalAgendar /></LanguageProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Explore os prestadores" })).toBeInTheDocument();
+    expect(screen.getByText("2 resultados")).toBeInTheDocument();
+    expect(screen.getByRole("searchbox", { name: "Buscar prestador" })).toBeInTheDocument();
+    expect(screen.getAllByText("Conhecer serviços e horários")).toHaveLength(2);
+
+    const autonomous = screen.getByRole("button", { name: /Autonomo Teste/i });
+    const company = screen.getByRole("button", { name: /Empresa Teste/i });
+    expect(autonomous).toHaveTextContent("Autônomo");
+    expect(company).toHaveTextContent("Empresa");
+
+    fireEvent.click(screen.getByRole("button", { name: "Empresas" }));
+    expect(screen.getByText("1 resultado")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Autonomo Teste/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Empresa Teste/i })).toBeInTheDocument();
+    expect(mocks.listarResponsaveisAgendamento).toHaveBeenCalledTimes(1);
+  });
+
   it("filtra autonomos e empresas sem chamadas extras de API", async () => {
     mocks.listarResponsaveisAgendamento.mockResolvedValue([
       { Id: 7, Nome: "Autonomo Teste", TipoUsuario: "AUTONOMO" },
