@@ -38,7 +38,6 @@
   justify-content: flex-end;
 }
 
-.brand,
 .logoutButton,
 .navigation button,
 .primaryButton,
@@ -51,29 +50,30 @@
 }
 
 .brand {
+  grid-column: 1;
+  grid-row: 1;
   width: max-content;
+  max-width: 100%;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 0;
-  border: 0;
-  background: transparent;
+  gap: 8px;
   color: var(--theme-text);
+  white-space: nowrap;
 }
 
-.brand > span {
-  width: 36px;
-  height: 36px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--theme-primary);
-  color: var(--theme-on-primary);
-  font-weight: 800;
+.brand img {
+  display: block;
+  width: 25px;
+  height: 25px;
+  flex-shrink: 0;
+  object-fit: contain;
 }
 
 .brand strong {
-  font-size: 15px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
 }
 
 .navigation {
@@ -560,7 +560,6 @@
     gap: 12px;
   }
 
-  .brand strong,
   .logoutButton span {
     display: none;
   }

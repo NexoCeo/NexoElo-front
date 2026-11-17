@@ -96,6 +96,7 @@ describe("ClienteFinalHome", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Olá, VITOR CLIENTE" }).closest("main")).toBeInTheDocument();
+    expect(screen.getByText("NexoCeo").closest("header")).toBeInTheDocument();
     expect(await screen.findByText("Corte")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("tab", { name: "Histórico" }));

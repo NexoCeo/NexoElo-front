@@ -1,4 +1,5 @@
 import LoadingState from "@/components/loading-state";
+import logoNexoCeo from "@/assets/logoNexoCeo.png";
 import { createAgendaRealtimeClient } from "@/services/agenda-realtime-service";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -366,6 +367,10 @@ export default function ClienteFinalHome() {
     <div className={styles.container}>
       <header className={styles.topbar}>
         <div className={styles.topbarInner}>
+          <div className={styles.brand}>
+            <img src={logoNexoCeo} alt="" aria-hidden="true" />
+            <strong>NexoCeo</strong>
+          </div>
           <nav className={styles.navigation} aria-label={t("client.navigation")} role="tablist">
             {navigationItems.map(({ id, Icon }) => (
               <button
