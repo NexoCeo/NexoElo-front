@@ -186,8 +186,10 @@ describe("ClienteFinalHome", () => {
     });
 
     fireEvent.click(screen.getByRole("button", { name: /Sair da conta/ }));
-    await waitFor(() => expect(mocks.logout).toHaveBeenCalledTimes(1));
-    expect(screen.getByTestId("location")).toHaveTextContent("/cliente-final/login");
+    await waitFor(() => {
+      expect(mocks.logout).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId("location")).toHaveTextContent("/cliente-final/login");
+    });
   });
 
   it("usa o fluxo existente de recuperação ao selecionar alterar senha", async () => {
