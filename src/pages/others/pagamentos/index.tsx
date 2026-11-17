@@ -67,12 +67,15 @@ export default function ConfiguracaoPagamentos() {
     try {
       await conectarContaRecebedora();
     } catch (error) {
-      const response = error as { response?: { data?: { erro?: string; codigo?: string; stripeRequestId?: string } } };
+      const response = error as { response?: { data?: { erro?: string; codigo?: string; stripeRequestId?: string; camposInvalidos?: string[] } } };
       const details = response?.response?.data;
       const platformRestriction = details?.codigo === "account_creation_losses_collector_unavailable";
+      const campos = details?.camposInvalidos?.join("; ");
       const message = platformRestriction
         ? "A integração de pagamentos online da NexoCeo aguarda uma habilitação da Stripe. Não há pendência no seu cadastro. Você pode continuar aceitando pagamentos presenciais."
-        : details?.erro || "Não foi possível iniciar a conexão da conta recebedora. Consulte os logs do backend.";
+        : details?.codigo === "invalid_fields" && campos
+          ? `A Stripe rejeitou os seguintes campos: ${campos}. Referência: ${details.stripeRequestId ?? "não disponível"}.`
+          : details?.erro || "Não foi possível iniciar a conexão da conta recebedora. Consulte os logs do backend.";
       showNotification({
         type: "error",
         title: platformRestriction ? "Integração Stripe pendente" : "Stripe indisponível",
