@@ -2288,3 +2288,46 @@
     border-top: 1px solid var(--theme-border-strong);
   }
 }
+
+/* Contêiner único para informações selecionadas, com contraste discreto.
+   O CTA continua separado, mantendo sua hierarquia e o rodapé fixo. */
+.serviceSelectionDock {
+  background: var(--theme-background);
+}
+.serviceSelectionDock .selectedSummaryFrame {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: minmax(0, auto) auto;
+  gap: 7px;
+  min-height: 0;
+  padding: 9px;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 13px;
+  background: var(--theme-surface);
+  overflow: hidden;
+}
+.serviceSelectionDock .selectedServicesPanel {
+  min-height: 0;
+  padding: 2px;
+  border: 0;
+  background: transparent;
+}
+.serviceSelectionDock .selectedServiceItem {
+  background: var(--theme-surface-hover);
+}
+.serviceSelectionDock .bookingSelectionTotals {
+  padding: 9px 5px;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 9px;
+  background: var(--theme-primary-soft);
+}
+@media (max-width: 420px) {
+  .serviceSelectionDock .selectedSummaryFrame {
+    gap: 6px;
+    padding: 7px;
+    border-radius: 11px;
+  }
+  .serviceSelectionDock .bookingSelectionTotals {
+    padding: 8px 3px;
+  }
+}

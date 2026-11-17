@@ -196,7 +196,11 @@ describe("ClienteFinalAgendar", () => {
     expect(screen.queryByTestId("service-selection-dock")).not.toBeInTheDocument();
     fireEvent.click(await screen.findByRole("button", { name: /Corte/i }));
     const dock = screen.getByTestId("service-selection-dock");
-    expect(dock).toContainElement(screen.getByRole("heading", { name: "Serviços selecionados (1)" }));
+    const summaryFrame = screen.getByTestId("selected-services-summary-frame");
+    expect(summaryFrame).toContainElement(screen.getByRole("heading", { name: "Serviços selecionados (1)" }));
+    expect(summaryFrame).toContainElement(screen.getByRole("region", { name: "Resumo do agendamento" }));
+    expect(summaryFrame).not.toContainElement(screen.getByRole("button", { name: /Escolher horário/i }));
+    expect(dock).toContainElement(summaryFrame);
     expect(dock).toContainElement(screen.getByRole("button", { name: /Escolher horário/i }));
     fireEvent.click(screen.getByRole("button", { name: /Escolher horário/i }));
     expect(screen.queryByTestId("service-selection-dock")).not.toBeInTheDocument();

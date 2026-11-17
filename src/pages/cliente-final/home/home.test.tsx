@@ -126,7 +126,7 @@ describe("ClienteFinalHome", () => {
     });
   });
 
-  it("mantém o espaçamento do card após receber pagamento não iniciado", async () => {
+  it("reserva espaço fixo para pagamento mesmo antes da resposta da API", async () => {
     let resolvePayment!: (value: { status: string; valor: number }) => void;
     mocks.consultarPagamentoAgendamento.mockImplementation(
       () => new Promise(resolve => { resolvePayment = resolve; }),
@@ -140,13 +140,16 @@ describe("ClienteFinalHome", () => {
 
     expect(await screen.findByText("Corte")).toBeInTheDocument();
     await waitFor(() => expect(resolvePayment).toBeTypeOf("function"));
+    const reservedSlot = screen.getByTestId("appointment-payment-slot");
+    expect(reservedSlot).toBeInTheDocument();
     expect(screen.queryByTestId("appointment-payment-status")).not.toBeInTheDocument();
 
     await act(async () => {
       resolvePayment({ status: "NAO_INICIADO", valor: 50 });
     });
 
-    // A div vazia não deve surgir entre métricas e botões após a resposta da API.
+    // O mesmo elemento continua montado, sem criar uma nova linha ou deslocar botões.
+    expect(screen.getByTestId("appointment-payment-slot")).toBe(reservedSlot);
     expect(screen.queryByTestId("appointment-payment-status")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cancelar agendamento de Corte" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Concluir agendamento de Corte" })).toBeInTheDocument();
@@ -163,8 +166,32 @@ describe("ClienteFinalHome", () => {
       </MemoryRouter>,
     );
 
+    const reservedSlot = await screen.findByTestId("appointment-payment-slot");
     expect(await screen.findByText("Pagamento presencial pendente")).toBeInTheDocument();
+    expect(reservedSlot).toContainElement(screen.getByTestId("appointment-payment-status"));
     expect(screen.getByTestId("appointment-payment-status")).toHaveTextContent("Pagamento presencial pendente");
+  });
+
+  it("mantém o mesmo espaço reservado quando pagamento pendente chega após o card", async () => {
+    let resolvePayment!: (value: { status: string; metodo: string; valor: number }) => void;
+    mocks.consultarPagamentoAgendamento.mockImplementation(
+      () => new Promise(resolve => { resolvePayment = resolve; }),
+    );
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/home"]}>
+        <ClienteFinalHome />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText("Corte")).toBeInTheDocument();
+    const slot = screen.getByTestId("appointment-payment-slot");
+    expect(screen.queryByTestId("appointment-payment-status")).not.toBeInTheDocument();
+    await waitFor(() => expect(resolvePayment).toBeTypeOf("function"));
+    await act(async () => {
+      resolvePayment({ status: "PENDENTE", metodo: "PRESENCIAL", valor: 50 });
+    });
+    expect(screen.getByTestId("appointment-payment-slot")).toBe(slot);
+    expect(slot).toHaveTextContent("Pagamento presencial pendente");
+    expect(screen.getByRole("button", { name: "Cancelar agendamento de Corte" })).toBeInTheDocument();
   });
 
   it("usa o perfil compacto sem adicionar um cartão com fundo e permite editar os dados", async () => {

@@ -1010,6 +1010,7 @@ export default function ClienteFinalAgendar() {
 
                 {selectedServicos.length > 0 && (
                   <div ref={serviceDockRef} className={styles.serviceSelectionDock} data-testid="service-selection-dock">
+                    <div className={styles.selectedSummaryFrame} data-testid="selected-services-summary-frame">
                     <section className={styles.selectedServicesPanel} aria-label="Serviços selecionados">
                       <h3>Serviços selecionados ({selectedServicos.length})</h3>
                       <div className={styles.selectedServicesList}>
@@ -1075,6 +1076,7 @@ export default function ClienteFinalAgendar() {
                         <span><strong>{formatCurrency(totalValor)}</strong><small>Valor total</small></span>
                       </div>
                     </section>
+                    </div>
                     <button type="button" className={styles.chooseTimeButton} onClick={advanceToSchedule}>
                       Escolher horário <FaArrowRight aria-hidden="true" />
                     </button>

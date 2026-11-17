@@ -171,8 +171,8 @@ function AppointmentCard({
     }
   }
 
-  // Não monta uma linha de pagamento sem conteúdo. A API pode retornar NAO_INICIADO
-  // após o card já ter sido exibido, e uma div vazia criaria um espaçamento fantasma.
+  // Reserva sempre o mesmo espaço antes da resposta da API. O conteúdo
+  // permanece opcional, mas seu carregamento não desloca as ações do card.
   const paymentStatusContent = payment?.status === "PAGO" ? (
     <span>Pagamento confirmado</span>
   ) : payment?.status === "PENDENTE" && payment.metodo === "PRESENCIAL" ? (
@@ -265,9 +265,13 @@ function AppointmentCard({
               <p className={styles.historyCancellationReason}>Motivo: {appointment.MotivoCancelamento}</p>
             )}
 
-            {paymentStatusContent && (
-              <div className={styles.paymentStatus} data-testid="appointment-payment-status">
-                {paymentStatusContent}
+            {isScheduled(appointment) && (
+              <div className={styles.paymentStatusSlot} data-testid="appointment-payment-slot">
+                {paymentStatusContent && (
+                  <div className={styles.paymentStatus} data-testid="appointment-payment-status">
+                    {paymentStatusContent}
+                  </div>
+                )}
               </div>
             )}
 
@@ -351,9 +355,13 @@ function AppointmentCard({
         </div>
       </div>
 
-      {paymentStatusContent && (
-        <div className={styles.paymentStatus} data-testid="appointment-payment-status">
-          {paymentStatusContent}
+      {isScheduled(appointment) && (
+        <div className={styles.paymentStatusSlot} data-testid="appointment-payment-slot">
+          {paymentStatusContent && (
+            <div className={styles.paymentStatus} data-testid="appointment-payment-status">
+              {paymentStatusContent}
+            </div>
+          )}
         </div>
       )}
 
