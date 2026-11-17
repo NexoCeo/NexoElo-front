@@ -15,6 +15,8 @@ import {
   FaHistory,
   FaInfoCircle,
   FaLayerGroup,
+  FaLock,
+  FaChevronRight,
   FaHome,
   FaPlus,
   FaSignOutAlt,
@@ -43,6 +45,33 @@ import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
 type HomeSection = "home" | "historico" | "perfil";
 type HistoryStatusFilter = "all" | "completed" | "cancelled";
+type ProfileSettingsPanel = "preferences" | null;
+
+type ClientPreferences = {
+  favoriteProfessional: string;
+  favoriteService: string;
+};
+
+const EMPTY_CLIENT_PREFERENCES: ClientPreferences = {
+  favoriteProfessional: "",
+  favoriteService: "",
+};
+
+function readClientPreferences(userId?: number): ClientPreferences {
+  if (!userId) return { ...EMPTY_CLIENT_PREFERENCES };
+  try {
+    const saved = localStorage.getItem(`nexoelo-client-preferences:${userId}`);
+    if (!saved) return { ...EMPTY_CLIENT_PREFERENCES };
+    const parsed = JSON.parse(saved) as Partial<ClientPreferences>;
+    return {
+      favoriteProfessional: typeof parsed.favoriteProfessional === "string" ? parsed.favoriteProfessional : "",
+      favoriteService: typeof parsed.favoriteService === "string" ? parsed.favoriteService : "",
+    };
+  } catch {
+    return { ...EMPTY_CLIENT_PREFERENCES };
+  }
+}
+
 
 type ApiError = {
   erro?: string;
@@ -395,6 +424,8 @@ export default function ClienteFinalHome() {
   const cliente = getClienteFinalUser();
   const [activeSection, setActiveSection] = useState<HomeSection>("home");
   const [historyFilter, setHistoryFilter] = useState<HistoryStatusFilter>("all");
+  const [profileSettingsPanel, setProfileSettingsPanel] = useState<ProfileSettingsPanel>(null);
+  const [clientPreferences, setClientPreferences] = useState<ClientPreferences>(() => readClientPreferences(cliente?.Id));
   const [appointments, setAppointments] = useState<Agendamento[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -491,6 +522,40 @@ export default function ClienteFinalHome() {
     }).length,
     [appointments],
   );
+
+  const favoriteProfessionalOptions = useMemo(
+    () => Array.from(new Set(appointments.flatMap((appointment) =>
+      appointment.ServicosDetalhados?.length
+        ? appointment.ServicosDetalhados.map((item) => formatPersonName(item.ProfissionalNome))
+        : appointment.ProfissionalNome.split(" + ").map(formatPersonName),
+    ).filter(Boolean))).sort((a, b) => a.localeCompare(b, "pt-BR")),
+    [appointments],
+  );
+
+  const favoriteServiceOptions = useMemo(
+    () => Array.from(new Set(appointments.flatMap((appointment) =>
+      appointment.ServicosDetalhados?.length
+        ? appointment.ServicosDetalhados.map((item) => item.Nome.trim())
+        : appointment.ServicoNome.split(" + ").map((name) => name.trim()),
+    ).filter(Boolean))).sort((a, b) => a.localeCompare(b, "pt-BR")),
+    [appointments],
+  );
+
+  function updateClientPreference(field: keyof ClientPreferences, value: string) {
+    const nextPreferences = { ...clientPreferences, [field]: value };
+    setClientPreferences(nextPreferences);
+    if (cliente?.Id) {
+      try {
+        localStorage.setItem(`nexoelo-client-preferences:${cliente.Id}`, JSON.stringify(nextPreferences));
+      } catch {
+        showNotification({
+          type: "warning",
+          title: "Preferência não salva",
+          message: "Não foi possível salvar sua preferência neste navegador.",
+        });
+      }
+    }
+  }
 
   function handleRebook(appointment: Agendamento) {
     // Um novo agendamento usa o prestador original, sem copiar data e horários passados.
@@ -826,6 +891,94 @@ export default function ClienteFinalHome() {
               email={formatEmailDisplay(cliente?.Email)}
               phone={cliente?.Telefone}
             />
+
+            <div className={styles.profileSettings} aria-label={lang === "pt" ? "Opções da conta" : "Account options"}>
+              <button
+                type="button"
+                className={`${styles.profileSettingsAction} ${profileSettingsPanel === "preferences" ? styles.profileSettingsActionSelected : ""}`}
+                aria-expanded={profileSettingsPanel === "preferences"}
+                aria-controls="client-profile-preferences"
+                onClick={() => setProfileSettingsPanel((current) => current === "preferences" ? null : "preferences")}
+              >
+                <span className={styles.profileSettingsIcon}><FaCalendarAlt aria-hidden="true" /></span>
+                <span className={styles.profileSettingsCopy}>
+                  <strong>{lang === "pt" ? "Minhas preferências" : "My preferences"}</strong>
+                  <small>{lang === "pt"
+                    ? "Escolha seus profissionais e serviços favoritos."
+                    : "Choose your favorite professionals and services."}</small>
+                </span>
+                <FaChevronRight className={styles.profileSettingsChevron} aria-hidden="true" />
+              </button>
+
+              <button
+                type="button"
+                className={styles.profileSettingsAction}
+                onClick={() => navigate("/global/recuperarSenha")}
+              >
+                <span className={styles.profileSettingsIcon}><FaLock aria-hidden="true" /></span>
+                <span className={styles.profileSettingsCopy}>
+                  <strong>{lang === "pt" ? "Alterar senha" : "Change password"}</strong>
+                  <small>{lang === "pt"
+                    ? "Atualize sua senha de acesso."
+                    : "Update your account password."}</small>
+                </span>
+                <FaChevronRight className={styles.profileSettingsChevron} aria-hidden="true" />
+              </button>
+
+              <button
+                type="button"
+                className={`${styles.profileSettingsAction} ${styles.profileSettingsLogout}`}
+                onClick={() => void handleLogout()}
+              >
+                <span className={styles.profileSettingsIcon}><FaSignOutAlt aria-hidden="true" /></span>
+                <span className={styles.profileSettingsCopy}>
+                  <strong>{lang === "pt" ? "Sair da conta" : "Sign out"}</strong>
+                  <small>{lang === "pt"
+                    ? "Encerre sua sessão no NexoCeo."
+                    : "End your NexoCeo session."}</small>
+                </span>
+                <FaChevronRight className={styles.profileSettingsChevron} aria-hidden="true" />
+              </button>
+
+              {profileSettingsPanel === "preferences" && (
+                <section
+                  id="client-profile-preferences"
+                  className={styles.profilePreferences}
+                  aria-label={lang === "pt" ? "Minhas preferências" : "My preferences"}
+                >
+                  <h3>{lang === "pt" ? "Minhas preferências" : "My preferences"}</h3>
+                  <label htmlFor="client-favorite-professional">
+                    {lang === "pt" ? "Profissional favorito" : "Favorite professional"}
+                  </label>
+                  <select
+                    id="client-favorite-professional"
+                    value={clientPreferences.favoriteProfessional}
+                    onChange={(event) => updateClientPreference("favoriteProfessional", event.target.value)}
+                  >
+                    <option value="">{lang === "pt" ? "Nenhum selecionado" : "None selected"}</option>
+                    {favoriteProfessionalOptions.map((name) => (
+                      <option key={name} value={name}>{name}</option>
+                    ))}
+                  </select>
+                  <label htmlFor="client-favorite-service">
+                    {lang === "pt" ? "Serviço favorito" : "Favorite service"}
+                  </label>
+                  <select
+                    id="client-favorite-service"
+                    value={clientPreferences.favoriteService}
+                    onChange={(event) => updateClientPreference("favoriteService", event.target.value)}
+                  >
+                    <option value="">{lang === "pt" ? "Nenhum selecionado" : "None selected"}</option>
+                    {favoriteServiceOptions.map((name) => (
+                      <option key={name} value={name}>{name}</option>
+                    ))}
+                  </select>
+                  <p>{lang === "pt"
+                    ? "As opções são baseadas nos seus agendamentos e ficam salvas neste navegador."
+                    : "Options come from your appointments and are saved in this browser."}</p>
+                </section>
+              )}
+            </div>
           </section>
         )}
       </main>

@@ -62,6 +62,7 @@ describe("ClienteFinalHome", () => {
       value: ["pt-BR"],
     });
     vi.clearAllMocks();
+    localStorage.clear();
     mocks.consultarPagamentoAgendamento.mockResolvedValue(null);
     mocks.listarHistoricoAgendamentos.mockResolvedValue([
       {
@@ -151,6 +152,55 @@ describe("ClienteFinalHome", () => {
 
     expect(await screen.findByText("Pagamento presencial pendente")).toBeInTheDocument();
     expect(screen.getByTestId("appointment-payment-status")).toHaveTextContent("Pagamento presencial pendente");
+  });
+
+  it("exibe somente preferências, alteração de senha e saída no perfil", async () => {
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/home"]}>
+        <ClienteFinalHome />
+        <LocationProbe />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Corte")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "Perfil" }));
+
+    const preferencesButton = screen.getByRole("button", { name: /Minhas preferências/ });
+    expect(preferencesButton).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: /Alterar senha/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Sair da conta/ })).toBeInTheDocument();
+    expect(screen.queryByText("Notificações")).not.toBeInTheDocument();
+    expect(screen.queryByText("Segurança")).not.toBeInTheDocument();
+
+    fireEvent.click(preferencesButton);
+    expect(preferencesButton).toHaveAttribute("aria-expanded", "true");
+    fireEvent.change(screen.getByRole("combobox", { name: "Profissional favorito" }), {
+      target: { value: "Profissional Teste" },
+    });
+    fireEvent.change(screen.getByRole("combobox", { name: "Serviço favorito" }), {
+      target: { value: "Corte" },
+    });
+    expect(JSON.parse(localStorage.getItem("nexoelo-client-preferences:4") || "{}")).toEqual({
+      favoriteProfessional: "Profissional Teste",
+      favoriteService: "Corte",
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /Sair da conta/ }));
+    await waitFor(() => expect(mocks.logout).toHaveBeenCalledTimes(1));
+    expect(screen.getByTestId("location")).toHaveTextContent("/cliente-final/login");
+  });
+
+  it("usa o fluxo existente de recuperação ao selecionar alterar senha", async () => {
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/home"]}>
+        <ClienteFinalHome />
+        <LocationProbe />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: "Perfil" }));
+    fireEvent.click(screen.getByRole("button", { name: /Alterar senha/ }));
+    expect(screen.getByTestId("location")).toHaveTextContent("/global/recuperarSenha");
   });
 
   it("troca o conteudo pelas abas sem sair da rota home", async () => {
