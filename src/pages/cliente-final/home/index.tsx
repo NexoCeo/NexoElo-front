@@ -195,7 +195,7 @@ function AppointmentCard({
           onClick={() => setExpanded(current => !current)}
         >
           <span className={styles.appointmentDate}>
-            <span className={styles.appointmentIcon}><FaCalendarAlt aria-hidden="true" /></span>
+            <span className={`${styles.appointmentIcon} ${statusClass(appointment.Status)}`}><FaCalendarAlt aria-hidden="true" /></span>
             <span className={styles.appointmentDateInfo}>
               <time dateTime={appointment.DataAgendamento}>{formatAppointmentDate(appointment.DataAgendamento)}</time>
               <strong>{formatAppointmentTime(appointment.DataAgendamento)}</strong>
