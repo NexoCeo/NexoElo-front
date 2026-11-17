@@ -23,11 +23,15 @@ vi.mock("@/services/agendamento-service", () => ({
   listarResponsaveisAgendamento: mocks.listarResponsaveisAgendamento,
 }));
 
-vi.mock("@/services/pagamentos-agendamento-service", () => ({
-  consultarPagamentoPublico: mocks.consultarPagamentoPublico,
-  registrarPagamentoPresencial: mocks.registrarPagamentoPresencial,
-  iniciarPagamentoOnline: mocks.iniciarPagamentoOnline,
-}));
+vi.mock("@/services/pagamentos-agendamento-service", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/services/pagamentos-agendamento-service")>();
+  return {
+    ...actual,
+    consultarPagamentoPublico: mocks.consultarPagamentoPublico,
+    registrarPagamentoPresencial: mocks.registrarPagamentoPresencial,
+    iniciarPagamentoOnline: mocks.iniciarPagamentoOnline,
+  };
+});
 
 vi.mock("@/services/agenda-publica-service", () => ({
   obterAgendaPublica: mocks.obterAgendaPublica,
