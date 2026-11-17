@@ -11,6 +11,8 @@ const mocks = vi.hoisted(() => ({
   consultarPagamentoAgendamento: vi.fn(),
   logout: vi.fn(),
   alterarSenhaCliente: vi.fn(),
+  atualizarPerfilUsuario: vi.fn(),
+  saveClienteFinalSession: vi.fn(),
 }));
 
 vi.mock("@/services/agendamento-service", () => ({
@@ -26,6 +28,7 @@ vi.mock("@/services/cliente-final-auth-token", () => ({
     Telefone: "28993337212",
     TipoUsuario: "CLIENTE",
   }),
+  saveClienteFinalSession: mocks.saveClienteFinalSession,
 }));
 
 vi.mock("@/services/logout-service", () => ({
@@ -34,6 +37,7 @@ vi.mock("@/services/logout-service", () => ({
 
 vi.mock("@/services/usuario-service", () => ({
   alterarSenhaCliente: mocks.alterarSenhaCliente,
+  atualizarPerfilUsuario: mocks.atualizarPerfilUsuario,
 }));
 
 vi.mock("@/services/agenda-realtime-service", () => ({
@@ -70,6 +74,9 @@ describe("ClienteFinalHome", () => {
     localStorage.clear();
     mocks.consultarPagamentoAgendamento.mockResolvedValue(null);
     mocks.alterarSenhaCliente.mockResolvedValue(undefined);
+    mocks.atualizarPerfilUsuario.mockResolvedValue({
+      Nome: "Nome Atualizado", Email: "atualizado@example.com", Telefone: "11987654321",
+    });
     mocks.listarHistoricoAgendamentos.mockResolvedValue([
       {
         Id: 12,
@@ -158,6 +165,42 @@ describe("ClienteFinalHome", () => {
 
     expect(await screen.findByText("Pagamento presencial pendente")).toBeInTheDocument();
     expect(screen.getByTestId("appointment-payment-status")).toHaveTextContent("Pagamento presencial pendente");
+  });
+
+  it("usa o perfil compacto sem adicionar um cartão com fundo e permite editar os dados", async () => {
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/home"]}>
+        <ClienteFinalHome />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: "Perfil" }));
+    expect(screen.getByText("Vitor Cliente")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Editar meus dados" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Editar meus dados" }));
+    expect(screen.getByRole("dialog", { name: "Editar meus dados" })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Nome"), { target: { value: "Nome Atualizado" } });
+    fireEvent.change(screen.getByLabelText("E-mail"), { target: { value: "atualizado@example.com" } });
+    fireEvent.change(screen.getByLabelText("Telefone"), { target: { value: "(11) 98765-4321" } });
+    fireEvent.submit(screen.getByRole("form", { name: "Formulário de edição de dados" }));
+
+    await waitFor(() => {
+      expect(mocks.atualizarPerfilUsuario).toHaveBeenCalledWith(4, {
+        Nome: "Nome Atualizado",
+        Email: "atualizado@example.com",
+        Telefone: "11987654321",
+      });
+    });
+    await waitFor(() => {
+      expect(mocks.saveClienteFinalSession).toHaveBeenCalledWith(expect.objectContaining({
+        Nome: "Nome Atualizado",
+        Email: "atualizado@example.com",
+        Telefone: "11987654321",
+      }));
+      expect(screen.getByRole("heading", { name: "Nome Atualizado" })).toBeInTheDocument();
+      expect(screen.queryByRole("dialog", { name: "Editar meus dados" })).not.toBeInTheDocument();
+    });
   });
 
   it("abre preferências como página e mantém o logout existente", async () => {

@@ -829,6 +829,33 @@
 }
 
 
+.profileEditButton {
+  width: 100%;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 10px 14px;
+  border: 1px solid var(--theme-primary);
+  border-radius: 8px;
+  background: var(--theme-primary);
+  color: var(--theme-on-primary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.profileEditButton:hover {
+  filter: brightness(1.06);
+}
+
+.profileEditButton:focus-visible {
+  outline: 2px solid var(--theme-primary-text);
+  outline-offset: 2px;
+}
+
 /* Ações do perfil do cliente, alinhadas ao painel de informações. */
 .profileSettings {
   display: grid;

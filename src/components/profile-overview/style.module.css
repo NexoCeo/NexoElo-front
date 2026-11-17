@@ -247,3 +247,125 @@
     border-top: 1px solid var(--theme-bottom, #334155);
   }
 }
+
+/* Variante compacta para o cliente: nenhuma superfície/fundo novo.
+   Preserva a aparência padrão do ProfileOverview nas outras telas. */
+.compact {
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr);
+  column-gap: 14px;
+  row-gap: 14px;
+  align-items: center;
+  width: 100%;
+  max-width: 580px;
+  padding: 0;
+  background: transparent;
+}
+
+.compact .avatar {
+  grid-column: 1;
+  grid-row: 1;
+  width: 62px;
+  height: 62px;
+  margin: 0;
+}
+
+.compact .avatar > span {
+  font-size: 25px;
+}
+
+.compact .heading {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+  text-align: left;
+}
+
+.compact .heading h2 {
+  margin-bottom: 6px;
+  font-size: clamp(17px, 3vw, 21px);
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.compact .role {
+  display: inline-flex;
+  width: max-content;
+  max-width: 100%;
+  padding: 2px 0;
+  color: var(--theme-primary-text);
+  font-size: 10px;
+  letter-spacing: .035em;
+}
+
+.compact .details {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--theme-bottom);
+  border-bottom: 1px solid var(--theme-bottom);
+  border-radius: 0;
+  background: transparent;
+}
+
+.compact .details > div,
+.compact .details > div:nth-child(2n) {
+  padding: 10px 0;
+  border: 0;
+}
+
+.compact .details > div + div,
+.compact .details > div:nth-child(n + 3) {
+  border-top: 1px solid var(--theme-bottom);
+}
+
+.compact .details dt {
+  gap: 9px;
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+
+.compact .details dt svg {
+  width: 16px;
+  height: 16px;
+}
+
+.compact .details dd {
+  padding-left: 25px;
+  font-size: 13px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.compact .action {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .profile.compact {
+    padding: 0;
+  }
+  .compact .avatar {
+    width: 62px;
+    height: 62px;
+  }
+  .compact .avatar > span {
+    font-size: 25px;
+  }
+  .compact .details > div {
+    padding: 10px 0;
+  }
+  .compact .details dd {
+    font-size: 12px;
+  }
+}

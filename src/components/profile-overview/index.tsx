@@ -15,14 +15,15 @@ type ProfileOverviewProps = {
   subtitle?: string;
   onPhotoChange?: (file: File) => void;
   photoSaving?: boolean;
+  compact?: boolean;
 };
 
-export default function ProfileOverview({ name, role, email, phone, companyDetails, avatarUrl, className, action, subtitle, onPhotoChange, photoSaving = false }: ProfileOverviewProps) {
+export default function ProfileOverview({ name, role, email, phone, companyDetails, avatarUrl, className, action, subtitle, onPhotoChange, photoSaving = false, compact = false }: ProfileOverviewProps) {
   const { t } = useLanguage();
   const displayName = formatPersonName(name);
   const initial = displayName.charAt(0) || "?";
   return (
-    <section className={`${styles.profile} ${className || ""}`} aria-label={t("profile.info")}>
+    <section className={`${styles.profile} ${compact ? styles.compact : ""} ${className || ""}`} aria-label={t("profile.info")}>
       <div className={styles.avatar}>
         {avatarUrl ? <img src={avatarUrl} alt={`${t("profile.photo")}: ${displayName}`} /> : <span aria-hidden="true">{initial}</span>}
         {onPhotoChange && (

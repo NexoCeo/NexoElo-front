@@ -20,6 +20,7 @@ import {
   FaChevronRight,
   FaHome,
   FaPlus,
+  FaPen,
   FaSignOutAlt,
   FaTag,
   FaTimes,
@@ -33,10 +34,10 @@ import {
   atualizarStatusAgendamento,
   listarHistoricoAgendamentos,
 } from "@/services/agendamento-service";
-import { getClienteFinalUser } from "@/services/cliente-final-auth-token";
+import { getClienteFinalUser, saveClienteFinalSession } from "@/services/cliente-final-auth-token";
 import { consultarPagamentoAgendamento, iniciarPagamentoOnline, type EstadoPagamento } from "@/services/pagamentos-agendamento-service";
 import { logout } from "@/services/logout-service";
-import { alterarSenhaCliente } from "@/services/usuario-service";
+import { alterarSenhaCliente, atualizarPerfilUsuario } from "@/services/usuario-service";
 import { useNotification } from "@/context/NotificationContext";
 import type { Agendamento } from "@/types/agendamento";
 import styles from "./style.module.css";
@@ -396,10 +397,13 @@ export default function ClienteFinalHome() {
   const location = useLocation();
   const { t, lang } = useLanguage();
   const { showNotification } = useNotification();
-  const cliente = getClienteFinalUser();
+  const [cliente, setCliente] = useState(() => getClienteFinalUser());
   const returnSection = (location.state as { section?: HomeSection } | null)?.section;
   const [activeSection, setActiveSection] = useState<HomeSection>(returnSection === "perfil" ? "perfil" : "home");
   const [historyFilter, setHistoryFilter] = useState<HistoryStatusFilter>("all");
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const [editProfileBusy, setEditProfileBusy] = useState(false);
+  const [profileFields, setProfileFields] = useState({ nome: "", email: "", telefone: "" });
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [passwordBusy, setPasswordBusy] = useState(false);
   const [passwordFields, setPasswordFields] = useState({
@@ -515,6 +519,85 @@ export default function ClienteFinalHome() {
     });
   }
 
+
+  function openEditProfile() {
+    setProfileFields({
+      nome: cliente?.Nome ?? "",
+      email: cliente?.Email ?? "",
+      telefone: cliente?.Telefone ?? "",
+    });
+    setEditProfileOpen(true);
+  }
+
+  function closeEditProfile() {
+    if (editProfileBusy) return;
+    setEditProfileOpen(false);
+  }
+
+  async function handleEditProfile(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (editProfileBusy || !cliente?.Id) return;
+    const nome = profileFields.nome.trim();
+    const email = profileFields.email.trim();
+    const telefone = profileFields.telefone.replace(/\D/g, "");
+    if (!nome || (!email && !telefone)) {
+      showNotification({
+        type: "warning",
+        title: "Dados incompletos",
+        message: "Informe seu nome e pelo menos um contato (e-mail ou telefone).",
+      });
+      return;
+    }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showNotification({
+        type: "warning",
+        title: "E-mail inválido",
+        message: "Confira o e-mail informado.",
+      });
+      return;
+    }
+    if (telefone && (telefone.length < 10 || telefone.length > 11)) {
+      showNotification({
+        type: "warning",
+        title: "Telefone inválido",
+        message: "Informe um telefone com DDD.",
+      });
+      return;
+    }
+
+    setEditProfileBusy(true);
+    try {
+      const updated = await atualizarPerfilUsuario(cliente.Id, {
+        Nome: nome,
+        Email: email,
+        Telefone: telefone,
+      });
+      const nextCliente = {
+        ...cliente,
+        Nome: updated.Nome || nome,
+        Email: updated.Email ?? email,
+        Telefone: updated.Telefone ?? telefone,
+      };
+      saveClienteFinalSession(nextCliente);
+      setCliente(nextCliente);
+      setEditProfileOpen(false);
+      showNotification({
+        type: "success",
+        title: "Dados atualizados",
+        message: "Suas informações foram salvas com sucesso.",
+      });
+    } catch (error) {
+      const data = isAxiosError(error) ? error.response?.data as ApiError | string | undefined : undefined;
+      showNotification({
+        type: "error",
+        title: "Não foi possível atualizar o perfil",
+        message: typeof data === "string" ? data : data?.message || data?.erro ||
+          "Verifique seus dados e tente novamente.",
+      });
+    } finally {
+      setEditProfileBusy(false);
+    }
+  }
 
   function closePasswordModal() {
     if (passwordBusy) return;
@@ -905,10 +988,17 @@ export default function ClienteFinalHome() {
             className={styles.view}
           >
             <ProfileOverview
+              compact
               name={formatPersonName(cliente?.Nome) || "Cliente"}
               role="Cliente"
               email={formatEmailDisplay(cliente?.Email)}
               phone={cliente?.Telefone}
+              action={
+                <button type="button" className={styles.profileEditButton} onClick={openEditProfile}>
+                  <FaPen aria-hidden="true" />
+                  {lang === "pt" ? "Editar meus dados" : "Edit my details"}
+                </button>
+              }
             />
 
             <div className={styles.profileSettings} aria-label={lang === "pt" ? "Opções da conta" : "Account options"}>
@@ -961,6 +1051,53 @@ export default function ClienteFinalHome() {
           </section>
         )}
       </main>
+
+      <Modal
+        open={editProfileOpen}
+        title={lang === "pt" ? "Editar meus dados" : "Edit my details"}
+        onClose={closeEditProfile}
+        busy={editProfileBusy}
+        actions={
+          <>
+            <button type="button" className={styles.changePasswordCancel}
+              onClick={closeEditProfile} disabled={editProfileBusy}>
+              {lang === "pt" ? "Cancelar" : "Cancel"}
+            </button>
+            <button type="submit" form="client-edit-profile-form"
+              className={styles.changePasswordSave} disabled={editProfileBusy}>
+              {editProfileBusy
+                ? (lang === "pt" ? "Salvando..." : "Saving...")
+                : (lang === "pt" ? "Salvar alterações" : "Save changes")}
+            </button>
+          </>
+        }
+      >
+        <form
+          id="client-edit-profile-form"
+          className={styles.changePasswordForm}
+          aria-label={lang === "pt" ? "Formulário de edição de dados" : "Edit details form"}
+          onSubmit={(event) => void handleEditProfile(event)}
+        >
+          <label htmlFor="client-edit-name">{lang === "pt" ? "Nome" : "Name"}</label>
+          <input id="client-edit-name" type="text" required
+            autoComplete="name" value={profileFields.nome}
+            disabled={editProfileBusy}
+            onChange={(event) => setProfileFields((values) => ({ ...values, nome: event.target.value }))}
+          />
+          <label htmlFor="client-edit-email">{lang === "pt" ? "E-mail" : "Email"}</label>
+          <input id="client-edit-email" type="email"
+            autoComplete="email" value={profileFields.email}
+            disabled={editProfileBusy}
+            onChange={(event) => setProfileFields((values) => ({ ...values, email: event.target.value }))}
+          />
+          <label htmlFor="client-edit-phone">{lang === "pt" ? "Telefone" : "Phone"}</label>
+          <input id="client-edit-phone" type="tel" inputMode="tel"
+            autoComplete="tel" value={profileFields.telefone}
+            disabled={editProfileBusy}
+            onChange={(event) => setProfileFields((values) => ({ ...values, telefone: event.target.value }))}
+          />
+        </form>
+      </Modal>
       <Modal
         open={passwordModalOpen}
         title={lang === "pt" ? "Alterar senha" : "Change password"}
