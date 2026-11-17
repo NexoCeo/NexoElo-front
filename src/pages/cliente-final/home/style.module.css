@@ -25,14 +25,10 @@
   gap: 24px;
 }
 
-.topbarInner .greeting {
-  grid-column: 1;
-  grid-row: 1;
+.greeting {
   min-width: 0;
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  margin: 0 0 16px;
+  overflow-wrap: anywhere;
   font-size: 14px;
   font-weight: 600;
   line-height: 1.2;
@@ -605,8 +601,8 @@
 }
 
 @media (max-width: 560px) {
-  .topbarInner .greeting {
-    padding-right: 12px;
+  .greeting {
+    margin-bottom: 12px;
     font-size: 13px;
   }
 
@@ -652,7 +648,7 @@
   }
 
   .content {
-    padding: 146px 12px 32px;
+    padding: 132px 12px 32px;
   }
 
   .statusFeedback {
