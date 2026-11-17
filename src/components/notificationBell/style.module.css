@@ -23,7 +23,32 @@
 .unreadDot{width:8px;height:8px;flex:none;margin-top:8px;border-radius:50%;background:#2563eb}
 .read{font-size:12px;color:var(--theme-text-muted);margin-top:6px}
 .feedback{padding:10px 15px;color:#f87171;font-size:12px}
-@media(max-width:600px){.panel{position:fixed;top:66px;right:12px;left:12px;width:auto;max-height:calc(100dvh - 82px)}.tabs button{padding:10px 8px}.tabs button.clear{font-size:9px}}
+/* Em dispositivos pequenos, o painel ocupa uma área previsível (aprox. metade da
+   viewport), sem avançar sobre a navegação inferior. Somente a lista rola. */
+@media (max-width: 600px) {
+  .panel {
+    position: fixed;
+    top: 66px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+    height: min(450px, 50dvh);
+    max-height: calc(100dvh - 100px);
+  }
+  .heading,
+  .tabs {
+    flex: 0 0 auto;
+  }
+  .content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tabs button { padding: 10px 8px; }
+  .tabs button.clear { font-size: 9px; }
+}
 
 /* Data e hora da notificação alinhadas ao título, sem sobrepor o indicador de não lida. */
 .itemHeading{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;min-width:0;flex-wrap:wrap}
