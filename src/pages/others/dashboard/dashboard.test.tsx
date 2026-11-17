@@ -164,7 +164,7 @@ describe("Dashboard", () => {
     expect(await screen.findByText("Cliente de hoje")).toBeInTheDocument();
     expect(screen.getByText("Corte")).toBeInTheDocument();
     expect(screen.getByText("Profissional Teste")).toBeInTheDocument();
-    expect(screen.getByText(/R\\$\\s*85,00/)).toBeInTheDocument();
+    expect(screen.getByText(/R\$\s*85,00/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Abrir agendamento de Cliente de hoje na agenda" }))
       .toHaveAttribute("href", expect.stringContaining(agendaPath + "?data="));
     expect(screen.getByRole("button", { name: "Hoje" })).toHaveAttribute("aria-pressed", "true");
