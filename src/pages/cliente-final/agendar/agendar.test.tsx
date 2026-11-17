@@ -94,7 +94,10 @@ describe("ClienteFinalAgendar", () => {
     fireEvent.click(screen.getByRole("button", { name: /Escolher horário/i }));
     expect(await screen.findByRole("heading", { name: "Escolha a data e o horário" })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText(/Data|Date/i), { target: { value: "2099-08-20" } });
-    fireEvent.click(await screen.findByRole("button", { name: "08:30" }));
+    const timeChoice = await screen.findByRole("button", { name: "08:30" });
+    fireEvent.click(timeChoice);
+    expect(timeChoice).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
     expect(screen.getByRole("heading", { name: "Revise seu agendamento" })).toBeInTheDocument();
     fireEvent.click(await screen.findByRole("button", { name: "Confirmar agendamento" }));
     await waitFor(() => expect(mocks.criarAgendamento).toHaveBeenCalledWith({
@@ -131,7 +134,10 @@ describe("ClienteFinalAgendar", () => {
     await waitFor(() => expect(mocks.listarHorariosDisponiveis).toHaveBeenCalledWith({
       responsavelId: 7, profissionalId: undefined, servicoId: 2, servicoIds: [2, 3], data: "2099-08-20",
     }));
-    fireEvent.click(await screen.findByRole("button", { name: "08:30" }));
+    const timeChoice = await screen.findByRole("button", { name: "08:30" });
+    fireEvent.click(timeChoice);
+    expect(timeChoice).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
     fireEvent.click(screen.getByRole("button", { name: "Confirmar agendamento" }));
     await waitFor(() => expect(mocks.criarAgendamento).toHaveBeenCalledWith({
       ClienteId: 4, ResponsavelId: 7, ProfissionalId: undefined,
@@ -180,6 +186,48 @@ describe("ClienteFinalAgendar", () => {
     expect(screen.queryByRole("button", { name: /Escolher horário/ })).not.toBeInTheDocument();
   });
 
+  it("mantém o resumo dos serviços e o botão no rodapé da etapa", async () => {
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/agendar"]}>
+        <LanguageProvider><ClienteFinalAgendar /></LanguageProvider>
+      </MemoryRouter>,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: /Autonomo Teste/i }));
+    expect(screen.queryByTestId("service-selection-dock")).not.toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("button", { name: /Corte/i }));
+    const dock = screen.getByTestId("service-selection-dock");
+    expect(dock).toContainElement(screen.getByRole("heading", { name: "Serviços selecionados (1)" }));
+    expect(dock).toContainElement(screen.getByRole("button", { name: /Escolher horário/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Escolher horário/i }));
+    expect(screen.queryByTestId("service-selection-dock")).not.toBeInTheDocument();
+  });
+
+  it("navega entre semanas e seleciona datas no calendário", async () => {
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/agendar"]}>
+        <LanguageProvider><ClienteFinalAgendar /></LanguageProvider>
+      </MemoryRouter>,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: /Autonomo Teste/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Corte/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Escolher horário/i }));
+
+    const calendar = screen.getByRole("group", { name: "Escolher data no calendário" });
+    expect(calendar.querySelectorAll("button")).toHaveLength(7);
+    expect(screen.getByRole("button", { name: "Semana anterior" })).toBeDisabled();
+    const firstDate = (screen.getByLabelText("Data") as HTMLInputElement).value;
+    expect(firstDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(calendar.querySelectorAll('button[aria-pressed="true"]')).toHaveLength(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "Próxima semana" }));
+    const nextWeekDate = (screen.getByLabelText("Data") as HTMLInputElement).value;
+    expect(nextWeekDate > firstDate).toBe(true);
+    expect(calendar.querySelectorAll('button[aria-pressed="true"]')).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "Semana anterior" })).not.toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Semana anterior" }));
+    expect((screen.getByLabelText("Data") as HTMLInputElement).value).toBe(firstDate);
+  });
+
   it("permite adicionar servicos de profissionais diferentes na mesma reserva", async () => {
     mocks.listarResponsaveisAgendamento.mockResolvedValue([
       { Id: 7, Nome: "Empresa Teste", TipoUsuario: "EMPRESA" },
@@ -215,7 +263,10 @@ describe("ClienteFinalAgendar", () => {
       atendimentos: [{ ServicoId: 2, ProfissionalId: 9 }, { ServicoId: 3, ProfissionalId: 10 }],
       data: "2099-08-20",
     }));
-    fireEvent.click(await screen.findByRole("button", { name: "08:30" }));
+    const timeChoice = await screen.findByRole("button", { name: "08:30" });
+    fireEvent.click(timeChoice);
+    expect(timeChoice).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
     fireEvent.click(screen.getByRole("button", { name: "Confirmar agendamento" }));
     await waitFor(() => expect(mocks.criarAgendamento).toHaveBeenCalledWith(expect.objectContaining({
       ResponsavelId: 7, ProfissionalId: 9, ServicoIds: [2, 3],

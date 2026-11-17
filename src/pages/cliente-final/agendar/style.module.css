@@ -1634,3 +1634,375 @@
     padding: 0 3px;
   }
 }
+
+/* Resumo do agendamento preso ao rodapé durante a seleção de serviços.
+   O catálogo permanece rolável e nunca termina atrás da barra fixa. */
+.bookingPageWithDock {
+  padding-bottom: min(65dvh, 600px);
+}
+
+.serviceSelectionDock {
+  position: fixed;
+  z-index: 30;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  width: min(1052px, calc(100% - 48px));
+  max-height: min(61dvh, 540px);
+  display: grid;
+  grid-template-rows: minmax(0, auto) auto auto;
+  gap: 10px;
+  padding: 12px 14px max(14px, env(safe-area-inset-bottom));
+  border: 1px solid var(--theme-border-strong);
+  border-bottom: 0;
+  border-radius: 15px 15px 0 0;
+  background: var(--theme-background);
+  box-shadow: 0 -10px 25px rgba(0, 0, 0, .15);
+}
+
+.serviceSelectionDock .selectedServicesPanel {
+  min-height: 0;
+  overflow: hidden;
+  padding: 10px;
+  gap: 8px;
+}
+
+.serviceSelectionDock .selectedServicesList {
+  min-height: 0;
+  max-height: min(23dvh, 220px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.serviceSelectionDock .selectedServiceItem {
+  flex-shrink: 0;
+}
+
+.serviceSelectionDock .bookingSelectionTotals {
+  padding: 10px 4px;
+}
+
+.serviceSelectionDock .chooseTimeButton {
+  min-height: 45px;
+}
+
+/* Escolha semanal de data e de horário, mantendo o mesmo tema da aplicação. */
+.scheduleBookingPanel {
+  gap: 18px;
+}
+
+.scheduleServiceSummary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 11px 12px;
+  border-radius: 12px;
+  background: var(--theme-surface-muted);
+}
+
+.scheduleServiceIcon {
+  flex: 0 0 39px;
+  width: 39px;
+  height: 39px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--theme-primary-soft);
+  color: var(--theme-primary-text);
+}
+
+.scheduleServiceIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.scheduleServiceDetails {
+  flex: 1 1 auto;
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.scheduleServiceDetails strong {
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.scheduleServiceDetails small {
+  color: var(--theme-text-muted);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.scheduleEditServices {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 35px;
+  padding: 8px 11px;
+  border: 1px solid var(--theme-primary-text);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--theme-primary-text);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.scheduleEditServices svg {
+  flex: 0 0 auto;
+  width: 11px;
+  height: 11px;
+}
+
+.weeklySchedule {
+  min-width: 0;
+  display: grid;
+  gap: 17px;
+}
+
+.weeklyCalendar,
+.weeklyTimeSelection {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.weeklyScheduleHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  gap: 10px;
+}
+
+.weeklySchedule h3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.weeklySchedule h3 svg {
+  flex: 0 0 auto;
+  color: var(--theme-primary-text);
+  width: 16px;
+  height: 16px;
+}
+
+.calendarWeekNavigation {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+}
+
+.calendarWeekNavigation strong {
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.calendarWeekNavigation button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 27px;
+  width: 27px;
+  height: 27px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--theme-surface-muted);
+  color: var(--theme-primary-text);
+  cursor: pointer;
+}
+
+.calendarWeekNavigation button:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+.calendarWeekNavigation button svg {
+  width: 11px;
+  height: 11px;
+}
+
+.weekdayGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.weekdayButton {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 62px;
+  padding: 9px 1px;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 11px;
+  background: var(--theme-surface);
+  color: var(--theme-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.weekdayButton span {
+  font-size: 11px;
+  text-transform: capitalize;
+  color: var(--theme-text-muted);
+}
+
+.weekdayButton strong {
+  font-size: 15px;
+  line-height: 1.1;
+}
+
+.weekdayButton:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+.weekdayButtonSelected {
+  border-color: var(--theme-primary);
+  background: var(--theme-primary);
+  color: var(--theme-on-primary);
+}
+
+.weekdayButtonSelected span {
+  color: var(--theme-on-primary);
+}
+
+.weeklyTimeSelection {
+  padding-top: 13px;
+  border-top: 1px solid var(--theme-border-strong);
+}
+
+.weeklyTimeSelection .scheduleRegion,
+.weeklyTimeSelection .scheduleFieldset {
+  min-height: 0;
+}
+
+.weeklyTimeSelection .timeGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0;
+}
+
+.bookingPanel .weeklyTimeSelection .timeButton,
+.bookingPanel .weeklyTimeSelection .timeButtonSelected {
+  min-height: 39px;
+  padding: 7px 4px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.bookingPanel .weeklyTimeSelection .timeButton {
+  background: var(--theme-surface);
+}
+
+.bookingPanel .weeklyTimeSelection .timeButtonSelected {
+  background: var(--theme-primary);
+  border-color: var(--theme-primary);
+  color: var(--theme-on-primary);
+}
+
+.weekdayButton:focus-visible,
+.calendarWeekNavigation button:focus-visible,
+.scheduleEditServices:focus-visible {
+  outline: 2px solid var(--theme-primary-text);
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .serviceSelectionDock {
+    width: calc(100% - 28px);
+  }
+  .scheduleBookingPanel {
+    gap: 14px;
+  }
+}
+
+@media (max-width: 420px) {
+  .serviceSelectionDock {
+    width: calc(100% - 24px);
+    padding: 9px 9px max(10px, env(safe-area-inset-bottom));
+    gap: 7px;
+  }
+  .serviceSelectionDock .selectedServicesPanel {
+    gap: 6px;
+    padding: 8px;
+  }
+  .serviceSelectionDock .selectedServicesList {
+    max-height: min(22dvh, 180px);
+  }
+  .scheduleBookingPanel {
+    padding: 12px;
+  }
+  .scheduleServiceSummary {
+    gap: 8px;
+    padding: 9px;
+  }
+  .scheduleServiceIcon {
+    flex-basis: 32px;
+    width: 32px;
+    height: 32px;
+  }
+  .scheduleServiceDetails strong {
+    font-size: 12px;
+  }
+  .scheduleServiceDetails small {
+    font-size: 11px;
+  }
+  .scheduleEditServices {
+    padding: 7px 8px;
+    font-size: 10px;
+  }
+  .weekdayGrid {
+    gap: 5px;
+  }
+  .weekdayButton {
+    min-height: 53px;
+    border-radius: 9px;
+    gap: 4px;
+  }
+  .weekdayButton span {
+    font-size: 10px;
+  }
+  .weekdayButton strong {
+    font-size: 14px;
+  }
+  .calendarWeekNavigation {
+    gap: 5px;
+  }
+  .calendarWeekNavigation strong {
+    font-size: 11px;
+  }
+  .weeklyTimeSelection .timeGrid {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 340px) {
+  .weeklyTimeSelection .timeGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .calendarWeekNavigation strong {
+    font-size: 10px;
+  }
+}

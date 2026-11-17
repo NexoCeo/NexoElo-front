@@ -21,6 +21,9 @@ import {
   FaTag,
   FaTimes,
   FaUserPlus,
+  FaChevronLeft,
+  FaChevronRight,
+  FaPen,
 } from "react-icons/fa";
 import {
   criarAgendamento,
@@ -122,6 +125,24 @@ function toDateInputValue(date: Date) {
   const offset = date.getTimezoneOffset();
   const localDate = new Date(date.getTime() - offset * 60 * 1000);
   return localDate.toISOString().slice(0, 10);
+}
+
+
+function parseBookingDay(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day, 12);
+}
+
+function shiftBookingDay(value: string, count: number) {
+  const day = parseBookingDay(value);
+  day.setDate(day.getDate() + count);
+  return toDateInputValue(day);
+}
+
+function startBookingWeek(value: string) {
+  const day = parseBookingDay(value);
+  day.setDate(day.getDate() - (day.getDay() + 6) % 7);
+  return toDateInputValue(day);
 }
 
 function ProfilePhoto({ source, name }: { source?: string; name: string }) {
@@ -276,6 +297,17 @@ export default function ClienteFinalAgendar() {
   const totalDuracao = selectedServicos.reduce((total, servico) => total + Number(servico.TempoEstimadoMinutos || 0), 0);
   const responsavelEhEmpresa = selectedResponsavel?.TipoUsuario === "EMPRESA";
   const minDate = useMemo(() => toDateInputValue(new Date()), []);
+  const [visibleWeek, setVisibleWeek] = useState(() => startBookingWeek(draft?.dataSelecionada || minDate));
+  const weekDates = useMemo(
+    () => Array.from({ length: 7 }, (_, index) => shiftBookingDay(visibleWeek, index)),
+    [visibleWeek],
+  );
+  const calendarMonth = useMemo(() => {
+    const value = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" })
+      .format(parseBookingDay(weekDates[3]));
+    return value[0].toLocaleUpperCase("pt-BR") + value.slice(1);
+  }, [weekDates]);
+  const canGoPreviousWeek = visibleWeek > startBookingWeek(minDate);
   const returnUrl = location.pathname + location.search;
   const loginUrl = "/cliente-final/login?redirectTo=" + encodeURIComponent(returnUrl);
   const prestadoresFiltrados = responsaveis.filter((item) =>
@@ -640,14 +672,27 @@ export default function ClienteFinalAgendar() {
       showNotification({ type: "warning", title: "Selecione um serviço", message: "Escolha pelo menos um atendimento." });
       return;
     }
+    const nextDate = dataSelecionada && dataSelecionada >= minDate ? dataSelecionada : minDate;
+    if (nextDate !== dataSelecionada) handleDataChange(nextDate);
+    setVisibleWeek(startBookingWeek(nextDate));
     setExpandedSection("horario");
   }
 
   function handleDataChange(nextDate: string) {
+    if (nextDate && nextDate < minDate) return;
     setDataSelecionada(nextDate);
+    if (nextDate) setVisibleWeek(startBookingWeek(nextDate));
     setDataAgendamento("");
     setError("");
     setSuccess("");
+  }
+
+  function moveCalendarWeek(direction: -1 | 1) {
+    const nextWeek = shiftBookingDay(visibleWeek, direction * 7);
+    if (nextWeek < startBookingWeek(minDate)) return;
+    const nextDate = nextWeek < minDate ? minDate : nextWeek;
+    setVisibleWeek(nextWeek);
+    handleDataChange(nextDate);
   }
 
   async function handleSubmit(event: React.FormEvent) {
@@ -811,7 +856,7 @@ export default function ClienteFinalAgendar() {
             </div>}
         </section>
       ) : (
-        <section className={styles.bookingPage}>
+        <section className={`${styles.bookingPage} ${etapaAtual === "servico" && selectedServicos.length > 0 ? styles.bookingPageWithDock : ""}`}>
           <button type="button" className={styles.backToProviders} onClick={() => {
             if (etapaAtual === "confirmacao") {
               setExpandedSection("horario");
@@ -927,7 +972,7 @@ export default function ClienteFinalAgendar() {
                 )}
 
                 {selectedServicos.length > 0 && (
-                  <>
+                  <div className={styles.serviceSelectionDock} data-testid="service-selection-dock">
                     <section className={styles.selectedServicesPanel} aria-label="Serviços selecionados">
                       <h3>Serviços selecionados ({selectedServicos.length})</h3>
                       <div className={styles.selectedServicesList}>
@@ -996,43 +1041,114 @@ export default function ClienteFinalAgendar() {
                     <button type="button" className={styles.chooseTimeButton} onClick={advanceToSchedule}>
                       Escolher horário <FaArrowRight aria-hidden="true" />
                     </button>
-                  </>
+                  </div>
                 )}
               </section>
             )}
 
             {etapaAtual === "horario" && (
-              <section className={styles.bookingPanel}>
-                <div className={styles.sectionHeading}><div><h2>Escolha a data e o horário</h2><p>Horários atualizados conforme a disponibilidade do prestador.</p></div></div>
-                <div className={styles.selectionSummary}>
-                  <span><strong>{selectedServicos.map(item => item.NomeServico).join(" + ")}</strong> · {totalDuracao} min · {formatCurrency(totalValor)} {multiplosProfissionais ? "· Vários profissionais" : ""}</span>
-                  <button type="button" className={styles.textAction} onClick={() => setExpandedSection("servico")}>Alterar serviços</button>
+              <section className={`${styles.bookingPanel} ${styles.scheduleBookingPanel}`}>
+                <div className={styles.sectionHeading}>
+                  <div>
+                    <h2>Escolha a data e o horário</h2>
+                    <p>Horários atualizados conforme a disponibilidade do prestador.</p>
+                  </div>
                 </div>
-                <div className={styles.scheduleLayout}>
-                  <label className={styles.dateField} htmlFor="booking-date">
-                    <span><FaCalendarAlt aria-hidden="true" /> {t("client.date")}</span>
-                    <input id="booking-date" type="date" min={minDate} value={dataSelecionada}
+                <div className={styles.scheduleServiceSummary}>
+                  <span className={styles.scheduleServiceIcon}><FaTag aria-hidden="true" /></span>
+                  <span className={styles.scheduleServiceDetails}>
+                    <strong>{selectedServicos.map(item => item.NomeServico).join(" + ")}</strong>
+                    <small>{totalDuracao} min · {formatCurrency(totalValor)} {multiplosProfissionais ? "· Vários profissionais" : ""}</small>
+                  </span>
+                  <button type="button" className={styles.scheduleEditServices}
+                    onClick={() => setExpandedSection("servico")}>
+                    <FaPen aria-hidden="true" /> Alterar serviços
+                  </button>
+                </div>
+
+                <div className={styles.weeklySchedule}>
+                  <div className={styles.weeklyCalendar}>
+                    <div className={styles.weeklyScheduleHeading}>
+                      <h3><FaCalendarAlt aria-hidden="true" /> Data</h3>
+                      <div className={styles.calendarWeekNavigation}>
+                        <button type="button" aria-label="Semana anterior"
+                          disabled={!canGoPreviousWeek}
+                          onClick={() => moveCalendarWeek(-1)}>
+                          <FaChevronLeft aria-hidden="true" />
+                        </button>
+                        <strong aria-live="polite">{calendarMonth}</strong>
+                        <button type="button" aria-label="Próxima semana"
+                          onClick={() => moveCalendarWeek(1)}>
+                          <FaChevronRight aria-hidden="true" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className={styles.weekdayGrid} role="group" aria-label="Escolher data no calendário">
+                      {weekDates.map((day) => {
+                        const date = parseBookingDay(day);
+                        const isSelected = day === dataSelecionada;
+                        const fullDate = new Intl.DateTimeFormat("pt-BR", {
+                          weekday: "long", day: "numeric", month: "long", year: "numeric",
+                        }).format(date);
+                        return (
+                          <button
+                            type="button"
+                            key={day}
+                            className={`${styles.weekdayButton} ${isSelected ? styles.weekdayButtonSelected : ""}`}
+                            aria-label={fullDate}
+                            aria-pressed={isSelected}
+                            disabled={day < minDate}
+                            onClick={() => handleDataChange(day)}
+                          >
+                            <span>{new Intl.DateTimeFormat("pt-BR", { weekday: "short" })
+                              .format(date).replace(".", "")}</span>
+                            <strong>{date.getDate()}</strong>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <label htmlFor="booking-date" className={styles.visuallyHidden}>Data</label>
+                    <input id="booking-date" className={styles.visuallyHidden}
+                      type="date" min={minDate} value={dataSelecionada}
                       style={{ colorScheme: themeName === "dark" ? "dark" : "light" }}
-                      onChange={(event) => handleDataChange(event.target.value)} />
-                  </label>
-                  <div className={styles.scheduleRegion}>
-                    {!dataSelecionada ? <p className={styles.emptyState}>Escolha uma data para consultar os horários disponíveis.</p> :
-                      <fieldset className={styles.scheduleFieldset} disabled={loadingHorarios}>
-                        <legend>{t("client.availableSlots")}</legend>
-                        {loadingHorarios ? <LoadingState label={t("client.slotsLoading")} variant="client-slots" compact /> :
-                          horariosDisponiveis.length === 0 ? <p className={styles.scheduleFeedback}>{t("client.slotsEmpty")}</p> :
-                          <div className={styles.timeGrid}>
-                            {horariosDisponiveis.map((horario) => (
-                              <button key={horario.DataAgendamento} type="button" className={dataAgendamento === horario.DataAgendamento ? styles.timeButtonSelected : styles.timeButton}
-                                aria-pressed={dataAgendamento === horario.DataAgendamento} onClick={() => {
-                                  setDataAgendamento(horario.DataAgendamento);
-                                  setExpandedSection("confirmacao");
-                                  setError("");
-                                  setSuccess("");
-                                }}>{horario.Horario}</button>
-                            ))}
-                          </div>}
-                      </fieldset>}
+                      onChange={(event) => handleDataChange(event.target.value)}
+                    />
+                  </div>
+                  <div className={styles.weeklyTimeSelection}>
+                    <h3><FaClock aria-hidden="true" /> Horário</h3>
+                    {!dataSelecionada ? (
+                      <p className={styles.scheduleFeedback}>Selecione uma data para ver os horários disponíveis.</p>
+                    ) : (
+                      <div className={styles.scheduleRegion}>
+                        <fieldset className={styles.scheduleFieldset} disabled={loadingHorarios}>
+                          <legend className={styles.visuallyHidden}>{t("client.availableSlots")}</legend>
+                          {loadingHorarios ? (
+                            <LoadingState label={t("client.slotsLoading")} variant="client-slots" compact />
+                          ) : horariosDisponiveis.length === 0 ? (
+                            <p className={styles.scheduleFeedback}>{t("client.slotsEmpty")}</p>
+                          ) : (
+                            <div className={styles.timeGrid}>
+                              {horariosDisponiveis.map((horario) => (
+                                <button
+                                  key={horario.DataAgendamento}
+                                  type="button"
+                                  className={dataAgendamento === horario.DataAgendamento
+                                    ? styles.timeButtonSelected : styles.timeButton}
+                                  aria-pressed={dataAgendamento === horario.DataAgendamento}
+                                  onClick={() => {
+                                    setDataAgendamento(horario.DataAgendamento);
+                                    setError("");
+                                    setSuccess("");
+                                  }}
+                                >
+                                  {horario.Horario}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </fieldset>
+                      </div>
+                    )}
                   </div>
                 </div>
               </section>
@@ -1097,7 +1213,14 @@ export default function ClienteFinalAgendar() {
                   disabled={loading || loadingHorarios || loadingPagamento || !configPagamento || !dataAgendamento || !selectedHorario || (metodoPagamento === "ONLINE" && !configPagamento.OnlineDisponivel)}>
                   {loading ? "Agendando..." : cliente ? "Confirmar agendamento" : "Entrar para agendar"}
                 </button>}
-                {etapaAtual === "horario" && <span className={styles.footerHint}>Selecione um horário para continuar</span>}
+                {etapaAtual === "horario" && (
+                  dataAgendamento && selectedHorario
+                    ? <button type="button" className={styles.footerConfirm}
+                        onClick={() => setExpandedSection("confirmacao")}>
+                        Continuar <FaArrowRight aria-hidden="true" />
+                      </button>
+                    : <span className={styles.footerHint}>Selecione um horário para continuar</span>
+                )}
               </div>
             )}
           </form>
