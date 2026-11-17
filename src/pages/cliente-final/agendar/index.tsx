@@ -1,7 +1,7 @@
 import { formatPersonName } from "@/context/UserContext";
 import LoadingState from "@/components/loading-state";
 import { useTheme } from "@/context/ThemeContext";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 import { isAxiosError } from "axios";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
@@ -260,6 +260,8 @@ export default function ClienteFinalAgendar() {
   const [dataSelecionada, setDataSelecionada] = useState(draft?.dataSelecionada ?? "");
   const [dataAgendamento, setDataAgendamento] = useState(draft?.dataAgendamento ?? "");
   const [refreshHorarios, setRefreshHorarios] = useState(0);
+  const serviceDockRef = useRef<HTMLDivElement | null>(null);
+  const [serviceDockHeight, setServiceDockHeight] = useState(0);
   const [loading, setLoading] = useState(false);
   const [configPagamento, setConfigPagamento] = useState<ConfiguracaoPagamento | null>(null);
   const [loadingPagamento, setLoadingPagamento] = useState(false);
@@ -315,6 +317,25 @@ export default function ClienteFinalAgendar() {
     (filtroPrestador === "TODOS" || item.TipoUsuario === filtroPrestador),
   );
   const etapaAtual = expandedSection ?? "confirmacao";
+  const serviceDockActive = etapaAtual === "servico" && selectedServicos.length > 0;
+  const bookingActionActive = etapaAtual === "horario" || etapaAtual === "confirmacao";
+
+  // O espaço reservado abaixo do catálogo corresponde exatamente à altura real
+  // do rodapé. Assim, nenhum serviço fica atrás dos botões em telas pequenas.
+  useEffect(() => {
+    if (!serviceDockActive || !serviceDockRef.current) return;
+    const dock = serviceDockRef.current;
+    const measure = () => {
+      const height = Math.ceil(dock.getBoundingClientRect().height);
+      if (height > 0) setServiceDockHeight(height);
+    };
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(dock);
+    return () => observer.disconnect();
+  }, [serviceDockActive, selectedServicos.length]);
+
   useEffect(() => {
     try {
       if (success) {
@@ -800,7 +821,7 @@ export default function ClienteFinalAgendar() {
   }
 
   return (
-    <main className={styles.marketplace}>
+    <main className={`${styles.marketplace} ${responsavelId ? styles.bookingMarketplace : ""}`}>
       {!responsavelId && (
         <button type="button" className={styles.backToProviders} onClick={() => navigate(cliente ? "/cliente-final/home" : "/cliente-final/login")}>
           <FaArrowLeft aria-hidden="true" /> Voltar
@@ -856,7 +877,10 @@ export default function ClienteFinalAgendar() {
             </div>}
         </section>
       ) : (
-        <section className={`${styles.bookingPage} ${etapaAtual === "servico" && selectedServicos.length > 0 ? styles.bookingPageWithDock : ""}`}>
+        <section
+          className={`${styles.bookingPage} ${serviceDockActive ? styles.bookingPageWithDock : ""} ${bookingActionActive ? styles.bookingPageWithAction : ""}`}
+          style={serviceDockActive && serviceDockHeight ? { paddingBottom: serviceDockHeight + 20 } : undefined}
+        >
           <button type="button" className={styles.backToProviders} onClick={() => {
             if (etapaAtual === "confirmacao") {
               setExpandedSection("horario");
@@ -972,7 +996,7 @@ export default function ClienteFinalAgendar() {
                 )}
 
                 {selectedServicos.length > 0 && (
-                  <div className={styles.serviceSelectionDock} data-testid="service-selection-dock">
+                  <div ref={serviceDockRef} className={styles.serviceSelectionDock} data-testid="service-selection-dock">
                     <section className={styles.selectedServicesPanel} aria-label="Serviços selecionados">
                       <h3>Serviços selecionados ({selectedServicos.length})</h3>
                       <div className={styles.selectedServicesList}>
@@ -1208,18 +1232,20 @@ export default function ClienteFinalAgendar() {
             {success && etapaAtual !== "confirmacao" && <p className={styles.success}>{success}</p>}
 
             {(etapaAtual === "horario" || etapaAtual === "confirmacao") && !success && (
-              <div className={styles.bookingFooter}>
+              <div className={styles.bookingFooter} data-testid="booking-action-dock">
                 {etapaAtual === "confirmacao" && <button type="submit" className={styles.footerConfirm}
                   disabled={loading || loadingHorarios || loadingPagamento || !configPagamento || !dataAgendamento || !selectedHorario || (metodoPagamento === "ONLINE" && !configPagamento.OnlineDisponivel)}>
                   {loading ? "Agendando..." : cliente ? "Confirmar agendamento" : "Entrar para agendar"}
                 </button>}
                 {etapaAtual === "horario" && (
-                  dataAgendamento && selectedHorario
-                    ? <button type="button" className={styles.footerConfirm}
-                        onClick={() => setExpandedSection("confirmacao")}>
-                        Continuar <FaArrowRight aria-hidden="true" />
-                      </button>
-                    : <span className={styles.footerHint}>Selecione um horário para continuar</span>
+                  <button
+                    type="button"
+                    className={styles.footerConfirm}
+                    disabled={loadingHorarios || !dataAgendamento || !selectedHorario}
+                    onClick={() => setExpandedSection("confirmacao")}
+                  >
+                    Continuar <FaArrowRight aria-hidden="true" />
+                  </button>
                 )}
               </div>
             )}

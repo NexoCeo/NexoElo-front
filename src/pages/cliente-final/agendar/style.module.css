@@ -679,7 +679,7 @@
 .reviewList span { color:var(--theme-text-muted); }
 .reviewList strong { text-align:right; color:var(--theme-text); }
 .reviewTotal strong { color:var(--theme-primary-text); font-size:20px; }
-.bookingFooter { position:sticky; bottom:12px; display:flex; gap:12px; align-items:center; justify-content:space-between; background:var(--theme-surface); border:1px solid var(--theme-border-strong); border-radius:16px; padding:12px; box-shadow:0 7px 25px rgba(0,0,0,.12); z-index:5; }
+.bookingFooter { position:fixed; left:50%; bottom:max(12px,env(safe-area-inset-bottom)); transform:translateX(-50%); width:min(1052px,calc(100% - 48px)); box-sizing:border-box; display:flex; align-items:center; justify-content:center; z-index:30; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; }
 .footerBack,.footerConfirm { border:0; border-radius:11px; padding:14px 19px; cursor:pointer; font:inherit; font-size:14px; font-weight:800; display:flex; align-items:center; justify-content:center; gap:9px; }
 .footerBack { background:var(--theme-surface-muted); color:var(--theme-text); }
 .footerConfirm { flex:1; background:var(--theme-primary); color:var(--theme-on-primary); }
@@ -1637,8 +1637,17 @@
 
 /* Resumo do agendamento preso ao rodapé durante a seleção de serviços.
    O catálogo permanece rolável e nunca termina atrás da barra fixa. */
+.bookingMarketplace {
+  padding-bottom: 0;
+}
+
 .bookingPageWithDock {
-  padding-bottom: min(65dvh, 600px);
+  /* Valor inicial enquanto o tamanho real do dock é medido. */
+  padding-bottom: min(42dvh, 400px);
+}
+
+.bookingPageWithAction {
+  padding-bottom: 85px;
 }
 
 .serviceSelectionDock {
@@ -1653,12 +1662,11 @@
   display: grid;
   grid-template-rows: minmax(0, auto) auto auto;
   gap: 10px;
-  padding: 12px 14px max(14px, env(safe-area-inset-bottom));
-  border: 1px solid var(--theme-border-strong);
-  border-bottom: 0;
-  border-radius: 15px 15px 0 0;
-  background: var(--theme-background);
-  box-shadow: 0 -10px 25px rgba(0, 0, 0, .15);
+  padding: 10px 14px max(12px, env(safe-area-inset-bottom));
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .serviceSelectionDock .selectedServicesPanel {
@@ -2004,5 +2012,48 @@
   }
   .calendarWeekNavigation strong {
     font-size: 10px;
+  }
+}
+
+/* Rodapés de todas as etapas: sem caixa, moldura ou cor de fundo extra.
+   Preserva o acabamento dos cards individuais e do botão principal. */
+.bookingPage .scheduleBookingPanel {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.serviceSelectionDock .selectedServicesPanel {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.serviceSelectionDock .bookingSelectionTotals {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.bookingFooter .footerConfirm {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 47px;
+}
+
+@media (max-width: 760px) {
+  .bookingFooter {
+    width: calc(100% - 28px);
+  }
+}
+
+@media (max-width: 420px) {
+  .bookingFooter {
+    width: calc(100% - 24px);
+  }
+  .bookingPage .scheduleBookingPanel {
+    padding: 0;
   }
 }

@@ -228,6 +228,36 @@ describe("ClienteFinalAgendar", () => {
     expect((screen.getByLabelText("Data") as HTMLInputElement).value).toBe(firstDate);
   });
 
+  it("mantém os botões de avanço no rodapé durante horário e confirmação", async () => {
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/agendar"]}>
+        <LanguageProvider><ClienteFinalAgendar /></LanguageProvider>
+      </MemoryRouter>,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: /Autonomo Teste/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Corte/i }));
+    const servicesDock = screen.getByTestId("service-selection-dock");
+    expect(servicesDock).toContainElement(screen.getByRole("button", { name: /Escolher horário/i }));
+
+    fireEvent.click(screen.getByRole("button", { name: /Escolher horário/i }));
+    const footer = screen.getByTestId("booking-action-dock");
+    const continueButton = screen.getByRole("button", { name: "Continuar" });
+    expect(footer).toContainElement(continueButton);
+    expect(continueButton).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText(/^Data$/i, { selector: "input" }), {
+      target: { value: "2099-08-20" },
+    });
+    fireEvent.click(await screen.findByRole("button", { name: "08:30" }));
+    expect(continueButton).toBeEnabled();
+    fireEvent.click(continueButton);
+
+    expect(screen.getByTestId("booking-action-dock")).toContainElement(
+      screen.getByRole("button", { name: "Confirmar agendamento" }),
+    );
+    expect(screen.queryByTestId("service-selection-dock")).not.toBeInTheDocument();
+  });
+
   it("permite adicionar servicos de profissionais diferentes na mesma reserva", async () => {
     mocks.listarResponsaveisAgendamento.mockResolvedValue([
       { Id: 7, Nome: "Empresa Teste", TipoUsuario: "EMPRESA" },
