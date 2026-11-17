@@ -136,7 +136,8 @@ describe("ClienteFinalHome", () => {
     expect(screen.getByRole("heading", { name: "Histórico de Agendamentos" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Próximos" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Anteriores" })).toBeInTheDocument();
-    expect(screen.getByText("Barba")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Exibir detalhes do agendamento de Corte" })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: "Exibir detalhes do agendamento de Barba" })).toHaveAttribute("aria-expanded", "false");
     expect(screen.getByRole("button", { name: "Todos" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("location")).toHaveTextContent("/cliente-final/home");
 
@@ -184,22 +185,23 @@ describe("ClienteFinalHome", () => {
     const completedFilter = screen.getByRole("button", { name: "Concluídos" });
     const cancelledFilter = screen.getByRole("button", { name: "Cancelados" });
     expect(allFilter).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByText("Corte")).toBeInTheDocument();
-    expect(screen.getByText("Barba")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Exibir detalhes do agendamento de Corte" })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: "Exibir detalhes do agendamento de Barba" })).toHaveAttribute("aria-expanded", "false");
     expect(screen.getByRole("button", { name: "Exibir detalhes do agendamento de Hidratação" })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByText("Hidratação")).not.toBeInTheDocument();
 
     fireEvent.click(completedFilter);
     expect(completedFilter).toHaveAttribute("aria-pressed", "true");
     expect(allFilter).toHaveAttribute("aria-pressed", "false");
-    expect(screen.queryByText("Corte")).not.toBeInTheDocument();
-    expect(screen.getByText("Barba")).toBeInTheDocument();
-    expect(screen.queryByText("Hidratação")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /detalhes do agendamento de Corte/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Exibir detalhes do agendamento de Barba" })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("button", { name: /detalhes do agendamento de Hidratação/ })).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Anteriores" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Próximos" })).not.toBeInTheDocument();
 
     fireEvent.click(cancelledFilter);
     expect(cancelledFilter).toHaveAttribute("aria-pressed", "true");
-    expect(screen.queryByText("Barba")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /detalhes do agendamento de Barba/ })).not.toBeInTheDocument();
     const cancelledCard = screen.getByRole("button", { name: "Exibir detalhes do agendamento de Hidratação" });
     expect(cancelledCard).toHaveAttribute("aria-expanded", "false");
     fireEvent.click(cancelledCard);
@@ -207,9 +209,9 @@ describe("ClienteFinalHome", () => {
 
     fireEvent.click(allFilter);
     expect(allFilter).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByText("Corte")).toBeInTheDocument();
-    expect(screen.getByText("Barba")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /detalhes do agendamento de Hidratação/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Exibir detalhes do agendamento de Corte" })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: "Exibir detalhes do agendamento de Barba" })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: "Exibir detalhes do agendamento de Hidratação" })).toHaveAttribute("aria-expanded", "false");
     expect(mocks.listarHistoricoAgendamentos).toHaveBeenCalledTimes(1);
   });
 
@@ -254,6 +256,13 @@ describe("ClienteFinalHome", () => {
       expect(screen.getByText("Atendimentos concluídos").parentElement).toHaveTextContent("1");
     });
     fireEvent.click(screen.getByRole("tab", { name: "Histórico" }));
+    const expandInitially = screen.getByRole("button", {
+      name: "Exibir detalhes do agendamento de Escova e prancha + Sobrancelha",
+    });
+    expect(expandInitially).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("heading", { name: "Serviços realizados" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Escova e prancha")).not.toBeInTheDocument();
+    fireEvent.click(expandInitially);
     expect(screen.getByRole("heading", { name: "Serviços realizados" })).toBeInTheDocument();
     expect(screen.getByText("Escova e prancha")).toBeInTheDocument();
     expect(screen.getByText("Maria Eduarda")).toBeInTheDocument();
@@ -363,7 +372,10 @@ describe("ClienteFinalHome", () => {
     );
 
     fireEvent.click(screen.getByRole("tab", { name: "Histórico" }));
-    expect(await screen.findByText("Corte")).toBeInTheDocument();
+    const expandScheduled = await screen.findByRole("button", { name: "Exibir detalhes do agendamento de Corte" });
+    expect(expandScheduled).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(expandScheduled);
+    expect(screen.getByText("Corte")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Cancelar agendamento de Corte" }));
 
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
