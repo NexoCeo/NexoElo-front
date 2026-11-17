@@ -8,6 +8,8 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   FaBuilding,
   FaCalendarAlt,
+  FaCalendarCheck,
+  FaCut,
   FaCheck,
   FaArrowLeft,
   FaArrowRight,
@@ -1228,29 +1230,75 @@ export default function ClienteFinalAgendar() {
             )}
 
             {etapaAtual === "confirmacao" && (
-              <section className={styles.bookingPanel}>
+              <section className={`${styles.bookingPanel} ${styles.confirmationPanel}`}>
                 {success ? (
                   <div className={styles.successPanel}><FaCheck aria-hidden="true" /><h2>Agendamento realizado!</h2><p>{success}</p>
                     <Link to="/cliente-final/home">Ver meus agendamentos</Link></div>
                 ) : (
                   <>
-                    <div className={styles.sectionHeading}><div><h2>Revise seu agendamento</h2><p>Confira as informações antes de confirmar.</p></div></div>
-                    <div className={styles.reviewList}>
-                      <div><span>Prestador</span><strong>{formatPersonName(selectedResponsavel?.Nome ?? "")}</strong></div>
-                      {responsavelEhEmpresa && <div><span>Profissional</span><strong>{multiplosProfissionais ? "Vários profissionais" : formatPersonName(selectedProfissional?.Nome ?? "")}</strong></div>}
-                      <div><span>Serviços</span><strong>{selectedServicos.map(item => item.NomeServico).join(" + ")}</strong></div>
-                      {responsavelEhEmpresa && selecoes.length > 0 && <div><span>Atendimentos</span><strong>{selecoes.map(item => `${item.servico.NomeServico} — ${formatPersonName(profissionais.find(pro => pro.Id === item.profissionalId)?.Nome ?? "Profissional")}`).join(" · ")}</strong></div>}
-                      <div><span>Duração total</span><strong>{totalDuracao} min</strong></div>
-                      <div><span>Data e horário</span><strong>{dataFormatada} · {selectedHorario?.Horario}</strong></div>
-                      <div className={styles.reviewTotal}><span>Valor dos serviços</span><strong>{formatCurrency(totalValor)}</strong></div>
-                      {metodoPagamento === "ONLINE" && totalOnline && (
-                        <>
-                          <div><span>Custo do pagamento online (cliente)</span><strong>{formatCurrency(totalOnline.tarifa)}</strong></div>
-                          <div className={styles.reviewTotal}><span>Total a pagar com cartão</span><strong>{formatCurrency(totalOnline.total)}</strong></div>
-                          <small>O estabelecimento recebe o valor integral dos serviços. O custo do processamento é acrescentado ao pagamento online.</small>
-                        </>
+                    <header className={styles.confirmationHeader}>
+                      <FaCalendarCheck aria-hidden="true" />
+                      <div>
+                        <h2>Confirme seu agendamento</h2>
+                        <p>Revise as informações abaixo antes de confirmar.</p>
+                      </div>
+                    </header>
+                    <section className={styles.confirmationSummary} aria-label="Resumo da confirmação">
+                      {!multiplosProfissionais && (
+                        <div className={styles.confirmationRow}>
+                          <span className={styles.confirmationIcon}><FaUser aria-hidden="true" /></span>
+                          <span className={styles.confirmationInfo}>
+                            <small>Profissional</small>
+                            <strong>{formatPersonName(responsavelEhEmpresa
+                              ? selectedProfissional?.Nome ?? "" : selectedResponsavel?.Nome ?? "")}</strong>
+                          </span>
+                        </div>
                       )}
-                    </div>
+                      <div className={styles.confirmationRow}>
+                        <span className={styles.confirmationIcon}><FaCut aria-hidden="true" /></span>
+                        <span className={styles.confirmationInfo}>
+                          <small>Serviço(s)</small>
+                          {responsavelEhEmpresa && multiplosProfissionais ? (
+                            <span className={styles.confirmationServiceList}>
+                              {selecoes.map(item => (
+                                <span key={`${item.profissionalId}:${item.servico.Id}`}>
+                                  <strong>{item.servico.NomeServico}</strong>
+                                  <small>Com {formatPersonName(profissionais.find(
+                                    profissional => profissional.Id === item.profissionalId,
+                                  )?.Nome ?? "Profissional")}</small>
+                                </span>
+                              ))}
+                            </span>
+                          ) : (
+                            <strong>{selectedServicos.map(item => item.NomeServico).join(" + ")}</strong>
+                          )}
+                        </span>
+                      </div>
+                      <div className={styles.confirmationTiming}>
+                        <div className={styles.confirmationTimingItem}>
+                          <span className={styles.confirmationIcon}><FaCalendarAlt aria-hidden="true" /></span>
+                          <span className={styles.confirmationInfo}>
+                            <small>Data e horário</small>
+                            <strong>{dataFormatada} às {selectedHorario?.Horario}</strong>
+                          </span>
+                        </div>
+                        <div className={styles.confirmationTimingItem}>
+                          <span className={styles.confirmationIcon}><FaClock aria-hidden="true" /></span>
+                          <span className={styles.confirmationInfo}>
+                            <small>Duração total</small>
+                            <strong>{totalDuracao} min</strong>
+                          </span>
+                        </div>
+                      </div>
+                      <div className={styles.confirmationTotal}>
+                        <span className={styles.confirmationTotalLabel}>
+                          <span className={styles.confirmationIcon}><FaTag aria-hidden="true" /></span>
+                          Valor total
+                        </span>
+                        <strong>{formatCurrency(metodoPagamento === "ONLINE" && totalOnline
+                          ? totalOnline.total : totalValor)}</strong>
+                      </div>
+                    </section>
                     <fieldset className={styles.paymentChoice}>
                       <legend>Como deseja pagar?</legend>
                       {loadingPagamento && <p>Carregando formas de pagamento...</p>}
@@ -1270,8 +1318,17 @@ export default function ClienteFinalAgendar() {
                               "O estabelecimento ainda não habilitou sua conta recebedora."}</small></span>
                         </label>
                       )}
+                      {metodoPagamento === "ONLINE" && totalOnline && (
+                        <div className={styles.confirmationPaymentBreakdown}>
+                          <span>Serviços <strong>{formatCurrency(totalValor)}</strong></span>
+                          <span>Taxa de pagamento online <strong>{formatCurrency(totalOnline.tarifa)}</strong></span>
+                        </div>
+                      )}
                     </fieldset>
-                    <button type="button" className={styles.textAction} onClick={() => setExpandedSection("horario")}>Alterar data ou horário</button>
+                    <button type="button" className={styles.confirmationChangeDate}
+                      onClick={() => setExpandedSection("horario")}>
+                      <FaPen aria-hidden="true" /> Alterar data ou horário
+                    </button>
                   </>
                 )}
               </section>

@@ -98,7 +98,7 @@ describe("ClienteFinalAgendar", () => {
     fireEvent.click(timeChoice);
     expect(timeChoice).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
-    expect(screen.getByRole("heading", { name: "Revise seu agendamento" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Confirme seu agendamento" })).toBeInTheDocument();
     fireEvent.click(await screen.findByRole("button", { name: "Confirmar agendamento" }));
     await waitFor(() => expect(mocks.criarAgendamento).toHaveBeenCalledWith({
       ClienteId: 4, ResponsavelId: 7, ProfissionalId: undefined,
@@ -288,7 +288,7 @@ describe("ClienteFinalAgendar", () => {
     fireEvent.click(await screen.findByRole("button", { name: "08:30" }));
     expect(confirm).toBeEnabled();
     fireEvent.click(confirm);
-    expect(screen.getByRole("heading", { name: "Revise seu agendamento" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Confirme seu agendamento" })).toBeInTheDocument();
     expect(confirm).toHaveAttribute("aria-current", "step");
 
     fireEvent.click(date);
@@ -378,6 +378,79 @@ describe("ClienteFinalAgendar", () => {
     expect(mocks.criarAgendamento).toHaveBeenCalledTimes(1);
   });
 
+  it("apresenta confirmação compacta sem repetir estabelecimento nem atendimentos", async () => {
+    mocks.listarResponsaveisAgendamento.mockResolvedValue([
+      { Id: 7, Nome: "Empresa Teste", TipoUsuario: "EMPRESA" },
+    ]);
+    mocks.listarProfissionaisAgendamento.mockResolvedValue([
+      { Id: 9, Nome: "Ana", VinculoStatus: "APROVADO" },
+    ]);
+    mocks.listarServicosPorProfissional.mockResolvedValue([
+      { Id: 2, NomeServico: "Corte", Valor: 50, TempoEstimadoMinutos: 30 },
+    ]);
+    render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}>
+      <LanguageProvider><ClienteFinalAgendar /></LanguageProvider>
+    </MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: /Empresa Teste/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Ana/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Corte/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Escolher horário/i }));
+    fireEvent.change(screen.getByLabelText(/^Data$/i, { selector: "input" }), {
+      target: { value: "2099-08-20" },
+    });
+    fireEvent.click(await screen.findByRole("button", { name: "08:30" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
+    const summary = screen.getByRole("region", { name: "Resumo da confirmação" });
+    expect(screen.getByRole("heading", { name: "Confirme seu agendamento" })).toBeInTheDocument();
+    expect(summary).toHaveTextContent("Profissional");
+    expect(summary).toHaveTextContent("Ana");
+    expect(summary).toHaveTextContent("Corte");
+    expect(summary).toHaveTextContent("30 min");
+    expect(summary).toHaveTextContent(/50,00/);
+    expect(summary).not.toHaveTextContent("Empresa Teste");
+    expect(summary).not.toHaveTextContent("Atendimentos");
+    expect(screen.getByRole("button", { name: "Alterar data ou horário" })).toBeInTheDocument();
+    expect(screen.getByTestId("booking-action-dock")).toContainElement(
+      screen.getByRole("button", { name: "Confirmar agendamento" }),
+    );
+  });
+
+  it("associa cada serviço ao profissional sem duplicar informações", async () => {
+    mocks.listarResponsaveisAgendamento.mockResolvedValue([
+      { Id: 7, Nome: "Empresa Teste", TipoUsuario: "EMPRESA" },
+    ]);
+    mocks.listarProfissionaisAgendamento.mockResolvedValue([
+      { Id: 9, Nome: "Ana", VinculoStatus: "APROVADO" },
+      { Id: 10, Nome: "Maria", VinculoStatus: "APROVADO" },
+    ]);
+    mocks.listarServicosPorProfissional.mockImplementation(async (id: number) => id === 9
+      ? [{ Id: 2, NomeServico: "Corte", Valor: 50, TempoEstimadoMinutos: 30 }]
+      : [{ Id: 3, NomeServico: "Escova", Valor: 70, TempoEstimadoMinutos: 45 }]);
+    render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}>
+      <LanguageProvider><ClienteFinalAgendar /></LanguageProvider>
+    </MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: /Empresa Teste/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Ana/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Corte/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Adicionar serviços de outro profissional/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Maria/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Escova/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Escolher horário/i }));
+    fireEvent.change(screen.getByLabelText(/^Data$/i, { selector: "input" }), {
+      target: { value: "2099-08-20" },
+    });
+    fireEvent.click(await screen.findByRole("button", { name: "08:30" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
+    const summary = screen.getByRole("region", { name: "Resumo da confirmação" });
+    expect(summary).toHaveTextContent("Corte");
+    expect(summary).toHaveTextContent("Escova");
+    expect(summary).toHaveTextContent("Com Ana");
+    expect(summary).toHaveTextContent("Com Maria");
+    expect(summary).not.toHaveTextContent("Atendimentos");
+    expect(summary).toHaveTextContent("75 min");
+    expect(summary).toHaveTextContent(/120,00/);
+  });
+
   it("remove serviços de outro profissional sem depender do catálogo atualmente carregado", async () => {
     mocks.listarResponsaveisAgendamento.mockResolvedValue([
       { Id: 7, Nome: "Empresa Teste", TipoUsuario: "EMPRESA" },
@@ -445,7 +518,7 @@ describe("ClienteFinalAgendar", () => {
       expandedSection: "confirmacao",
     }));
     render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><LanguageProvider><ClienteFinalAgendar /></LanguageProvider></MemoryRouter>);
-    expect(await screen.findByRole("heading", { name: "Revise seu agendamento" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Confirme seu agendamento" })).toBeInTheDocument();
     await waitFor(() => expect(mocks.listarHorariosDisponiveis).toHaveBeenCalledWith({
       responsavelId: 7, profissionalId: undefined, servicoId: 2, servicoIds: [2], data: "2099-08-20",
     }));
