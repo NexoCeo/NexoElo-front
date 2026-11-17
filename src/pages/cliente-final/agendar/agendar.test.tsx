@@ -196,11 +196,18 @@ describe("ClienteFinalAgendar", () => {
       { Id: 3, NomeServico: "Coloracao", Valor: 120, TempoEstimadoMinutos: 90, ImagemServico: "uploads/coloracao.webp" },
     ]);
     render(<MemoryRouter initialEntries={["/cliente-final/agendar"]}><LanguageProvider><ClienteFinalAgendar /></LanguageProvider></MemoryRouter>);
-    fireEvent.click(await screen.findByRole("button", { name: /Empresa Teste/i }));
+    const companyCard = await screen.findByRole("button", { name: /Empresa Teste/i });
+    const sharedCardClasses = companyCard.className;
+    expect(companyCard).toHaveTextContent("Conhecer serviços e horários");
+    fireEvent.click(companyCard);
     expect(screen.getByTestId("professional-selection-panel")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Com quem deseja agendar?" })).toBeInTheDocument();
     expect(await screen.findByAltText("Foto de Profissional Teste")).toHaveAttribute("src", expect.stringContaining("/uploads/profissional.png"));
-    fireEvent.click(screen.getByRole("button", { name: /Profissional Teste/i }));
+    const professionalCard = screen.getByRole("button", { name: /Profissional Teste/i });
+    expect(professionalCard.className).toBe(sharedCardClasses);
+    expect(professionalCard).toHaveTextContent("Profissional");
+    expect(professionalCard).toHaveTextContent("Conhecer serviços e horários");
+    fireEvent.click(professionalCard);
     expect(await screen.findByAltText("Imagem do servico Coloracao")).toHaveAttribute("src", expect.stringContaining("/uploads/coloracao.webp"));
     fireEvent.click(screen.getByRole("button", { name: "Escolher outro profissional" }));
     expect(await screen.findByRole("button", { name: /Profissional Teste/i })).toBeInTheDocument();

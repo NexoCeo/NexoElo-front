@@ -135,6 +135,50 @@ function ProfilePhoto({ source, name }: { source?: string; name: string }) {
   );
 }
 
+
+type BookingChoiceKind = "EMPRESA" | "AUTONOMO" | "PROFISSIONAL";
+
+/** O mesmo card é usado na descoberta de prestadores e na escolha do profissional. */
+function BookingChoiceCard({
+  name,
+  photo,
+  kind,
+  onSelect,
+}: {
+  name: string;
+  photo?: string;
+  kind: BookingChoiceKind;
+  onSelect: () => void;
+}) {
+  const isCompany = kind === "EMPRESA";
+  const label = isCompany ? "Empresa" : kind === "AUTONOMO" ? "Autônomo" : "Profissional";
+  return (
+    <button
+      type="button"
+      className={`${styles.providerCard} ${styles.bookingChoiceCard}`}
+      onClick={onSelect}
+    >
+      <ProfilePhoto source={photo} name={name} />
+      <span className={styles.providerDetails}>
+        <strong>{formatPersonName(name)}</strong>
+        <span className={styles.bookingChoiceType}>
+          {isCompany ? <FaBuilding aria-hidden="true" /> : <FaUser aria-hidden="true" />}
+          <span className={`${styles.bookingChoiceBadge} ${isCompany ? styles.bookingChoiceCompany : styles.bookingChoicePerson}`}>
+            {label}
+          </span>
+        </span>
+        <span className={styles.providerHint}>
+          <FaCalendarAlt aria-hidden="true" />
+          <span>Conhecer serviços e horários</span>
+        </span>
+      </span>
+      <span className={styles.bookingChoiceArrow} aria-hidden="true">
+        <FaArrowRight />
+      </span>
+    </button>
+  );
+}
+
 function ServicePhoto({ source, name }: { source?: string; name: string }) {
   const imageUrl = getUploadedImageUrl(source);
 
@@ -737,26 +781,13 @@ export default function ClienteFinalAgendar() {
             prestadoresFiltrados.length === 0 ? <p className={styles.emptyState}>Nenhum prestador corresponde à sua busca.</p> :
             <div className={styles.providerList}>
               {prestadoresFiltrados.map((responsavel) => (
-                <button type="button" key={responsavel.Id}
-                  className={`${styles.providerCard} ${styles.discoveryProviderCard}`}
-                  onClick={() => handleResponsavelChange(responsavel.Id)}>
-                  <ProfilePhoto source={responsavel.FotoPerfil} name={responsavel.Nome} />
-                  <span className={styles.providerDetails}>
-                    <strong>{formatPersonName(responsavel.Nome)}</strong>
-                    <span className={styles.discoveryProviderType}>
-                      {responsavel.TipoUsuario === "EMPRESA"
-                        ? <><FaBuilding aria-hidden="true" /><span className={`${styles.discoveryTypeBadge} ${styles.discoveryCompanyBadge}`}>Empresa</span></>
-                        : <><FaUser aria-hidden="true" /><span className={`${styles.discoveryTypeBadge} ${styles.discoverySelfEmployedBadge}`}>Autônomo</span></>}
-                    </span>
-                    <span className={styles.providerHint}>
-                      <FaCalendarAlt aria-hidden="true" />
-                      <span>Conhecer serviços e horários</span>
-                    </span>
-                  </span>
-                  <span className={styles.discoveryProviderArrow} aria-hidden="true">
-                    <FaArrowRight />
-                  </span>
-                </button>
+                <BookingChoiceCard
+                  key={responsavel.Id}
+                  name={responsavel.Nome}
+                  photo={responsavel.FotoPerfil}
+                  kind={responsavel.TipoUsuario === "EMPRESA" ? "EMPRESA" : "AUTONOMO"}
+                  onSelect={() => handleResponsavelChange(responsavel.Id)}
+                />
               ))}
             </div>}
         </section>
@@ -812,11 +843,13 @@ export default function ClienteFinalAgendar() {
                   profissionais.length === 0 ? <p className={styles.emptyState}>{t("client.professionalsEmpty")}</p> :
                   <div className={styles.providerList}>
                     {profissionais.map((profissional) => (
-                      <button type="button" key={profissional.Id} className={styles.providerCard} onClick={() => handleProfissionalChange(profissional.Id)}>
-                        <ProfilePhoto source={profissional.FotoPerfil} name={profissional.Nome} />
-                        <span className={styles.providerDetails}><strong>{formatPersonName(profissional.Nome)}</strong><small>Profissional</small></span>
-                        <FaArrowRight aria-hidden="true" className={styles.providerArrow} />
-                      </button>
+                      <BookingChoiceCard
+                        key={profissional.Id}
+                        name={profissional.Nome}
+                        photo={profissional.FotoPerfil}
+                        kind="PROFISSIONAL"
+                        onSelect={() => handleProfissionalChange(profissional.Id)}
+                      />
                     ))}
                   </div>}
               </section>

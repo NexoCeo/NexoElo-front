@@ -837,8 +837,7 @@
 .paymentChoice label span{display:grid;gap:5px}
 .paymentChoice small{color:var(--theme-text-muted)}
 
-/* Descoberta de prestadores: hierarquia visual melhorada sem afetar a
-   vitrine e os passos de agendamento que reutilizam .providerCard. */
+/* Busca e filtros da descoberta + card de seleção compartilhado com profissionais. */
 .discovery {
   gap: 20px;
   min-width: 0;
@@ -939,14 +938,14 @@
   gap: 10px;
 }
 
-.discovery .discoveryProviderCard {
+.bookingChoiceCard {
   min-height: 86px;
   gap: 12px;
   padding: 10px 12px;
   border-radius: 14px;
 }
 
-.discovery .discoveryProviderCard .profilePhoto {
+.bookingChoiceCard .profilePhoto {
   display: block;
   flex: 0 0 60px;
   width: 60px;
@@ -954,16 +953,16 @@
   border-radius: 12px;
 }
 
-.discovery .discoveryProviderCard .providerDetails {
+.bookingChoiceCard .providerDetails {
   gap: 5px;
 }
 
-.discovery .discoveryProviderCard .providerDetails > strong {
+.bookingChoiceCard .providerDetails > strong {
   font-size: 14px;
   line-height: 1.2;
 }
 
-.discoveryProviderType {
+.bookingChoiceType {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -972,13 +971,13 @@
   font-size: 11px;
 }
 
-.discoveryProviderType > svg {
+.bookingChoiceType > svg {
   width: 12px;
   height: 12px;
   flex: 0 0 auto;
 }
 
-.discoveryTypeBadge {
+.bookingChoiceBadge {
   display: inline-flex;
   align-items: center;
   padding: 3px 7px;
@@ -988,17 +987,17 @@
   line-height: 1.1;
 }
 
-.discoverySelfEmployedBadge {
+.bookingChoicePerson {
   color: var(--theme-primary-text);
   background: var(--theme-primary-soft);
 }
 
-.discoveryCompanyBadge {
+.bookingChoiceCompany {
   color: var(--theme-success-text);
   background: var(--theme-success-soft);
 }
 
-.discovery .providerHint {
+.bookingChoiceCard .providerHint {
   min-width: 0;
   display: inline-flex;
   align-items: center;
@@ -1008,13 +1007,13 @@
   text-wrap: balance;
 }
 
-.discovery .providerHint svg {
+.bookingChoiceCard .providerHint svg {
   flex: 0 0 auto;
   width: 12px;
   height: 12px;
 }
 
-.discoveryProviderArrow {
+.bookingChoiceArrow {
   flex: 0 0 30px;
   width: 30px;
   height: 30px;
@@ -1025,12 +1024,12 @@
   color: var(--theme-primary-text);
 }
 
-.discoveryProviderArrow svg {
+.bookingChoiceArrow svg {
   width: 14px;
   height: 14px;
 }
 
-.discovery .discoveryProviderCard:focus-visible,
+.bookingChoiceCard:focus-visible,
 .discovery .filterPills button:focus-visible {
   outline: 2px solid var(--theme-primary-text);
   outline-offset: 2px;
@@ -1081,23 +1080,23 @@
     padding: 7px 5px;
   }
 
-  .discovery .discoveryProviderCard {
+  .bookingChoiceCard {
     gap: 10px;
     padding: 9px 10px;
     min-height: 78px;
   }
 
-  .discovery .discoveryProviderCard .profilePhoto {
+  .bookingChoiceCard .profilePhoto {
     flex-basis: 54px;
     width: 54px;
     height: 54px;
   }
 
-  .discovery .discoveryProviderCard .providerDetails > strong {
+  .bookingChoiceCard .providerDetails > strong {
     font-size: 13px;
   }
 
-  .discoveryProviderArrow {
+  .bookingChoiceArrow {
     flex-basis: 28px;
     width: 28px;
     height: 28px;
