@@ -1,6 +1,6 @@
 import LoadingState from "@/components/loading-state";
 import Modal from "@/components/modal";
-import logoNexoCeo from "@/assets/logoNexoCeo.png";
+import logoNexoElo from "@/assets/logo.png";
 import { createAgendaRealtimeClient } from "@/services/agenda-realtime-service";
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
@@ -37,7 +37,8 @@ import {
 import { getClienteFinalUser, saveClienteFinalSession } from "@/services/cliente-final-auth-token";
 import { iniciarPagamentoOnline } from "@/services/pagamentos-agendamento-service";
 import { logout } from "@/services/logout-service";
-import { alterarSenhaCliente, atualizarPerfilUsuario } from "@/services/usuario-service";
+import { alterarSenhaCliente, atualizarPerfilUsuario, obterPerfilUsuario } from "@/services/usuario-service";
+import { getUploadedImageUrl } from "@/components/header/profile-image";
 import { useNotification } from "@/context/NotificationContext";
 import type { Agendamento } from "@/types/agendamento";
 import styles from "./style.module.css";
@@ -398,6 +399,22 @@ export default function ClienteFinalHome() {
   const { t, lang } = useLanguage();
   const { showNotification } = useNotification();
   const [cliente, setCliente] = useState(() => getClienteFinalUser());
+
+  // Complementa sessões antigas que foram armazenadas sem a foto de perfil.
+  useEffect(() => {
+    if (!cliente?.Id || cliente.FotoPerfil !== undefined) return;
+    let active = true;
+    void obterPerfilUsuario(cliente.Id).then(perfil => {
+      if (!active) return;
+      setCliente(current => {
+        if (!current || current.Id !== perfil.Id) return current;
+        const next = { ...current, FotoPerfil: perfil.FotoPerfil || null };
+        saveClienteFinalSession(next);
+        return next;
+      });
+    }).catch(() => { /* A foto não bloqueia a navegação. */ });
+    return () => { active = false; };
+  }, [cliente?.Id, cliente?.FotoPerfil]);
   const returnSection = (location.state as { section?: HomeSection } | null)?.section;
   const [activeSection, setActiveSection] = useState<HomeSection>(returnSection === "perfil" ? "perfil" : "home");
   const [historyFilter, setHistoryFilter] = useState<HistoryStatusFilter>("all");
@@ -750,8 +767,8 @@ export default function ClienteFinalHome() {
       <header className={styles.topbar}>
         <div className={styles.topbarInner}>
           <div className={styles.brand}>
-            <img src={logoNexoCeo} alt="" aria-hidden="true" />
-            <strong>NexoCeo</strong>
+            <img src={logoNexoElo} alt="" aria-hidden="true" />
+            <strong>NexoElo</strong>
           </div>
           <nav className={styles.navigation} aria-label={t("client.navigation")} role="tablist">
             {navigationItems.map(({ id, Icon }) => (
@@ -975,6 +992,7 @@ export default function ClienteFinalHome() {
               compact
               name={formatPersonName(cliente?.Nome) || "Cliente"}
               role="Cliente"
+               avatarUrl={getUploadedImageUrl(cliente?.FotoPerfil)}
               email={formatEmailDisplay(cliente?.Email)}
               phone={cliente?.Telefone}
               action={
@@ -1025,7 +1043,7 @@ export default function ClienteFinalHome() {
                 <span className={styles.profileSettingsCopy}>
                   <strong>{lang === "pt" ? "Sair da conta" : "Sign out"}</strong>
                   <small>{lang === "pt"
-                    ? "Encerre sua sessão no NexoCeo."
+                    ? "Encerre sua sessão no NexoElo."
                     : "End your NexoCeo session."}</small>
                 </span>
                 <FaChevronRight className={styles.profileSettingsChevron} aria-hidden="true" />

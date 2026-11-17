@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { FaCamera, FaEnvelope, FaPhoneAlt, FaStore, FaIdCard } from "react-icons/fa";
 import styles from "./style.module.css";
 import { formatPersonName, formatEmailDisplay, formatPhoneDisplay, formatCnpjDisplay } from "@/context/UserContext";
@@ -22,10 +23,15 @@ export default function ProfileOverview({ name, role, email, phone, companyDetai
   const { t } = useLanguage();
   const displayName = formatPersonName(name);
   const initial = displayName.charAt(0) || "?";
+  const [failedAvatar, setFailedAvatar] = useState<string | null>(null);
+  const showPhoto = Boolean(avatarUrl && avatarUrl !== failedAvatar);
   return (
     <section className={`${styles.profile} ${compact ? styles.compact : ""} ${className || ""}`} aria-label={t("profile.info")}>
       <div className={styles.avatar}>
-        {avatarUrl ? <img src={avatarUrl} alt={`${t("profile.photo")}: ${displayName}`} /> : <span aria-hidden="true">{initial}</span>}
+        {showPhoto ? (
+          <img src={avatarUrl!} alt={`${t("profile.photo")}: ${displayName}`}
+            onError={() => setFailedAvatar(avatarUrl!)} />
+        ) : <span aria-hidden="true">{initial}</span>}
         {onPhotoChange && (
           <label className={styles.cameraButton} title={t("profile.photoUpload")} aria-label={t("profile.photoUpload")}>
             {photoSaving ? <span className={styles.spinner} aria-hidden="true" /> : <FaCamera aria-hidden="true" />}

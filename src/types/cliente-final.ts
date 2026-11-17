@@ -4,6 +4,7 @@ export type ClienteFinal = {
   Email: string;
   Telefone: string;
   TipoUsuario: string;
+  FotoPerfil?: string | null;
 };
 
 export type ClienteFinalLoginPayload = {

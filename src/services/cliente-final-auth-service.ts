@@ -80,6 +80,7 @@ function normalizeClienteFinal(data: ApiRecord): ClienteFinal {
     Email: pickString(cliente, ["Email", "email"]),
     Telefone: pickString(cliente, ["Telefone", "telefone", "TelefoneCliente", "telefoneCliente"]),
     TipoUsuario: tipoUsuario,
+    FotoPerfil: pickString(cliente, ["FotoPerfil", "fotoPerfil"]) || null,
   });
 }
 
