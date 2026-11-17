@@ -119,8 +119,8 @@ describe("Dashboard", () => {
     const professionalRow = screen.getByText("Roberta Silva").parentElement;
     expect(serviceRow?.querySelector('[class*="mobileAppointmentDetailIcon"] svg')).toBeInTheDocument();
     expect(professionalRow?.querySelector('[class*="mobileAppointmentDetailIcon"] svg')).toBeInTheDocument();
-    expect(serviceRow).toHaveClass(expect.stringContaining("mobileAppointmentDetailRow"));
-    expect(professionalRow).toHaveClass(expect.stringContaining("mobileAppointmentDetailRow"));
+    expect(serviceRow?.className).toContain("mobileAppointmentDetailRow");
+    expect(professionalRow?.className).toContain("mobileAppointmentDetailRow");
     const nameRow = screen.getByText("Bianca Pirez").parentElement;
     expect(nameRow).toContainElement(screen.getByLabelText("Iniciais de Bianca Pirez"));
     const card = screen.getByText("Bianca Pirez").closest("article");
