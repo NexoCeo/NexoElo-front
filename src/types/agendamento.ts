@@ -28,6 +28,7 @@ export type Agendamento = {
   ProfissionalId?: number | null;
   EmpresaId?: number | null;
   ServicoId: number;
+  ResponsavelId?: number;
   DataAgendamento: string;
   Valor: number;
   Taxa: number;
@@ -40,6 +41,12 @@ export type Agendamento = {
   ServicoNome: string;
   ProfissionalNome: string;
   Profissionais?: { Id: number; Nome: string; FotoPerfil?: string | null }[];
+  ServicosDetalhados?: {
+    Id: number;
+    Nome: string;
+    ProfissionalId?: number | null;
+    ProfissionalNome: string;
+  }[];
 };
 
 export type CreateAgendamentoPayload = {

@@ -68,6 +68,7 @@ function normalizeAgendamento(agendamento: ApiRecord): Agendamento {
     ProfissionalId: pickNumber(agendamento, ["ProfissionalId", "profissionalId"]) || null,
     EmpresaId: pickNumber(agendamento, ["EmpresaId", "empresaId"]) || null,
     ServicoId: pickNumber(agendamento, ["ServicoId", "servicoId"]),
+    ResponsavelId: pickNumber(agendamento, ["ResponsavelId", "responsavelId"]) || undefined,
     DataAgendamento: pickString(agendamento, ["DataAgendamento", "dataAgendamento", "DataHora", "dataHora"]),
     Valor: pickNumber(agendamento, ["Valor", "valor"]),
     Taxa: pickNumber(agendamento, ["Taxa", "taxa"]),
@@ -85,6 +86,15 @@ function normalizeAgendamento(agendamento: ApiRecord): Agendamento {
         Id: pickNumber(item, ["Id", "id"]),
         Nome: pickString(item, ["Nome", "nome"]),
         FotoPerfil: pickString(item, ["FotoPerfil", "fotoPerfil"]) || null,
+      })),
+    ServicosDetalhados: (Array.isArray(agendamento.ServicosDetalhados) ? agendamento.ServicosDetalhados :
+      Array.isArray(agendamento.servicosDetalhados) ? agendamento.servicosDetalhados : [])
+      .filter((item): item is ApiRecord => Boolean(item) && typeof item === "object" && !Array.isArray(item))
+      .map(item => ({
+        Id: pickNumber(item, ["Id", "id"]),
+        Nome: pickString(item, ["Nome", "nome"]),
+        ProfissionalId: pickNumber(item, ["ProfissionalId", "profissionalId"]) || null,
+        ProfissionalNome: pickString(item, ["ProfissionalNome", "profissionalNome"]),
       })),
   };
 }

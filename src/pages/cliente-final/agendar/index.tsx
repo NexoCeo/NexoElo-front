@@ -160,7 +160,23 @@ export default function ClienteFinalAgendar() {
   const { showNotification } = useNotification();
   const cliente = getClienteFinalUser();
   const storageKey = `nexoelo-booking-draft:${cliente?.Id ?? "guest"}:${username ?? "marketplace"}`;
-  const [draft] = useState(() => readBookingDraft(storageKey));
+  // Agendar novamente inicia um novo fluxo no prestador original, sem reutilizar data/horário antigos.
+  const [draft] = useState<BookingDraft | null>(() => {
+    const routeState = location.state as { repeatBooking?: { responsavelId?: number } } | null;
+    const responsavelId = routeState?.repeatBooking?.responsavelId;
+    if (typeof responsavelId === "number" && Number.isSafeInteger(responsavelId) && responsavelId > 0) {
+      return {
+        responsavelId,
+        profissionalId: 0,
+        servicoId: 0,
+        servicoIds: [],
+        dataSelecionada: "",
+        dataAgendamento: "",
+        expandedSection: "responsavel",
+      };
+    }
+    return readBookingDraft(storageKey);
+  });
   const [responsaveis, setResponsaveis] = useState<ResponsavelAgendamento[]>([]);
   const [profissionais, setProfissionais] = useState<ProfissionalAgendamento[]>([]);
   const [servicos, setServicos] = useState<Servico[]>([]);
