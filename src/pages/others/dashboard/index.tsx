@@ -99,7 +99,7 @@ function ClientAvatar({ name, photo }: { name: string; photo?: string | null }) 
   const [imageFailed, setImageFailed] = useState(false);
   useEffect(() => setImageFailed(false), [imageUrl]);
 
-  const words = name.trim().split(/\\s+/).filter(Boolean);
+  const words = name.trim().split(/\s+/).filter(Boolean);
   const initials = words.length > 1
     ? `${words[0][0]}${words[words.length - 1][0]}`.toLocaleUpperCase("pt-BR")
     : (words[0]?.slice(0, 2) || "?").toLocaleUpperCase("pt-BR");
