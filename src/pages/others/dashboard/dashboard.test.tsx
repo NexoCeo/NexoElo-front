@@ -57,7 +57,6 @@ describe("Dashboard", () => {
     sessionStorage.setItem("usuario", JSON.stringify({ Id: 8, Papel: "PROFISSIONAL" }));
     renderDashboard();
 
-    expect(screen.getByRole("heading", { name: "Dashboard Profissional" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Agendamentos de hoje" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Hoje" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.queryByText(/^Tema:/)).not.toBeInTheDocument();
@@ -114,6 +113,11 @@ describe("Dashboard", () => {
     expect(screen.getByLabelText("Iniciais de Bianca Pirez")).toHaveTextContent("BP");
     expect(screen.getByText("Escova e prancha").parentElement?.querySelector("svg")).toBeInTheDocument();
     expect(screen.getByText("Roberta Silva").parentElement?.querySelector("svg")).toBeInTheDocument();
+    const card = screen.getByText("Bianca Pirez").closest("article");
+    expect(card).not.toBeNull();
+    const metadata = card?.querySelector('[class*="mobileAppointmentMeta"]');
+    expect(metadata).toHaveTextContent("R$");
+    expect(metadata).toHaveTextContent(":");
   });
 
   it("exibe imagem cadastrada quando o cliente possui foto", async () => {
@@ -135,40 +139,41 @@ describe("Dashboard", () => {
   });
 
   it.each([
-    ["EMPRESA", "Dashboard da Empresa", "/empresa/agenda"],
-    ["AUTONOMO", "Dashboard do Autônomo", "/autonomo/agenda"],
-  ])(
-    "exibe os agendamentos de hoje e o acesso a agenda para %s",
-    async (papel, titulo, agendaPath) => {
-      sessionStorage.setItem("usuario", JSON.stringify({ Id: 7, Papel: papel }));
-      agendaMocks.listarPorData.mockResolvedValue([
-        {
-          Id: 42,
-          ClienteId: 3,
-          ProfissionalId: 8,
-          EmpresaId: 7,
-          ServicoId: 2,
-          DataAgendamento: new Date().toISOString(),
-          Valor: 0,
-          Taxa: 0,
-          ValorServico: 85,
-          Status: "AGENDADO",
-          ClienteNome: "Cliente de hoje",
-          ServicoNome: "Corte",
-          ProfissionalNome: "Profissional Teste",
-        },
-      ]);
-
-      renderDashboard();
-
-      expect(screen.getByRole("heading", { name: titulo })).toBeInTheDocument();
-      expect(await screen.findByText("Cliente de hoje")).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "Abrir agenda" })).toHaveAttribute(
-        "href",
-        agendaPath,
-      );
-      expect(screen.queryByRole("button", { name: "Esta semana" })).not.toBeInTheDocument();
-      expect(agendaMocks.listarPorData).toHaveBeenCalledWith(7, expect.any(String));
-    },
-  );
+    ["EMPRESA", "/empresa/agenda"],
+    ["AUTONOMO", "/autonomo/agenda"],
+    ["PROFISSIONAL", "/profissional/agenda"],
+  ])("compartilha a mesma dashboard, card e filtros com o papel %s", async (papel, agendaPath) => {
+    sessionStorage.setItem("usuario", JSON.stringify({ Id: 7, Papel: papel }));
+    agendaMocks.listarPorData.mockResolvedValue([{
+      Id: 42,
+      ClienteId: 3,
+      ProfissionalId: 8,
+      EmpresaId: 7,
+      ServicoId: 2,
+      DataAgendamento: new Date().toISOString(),
+      Valor: 0,
+      Taxa: 0,
+      ValorServico: 85,
+      Status: "AGENDADO",
+      ClienteNome: "Cliente de hoje",
+      ServicoNome: "Corte",
+      ProfissionalNome: "Profissional Teste",
+    }]);
+    renderDashboard();
+    expect(screen.getByRole("heading", { name: "Agendamentos de hoje" })).toBeInTheDocument();
+    expect(await screen.findByText("Cliente de hoje")).toBeInTheDocument();
+    expect(screen.getByText("Corte")).toBeInTheDocument();
+    expect(screen.getByText("Profissional Teste")).toBeInTheDocument();
+    expect(screen.getByText(/R\\$\\s*85,00/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Abrir agendamento de Cliente de hoje na agenda" }))
+      .toHaveAttribute("href", expect.stringContaining(agendaPath + "?data="));
+    expect(screen.getByRole("button", { name: "Hoje" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Esta semana" })).toBeInTheDocument();
+    expect(agendaMocks.listarPorData).toHaveBeenCalledWith(7, expect.any(String));
+    fireEvent.click(screen.getByRole("button", { name: "Esta semana" }));
+    await waitFor(() => expect(agendaMocks.listarPorPeriodo).toHaveBeenCalledWith(
+      7, expect.any(String), expect.any(String),
+    ));
+    expect(screen.getByRole("button", { name: "Esta semana" })).toHaveAttribute("aria-pressed", "true");
+  });
 });

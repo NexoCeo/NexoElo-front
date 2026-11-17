@@ -475,3 +475,72 @@
   .mobileAppointmentService,
   .mobileAppointmentProfessional { gap: 5px; }
 }
+
+/* Dashboard compartilhado: foto, informações e horário/valor em colunas
+   independentes, sem competição por largura em telas pequenas. */
+.mobileAppointmentBody {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) max-content;
+  align-items: start;
+  column-gap: 11px;
+  width: 100%;
+  min-width: 0;
+}
+.mobileAppointmentAvatar { grid-column: 1; grid-row: 1; }
+.mobileAppointmentMain {
+  grid-column: 2;
+  grid-row: 1;
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  gap: 8px;
+}
+.mobileAppointmentClient { min-width: 0; margin: 0; line-height: 1.25; }
+.mobileAppointmentService,
+.mobileAppointmentProfessional {
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  gap: 6px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.mobileAppointmentService svg,
+.mobileAppointmentProfessional svg { margin-top: 1px; }
+.mobileAppointmentMeta {
+  grid-column: 3;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 0;
+  gap: 13px;
+  white-space: nowrap;
+}
+.mobileAppointmentTime { margin: 0; font-size: 11px; }
+.mobileAppointmentValue { margin: 0; text-align: right; font-size: 12px; }
+@media (max-width: 420px) {
+  .mobileAppointmentBody {
+    grid-template-columns: 44px minmax(0, 1fr) max-content;
+    column-gap: 8px;
+  }
+  .mobileAppointmentAvatar { width: 44px; height: 44px; flex-basis: 44px; }
+  .mobileAppointmentMain { gap: 7px; }
+  .mobileAppointmentTime { padding: 5px 6px; font-size: 10px; }
+  .mobileAppointmentValue { font-size: 11px; }
+}
+@media (max-width: 350px) {
+  .mobileAppointmentBody {
+    grid-template-columns: 38px minmax(0, 1fr) max-content;
+    column-gap: 6px;
+  }
+  .mobileAppointmentAvatar { width: 38px; height: 38px; flex-basis: 38px; }
+  .mobileAppointmentClient { font-size: 13px; }
+  .mobileAppointmentService,
+  .mobileAppointmentProfessional { font-size: 11px; }
+  .mobileAppointmentMeta { gap: 10px; }
+  .mobileAppointmentTime { gap: 3px; padding: 4px 5px; font-size: 9px; }
+  .mobileAppointmentValue { font-size: 10px; }
+}

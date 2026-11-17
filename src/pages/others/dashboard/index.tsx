@@ -49,7 +49,7 @@ function dashboardCountCacheKey(
   range: DashboardRange,
   date: Date,
 ) {
-  const weekly = isProfessional && range === "week";
+  const weekly = range === "week";
   const periodStart = weekly ? weekRange(date).start : date;
   return `nexoelo:dashboard-skeleton:v1:${isProfessional ? "professional" : "owner"}:${userId}:${weekly ? "week" : "today"}:${formatAgendaDateParam(periodStart)}`;
 }
@@ -183,7 +183,7 @@ export default function Dashboard({ initialAgenda }: { initialAgenda?: Dashboard
       setError("");
       const now = new Date();
       let nextAppointments: Agendamento[];
-      if (!isProfessional || range === "today") {
+      if (range === "today") {
         nextAppointments = await listarAgendaPorData(usuario.Id, formatAgendaDateParam(now));
       } else {
         const period = weekRange(now);
@@ -248,8 +248,8 @@ export default function Dashboard({ initialAgenda }: { initialAgenda?: Dashboard
           new Date(first.DataAgendamento).getTime() -
           new Date(second.DataAgendamento).getTime(),
       )
-      .map((item) => toCardItem(item, isProfessional && range === "week")),
-    [appointments, isProfessional, range],
+      .map((item) => toCardItem(item, range === "week")),
+    [appointments, range],
   );
 
   const todayLabel = new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US", {
@@ -273,37 +273,35 @@ export default function Dashboard({ initialAgenda }: { initialAgenda?: Dashboard
           <div className={styles.agendaTitleGroup}>
             <h2 id="dashboard-agenda-title">
               <FaCalendarDay aria-hidden="true" />
-              <span>{isProfessional && range === "week" ? t("dashboard.week") : t("dashboard.today")}</span>
+              <span>{range === "week" ? t("dashboard.week") : t("dashboard.today")}</span>
             </h2>
             <p>
-              {isProfessional && range === "week" ? t("dashboard.currentWeek") : todayLabel}
+              {range === "week" ? t("dashboard.currentWeek") : todayLabel}
               <span aria-hidden="true" />
               {appointmentCountLabel}
             </p>
           </div>
 
-          {isProfessional && (
-            <div className={styles.agendaActions}>
-              <div className={styles.segmented} aria-label={t("dashboard.period")}>
-                <button
-                  type="button"
-                  className={range === "today" ? styles.active : ""}
-                  onClick={() => setRange("today")}
-                  aria-pressed={range === "today"}
-                >
-                  {t("dashboard.todayFilter")}
-                </button>
-                <button
-                  type="button"
-                  className={range === "week" ? styles.active : ""}
-                  onClick={() => setRange("week")}
-                  aria-pressed={range === "week"}
-                >
-                  {t("dashboard.weekFilter")}
-                </button>
-              </div>
+          <div className={styles.agendaActions}>
+            <div className={styles.segmented} aria-label={t("dashboard.period")}>
+              <button
+                type="button"
+                className={range === "today" ? styles.active : ""}
+                onClick={() => setRange("today")}
+                aria-pressed={range === "today"}
+              >
+                {t("dashboard.todayFilter")}
+              </button>
+              <button
+                type="button"
+                className={range === "week" ? styles.active : ""}
+                onClick={() => setRange("week")}
+                aria-pressed={range === "week"}
+              >
+                {t("dashboard.weekFilter")}
+              </button>
             </div>
-          )}
+          </div>
         </div>
 
         <div className={styles.mobileAppointments} aria-live="polite">
@@ -315,14 +313,14 @@ export default function Dashboard({ initialAgenda }: { initialAgenda?: Dashboard
             <div className={styles.mobileEmpty}>
               <FaCalendarDay aria-hidden="true" />
               <strong>{t("common.noAppointments")}</strong>
-              <span>{isProfessional && range === "week" ? t("dashboard.weekFilter") : t("dashboard.todayFilter")}</span>
+              <span>{range === "week" ? t("dashboard.weekFilter") : t("dashboard.todayFilter")}</span>
             </div>
           ) : (
             <div className={styles.mobileAppointmentList}>
               {[...appointments]
                 .sort((first, second) => new Date(first.DataAgendamento).getTime() - new Date(second.DataAgendamento).getTime())
                 .map((appointment) => {
-                  const item = toCardItem(appointment, isProfessional && range === "week");
+                  const item = toCardItem(appointment, range === "week");
                   const normalizedStatus = item.status.trim().toUpperCase();
                   const statusStyle = normalizedStatus === "CANCELADO"
                     ? styles.mobileCancelled
@@ -341,24 +339,22 @@ export default function Dashboard({ initialAgenda }: { initialAgenda?: Dashboard
                       <div className={styles.mobileAppointmentBody}>
                         <ClientAvatar name={item.cliente} photo={appointment.ClienteFotoPerfil} />
                         <div className={styles.mobileAppointmentMain}>
-                          <div className={styles.mobileAppointmentNameRow}>
-                            <strong className={styles.mobileAppointmentClient}>{item.cliente}</strong>
-                            <span className={styles.mobileAppointmentTime}>
-                              <FaCalendarDay aria-hidden="true" />
-                              <span>{timeLabel}</span>
-                            </span>
-                          </div>
-                          <div className={styles.mobileAppointmentServiceRow}>
-                            <span className={styles.mobileAppointmentService}>
-                              <FaScrewdriverWrench aria-hidden="true" />
-                              <span>{item.servico}</span>
-                            </span>
-                            <strong className={styles.mobileAppointmentValue}>{item.valor}</strong>
-                          </div>
+                          <strong className={styles.mobileAppointmentClient}>{item.cliente}</strong>
+                          <span className={styles.mobileAppointmentService}>
+                            <FaScrewdriverWrench aria-hidden="true" />
+                            <span>{item.servico}</span>
+                          </span>
                           <span className={styles.mobileAppointmentProfessional}>
                             <FaUser aria-hidden="true" />
                             <span>{item.profissional}</span>
                           </span>
+                        </div>
+                        <div className={styles.mobileAppointmentMeta}>
+                          <span className={styles.mobileAppointmentTime}>
+                            <FaCalendarDay aria-hidden="true" />
+                            <span>{timeLabel}</span>
+                          </span>
+                          <strong className={styles.mobileAppointmentValue}>{item.valor}</strong>
                         </div>
                       </div>
                       <div className={styles.mobileAppointmentFooter}>
