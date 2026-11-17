@@ -1,6 +1,7 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { render } from "@/test/render-with-notifications";
 import { MemoryRouter } from "react-router-dom";
+import { LanguageProvider } from "@/context/LanguageContext";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const agendaMocks = vi.hoisted(() => ({
@@ -41,7 +42,7 @@ import Dashboard from "./index";
 function renderDashboard() {
   return render(
     <MemoryRouter>
-      <Dashboard />
+      <LanguageProvider><Dashboard /></LanguageProvider>
     </MemoryRouter>,
   );
 }
