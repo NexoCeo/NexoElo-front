@@ -1044,7 +1044,7 @@ export default function ClienteFinalHome() {
                   <strong>{lang === "pt" ? "Sair da conta" : "Sign out"}</strong>
                   <small>{lang === "pt"
                     ? "Encerre sua sessão no NexoElo."
-                    : "End your NexoCeo session."}</small>
+                    : "End your NexoElo session."}</small>
                 </span>
                 <FaChevronRight className={styles.profileSettingsChevron} aria-hidden="true" />
               </button>

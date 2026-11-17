@@ -13,6 +13,8 @@ const mocks = vi.hoisted(() => ({
   alterarSenhaCliente: vi.fn(),
   atualizarPerfilUsuario: vi.fn(),
   saveClienteFinalSession: vi.fn(),
+  getClienteFinalUser: vi.fn(),
+  obterPerfilUsuario: vi.fn(),
 }));
 
 vi.mock("@/services/agendamento-service", () => ({
@@ -21,13 +23,7 @@ vi.mock("@/services/agendamento-service", () => ({
 }));
 
 vi.mock("@/services/cliente-final-auth-token", () => ({
-  getClienteFinalUser: () => ({
-    Id: 4,
-    Nome: "VITOR CLIENTE",
-    Email: "VITOR@EXAMPLE.COM",
-    Telefone: "28993337212",
-    TipoUsuario: "CLIENTE",
-  }),
+  getClienteFinalUser: mocks.getClienteFinalUser,
   saveClienteFinalSession: mocks.saveClienteFinalSession,
 }));
 
@@ -38,6 +34,7 @@ vi.mock("@/services/logout-service", () => ({
 vi.mock("@/services/usuario-service", () => ({
   alterarSenhaCliente: mocks.alterarSenhaCliente,
   atualizarPerfilUsuario: mocks.atualizarPerfilUsuario,
+  obterPerfilUsuario: mocks.obterPerfilUsuario,
 }));
 
 vi.mock("@/services/agenda-realtime-service", () => ({
@@ -72,6 +69,11 @@ describe("ClienteFinalHome", () => {
     });
     vi.clearAllMocks();
     localStorage.clear();
+    mocks.getClienteFinalUser.mockReturnValue({
+      Id: 4, Nome: "VITOR CLIENTE", Email: "VITOR@EXAMPLE.COM",
+      Telefone: "28993337212", TipoUsuario: "CLIENTE", FotoPerfil: null,
+    });
+    mocks.obterPerfilUsuario.mockResolvedValue({ Id: 4, FotoPerfil: null });
     mocks.consultarPagamentoAgendamento.mockResolvedValue(null);
     mocks.alterarSenhaCliente.mockResolvedValue(undefined);
     mocks.atualizarPerfilUsuario.mockResolvedValue({
@@ -166,6 +168,38 @@ describe("ClienteFinalHome", () => {
     expect(screen.queryByTestId("appointment-payment-status")).not.toBeInTheDocument();
     expect(screen.queryByTestId("appointment-payment-slot")).not.toBeInTheDocument();
     expect(mocks.consultarPagamentoAgendamento).not.toHaveBeenCalled();
+  });
+
+  it("exibe a foto do banco com fallback para iniciais quando o arquivo não carrega", () => {
+    mocks.getClienteFinalUser.mockReturnValue({
+      Id: 4, Nome: "VITOR CLIENTE", Email: "VITOR@EXAMPLE.COM",
+      Telefone: "28993337212", TipoUsuario: "CLIENTE", FotoPerfil: "uploads/cliente.jpg",
+    });
+    render(<MemoryRouter><ClienteFinalHome /></MemoryRouter>);
+    fireEvent.click(screen.getByRole("tab", { name: "Perfil" }));
+    const photo = screen.getByRole("img", { name: /Vitor Cliente/i });
+    expect(photo).toHaveAttribute("src", expect.stringContaining("/uploads/cliente.jpg"));
+    const avatar = photo.parentElement;
+    fireEvent.error(photo);
+    expect(screen.queryByRole("img", { name: /Vitor Cliente/i })).not.toBeInTheDocument();
+    expect(avatar).toHaveTextContent("V");
+    expect(mocks.obterPerfilUsuario).not.toHaveBeenCalled();
+  });
+
+  it("recupera a foto em sessões anteriores sem FotoPerfil", async () => {
+    mocks.getClienteFinalUser.mockReturnValue({
+      Id: 4, Nome: "VITOR CLIENTE", Email: "VITOR@EXAMPLE.COM",
+      Telefone: "28993337212", TipoUsuario: "CLIENTE",
+    });
+    mocks.obterPerfilUsuario.mockResolvedValue({ Id: 4, FotoPerfil: "uploads/antiga.jpg" });
+    render(<MemoryRouter><ClienteFinalHome /></MemoryRouter>);
+    fireEvent.click(screen.getByRole("tab", { name: "Perfil" }));
+    const photo = await screen.findByRole("img", { name: /Vitor Cliente/i });
+    expect(photo).toHaveAttribute("src", expect.stringContaining("/uploads/antiga.jpg"));
+    expect(mocks.saveClienteFinalSession).toHaveBeenCalledWith(expect.objectContaining({
+      FotoPerfil: "uploads/antiga.jpg",
+    }));
+    expect(mocks.obterPerfilUsuario).toHaveBeenCalledWith(4);
   });
 
   it("usa o perfil compacto sem adicionar um cartão com fundo e permite editar os dados", async () => {
@@ -289,7 +323,10 @@ describe("ClienteFinalHome", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Olá, Vitor Cliente" }).closest("main")).toBeInTheDocument();
-    expect(screen.getByText("NexoCeo").closest("header")).toBeInTheDocument();
+    expect(screen.getByText("NexoElo").closest("header")).toBeInTheDocument();
+    expect(screen.getByText("NexoElo").previousElementSibling).toHaveAttribute(
+      "src", expect.stringContaining("logo.png"),
+    );
     expect(await screen.findByText("Corte")).toBeInTheDocument();
     expect(screen.getByText("Próximos agendamentos")).toBeInTheDocument();
     expect(screen.getByText("Atendimentos concluídos")).toBeInTheDocument();

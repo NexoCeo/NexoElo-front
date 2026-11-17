@@ -34,6 +34,7 @@ describe("cliente-final-auth-service", () => {
           Email: "cliente@example.com",
           Telefone: "28993337212",
           TipoUsuario: "CLIENTE",
+          FotoPerfil: "uploads/cliente.jpg",
         },
       },
     });
@@ -44,7 +45,18 @@ describe("cliente-final-auth-service", () => {
       Login: "cliente@example.com",
       Senha: "senha-segura",
     });
-    expect(mocks.saveClienteFinalSession).toHaveBeenCalledOnce();
+    expect(mocks.saveClienteFinalSession).toHaveBeenCalledWith(expect.objectContaining({
+      FotoPerfil: "uploads/cliente.jpg",
+    }));
+  });
+
+  it("mantém FotoPerfil nulo quando o cliente não possui imagem", async () => {
+    mocks.post.mockResolvedValue({ data: { usuario: {
+      Id: 4, Nome: "Cliente Teste", Email: "cliente@example.com",
+      Telefone: "28993337212", TipoUsuario: "CLIENTE",
+    } } });
+    await loginClienteFinal({ login: "cliente@example.com", senha: "senha-segura" });
+    expect(mocks.saveClienteFinalSession).toHaveBeenCalledWith(expect.objectContaining({ FotoPerfil: null }));
   });
 
   it("autentica o cliente por telefone normalizado", async () => {
