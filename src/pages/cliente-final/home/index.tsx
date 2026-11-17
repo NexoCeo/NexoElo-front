@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FaCalendarAlt,
   FaCheck,
+  FaCheckCircle,
   FaClock,
   FaCut,
   FaHistory,
@@ -322,6 +323,15 @@ export default function ClienteFinalHome() {
     [appointments],
   );
 
+  // O resumo contabiliza somente atendimentos concluídos, sem incluir cancelamentos.
+  const completedAppointmentsCount = useMemo(
+    () => appointments.filter((appointment) => {
+      const status = appointment.Status.trim().toUpperCase();
+      return status === "CONCLUIDO" || status === "CONCLUÍDO";
+    }).length,
+    [appointments],
+  );
+
   async function handleLogout() {
     try {
       await logout();
@@ -452,13 +462,23 @@ export default function ClienteFinalHome() {
             </header>
 
             <div className={styles.summaryGrid} aria-label="Resumo dos agendamentos">
-              <div>
-                <span>{t("client.upcoming")}</span>
-                <strong>{upcomingAppointments.length}</strong>
+              <div className={styles.summaryCard}>
+                <span className={`${styles.summaryIcon} ${styles.summaryIconUpcoming}`} aria-hidden="true">
+                  <FaCalendarAlt />
+                </span>
+                <div className={styles.summaryDetails}>
+                  <span className={styles.summaryLabel}>{t("client.summaryUpcoming")}</span>
+                  <strong>{upcomingAppointments.length}</strong>
+                </div>
               </div>
-              <div>
-                <span>{t("client.previous")}</span>
-                <strong>{previousAppointments.length}</strong>
+              <div className={styles.summaryCard}>
+                <span className={`${styles.summaryIcon} ${styles.summaryIconCompleted}`} aria-hidden="true">
+                  <FaCheckCircle />
+                </span>
+                <div className={styles.summaryDetails}>
+                  <span className={styles.summaryLabel}>{t("client.summaryCompleted")}</span>
+                  <strong>{completedAppointmentsCount}</strong>
+                </div>
               </div>
             </div>
 

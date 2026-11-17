@@ -98,6 +98,10 @@ describe("ClienteFinalHome", () => {
     expect(screen.getByRole("heading", { name: "Olá, VITOR CLIENTE" }).closest("main")).toBeInTheDocument();
     expect(screen.getByText("NexoCeo").closest("header")).toBeInTheDocument();
     expect(await screen.findByText("Corte")).toBeInTheDocument();
+    expect(screen.getByText("Próximos agendamentos")).toBeInTheDocument();
+    expect(screen.getByText("Atendimentos concluídos")).toBeInTheDocument();
+    expect(screen.getByText("Próximos agendamentos").parentElement).toHaveTextContent("1");
+    expect(screen.getByText("Atendimentos concluídos").parentElement).toHaveTextContent("1");
     expect(screen.getByText("Valor total")).toBeInTheDocument();
     expect(screen.getByText("Duração")).toBeInTheDocument();
     expect(screen.getByText("Não informada")).toBeInTheDocument();
@@ -121,6 +125,48 @@ describe("ClienteFinalHome", () => {
     await waitFor(() => {
       expect(mocks.listarHistoricoAgendamentos).toHaveBeenCalledWith(4);
     });
+  });
+
+  it("não inclui agendamentos cancelados no resumo de atendimentos concluídos", async () => {
+    mocks.listarHistoricoAgendamentos.mockResolvedValue([
+      {
+        Id: 21,
+        ClienteId: 4,
+        ServicoId: 1,
+        DataAgendamento: "2026-11-15T09:00:00",
+        Valor: 40,
+        Taxa: 0,
+        ValorServico: 40,
+        Status: "CANCELADO",
+        ClienteNome: "Vitor Cliente",
+        ServicoNome: "Corte",
+        ProfissionalNome: "Profissional Teste",
+      },
+      {
+        Id: 22,
+        ClienteId: 4,
+        ServicoId: 2,
+        DataAgendamento: "2026-11-16T09:00:00",
+        Valor: 80,
+        Taxa: 0,
+        ValorServico: 80,
+        Status: "CONCLUIDO",
+        ClienteNome: "Vitor Cliente",
+        ServicoNome: "Barba",
+        ProfissionalNome: "Profissional Teste",
+      },
+    ]);
+
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/home"]}>
+        <ClienteFinalHome />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Atendimentos concluídos").parentElement).toHaveTextContent("1");
+    });
+    expect(screen.getByText("Próximos agendamentos").parentElement).toHaveTextContent("0");
   });
 
   it("permite cancelar um agendamento ativo e atualiza o conteudo", async () => {
