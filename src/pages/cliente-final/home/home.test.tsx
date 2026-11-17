@@ -1,5 +1,7 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
-import { render } from "@/test/render-with-notifications";
+import { render as renderWithNotifications } from "@/test/render-with-notifications";
+import { LanguageProvider } from "@/context/LanguageContext";
+import type { ReactElement } from "react";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -28,7 +30,23 @@ vi.mock("@/services/logout-service", () => ({
   logout: mocks.logout,
 }));
 
+vi.mock("@/services/agenda-realtime-service", () => ({
+  createAgendaRealtimeClient: () => ({
+    start: () => undefined,
+    stop: async () => undefined,
+  }),
+}));
+
+vi.mock("@/services/pagamentos-agendamento-service", () => ({
+  consultarPagamentoAgendamento: vi.fn().mockResolvedValue(null),
+  iniciarPagamentoOnline: vi.fn(),
+}));
+
 import ClienteFinalHome from "./index";
+
+function render(ui: ReactElement) {
+  return renderWithNotifications(<LanguageProvider>{ui}</LanguageProvider>);
+}
 
 function LocationProbe() {
   const location = useLocation();
