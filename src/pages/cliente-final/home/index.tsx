@@ -172,6 +172,18 @@ function AppointmentCard({
     }
   }
 
+  // Não monta uma linha de pagamento sem conteúdo. A API pode retornar NAO_INICIADO
+  // após o card já ter sido exibido, e uma div vazia criaria um espaçamento fantasma.
+  const paymentStatusContent = payment?.status === "PAGO" ? (
+    <span>Pagamento confirmado</span>
+  ) : payment?.status === "PENDENTE" && payment.metodo === "PRESENCIAL" ? (
+    <span>Pagamento presencial pendente</span>
+  ) : payment?.status === "PENDENTE" && payment.metodo === "ONLINE" ? (
+    <button type="button" disabled={openingPayment} onClick={() => void retomarPagamento()}>
+      {openingPayment ? "Abrindo checkout..." : "Continuar pagamento online"}
+    </button>
+  ) : null;
+
   if (history) {
     const status = appointment.Status.trim().toUpperCase();
     const completed = status === "CONCLUIDO" || status === "CONCLUÍDO";
@@ -254,15 +266,9 @@ function AppointmentCard({
               <p className={styles.historyCancellationReason}>Motivo: {appointment.MotivoCancelamento}</p>
             )}
 
-            {payment && (
-              <div className={styles.paymentStatus}>
-                {payment.status === "PAGO" ? <span>Pagamento confirmado</span> :
-                 payment.status === "PENDENTE" && payment.metodo === "PRESENCIAL" ?
-                  <span>Pagamento presencial pendente</span> :
-                 payment.metodo === "ONLINE" && payment.status === "PENDENTE" ?
-                  <button type="button" disabled={openingPayment} onClick={() => void retomarPagamento()}>
-                    {openingPayment ? "Abrindo checkout..." : "Continuar pagamento online"}
-                  </button> : null}
+            {paymentStatusContent && (
+              <div className={styles.paymentStatus} data-testid="appointment-payment-status">
+                {paymentStatusContent}
               </div>
             )}
 
@@ -346,15 +352,9 @@ function AppointmentCard({
         </div>
       </div>
 
-      {payment && (
-        <div className={styles.paymentStatus}>
-          {payment.status === "PAGO" ? <span>Pagamento confirmado</span> :
-           payment.status === "PENDENTE" && payment.metodo === "PRESENCIAL" ?
-            <span>Pagamento presencial pendente</span> :
-           payment.metodo === "ONLINE" && payment.status === "PENDENTE" ?
-            <button type="button" disabled={openingPayment} onClick={() => void retomarPagamento()}>
-              {openingPayment ? "Abrindo checkout..." : "Continuar pagamento online"}
-            </button> : null}
+      {paymentStatusContent && (
+        <div className={styles.paymentStatus} data-testid="appointment-payment-status">
+          {paymentStatusContent}
         </div>
       )}
 

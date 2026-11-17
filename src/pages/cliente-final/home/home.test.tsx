@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { render as renderWithNotifications } from "@/test/render-with-notifications";
 import { LanguageProvider } from "@/context/LanguageContext";
 import type { ReactElement } from "react";
@@ -8,6 +8,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   listarHistoricoAgendamentos: vi.fn(),
   atualizarStatusAgendamento: vi.fn(),
+  consultarPagamentoAgendamento: vi.fn(),
   logout: vi.fn(),
 }));
 
@@ -38,7 +39,7 @@ vi.mock("@/services/agenda-realtime-service", () => ({
 }));
 
 vi.mock("@/services/pagamentos-agendamento-service", () => ({
-  consultarPagamentoAgendamento: vi.fn().mockResolvedValue(null),
+  consultarPagamentoAgendamento: mocks.consultarPagamentoAgendamento,
   iniciarPagamentoOnline: vi.fn(),
 }));
 
@@ -61,6 +62,7 @@ describe("ClienteFinalHome", () => {
       value: ["pt-BR"],
     });
     vi.clearAllMocks();
+    mocks.consultarPagamentoAgendamento.mockResolvedValue(null);
     mocks.listarHistoricoAgendamentos.mockResolvedValue([
       {
         Id: 12,
@@ -108,6 +110,47 @@ describe("ClienteFinalHome", () => {
       ServicoNome: "Corte",
       ProfissionalNome: "Profissional Teste",
     });
+  });
+
+  it("mantém o espaçamento do card após receber pagamento não iniciado", async () => {
+    let resolvePayment!: (value: { status: string; valor: number }) => void;
+    mocks.consultarPagamentoAgendamento.mockImplementation(
+      () => new Promise(resolve => { resolvePayment = resolve; }),
+    );
+
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/home"]}>
+        <ClienteFinalHome />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Corte")).toBeInTheDocument();
+    await waitFor(() => expect(resolvePayment).toBeTypeOf("function"));
+    expect(screen.queryByTestId("appointment-payment-status")).not.toBeInTheDocument();
+
+    await act(async () => {
+      resolvePayment({ status: "NAO_INICIADO", valor: 50 });
+    });
+
+    // A div vazia não deve surgir entre métricas e botões após a resposta da API.
+    expect(screen.queryByTestId("appointment-payment-status")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cancelar agendamento de Corte" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Concluir agendamento de Corte" })).toBeInTheDocument();
+  });
+
+  it("exibe informação de pagamento somente quando há conteúdo real", async () => {
+    mocks.consultarPagamentoAgendamento.mockResolvedValue({
+      status: "PENDENTE", metodo: "PRESENCIAL", valor: 50,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/home"]}>
+        <ClienteFinalHome />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Pagamento presencial pendente")).toBeInTheDocument();
+    expect(screen.getByTestId("appointment-payment-status")).toHaveTextContent("Pagamento presencial pendente");
   });
 
   it("troca o conteudo pelas abas sem sair da rota home", async () => {
