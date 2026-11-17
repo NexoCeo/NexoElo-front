@@ -115,7 +115,14 @@ describe("Dashboard", () => {
     expect(await screen.findByText("Bianca Pirez")).toBeInTheDocument();
     expect(screen.getByLabelText("Iniciais de Bianca Pirez")).toHaveTextContent("BP");
     expect(screen.getByText("Escova e prancha").parentElement?.querySelector("svg")).toBeInTheDocument();
-    expect(screen.getByText("Roberta Silva").parentElement?.querySelector("svg")).toBeInTheDocument();
+    const serviceRow = screen.getByText("Escova e prancha").parentElement;
+    const professionalRow = screen.getByText("Roberta Silva").parentElement;
+    expect(serviceRow?.querySelector('[class*="mobileAppointmentDetailIcon"] svg')).toBeInTheDocument();
+    expect(professionalRow?.querySelector('[class*="mobileAppointmentDetailIcon"] svg')).toBeInTheDocument();
+    expect(serviceRow).toHaveClass(expect.stringContaining("mobileAppointmentDetailRow"));
+    expect(professionalRow).toHaveClass(expect.stringContaining("mobileAppointmentDetailRow"));
+    const nameRow = screen.getByText("Bianca Pirez").parentElement;
+    expect(nameRow).toContainElement(screen.getByLabelText("Iniciais de Bianca Pirez"));
     const card = screen.getByText("Bianca Pirez").closest("article");
     expect(card).not.toBeNull();
     const metadata = card?.querySelector('[class*="mobileAppointmentMeta"]');

@@ -283,15 +283,6 @@
     width:4px;
     background:var(--theme-primary);
   }
-  .mobileAppointmentMain{display:grid;grid-template-columns:minmax(0,1fr);gap:7px;min-width:0}
-  .mobileAppointmentNameRow,
-  .mobileAppointmentServiceRow{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    min-width:0;
-  }
   .mobileAppointmentTime{
     display:inline-flex;
     align-items:center;
@@ -316,8 +307,6 @@
     font-weight:800;
     overflow-wrap:anywhere;
   }
-  .mobileAppointmentService{flex:1 1 auto;min-width:0;font-size:13px;color:var(--theme-text);overflow-wrap:anywhere}
-  .mobileAppointmentProfessional{font-size:12px;color:var(--theme-text-muted);overflow-wrap:anywhere}
   .mobileAppointmentFooter{
     display:flex;
     align-items:center;
@@ -403,7 +392,6 @@
 
 @media(max-width:370px){
   .mobileAppointmentCard{padding:12px}
-  .mobileAppointmentNameRow,.mobileAppointmentServiceRow{gap:6px}
   .mobileAppointmentTime{padding:5px 6px;font-size:10px;gap:4px}
   .mobileAppointmentFooter{gap:6px}
   .mobileAppointmentStatus{padding-inline:7px;font-size:9px}
@@ -413,26 +401,45 @@
   .mobileAppointmentArrow{transition:none}
 }
 
-/* Foto e indicadores do agendamento, sem alterar ações/status do card. */
+/* Layout compartilhado por EMPRESA, AUTONOMO e PROFISSIONAL.
+   A coluna da foto passa a conter também os ícones, sem deslocar os textos. */
 .mobileAppointmentBody {
-  display: flex;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: start;
+  width: 100%;
   min-width: 0;
   gap: 12px;
 }
+.mobileAppointmentInfo {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  row-gap: 8px;
+}
+.mobileAppointmentNameRow,
+.mobileAppointmentDetailRow {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: start;
+  justify-content: initial;
+  width: 100%;
+  min-width: 0;
+  column-gap: 10px;
+}
+.mobileAppointmentNameRow { align-items: start; }
 .mobileAppointmentAvatar {
   display: grid;
-  flex: 0 0 48px;
   place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 46px;
+  height: 46px;
+  min-width: 0;
+  border-radius: 11px;
   overflow: hidden;
-  background: var(--theme-primary-soft);
   color: var(--theme-primary-text);
-  font-size: 17px;
+  background: var(--theme-primary-soft);
+  font-size: 16px;
   font-weight: 800;
-  letter-spacing: .015em;
 }
 .mobileAppointmentAvatar img {
   display: block;
@@ -440,107 +447,85 @@
   height: 100%;
   object-fit: cover;
 }
-.mobileAppointmentMain {
-  flex: 1 1 auto;
+.mobileAppointmentClient {
+  display: block;
   min-width: 0;
+  padding-top: 2px;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
 }
-.mobileAppointmentService,
-.mobileAppointmentProfessional {
-  display: inline-flex;
+.mobileAppointmentDetailIcon {
+  display: flex;
+  justify-content: center;
   align-items: flex-start;
-  gap: 7px;
+  width: 46px;
   min-width: 0;
-}
-.mobileAppointmentService svg,
-.mobileAppointmentProfessional svg {
-  flex: 0 0 14px;
-  width: 14px;
-  height: 14px;
   color: var(--theme-text-muted);
 }
-.mobileAppointmentService > span,
-.mobileAppointmentProfessional > span {
-  min-width: 0;
-  overflow-wrap: anywhere;
+.mobileAppointmentDetailIcon svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: none;
 }
-@media (max-width: 370px) {
-  .mobileAppointmentBody { gap: 8px; }
-  .mobileAppointmentAvatar {
-    flex-basis: 42px;
-    width: 42px;
-    height: 42px;
-    border-radius: 10px;
-    font-size: 15px;
-  }
-  .mobileAppointmentService,
-  .mobileAppointmentProfessional { gap: 5px; }
-}
-
-/* Dashboard compartilhado: foto, informações e horário/valor em colunas
-   independentes, sem competição por largura em telas pequenas. */
-.mobileAppointmentBody {
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) max-content;
-  align-items: start;
-  column-gap: 11px;
-  width: 100%;
-  min-width: 0;
-}
-.mobileAppointmentAvatar { grid-column: 1; grid-row: 1; }
-.mobileAppointmentMain {
-  grid-column: 2;
-  grid-row: 1;
-  display: grid;
-  align-content: start;
-  min-width: 0;
-  gap: 8px;
-}
-.mobileAppointmentClient { min-width: 0; margin: 0; line-height: 1.25; }
 .mobileAppointmentService,
 .mobileAppointmentProfessional {
-  display: flex;
-  align-items: flex-start;
+  display: block;
   min-width: 0;
-  max-width: 100%;
   margin: 0;
-  gap: 6px;
-  line-height: 1.35;
+  line-height: 1.4;
   overflow-wrap: anywhere;
 }
-.mobileAppointmentService svg,
-.mobileAppointmentProfessional svg { margin-top: 1px; }
+.mobileAppointmentService { font-size: 13px; color: var(--theme-text); }
+.mobileAppointmentProfessional { font-size: 12px; color: var(--theme-text-muted); }
 .mobileAppointmentMeta {
-  grid-column: 3;
-  grid-row: 1;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  justify-content: flex-start;
   min-width: 0;
-  gap: 13px;
+  gap: 12px;
   white-space: nowrap;
 }
-.mobileAppointmentTime { margin: 0; font-size: 11px; }
-.mobileAppointmentValue { margin: 0; text-align: right; font-size: 12px; }
+.mobileAppointmentTime {
+  margin: 0;
+  font-size: 11px;
+}
+.mobileAppointmentValue {
+  margin: 0;
+  font-size: 12px;
+  text-align: right;
+}
 @media (max-width: 420px) {
-  .mobileAppointmentBody {
-    grid-template-columns: 44px minmax(0, 1fr) max-content;
+  .mobileAppointmentBody { gap: 8px; }
+  .mobileAppointmentInfo { row-gap: 7px; }
+  .mobileAppointmentNameRow,
+  .mobileAppointmentDetailRow {
+    grid-template-columns: 42px minmax(0, 1fr);
     column-gap: 8px;
   }
-  .mobileAppointmentAvatar { width: 44px; height: 44px; flex-basis: 44px; }
-  .mobileAppointmentMain { gap: 7px; }
+  .mobileAppointmentAvatar,
+  .mobileAppointmentDetailIcon { width: 42px; }
+  .mobileAppointmentAvatar { height: 42px; }
+  .mobileAppointmentClient { font-size: 14px; }
   .mobileAppointmentTime { padding: 5px 6px; font-size: 10px; }
   .mobileAppointmentValue { font-size: 11px; }
 }
 @media (max-width: 350px) {
-  .mobileAppointmentBody {
-    grid-template-columns: 38px minmax(0, 1fr) max-content;
-    column-gap: 6px;
+  .mobileAppointmentBody { gap: 6px; }
+  .mobileAppointmentNameRow,
+  .mobileAppointmentDetailRow {
+    grid-template-columns: 36px minmax(0, 1fr);
+    column-gap: 7px;
   }
-  .mobileAppointmentAvatar { width: 38px; height: 38px; flex-basis: 38px; }
+  .mobileAppointmentAvatar,
+  .mobileAppointmentDetailIcon { width: 36px; }
+  .mobileAppointmentAvatar { height: 36px; font-size: 13px; }
   .mobileAppointmentClient { font-size: 13px; }
   .mobileAppointmentService,
   .mobileAppointmentProfessional { font-size: 11px; }
-  .mobileAppointmentMeta { gap: 10px; }
-  .mobileAppointmentTime { gap: 3px; padding: 4px 5px; font-size: 9px; }
+  .mobileAppointmentTime { padding: 4px 5px; gap: 3px; font-size: 9px; }
   .mobileAppointmentValue { font-size: 10px; }
 }

@@ -337,17 +337,23 @@ export default function Dashboard({ initialAgenda }: { initialAgenda?: Dashboard
                   return (
                     <article className={`${styles.mobileAppointmentCard} ${statusStyle}`} key={appointment.Id}>
                       <div className={styles.mobileAppointmentBody}>
-                        <ClientAvatar name={item.cliente} photo={appointment.ClienteFotoPerfil} />
-                        <div className={styles.mobileAppointmentMain}>
-                          <strong className={styles.mobileAppointmentClient}>{item.cliente}</strong>
-                          <span className={styles.mobileAppointmentService}>
-                            <FaScrewdriverWrench aria-hidden="true" />
-                            <span>{item.servico}</span>
-                          </span>
-                          <span className={styles.mobileAppointmentProfessional}>
-                            <FaUser aria-hidden="true" />
-                            <span>{item.profissional}</span>
-                          </span>
+                        <div className={styles.mobileAppointmentInfo}>
+                          <div className={styles.mobileAppointmentNameRow}>
+                            <ClientAvatar name={item.cliente} photo={appointment.ClienteFotoPerfil} />
+                            <strong className={styles.mobileAppointmentClient}>{item.cliente}</strong>
+                          </div>
+                          <div className={styles.mobileAppointmentDetailRow}>
+                            <span className={styles.mobileAppointmentDetailIcon}>
+                              <FaScrewdriverWrench aria-hidden="true" />
+                            </span>
+                            <span className={styles.mobileAppointmentService}>{item.servico}</span>
+                          </div>
+                          <div className={styles.mobileAppointmentDetailRow}>
+                            <span className={styles.mobileAppointmentDetailIcon}>
+                              <FaUser aria-hidden="true" />
+                            </span>
+                            <span className={styles.mobileAppointmentProfessional}>{item.profissional}</span>
+                          </div>
                         </div>
                         <div className={styles.mobileAppointmentMeta}>
                           <span className={styles.mobileAppointmentTime}>
