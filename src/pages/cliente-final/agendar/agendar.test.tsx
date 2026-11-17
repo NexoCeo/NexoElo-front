@@ -258,6 +258,79 @@ describe("ClienteFinalAgendar", () => {
     expect(screen.queryByTestId("service-selection-dock")).not.toBeInTheDocument();
   });
 
+  it("distribui as três etapas como botões e bloqueia a confirmação antes de escolher horário", async () => {
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/agendar"]}>
+        <LanguageProvider><ClienteFinalAgendar /></LanguageProvider>
+      </MemoryRouter>,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: /Autonomo Teste/i }));
+
+    const steps = screen.getByRole("navigation", { name: "Etapas do agendamento" });
+    expect(steps.querySelectorAll("button")).toHaveLength(3);
+    const service = screen.getByRole("button", { name: "1. Serviço" });
+    const date = screen.getByRole("button", { name: "2. Data e horário" });
+    const confirm = screen.getByRole("button", { name: "3. Confirmar" });
+    expect(service).toHaveAttribute("aria-current", "step");
+    expect(confirm).toBeDisabled();
+
+    fireEvent.click(date);
+    expect(screen.getByRole("heading", { name: "Escolha os serviços" })).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("button", { name: /Corte/i }));
+    fireEvent.click(date);
+    expect(screen.getByRole("heading", { name: "Escolha a data e o horário" })).toBeInTheDocument();
+    expect(date).toHaveAttribute("aria-current", "step");
+    expect(confirm).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText(/^Data$/i, { selector: "input" }), {
+      target: { value: "2099-08-20" },
+    });
+    fireEvent.click(await screen.findByRole("button", { name: "08:30" }));
+    expect(confirm).toBeEnabled();
+    fireEvent.click(confirm);
+    expect(screen.getByRole("heading", { name: "Revise seu agendamento" })).toBeInTheDocument();
+    expect(confirm).toHaveAttribute("aria-current", "step");
+
+    fireEvent.click(date);
+    expect(screen.getByRole("heading", { name: "Escolha a data e o horário" })).toBeInTheDocument();
+    fireEvent.click(service);
+    expect(screen.getByRole("heading", { name: "Escolha os serviços" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Serviços selecionados (1)" })).toBeInTheDocument();
+  });
+
+  it("permite navegar do profissional aos serviços sem perder a seleção na empresa", async () => {
+    mocks.listarResponsaveisAgendamento.mockResolvedValue([
+      { Id: 7, Nome: "Empresa Teste", TipoUsuario: "EMPRESA" },
+    ]);
+    mocks.listarProfissionaisAgendamento.mockResolvedValue([
+      { Id: 9, Nome: "Ana", VinculoStatus: "APROVADO" },
+    ]);
+    mocks.listarServicosPorProfissional.mockResolvedValue([
+      { Id: 2, NomeServico: "Corte", Valor: 50, TempoEstimadoMinutos: 30 },
+    ]);
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/agendar"]}>
+        <LanguageProvider><ClienteFinalAgendar /></LanguageProvider>
+      </MemoryRouter>,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: /Empresa Teste/i }));
+    const professionalStep = screen.getByRole("button", { name: "1. Profissional" });
+    const servicesStep = screen.getByRole("button", { name: "2. Serviço e horário" });
+    const confirmStep = screen.getByRole("button", { name: "3. Confirmar" });
+    expect(servicesStep).toBeDisabled();
+    expect(confirmStep).toBeDisabled();
+
+    fireEvent.click(await screen.findByRole("button", { name: /Ana/i }));
+    expect(servicesStep).toBeEnabled();
+    expect(servicesStep).toHaveAttribute("aria-current", "step");
+    fireEvent.click(await screen.findByRole("button", { name: /Corte/i }));
+    fireEvent.click(professionalStep);
+    expect(screen.getByRole("heading", { name: "Com quem deseja agendar?" })).toBeInTheDocument();
+    fireEvent.click(servicesStep);
+    expect(screen.getByRole("heading", { name: "Escolha os serviços" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Serviços selecionados (1)" })).toBeInTheDocument();
+  });
+
   it("permite adicionar servicos de profissionais diferentes na mesma reserva", async () => {
     mocks.listarResponsaveisAgendamento.mockResolvedValue([
       { Id: 7, Nome: "Empresa Teste", TipoUsuario: "EMPRESA" },

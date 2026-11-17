@@ -653,9 +653,50 @@
 .heroContent h2 { font-size:clamp(22px,3vw,32px); margin:11px 0; overflow-wrap:anywhere; }
 .heroContent p { display:flex; align-items:center; gap:8px; margin:0; color:var(--theme-text-muted); font-size:13px; }
 .heroBadge { display:inline-flex; align-items:center; gap:8px; border-radius:999px; background:var(--theme-surface); padding:7px 12px; color:var(--theme-primary-text); font-size:12px; font-weight:800; }
-.bookingProgress { display:flex; align-items:center; gap:10px; flex-wrap:wrap; color:var(--theme-text-muted); font-size:12px; font-weight:700; }
-.bookingProgress span { background:var(--theme-surface-muted); padding:10px 14px; border-radius:999px; }
-.bookingProgress .progressCurrent { background:var(--theme-primary); color:var(--theme-on-primary); }
+.bookingProgress {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  min-width: 0;
+  gap: 7px;
+  color: var(--theme-text-muted);
+}
+.bookingProgress button {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 5px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: var(--theme-surface-muted);
+  color: var(--theme-text-muted);
+  font: inherit;
+  font-size: clamp(10px, 1.3vw, 12px);
+  font-weight: 750;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.bookingProgress button:hover:not(:disabled):not(.progressCurrent) {
+  color: var(--theme-primary-text);
+  border-color: var(--theme-border-strong);
+}
+.bookingProgress button:focus-visible {
+  outline: 2px solid var(--theme-primary-text);
+  outline-offset: 2px;
+}
+.bookingProgress button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+.bookingProgress .progressCurrent {
+  background: var(--theme-primary);
+  color: var(--theme-on-primary);
+}
 .bookingForm,.bookingPanel { display:grid; gap:22px; min-width:0; }
 .bookingPanel { padding:26px; background:var(--theme-surface); border:1px solid var(--theme-border-strong); border-radius:20px; }
 .selectedProfessional { background:var(--theme-primary-soft); color:var(--theme-text); padding:12px; border-radius:10px; margin:0; font-size:13px; }
@@ -708,8 +749,8 @@
   .bookingPanel .scheduleLayout { grid-template-columns:1fr; }
   .catalogService .servicePhoto { width:72px; height:72px; }
   .serviceAction { padding:8px; font-size:11px; }
-  .bookingProgress { font-size:10px; gap:5px; }
-  .bookingProgress span { padding:9px; }
+  .bookingProgress { gap: 6px; }
+  .bookingProgress button { padding: 8px 4px; min-height: 43px; font-size: 10px; }
 }
 @media (max-width:420px) {
   .marketHeader { flex-wrap:wrap; }
