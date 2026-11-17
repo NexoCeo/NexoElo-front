@@ -136,17 +136,15 @@ function AppointmentCard({
   updatingId,
   onStatusChange,
   history = false,
-  initiallyExpanded = false,
   onRebook,
 }: {
   appointment: Agendamento;
   updatingId: number | null;
   onStatusChange: (agendamentoId: number, status: "CANCELADO" | "CONCLUIDO") => void;
   history?: boolean;
-  initiallyExpanded?: boolean;
   onRebook?: (appointment: Agendamento) => void;
 }) {
-  const [expanded, setExpanded] = useState(initiallyExpanded);
+  const [expanded, setExpanded] = useState(false);
   const [payment, setPayment] = useState<EstadoPagamento | null>(null);
   const [openingPayment, setOpeningPayment] = useState(false);
   const { showNotification } = useNotification();
@@ -776,14 +774,13 @@ export default function ClienteFinalHome() {
                       <span>{filteredHistoryUpcoming.length}</span>
                     </div>
                     <div className={styles.appointmentList}>
-                      {filteredHistoryUpcoming.map((appointment, index) => (
+                      {filteredHistoryUpcoming.map((appointment) => (
                         <AppointmentCard
                           key={appointment.Id}
                           appointment={appointment}
                           updatingId={updatingId}
                           onStatusChange={handleStatusChange}
                           history
-                          initiallyExpanded={index === 0}
                           onRebook={handleRebook}
                         />
                       ))}
@@ -798,15 +795,13 @@ export default function ClienteFinalHome() {
                       <span>{filteredHistoryPrevious.length}</span>
                     </div>
                     <div className={styles.appointmentList}>
-                      {filteredHistoryPrevious.map((appointment, index) => (
+                      {filteredHistoryPrevious.map((appointment) => (
                         <AppointmentCard
                           key={appointment.Id}
                           appointment={appointment}
                           updatingId={updatingId}
                           onStatusChange={handleStatusChange}
                           history
-                          initiallyExpanded={index === 0 &&
-                            ["CONCLUIDO", "CONCLUÍDO"].includes(appointment.Status.trim().toUpperCase())}
                           onRebook={handleRebook}
                         />
                       ))}
