@@ -141,3 +141,10 @@ html:has(body.light) { color-scheme: light; }
     background: var(--theme-background, #0B1220);
   }
 }
+
+
+/* No cliente-final o conteúdo das abas varia de altura. Reservar o gutter na
+   raiz evita que a barra vertical apareça/desapareça e desloque o header fixo. */
+html:has([data-client-final-home="true"]) {
+  scrollbar-gutter: stable;
+}

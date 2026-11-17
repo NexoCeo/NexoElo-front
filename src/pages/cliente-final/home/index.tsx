@@ -763,7 +763,7 @@ export default function ClienteFinalHome() {
   }
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} data-client-final-home="true">
       <header className={styles.topbar}>
         <div className={styles.topbarInner}>
           <div className={styles.brand}>

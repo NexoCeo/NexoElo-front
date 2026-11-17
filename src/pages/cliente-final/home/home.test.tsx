@@ -323,7 +323,9 @@ describe("ClienteFinalHome", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Olá, Vitor Cliente" }).closest("main")).toBeInTheDocument();
-    expect(screen.getByText("NexoElo").closest("header")).toBeInTheDocument();
+    const fixedHeader = screen.getByText("NexoElo").closest("header");
+    expect(fixedHeader).toBeInTheDocument();
+    expect(fixedHeader?.parentElement).toHaveAttribute("data-client-final-home", "true");
     expect(screen.getByText("NexoElo").previousElementSibling).toHaveAttribute(
       "src", expect.stringContaining("logo.png"),
     );
@@ -340,6 +342,7 @@ describe("ClienteFinalHome", () => {
     expect(screen.queryByRole("button", { name: /ver detalhes/i })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("tab", { name: "Histórico" }));
+    expect(screen.getByText("NexoElo").closest("header")).toBe(fixedHeader);
     expect(screen.getByRole("heading", { name: "Histórico de Agendamentos" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Próximos" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Anteriores" })).toBeInTheDocument();
@@ -349,6 +352,7 @@ describe("ClienteFinalHome", () => {
     expect(screen.getByTestId("location")).toHaveTextContent("/cliente-final/home");
 
     fireEvent.click(screen.getByRole("tab", { name: "Perfil" }));
+    expect(screen.getByText("NexoElo").closest("header")).toBe(fixedHeader);
     expect(screen.getByRole("tab", { name: "Perfil" })).toHaveAttribute("aria-selected", "true");
     expect(screen.getByRole("heading", { name: "Vitor Cliente" })).toBeInTheDocument();
     expect(screen.getByText("vitor@example.com")).toBeInTheDocument();
