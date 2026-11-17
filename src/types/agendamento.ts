@@ -36,6 +36,9 @@ export type Agendamento = {
   /** Duração real cadastrada para o serviço, em minutos. */
   DuracaoMinutos?: number;
   Status: string;
+  /** Informados pelo histórico no mesmo carregamento, sem requisição adicional. */
+  MetodoPagamento?: "PRESENCIAL" | "ONLINE" | null;
+  StatusPagamento?: string | null;
   MotivoCancelamento?: string | null;
   ClienteNome: string;
   ServicoNome: string;

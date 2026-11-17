@@ -1,4 +1,4 @@
-import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { render as renderWithNotifications } from "@/test/render-with-notifications";
 import { LanguageProvider } from "@/context/LanguageContext";
 import type { ReactElement } from "react";
@@ -126,72 +126,46 @@ describe("ClienteFinalHome", () => {
     });
   });
 
-  it("reserva espaço fixo para pagamento mesmo antes da resposta da API", async () => {
-    let resolvePayment!: (value: { status: string; valor: number }) => void;
-    mocks.consultarPagamentoAgendamento.mockImplementation(
-      () => new Promise(resolve => { resolvePayment = resolve; }),
-    );
+  it("exibe pagamento presencial junto aos demais dados, sem consulta adicional", async () => {
+    const appointments = await mocks.listarHistoricoAgendamentos();
+    mocks.listarHistoricoAgendamentos.mockResolvedValue(appointments.map((item: { Id: number }) =>
+      item.Id === 12 ? { ...item, MetodoPagamento: "PRESENCIAL", StatusPagamento: "PENDENTE" } : item));
 
-    render(
-      <MemoryRouter initialEntries={["/cliente-final/home"]}>
-        <ClienteFinalHome />
-      </MemoryRouter>,
-    );
+    render(<MemoryRouter initialEntries={["/cliente-final/home"]}>
+      <ClienteFinalHome />
+    </MemoryRouter>);
 
     expect(await screen.findByText("Corte")).toBeInTheDocument();
-    await waitFor(() => expect(resolvePayment).toBeTypeOf("function"));
-    const reservedSlot = screen.getByTestId("appointment-payment-slot");
-    expect(reservedSlot).toBeInTheDocument();
-    expect(screen.queryByTestId("appointment-payment-status")).not.toBeInTheDocument();
-
-    await act(async () => {
-      resolvePayment({ status: "NAO_INICIADO", valor: 50 });
-    });
-
-    // O mesmo elemento continua montado, sem criar uma nova linha ou deslocar botões.
-    expect(screen.getByTestId("appointment-payment-slot")).toBe(reservedSlot);
-    expect(screen.queryByTestId("appointment-payment-status")).not.toBeInTheDocument();
+    expect(screen.getByTestId("appointment-payment-status")).toHaveTextContent("Pagamento presencial");
+    expect(screen.queryByText("Pagamento presencial pendente")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("appointment-payment-slot")).not.toBeInTheDocument();
+    expect(mocks.consultarPagamentoAgendamento).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Cancelar agendamento de Corte" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Concluir agendamento de Corte" })).toBeInTheDocument();
   });
 
-  it("exibe informação de pagamento somente quando há conteúdo real", async () => {
-    mocks.consultarPagamentoAgendamento.mockResolvedValue({
-      status: "PENDENTE", metodo: "PRESENCIAL", valor: 50,
-    });
+  it("exibe apenas o método online e mantém a ação de retomar pagamento pendente", async () => {
+    const appointments = await mocks.listarHistoricoAgendamentos();
+    mocks.listarHistoricoAgendamentos.mockResolvedValue(appointments.map((item: { Id: number }) =>
+      item.Id === 12 ? { ...item, MetodoPagamento: "ONLINE", StatusPagamento: "PENDENTE" } : item));
 
-    render(
-      <MemoryRouter initialEntries={["/cliente-final/home"]}>
-        <ClienteFinalHome />
-      </MemoryRouter>,
-    );
-
-    const reservedSlot = await screen.findByTestId("appointment-payment-slot");
-    expect(await screen.findByText("Pagamento presencial pendente")).toBeInTheDocument();
-    expect(reservedSlot).toContainElement(screen.getByTestId("appointment-payment-status"));
-    expect(screen.getByTestId("appointment-payment-status")).toHaveTextContent("Pagamento presencial pendente");
-  });
-
-  it("mantém o mesmo espaço reservado quando pagamento pendente chega após o card", async () => {
-    let resolvePayment!: (value: { status: string; metodo: string; valor: number }) => void;
-    mocks.consultarPagamentoAgendamento.mockImplementation(
-      () => new Promise(resolve => { resolvePayment = resolve; }),
-    );
-    render(
-      <MemoryRouter initialEntries={["/cliente-final/home"]}>
-        <ClienteFinalHome />
-      </MemoryRouter>,
-    );
+    render(<MemoryRouter initialEntries={["/cliente-final/home"]}>
+      <ClienteFinalHome />
+    </MemoryRouter>);
     expect(await screen.findByText("Corte")).toBeInTheDocument();
-    const slot = screen.getByTestId("appointment-payment-slot");
+    expect(screen.getByTestId("appointment-payment-status")).toHaveTextContent("Pagamento online");
+    expect(screen.queryByText("Pagamento online pendente")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Continuar pagamento online" })).toBeInTheDocument();
+    expect(mocks.consultarPagamentoAgendamento).not.toHaveBeenCalled();
+  });
+
+  it("não cria espaço vazio quando o agendamento não tem pagamento registrado", async () => {
+    render(<MemoryRouter initialEntries={["/cliente-final/home"]}>
+      <ClienteFinalHome />
+    </MemoryRouter>);
+    expect(await screen.findByText("Corte")).toBeInTheDocument();
     expect(screen.queryByTestId("appointment-payment-status")).not.toBeInTheDocument();
-    await waitFor(() => expect(resolvePayment).toBeTypeOf("function"));
-    await act(async () => {
-      resolvePayment({ status: "PENDENTE", metodo: "PRESENCIAL", valor: 50 });
-    });
-    expect(screen.getByTestId("appointment-payment-slot")).toBe(slot);
-    expect(slot).toHaveTextContent("Pagamento presencial pendente");
-    expect(screen.getByRole("button", { name: "Cancelar agendamento de Corte" })).toBeInTheDocument();
+    expect(screen.queryByTestId("appointment-payment-slot")).not.toBeInTheDocument();
+    expect(mocks.consultarPagamentoAgendamento).not.toHaveBeenCalled();
   });
 
   it("usa o perfil compacto sem adicionar um cartão com fundo e permite editar os dados", async () => {

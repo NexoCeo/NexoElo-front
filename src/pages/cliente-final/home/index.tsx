@@ -35,7 +35,7 @@ import {
   listarHistoricoAgendamentos,
 } from "@/services/agendamento-service";
 import { getClienteFinalUser, saveClienteFinalSession } from "@/services/cliente-final-auth-token";
-import { consultarPagamentoAgendamento, iniciarPagamentoOnline, type EstadoPagamento } from "@/services/pagamentos-agendamento-service";
+import { iniciarPagamentoOnline } from "@/services/pagamentos-agendamento-service";
 import { logout } from "@/services/logout-service";
 import { alterarSenhaCliente, atualizarPerfilUsuario } from "@/services/usuario-service";
 import { useNotification } from "@/context/NotificationContext";
@@ -144,18 +144,8 @@ function AppointmentCard({
   onRebook?: (appointment: Agendamento) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [payment, setPayment] = useState<EstadoPagamento | null>(null);
   const [openingPayment, setOpeningPayment] = useState(false);
   const { showNotification } = useNotification();
-
-  useEffect(() => {
-    if (!isScheduled(appointment)) return;
-    let active = true;
-    void consultarPagamentoAgendamento(appointment.Id)
-      .then(data => { if (active) setPayment(data); })
-      .catch(() => { if (active) setPayment(null); });
-    return () => { active = false; };
-  }, [appointment.Id, appointment.Status]);
 
   async function retomarPagamento() {
     try {
@@ -171,17 +161,14 @@ function AppointmentCard({
     }
   }
 
-  // Reserva sempre o mesmo espaço antes da resposta da API. O conteúdo
-  // permanece opcional, mas seu carregamento não desloca as ações do card.
-  const paymentStatusContent = payment?.status === "PAGO" ? (
-    <span>Pagamento confirmado</span>
-  ) : payment?.status === "PENDENTE" && payment.metodo === "PRESENCIAL" ? (
-    <span>Pagamento presencial pendente</span>
-  ) : payment?.status === "PENDENTE" && payment.metodo === "ONLINE" ? (
-    <button type="button" disabled={openingPayment} onClick={() => void retomarPagamento()}>
-      {openingPayment ? "Abrindo checkout..." : "Continuar pagamento online"}
-    </button>
-  ) : null;
+  // O método chega no mesmo payload que os demais dados do agendamento.
+  // Não exibir estado intermediário nem reservar uma área em branco.
+  const paymentMethodText = appointment.MetodoPagamento === "PRESENCIAL"
+    ? "Pagamento presencial"
+    : appointment.MetodoPagamento === "ONLINE" ? "Pagamento online" : null;
+  const canResumeOnline = isScheduled(appointment) &&
+    appointment.MetodoPagamento === "ONLINE" &&
+    appointment.StatusPagamento === "PENDENTE";
 
   if (history) {
     const status = appointment.Status.trim().toUpperCase();
@@ -265,12 +252,17 @@ function AppointmentCard({
               <p className={styles.historyCancellationReason}>Motivo: {appointment.MotivoCancelamento}</p>
             )}
 
-            {isScheduled(appointment) && (
-              <div className={styles.paymentStatusSlot} data-testid="appointment-payment-slot">
-                {paymentStatusContent && (
-                  <div className={styles.paymentStatus} data-testid="appointment-payment-status">
-                    {paymentStatusContent}
-                  </div>
+            {paymentMethodText && (
+              <div className={styles.paymentStatus} data-testid="appointment-payment-status">
+                <span>{paymentMethodText}</span>
+                {canResumeOnline && (
+                  <button type="button"
+                    aria-label="Continuar pagamento online"
+                    title="Continuar pagamento online"
+                    disabled={openingPayment}
+                    onClick={() => void retomarPagamento()}>
+                    <FaCreditCard aria-hidden="true" />
+                  </button>
                 )}
               </div>
             )}
@@ -355,12 +347,17 @@ function AppointmentCard({
         </div>
       </div>
 
-      {isScheduled(appointment) && (
-        <div className={styles.paymentStatusSlot} data-testid="appointment-payment-slot">
-          {paymentStatusContent && (
-            <div className={styles.paymentStatus} data-testid="appointment-payment-status">
-              {paymentStatusContent}
-            </div>
+      {paymentMethodText && (
+        <div className={styles.paymentStatus} data-testid="appointment-payment-status">
+          <span>{paymentMethodText}</span>
+          {canResumeOnline && (
+            <button type="button"
+              aria-label="Continuar pagamento online"
+              title="Continuar pagamento online"
+              disabled={openingPayment}
+              onClick={() => void retomarPagamento()}>
+              <FaCreditCard aria-hidden="true" />
+            </button>
           )}
         </div>
       )}

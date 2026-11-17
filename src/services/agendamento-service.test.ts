@@ -92,7 +92,8 @@ describe("agendamento-service security contracts", () => {
 
   it("consulta o historico do cliente autenticado", async () => {
     mocks.get.mockResolvedValue({
-      data: [{ Id: 12, ClienteId: 4, ServicoNome: "Corte", Status: "AGENDADO" }],
+      data: [{ Id: 12, ClienteId: 4, ServicoNome: "Corte", Status: "AGENDADO",
+        MetodoPagamento: "PRESENCIAL", StatusPagamento: "PENDENTE" }],
     });
 
     const result = await listarHistoricoAgendamentos(4);
@@ -100,6 +101,9 @@ describe("agendamento-service security contracts", () => {
     expect(mocks.get).toHaveBeenCalledWith("/Agendamento/historico/4");
     expect(result).toHaveLength(1);
     expect(result[0].ServicoNome).toBe("Corte");
+    expect(result[0].MetodoPagamento).toBe("PRESENCIAL");
+    expect(result[0].StatusPagamento).toBe("PENDENTE");
+    expect(mocks.get).toHaveBeenCalledTimes(1);
   });
 
   it("atualiza o status pelo endpoint autenticado do agendamento", async () => {

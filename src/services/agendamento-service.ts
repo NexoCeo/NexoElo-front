@@ -62,6 +62,7 @@ function normalizeProfissional(profissional: ApiRecord): ProfissionalAgendamento
 }
 
 function normalizeAgendamento(agendamento: ApiRecord): Agendamento {
+  const metodo = pickString(agendamento, ["MetodoPagamento", "metodoPagamento"]).toUpperCase();
   return {
     Id: pickNumber(agendamento, ["Id", "id", "AgendamentoId", "agendamentoId"]),
     ClienteId: pickNumber(agendamento, ["ClienteId", "clienteId"]),
@@ -75,6 +76,8 @@ function normalizeAgendamento(agendamento: ApiRecord): Agendamento {
     ValorServico: pickNumber(agendamento, ["ValorServico", "valorServico"]),
     DuracaoMinutos: pickNumber(agendamento, ["DuracaoMinutos", "duracaoMinutos", "TempoEstimadoMinutos", "tempoEstimadoMinutos"]) || undefined,
     Status: pickString(agendamento, ["Status", "status"]) || "AGENDADO",
+    MetodoPagamento: metodo === "ONLINE" || metodo === "PRESENCIAL" ? metodo : null,
+    StatusPagamento: pickString(agendamento, ["StatusPagamento", "statusPagamento"]).toUpperCase() || null,
     MotivoCancelamento: pickString(agendamento, ["MotivoCancelamento", "motivoCancelamento"]) || null,
     ClienteNome: pickString(agendamento, ["ClienteNome", "clienteNome"]),
     ServicoNome: pickString(agendamento, ["ServicoNome", "servicoNome"]),
