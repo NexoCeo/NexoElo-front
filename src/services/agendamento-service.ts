@@ -80,6 +80,7 @@ function normalizeAgendamento(agendamento: ApiRecord): Agendamento {
     StatusPagamento: pickString(agendamento, ["StatusPagamento", "statusPagamento"]).toUpperCase() || null,
     MotivoCancelamento: pickString(agendamento, ["MotivoCancelamento", "motivoCancelamento"]) || null,
     ClienteNome: pickString(agendamento, ["ClienteNome", "clienteNome"]),
+    ClienteFotoPerfil: pickString(agendamento, ["ClienteFotoPerfil", "clienteFotoPerfil"]) || null,
     ServicoNome: pickString(agendamento, ["ServicoNome", "servicoNome"]),
     ProfissionalNome: pickString(agendamento, ["ProfissionalNome", "profissionalNome"]),
     Profissionais: (Array.isArray(agendamento.Profissionais) ? agendamento.Profissionais :

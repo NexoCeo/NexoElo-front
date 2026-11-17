@@ -412,3 +412,66 @@
 @media(prefers-reduced-motion:reduce){
   .mobileAppointmentArrow{transition:none}
 }
+
+/* Foto e indicadores do agendamento, sem alterar ações/status do card. */
+.mobileAppointmentBody {
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+  gap: 12px;
+}
+.mobileAppointmentAvatar {
+  display: grid;
+  flex: 0 0 48px;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--theme-primary-soft);
+  color: var(--theme-primary-text);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: .015em;
+}
+.mobileAppointmentAvatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.mobileAppointmentMain {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.mobileAppointmentService,
+.mobileAppointmentProfessional {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 7px;
+  min-width: 0;
+}
+.mobileAppointmentService svg,
+.mobileAppointmentProfessional svg {
+  flex: 0 0 14px;
+  width: 14px;
+  height: 14px;
+  color: var(--theme-text-muted);
+}
+.mobileAppointmentService > span,
+.mobileAppointmentProfessional > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 370px) {
+  .mobileAppointmentBody { gap: 8px; }
+  .mobileAppointmentAvatar {
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    font-size: 15px;
+  }
+  .mobileAppointmentService,
+  .mobileAppointmentProfessional { gap: 5px; }
+}

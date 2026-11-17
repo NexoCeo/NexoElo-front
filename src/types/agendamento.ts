@@ -41,6 +41,7 @@ export type Agendamento = {
   StatusPagamento?: string | null;
   MotivoCancelamento?: string | null;
   ClienteNome: string;
+  ClienteFotoPerfil?: string | null;
   ServicoNome: string;
   ProfissionalNome: string;
   Profissionais?: { Id: number; Nome: string; FotoPerfil?: string | null }[];

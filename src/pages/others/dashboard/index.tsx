@@ -1,7 +1,7 @@
 import { formatPersonName } from "@/context/UserContext";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { FaArrowRight, FaCalendarDay } from "react-icons/fa6";
+import { FaArrowRight, FaCalendarDay, FaScrewdriverWrench, FaUser } from "react-icons/fa6";
 import { useTheme } from "@/context/ThemeContext";
 import { useNotification } from "@/context/NotificationContext";
 import type { AgendaCardItem } from "@/components/cardClientes";
@@ -18,6 +18,7 @@ import type { Agendamento } from "@/types/agendamento";
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
 import { usePageRevalidation } from "@/hooks/usePageRevalidation";
+import { getUploadedImageUrl } from "@/components/header/profile-image";
 
 type DashboardRange = "today" | "week";
 
@@ -90,6 +91,29 @@ function toCardItem(appointment: Agendamento, includeDate: boolean): AgendaCardI
       appointment.ValorServico || appointment.Valor || 0,
     ),
   };
+}
+
+
+function ClientAvatar({ name, photo }: { name: string; photo?: string | null }) {
+  const imageUrl = getUploadedImageUrl(photo);
+  const [imageFailed, setImageFailed] = useState(false);
+  useEffect(() => setImageFailed(false), [imageUrl]);
+
+  const words = name.trim().split(/\\s+/).filter(Boolean);
+  const initials = words.length > 1
+    ? `${words[0][0]}${words[words.length - 1][0]}`.toLocaleUpperCase("pt-BR")
+    : (words[0]?.slice(0, 2) || "?").toLocaleUpperCase("pt-BR");
+
+  return (
+    <span className={styles.mobileAppointmentAvatar}>
+      {imageUrl && !imageFailed ? (
+        <img src={imageUrl} alt={`Foto de ${name}`} loading="lazy" decoding="async"
+          onError={() => setImageFailed(true)} />
+      ) : (
+        <span aria-label={`Iniciais de ${name}`}>{initials}</span>
+      )}
+    </span>
+  );
 }
 
 // Mesmo cabeçalho e a mesma geometria do Dashboard final, usados pelo gate
@@ -314,19 +338,28 @@ export default function Dashboard({ initialAgenda }: { initialAgenda?: Dashboard
                   const destination = `${getRolePagePath(role, "agenda")}?data=${appointmentDate}&agendamento=${appointment.Id}`;
                   return (
                     <article className={`${styles.mobileAppointmentCard} ${statusStyle}`} key={appointment.Id}>
-                      <div className={styles.mobileAppointmentMain}>
-                        <div className={styles.mobileAppointmentNameRow}>
-                          <strong className={styles.mobileAppointmentClient}>{item.cliente}</strong>
-                          <span className={styles.mobileAppointmentTime}>
-                            <FaCalendarDay aria-hidden="true" />
-                            <span>{timeLabel}</span>
+                      <div className={styles.mobileAppointmentBody}>
+                        <ClientAvatar name={item.cliente} photo={appointment.ClienteFotoPerfil} />
+                        <div className={styles.mobileAppointmentMain}>
+                          <div className={styles.mobileAppointmentNameRow}>
+                            <strong className={styles.mobileAppointmentClient}>{item.cliente}</strong>
+                            <span className={styles.mobileAppointmentTime}>
+                              <FaCalendarDay aria-hidden="true" />
+                              <span>{timeLabel}</span>
+                            </span>
+                          </div>
+                          <div className={styles.mobileAppointmentServiceRow}>
+                            <span className={styles.mobileAppointmentService}>
+                              <FaScrewdriverWrench aria-hidden="true" />
+                              <span>{item.servico}</span>
+                            </span>
+                            <strong className={styles.mobileAppointmentValue}>{item.valor}</strong>
+                          </div>
+                          <span className={styles.mobileAppointmentProfessional}>
+                            <FaUser aria-hidden="true" />
+                            <span>{item.profissional}</span>
                           </span>
                         </div>
-                        <div className={styles.mobileAppointmentServiceRow}>
-                          <span className={styles.mobileAppointmentService}>{item.servico}</span>
-                          <strong className={styles.mobileAppointmentValue}>{item.valor}</strong>
-                        </div>
-                        <span className={styles.mobileAppointmentProfessional}>{item.profissional}</span>
                       </div>
                       <div className={styles.mobileAppointmentFooter}>
                         <span className={styles.mobileAppointmentStatus}>

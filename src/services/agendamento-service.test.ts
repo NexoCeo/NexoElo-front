@@ -19,6 +19,7 @@ import {
   concluirAgendamentosDoDiaAtual,
   criarAgendamento,
   listarHistoricoAgendamentos,
+  listarAgendaPorData,
   listarHorariosDisponiveis,
   listarProfissionaisAgendamento,
   listarResponsaveisAgendamento,
@@ -103,6 +104,20 @@ describe("agendamento-service security contracts", () => {
     expect(result[0].ServicoNome).toBe("Corte");
     expect(result[0].MetodoPagamento).toBe("PRESENCIAL");
     expect(result[0].StatusPagamento).toBe("PENDENTE");
+    expect(mocks.get).toHaveBeenCalledTimes(1);
+  });
+
+  it("retorna a foto do cliente no mesmo resultado da agenda", async () => {
+    mocks.get.mockResolvedValue({
+      data: [{
+        Id: 1, ClienteId: 3, ClienteNome: "Bianca Pirez",
+        ClienteFotoPerfil: "uploads/bianca.jpg", ServicoNome: "Escova",
+        DataAgendamento: "2026-11-17T14:00:00", Status: "AGENDADO",
+      }],
+    });
+
+    const result = await listarAgendaPorData(7, "2026-11-17");
+    expect(result[0].ClienteFotoPerfil).toBe("uploads/bianca.jpg");
     expect(mocks.get).toHaveBeenCalledTimes(1);
   });
 

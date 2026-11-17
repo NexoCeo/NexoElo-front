@@ -99,6 +99,39 @@ describe("Dashboard", () => {
     expect(screen.queryByText("Cliente cancelado")).not.toBeInTheDocument();
   });
 
+  it("exibe iniciais quando o cliente não possui foto e inclui ícones de serviço e profissional", async () => {
+    sessionStorage.setItem("usuario", JSON.stringify({ Id: 7, Papel: "EMPRESA" }));
+    agendaMocks.listarPorData.mockResolvedValue([{
+      Id: 3, ClienteId: 12, ClienteNome: "Bianca Pirez",
+      ClienteFotoPerfil: null, ProfissionalNome: "Roberta Silva",
+      ServicoNome: "Escova e prancha", ServicoId: 5,
+      DataAgendamento: new Date().toISOString(),
+      ValorServico: 85, Status: "AGENDADO",
+    }]);
+    renderDashboard();
+
+    expect(await screen.findByText("Bianca Pirez")).toBeInTheDocument();
+    expect(screen.getByLabelText("Iniciais de Bianca Pirez")).toHaveTextContent("BP");
+    expect(screen.getByText("Escova e prancha").closest("span")?.querySelector("svg")).toBeInTheDocument();
+    expect(screen.getByText("Roberta Silva").closest("span")?.querySelector("svg")).toBeInTheDocument();
+  });
+
+  it("exibe imagem cadastrada quando o cliente possui foto", async () => {
+    sessionStorage.setItem("usuario", JSON.stringify({ Id: 7, Papel: "EMPRESA" }));
+    agendaMocks.listarPorData.mockResolvedValue([{
+      Id: 4, ClienteId: 13, ClienteNome: "Maria Oliveira",
+      ClienteFotoPerfil: "uploads/maria.jpg", ProfissionalNome: "Roberta Silva",
+      ServicoNome: "Hidratação", ServicoId: 7,
+      DataAgendamento: new Date().toISOString(),
+      ValorServico: 90, Status: "AGENDADO",
+    }]);
+    renderDashboard();
+
+    const image = await screen.findByRole("img", { name: "Foto de Maria Oliveira" });
+    expect(image).toHaveAttribute("src", expect.stringContaining("/uploads/maria.jpg"));
+    expect(screen.queryByLabelText("Iniciais de Maria Oliveira")).not.toBeInTheDocument();
+  });
+
   it.each([
     ["EMPRESA", "Dashboard da Empresa", "/empresa/agenda"],
     ["AUTONOMO", "Dashboard do Autônomo", "/autonomo/agenda"],
