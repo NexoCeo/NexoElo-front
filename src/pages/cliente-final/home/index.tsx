@@ -776,7 +776,7 @@ export default function ClienteFinalHome() {
                     <div className={styles.appointmentList}>
                       {filteredHistoryUpcoming.map((appointment) => (
                         <AppointmentCard
-                          key={appointment.Id}
+                          key={`${historyFilter}:${appointment.Id}`}
                           appointment={appointment}
                           updatingId={updatingId}
                           onStatusChange={handleStatusChange}
@@ -797,7 +797,7 @@ export default function ClienteFinalHome() {
                     <div className={styles.appointmentList}>
                       {filteredHistoryPrevious.map((appointment) => (
                         <AppointmentCard
-                          key={appointment.Id}
+                          key={`${historyFilter}:${appointment.Id}`}
                           appointment={appointment}
                           updatingId={updatingId}
                           onStatusChange={handleStatusChange}
