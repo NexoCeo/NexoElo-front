@@ -98,6 +98,12 @@ describe("ClienteFinalHome", () => {
     expect(screen.getByRole("heading", { name: "Olá, VITOR CLIENTE" }).closest("main")).toBeInTheDocument();
     expect(screen.getByText("NexoCeo").closest("header")).toBeInTheDocument();
     expect(await screen.findByText("Corte")).toBeInTheDocument();
+    expect(screen.getByText("Valor total")).toBeInTheDocument();
+    expect(screen.getByText("Duração")).toBeInTheDocument();
+    expect(screen.getByText("Não informada")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cancelar agendamento de Corte" })).toHaveTextContent("Cancelar");
+    expect(screen.getByRole("button", { name: "Concluir agendamento de Corte" })).toHaveTextContent("Concluir");
+    expect(screen.queryByRole("button", { name: /ver detalhes/i })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("tab", { name: "Histórico" }));
     expect(screen.getByRole("heading", { name: "Histórico" })).toBeInTheDocument();

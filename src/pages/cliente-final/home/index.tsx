@@ -5,10 +5,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FaCalendarAlt,
   FaCheck,
+  FaClock,
+  FaCut,
   FaHistory,
   FaHome,
   FaPlus,
   FaSignOutAlt,
+  FaTag,
   FaTimes,
   FaUser,
 } from "react-icons/fa";
@@ -65,12 +68,13 @@ function formatCurrency(value: number) {
 }
 
 function formatAppointmentDate(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    weekday: "short",
+  const formatted = new Intl.DateTimeFormat("pt-BR", {
+    weekday: "long",
     day: "2-digit",
     month: "short",
     year: "numeric",
   }).format(new Date(value));
+  return formatted.charAt(0).toLocaleUpperCase("pt-BR") + formatted.slice(1);
 }
 
 function formatAppointmentTime(value: string) {
@@ -135,8 +139,8 @@ function AppointmentCard({
     if (!isScheduled(appointment)) return;
     let active = true;
     void consultarPagamentoAgendamento(appointment.Id)
-      .then(data => { if(active) setPayment(data); })
-      .catch(() => { if(active) setPayment(null); });
+      .then(data => { if (active) setPayment(data); })
+      .catch(() => { if (active) setPayment(null); });
     return () => { active = false; };
   }, [appointment.Id, appointment.Status]);
 
@@ -145,33 +149,54 @@ function AppointmentCard({
       setOpeningPayment(true);
       await iniciarPagamentoOnline(appointment.Id);
     } catch {
-      showNotification({type:"error",title:"Não foi possível abrir o pagamento",message:"Tente novamente ou entre em contato com o estabelecimento."});
+      showNotification({
+        type: "error",
+        title: "Não foi possível abrir o pagamento",
+        message: "Tente novamente ou entre em contato com o estabelecimento.",
+      });
       setOpeningPayment(false);
     }
   }
 
   return (
     <article className={styles.appointmentCard}>
-      <div className={styles.appointmentDate}>
-        <FaCalendarAlt aria-hidden="true" />
-        <div>
-          <time dateTime={appointment.DataAgendamento}>
-            {formatAppointmentDate(appointment.DataAgendamento)}
-          </time>
-          <strong>{formatAppointmentTime(appointment.DataAgendamento)}</strong>
+      <div className={styles.appointmentTopRow}>
+        <div className={styles.appointmentDate}>
+          <span className={styles.appointmentIcon}><FaCalendarAlt aria-hidden="true" /></span>
+          <div className={styles.appointmentDateInfo}>
+            <time dateTime={appointment.DataAgendamento}>{formatAppointmentDate(appointment.DataAgendamento)}</time>
+            <strong>{formatAppointmentTime(appointment.DataAgendamento)}</strong>
+          </div>
+        </div>
+        <span className={`${styles.statusBadge} ${statusClass(appointment.Status)}`}>{statusLabel(appointment.Status)}</span>
+      </div>
+
+      <div className={styles.appointmentService}>
+        <span className={styles.appointmentIcon}><FaCut aria-hidden="true" /></span>
+        <div className={styles.appointmentServiceInfo}>
+          <strong>{appointment.ServicoNome || `Serviço #${appointment.ServicoId}`}</strong>
+          <span>
+            <FaUser aria-hidden="true" />
+            <span>Profissionais: {formatPersonName(appointment.ProfissionalNome) || "Não informado"}</span>
+          </span>
         </div>
       </div>
 
-      <div className={styles.appointmentMain}>
-        <strong>{appointment.ServicoNome || `Serviço #${appointment.ServicoId}`}</strong>
-        <span>{formatPersonName(appointment.ProfissionalNome) || "Profissional não informado"}</span>
-      </div>
-
-      <div className={styles.appointmentMeta}>
-        <span className={`${styles.statusBadge} ${statusClass(appointment.Status)}`}>
-          {statusLabel(appointment.Status)}
-        </span>
-        <strong>{formatCurrency(appointment.ValorServico || appointment.Valor || 0)}</strong>
+      <div className={styles.appointmentMetrics}>
+        <div className={styles.appointmentMetric}>
+          <span className={styles.metricIcon}><FaTag aria-hidden="true" /></span>
+          <div className={styles.metricInfo}>
+            <span>Valor total</span>
+            <strong>{formatCurrency(appointment.ValorServico || appointment.Valor || 0)}</strong>
+          </div>
+        </div>
+        <div className={styles.appointmentMetric}>
+          <span className={styles.metricIcon}><FaClock aria-hidden="true" /></span>
+          <div className={styles.metricInfo}>
+            <span>Duração</span>
+            <strong>{appointment.DuracaoMinutos && appointment.DuracaoMinutos > 0 ? `${appointment.DuracaoMinutos} min` : "Não informada"}</strong>
+          </div>
+        </div>
       </div>
 
       {payment && (
@@ -185,6 +210,7 @@ function AppointmentCard({
             </button> : null}
         </div>
       )}
+
       {isScheduled(appointment) && (
         <div className={styles.appointmentActions} aria-label="Ações do agendamento">
           <button
@@ -196,6 +222,7 @@ function AppointmentCard({
             aria-label={`Cancelar agendamento de ${appointment.ServicoNome || `serviço ${appointment.ServicoId}`}`}
           >
             <FaTimes aria-hidden="true" />
+            <span>Cancelar</span>
           </button>
           <button
             type="button"
@@ -206,6 +233,7 @@ function AppointmentCard({
             aria-label={`Concluir agendamento de ${appointment.ServicoNome || `serviço ${appointment.ServicoId}`}`}
           >
             <FaCheck aria-hidden="true" />
+            <span>Concluir</span>
           </button>
         </div>
       )}
