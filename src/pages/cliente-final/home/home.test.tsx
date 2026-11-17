@@ -114,6 +114,7 @@ describe("ClienteFinalHome", () => {
     expect(screen.getByRole("heading", { name: "Próximos" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Anteriores" })).toBeInTheDocument();
     expect(screen.getByText("Barba")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Todos" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("location")).toHaveTextContent("/cliente-final/home");
 
     fireEvent.click(screen.getByRole("tab", { name: "Perfil" }));
@@ -125,6 +126,78 @@ describe("ClienteFinalHome", () => {
     await waitFor(() => {
       expect(mocks.listarHistoricoAgendamentos).toHaveBeenCalledWith(4);
     });
+  });
+
+  it("filtra o histórico por concluídos e cancelados sem alterar os agendamentos", async () => {
+    mocks.listarHistoricoAgendamentos.mockResolvedValue([
+      {
+        Id: 12, ClienteId: 4, ServicoId: 2, DataAgendamento: "2099-08-20T08:30:00",
+        Valor: 50, Taxa: 0, ValorServico: 50, Status: "AGENDADO",
+        ClienteNome: "Vitor Cliente", ServicoNome: "Corte",
+        ProfissionalNome: "Profissional Teste",
+      },
+      {
+        Id: 13, ClienteId: 4, ServicoId: 3, DataAgendamento: "2020-01-10T14:00:00",
+        Valor: 80, Taxa: 0, ValorServico: 80, Status: "CONCLUIDO",
+        ClienteNome: "Vitor Cliente", ServicoNome: "Barba",
+        ProfissionalNome: "Profissional Teste",
+      },
+      {
+        Id: 14, ClienteId: 4, ServicoId: 4, DataAgendamento: "2020-01-08T12:00:00",
+        Valor: 100, Taxa: 0, ValorServico: 100, Status: "CANCELADO",
+        ClienteNome: "Vitor Cliente", ServicoNome: "Hidratação",
+        ProfissionalNome: "Profissional Teste",
+      },
+    ]);
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/home"]}>
+        <ClienteFinalHome />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText("Corte")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "Histórico" }));
+    const allFilter = screen.getByRole("button", { name: "Todos" });
+    const completedFilter = screen.getByRole("button", { name: "Concluídos" });
+    const cancelledFilter = screen.getByRole("button", { name: "Cancelados" });
+    expect(allFilter).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("Corte")).toBeInTheDocument();
+    expect(screen.getByText("Barba")).toBeInTheDocument();
+    expect(screen.getByText("Hidratação")).toBeInTheDocument();
+
+    fireEvent.click(completedFilter);
+    expect(completedFilter).toHaveAttribute("aria-pressed", "true");
+    expect(allFilter).toHaveAttribute("aria-pressed", "false");
+    expect(screen.queryByText("Corte")).not.toBeInTheDocument();
+    expect(screen.getByText("Barba")).toBeInTheDocument();
+    expect(screen.queryByText("Hidratação")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Anteriores" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Próximos" })).not.toBeInTheDocument();
+
+    fireEvent.click(cancelledFilter);
+    expect(cancelledFilter).toHaveAttribute("aria-pressed", "true");
+    expect(screen.queryByText("Barba")).not.toBeInTheDocument();
+    expect(screen.getByText("Hidratação")).toBeInTheDocument();
+
+    fireEvent.click(allFilter);
+    expect(allFilter).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("Corte")).toBeInTheDocument();
+    expect(screen.getByText("Barba")).toBeInTheDocument();
+    expect(screen.getByText("Hidratação")).toBeInTheDocument();
+    expect(mocks.listarHistoricoAgendamentos).toHaveBeenCalledTimes(1);
+  });
+
+  it("informa quando o status selecionado não possui agendamentos", async () => {
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/home"]}>
+        <ClienteFinalHome />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText("Corte")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "Histórico" }));
+    fireEvent.click(screen.getByRole("button", { name: "Cancelados" }));
+    expect(screen.getByText("Nenhum agendamento cancelado")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Próximos" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Anteriores" })).not.toBeInTheDocument();
   });
 
   it("não inclui agendamentos cancelados no resumo de atendimentos concluídos", async () => {

@@ -14,6 +14,7 @@ import {
   FaSignOutAlt,
   FaTag,
   FaTimes,
+  FaTimesCircle,
   FaUser,
 } from "react-icons/fa";
 import type { IconType } from "react-icons";
@@ -35,6 +36,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
 type HomeSection = "home" | "historico" | "perfil";
+type HistoryStatusFilter = "all" | "completed" | "cancelled";
 
 type ApiError = {
   erro?: string;
@@ -248,6 +250,7 @@ export default function ClienteFinalHome() {
   const { showNotification } = useNotification();
   const cliente = getClienteFinalUser();
   const [activeSection, setActiveSection] = useState<HomeSection>("home");
+  const [historyFilter, setHistoryFilter] = useState<HistoryStatusFilter>("all");
   const [appointments, setAppointments] = useState<Agendamento[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -321,6 +324,19 @@ export default function ClienteFinalHome() {
       (a, b) => new Date(b.DataAgendamento).getTime() - new Date(a.DataAgendamento).getTime(),
     ),
     [appointments],
+  );
+
+  // Mantém os grupos de histórico, aplicando o status selecionado apenas à listagem.
+  const filteredHistoryUpcoming = historyFilter === "all" ? upcomingAppointments : [];
+  const filteredHistoryPrevious = useMemo(
+    () => previousAppointments.filter((appointment) => {
+      if (historyFilter === "all") return true;
+      const status = appointment.Status.trim().toUpperCase();
+      return historyFilter === "completed"
+        ? status === "CONCLUIDO" || status === "CONCLUÍDO"
+        : status === "CANCELADO";
+    }),
+    [previousAppointments, historyFilter],
   );
 
   // O resumo contabiliza somente atendimentos concluídos, sem incluir cancelamentos.
@@ -527,11 +543,41 @@ export default function ClienteFinalHome() {
             aria-labelledby="tab-historico"
             className={styles.view}
           >
-            <header className={styles.pageHeader}>
-              <div>
-                <h1>{lang === "pt" ? "Histórico de Agendamentos" : "Appointment History"}</h1>
+            <div className={styles.historyIntro}>
+              <header className={styles.pageHeader}>
+                <div>
+                  <h1>{lang === "pt" ? "Histórico de Agendamentos" : "Appointment History"}</h1>
+                </div>
+              </header>
+              <div className={styles.historyFilters} role="group" aria-label={t("client.historyStatusFilters")}>
+                <button
+                  type="button"
+                  className={`${styles.historyFilterButton} ${historyFilter === "all" ? styles.historyFilterActive : ""}`}
+                  aria-pressed={historyFilter === "all"}
+                  onClick={() => setHistoryFilter("all")}
+                >
+                  {t("client.filterAll")}
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.historyFilterButton} ${styles.historyFilterCompleted} ${historyFilter === "completed" ? styles.historyFilterActive : ""}`}
+                  aria-pressed={historyFilter === "completed"}
+                  onClick={() => setHistoryFilter("completed")}
+                >
+                  <FaCheckCircle aria-hidden="true" />
+                  {t("client.filterCompleted")}
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.historyFilterButton} ${styles.historyFilterCancelled} ${historyFilter === "cancelled" ? styles.historyFilterActive : ""}`}
+                  aria-pressed={historyFilter === "cancelled"}
+                  onClick={() => setHistoryFilter("cancelled")}
+                >
+                  <FaTimesCircle aria-hidden="true" />
+                  {t("client.filterCancelled")}
+                </button>
               </div>
-            </header>
+            </div>
 
             {loading ? (
               <LoadingState label={t("client.historyLoading")} variant="client-history" embedded />
@@ -548,16 +594,25 @@ export default function ClienteFinalHome() {
                   <span>{t("client.historyEmptyNote")}</span>
                 </div>
               </div>
+            ) : filteredHistoryUpcoming.length === 0 && filteredHistoryPrevious.length === 0 ? (
+              <div className={styles.emptyState}>
+                <FaHistory aria-hidden="true" />
+                <div>
+                  <strong>{t(historyFilter === "completed"
+                    ? "client.noCompletedAppointments"
+                    : "client.noCancelledAppointments")}</strong>
+                </div>
+              </div>
             ) : (
               <div className={styles.historyGroups}>
-                {upcomingAppointments.length > 0 && (
+                {filteredHistoryUpcoming.length > 0 && (
                   <section aria-labelledby="upcoming-title">
                     <div className={styles.listTitle}>
                       <h2 id="upcoming-title">{t("client.upcoming")}</h2>
-                      <span>{upcomingAppointments.length}</span>
+                      <span>{filteredHistoryUpcoming.length}</span>
                     </div>
                     <div className={styles.appointmentList}>
-                      {upcomingAppointments.map((appointment) => (
+                      {filteredHistoryUpcoming.map((appointment) => (
                         <AppointmentCard
                           key={appointment.Id}
                           appointment={appointment}
@@ -569,14 +624,14 @@ export default function ClienteFinalHome() {
                   </section>
                 )}
 
-                {previousAppointments.length > 0 && (
+                {filteredHistoryPrevious.length > 0 && (
                   <section aria-labelledby="previous-title">
                     <div className={styles.listTitle}>
                       <h2 id="previous-title">{t("client.previous")}</h2>
-                      <span>{previousAppointments.length}</span>
+                      <span>{filteredHistoryPrevious.length}</span>
                     </div>
                     <div className={styles.appointmentList}>
-                      {previousAppointments.map((appointment) => (
+                      {filteredHistoryPrevious.map((appointment) => (
                         <AppointmentCard
                           key={appointment.Id}
                           appointment={appointment}

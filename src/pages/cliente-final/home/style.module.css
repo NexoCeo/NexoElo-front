@@ -418,6 +418,68 @@
   font-weight: 800;
 }
 
+.historyIntro {
+  display: grid;
+  gap: 12px;
+}
+
+.historyFilters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  width: min(100%, 460px);
+}
+
+.historyFilterButton {
+  min-width: 0;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 999px;
+  background: var(--theme-surface);
+  color: var(--theme-text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.historyFilterButton:hover:not(.historyFilterActive) {
+  background: var(--theme-surface-hover);
+}
+
+.historyFilterButton:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: 2px;
+}
+
+.historyFilterButton svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+}
+
+.historyFilterCompleted svg {
+  color: var(--theme-success-text);
+}
+
+.historyFilterCancelled svg {
+  color: var(--theme-error-text);
+}
+
+.historyFilterButton.historyFilterActive {
+  border-color: var(--theme-primary);
+  background: var(--theme-primary);
+  color: var(--theme-on-primary);
+  font-weight: 700;
+}
+
 .historyGroups {
   gap: 30px;
 }
@@ -677,6 +739,27 @@
 
   .summaryDetails strong {
     font-size: 26px;
+  }
+
+  .historyIntro {
+    gap: 10px;
+  }
+
+  .historyFilters {
+    width: 100%;
+    gap: 6px;
+  }
+
+  .historyFilterButton {
+    min-height: 34px;
+    gap: 4px;
+    padding: 7px 4px;
+    font-size: 11px;
+  }
+
+  .historyFilterButton svg {
+    width: 13px;
+    height: 13px;
   }
 
   .appointmentCard { padding: 13px; }
