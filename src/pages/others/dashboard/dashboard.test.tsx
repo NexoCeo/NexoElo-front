@@ -112,8 +112,8 @@ describe("Dashboard", () => {
 
     expect(await screen.findByText("Bianca Pirez")).toBeInTheDocument();
     expect(screen.getByLabelText("Iniciais de Bianca Pirez")).toHaveTextContent("BP");
-    expect(screen.getByText("Escova e prancha").closest("span")?.querySelector("svg")).toBeInTheDocument();
-    expect(screen.getByText("Roberta Silva").closest("span")?.querySelector("svg")).toBeInTheDocument();
+    expect(screen.getByText("Escova e prancha").parentElement?.querySelector("svg")).toBeInTheDocument();
+    expect(screen.getByText("Roberta Silva").parentElement?.querySelector("svg")).toBeInTheDocument();
   });
 
   it("exibe imagem cadastrada quando o cliente possui foto", async () => {
