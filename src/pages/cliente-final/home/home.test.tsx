@@ -141,7 +141,8 @@ describe("ClienteFinalHome", () => {
     expect(screen.getByTestId("location")).toHaveTextContent("/cliente-final/home");
 
     fireEvent.click(screen.getByRole("tab", { name: "Perfil" }));
-    expect(screen.getByRole("heading", { name: "Perfil" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Perfil" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("heading", { name: "Vitor Cliente" })).toBeInTheDocument();
     expect(screen.getByText("vitor@example.com")).toBeInTheDocument();
     expect(screen.getByText("(28) 99333-7212")).toBeInTheDocument();
     expect(screen.getByTestId("location")).toHaveTextContent("/cliente-final/home");
@@ -388,7 +389,7 @@ describe("ClienteFinalHome", () => {
     );
     expect(await screen.findByText("Escova e prancha + Hidratação")).toBeInTheDocument();
     expect(screen.getByText("Próximo atendimento")).toBeInTheDocument();
-    expect(screen.getByText("Roberta Silva + Maria Eduarda")).toBeInTheDocument();
+    expect(screen.getByText(/Profissionais:\s*Roberta Silva \+ Maria Eduarda/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("tab", { name: "Histórico" }));
     expect(screen.getByRole("heading", { name: "Próximos" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Anteriores" })).not.toBeInTheDocument();
