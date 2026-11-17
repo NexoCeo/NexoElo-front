@@ -130,6 +130,8 @@ describe("Dashboard", () => {
     const image = await screen.findByRole("img", { name: "Foto de Maria Oliveira" });
     expect(image).toHaveAttribute("src", expect.stringContaining("/uploads/maria.jpg"));
     expect(screen.queryByLabelText("Iniciais de Maria Oliveira")).not.toBeInTheDocument();
+    fireEvent.error(image);
+    expect(screen.getByLabelText("Iniciais de Maria Oliveira")).toHaveTextContent("MO");
   });
 
   it.each([
