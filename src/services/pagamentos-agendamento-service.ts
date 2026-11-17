@@ -6,7 +6,25 @@ export type ConfiguracaoPagamento = {
   OnlineDisponivel: boolean;
   ContaConectada: boolean;
   ContaStripe?: string | null;
+  TarifaCartaoBps?: number;
+  TarifaCartaoFixaCentavos?: number;
 };
+
+// Mesmo arredondamento do backend. Esta é uma prévia; o backend define o valor final.
+export function calcularTotalOnline(valorServico: number, config: ConfiguracaoPagamento) {
+  const centavos = Math.round(valorServico * 100);
+  const percentual = config.TarifaCartaoBps ?? 399;
+  const fixa = config.TarifaCartaoFixaCentavos ?? 39;
+  if (!Number.isSafeInteger(centavos) || centavos <= 0 ||
+      !Number.isSafeInteger(percentual) || percentual < 0 || percentual >= 10000 ||
+      !Number.isSafeInteger(fixa) || fixa < 0) return null;
+  const totalCentavos = Math.ceil((centavos + fixa) * 10000 / (10000 - percentual));
+  return {
+    valorServico: centavos / 100,
+    tarifa: (totalCentavos - centavos) / 100,
+    total: totalCentavos / 100,
+  };
+}
 
 export async function consultarPagamentoPublico(recebedorId: number) {
   const { data } = await api.get<ConfiguracaoPagamento>(`/pagamentos-agendamento/configuracao/${recebedorId}`);
