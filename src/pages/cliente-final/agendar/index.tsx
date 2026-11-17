@@ -979,7 +979,7 @@ export default function ClienteFinalAgendar() {
                       )}
                     </section>
 
-                    <div className={styles.bookingSelectionTotals} aria-label="Resumo do agendamento">
+                    <section className={styles.bookingSelectionTotals} aria-label="Resumo do agendamento">
                       <div>
                         <FaLayerGroup aria-hidden="true" />
                         <strong>{selectedServicos.length} {selectedServicos.length === 1 ? "serviço" : "serviços"}</strong>
@@ -992,7 +992,7 @@ export default function ClienteFinalAgendar() {
                         <FaTag aria-hidden="true" />
                         <span><strong>{formatCurrency(totalValor)}</strong><small>Valor total</small></span>
                       </div>
-                    </div>
+                    </section>
                     <button type="button" className={styles.chooseTimeButton} onClick={advanceToSchedule}>
                       Escolher horário <FaArrowRight aria-hidden="true" />
                     </button>

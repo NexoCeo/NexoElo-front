@@ -325,7 +325,7 @@ describe("ClienteFinalAgendar", () => {
         </LanguageProvider>
       </MemoryRouter>,
     );
-    expect(await screen.findByRole("heading", { name: "Serviços disponíveis" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Escolha os serviços" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Voltar" }));
     expect(await screen.findByRole("heading", { name: "Explore os prestadores" })).toBeInTheDocument();
     expect(screen.getByRole("searchbox", { name: "Buscar prestador" })).toBeInTheDocument();
