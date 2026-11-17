@@ -113,7 +113,7 @@ describe("ClienteFinalHome", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole("heading", { name: "Olá, VITOR CLIENTE" }).closest("main")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Olá, Vitor Cliente" }).closest("main")).toBeInTheDocument();
     expect(screen.getByText("NexoCeo").closest("header")).toBeInTheDocument();
     expect(await screen.findByText("Corte")).toBeInTheDocument();
     expect(screen.getByText("Próximos agendamentos")).toBeInTheDocument();
@@ -128,7 +128,7 @@ describe("ClienteFinalHome", () => {
     expect(screen.queryByRole("button", { name: /ver detalhes/i })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("tab", { name: "Histórico" }));
-    expect(screen.getByRole("heading", { name: "Histórico" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Histórico de Agendamentos" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Próximos" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Anteriores" })).toBeInTheDocument();
     expect(screen.getByText("Barba")).toBeInTheDocument();
@@ -244,7 +244,9 @@ describe("ClienteFinalHome", () => {
       </MemoryRouter>,
     );
 
-    await waitFor(() => expect(mocks.listarHistoricoAgendamentos).toHaveBeenCalled());
+    await waitFor(() => {
+      expect(screen.getByText("Atendimentos concluídos").parentElement).toHaveTextContent("1");
+    });
     fireEvent.click(screen.getByRole("tab", { name: "Histórico" }));
     expect(screen.getByRole("heading", { name: "Serviços realizados" })).toBeInTheDocument();
     expect(screen.getByText("Escova e prancha")).toBeInTheDocument();
