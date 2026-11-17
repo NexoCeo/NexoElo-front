@@ -54,11 +54,6 @@ type ApiError = {
   title?: string;
 };
 
-type StatusFeedback = {
-  kind: "success" | "error";
-  text: string;
-};
-
 const CANCELLATION_LIMIT_MS = 2 * 60 * 60 * 1000;
 const CANCELLATION_LIMIT_MESSAGE =
   "Limite de prazo atingido, o agendamento não pode ser cancelado.";
@@ -413,11 +408,11 @@ export default function ClienteFinalHome() {
   });
   const [appointments, setAppointments] = useState<Agendamento[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [loadFailed, setLoadFailed] = useState(false);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
-  const [statusFeedback, setStatusFeedback] = useState<StatusFeedback | null>(null);
 
   const requestPending = useRef(false);
+  const loadErrorNotified = useRef(false);
   const requestGeneration = useRef(0);
 
   const loadAppointments = useCallback(async (silent = false) => {
@@ -435,19 +430,28 @@ export default function ClienteFinalHome() {
       const data = await listarHistoricoAgendamentos(cliente.Id);
       if (generation !== requestGeneration.current) return;
       setAppointments(data);
-      setError("");
+      setLoadFailed(false);
+      loadErrorNotified.current = false;
     } catch {
       if (generation !== requestGeneration.current) return;
-      setError(lang === "pt"
-        ? "Aguardando conexão para atualizar seus agendamentos automaticamente."
-        : "Waiting for a connection to update your appointments automatically.");
+      setLoadFailed(true);
+      if (!loadErrorNotified.current) {
+        loadErrorNotified.current = true;
+        showNotification({
+          type: "error",
+          title: lang === "pt" ? "Agendamentos indisponíveis" : "Appointments unavailable",
+          message: lang === "pt"
+            ? "Não foi possível atualizar seus agendamentos. A atualização será tentada novamente automaticamente."
+            : "Could not refresh your appointments. Automatic retry will continue.",
+        });
+      }
     } finally {
       if (generation === requestGeneration.current) {
         requestPending.current = false;
         setLoading(false);
       }
     }
-  }, [cliente?.Id, lang]);
+  }, [cliente?.Id, lang, showNotification]);
 
   useEffect(() => {
     void loadAppointments();
@@ -689,8 +693,6 @@ export default function ClienteFinalHome() {
     agendamentoId: number,
     status: "CANCELADO" | "CONCLUIDO",
   ) {
-    setStatusFeedback(null);
-
     const appointment = appointments.find((item) => item.Id === agendamentoId);
     const appointmentTime = appointment
       ? new Date(appointment.DataAgendamento).getTime()
@@ -701,7 +703,6 @@ export default function ClienteFinalHome() {
       Number.isFinite(appointmentTime) &&
       Date.now() > appointmentTime - CANCELLATION_LIMIT_MS
     ) {
-      setStatusFeedback({ kind: "error", text: CANCELLATION_LIMIT_MESSAGE });
       showNotification({
         type: "warning",
         title: "Prazo de cancelamento encerrado",
@@ -724,12 +725,6 @@ export default function ClienteFinalHome() {
             : item.ServicosDetalhados,
         } : item
       )));
-      setStatusFeedback({
-        kind: "success",
-        text: status === "CANCELADO"
-          ? "Agendamento cancelado."
-          : "Agendamento concluído.",
-      });
       showNotification({
         type: "success",
         title: status === "CANCELADO" ? "Agendamento cancelado" : "Agendamento concluído",
@@ -739,7 +734,6 @@ export default function ClienteFinalHome() {
       });
     } catch (statusError) {
       const message = getApiError(statusError);
-      setStatusFeedback({ kind: "error", text: message });
       showNotification({ type: "error", title: "Agendamento não atualizado", message });
     } finally {
       setUpdatingId(null);
@@ -783,15 +777,6 @@ export default function ClienteFinalHome() {
         {activeSection === "home" && (
           <h1 className={styles.greeting}>Olá, {formatPersonName(cliente?.Nome) || "cliente"}</h1>
         )}
-        {statusFeedback?.kind === "success" && (
-          <div
-            className={`${styles.statusFeedback} ${styles.success}`}
-            role="status"
-          >
-            {statusFeedback.text}
-          </div>
-        )}
-
         {activeSection === "home" && (
           <section
             id="panel-home"
@@ -841,11 +826,8 @@ export default function ClienteFinalHome() {
 
               {loading ? (
                 <LoadingState label={t("client.loading")} variant="client-home" embedded />
-              ) : error && appointments.length === 0 ? (
-                <div className={styles.feedback} role="alert">
-                  <span>{error}</span>
-
-                </div>
+              ) : loadFailed && appointments.length === 0 ? (
+                null
               ) : upcomingAppointments[0] ? (
                 <AppointmentCard
                   appointment={upcomingAppointments[0]}
@@ -910,11 +892,8 @@ export default function ClienteFinalHome() {
 
             {loading ? (
               <LoadingState label={t("client.historyLoading")} variant="client-history" embedded />
-            ) : error && appointments.length === 0 ? (
-              <div className={styles.feedback} role="alert">
-                <span>{error}</span>
-
-              </div>
+            ) : loadFailed && appointments.length === 0 ? (
+              null
             ) : appointments.length === 0 ? (
               <div className={styles.emptyState}>
                 <FaHistory aria-hidden="true" />

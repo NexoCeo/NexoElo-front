@@ -511,8 +511,20 @@ describe("ClienteFinalHome", () => {
     await waitFor(() => {
       expect(mocks.atualizarStatusAgendamento).toHaveBeenCalledWith(12, "CANCELADO");
     });
-    expect(await screen.findByText("Agendamento cancelado.")).toBeInTheDocument();
+    expect(await screen.findByText("Agendamento cancelado")).toBeInTheDocument();
+    expect(screen.queryByText("Agendamento cancelado.")).not.toBeInTheDocument();
     expect(screen.getByText("Nenhum atendimento agendado")).toBeInTheDocument();
+  });
+
+  it("usa apenas notificação global quando a busca de agendamentos falha", async () => {
+    mocks.listarHistoricoAgendamentos.mockRejectedValueOnce(new Error("Falha de rede"));
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/home"]}>
+        <ClienteFinalHome />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText("Agendamentos indisponíveis")).toBeInTheDocument();
+    expect(screen.queryByText("Aguardando conexão para atualizar seus agendamentos automaticamente.")).not.toBeInTheDocument();
   });
 
   it("avisa sobre o prazo encerrado sem enviar uma requisicao invalida", async () => {

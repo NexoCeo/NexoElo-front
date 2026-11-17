@@ -43,7 +43,6 @@
 .primaryButton,
 .secondaryButton,
 .textButton,
-.feedback button,
 .emptyState button {
   font: inherit;
   cursor: pointer;
@@ -143,31 +142,6 @@
   width: min(100%, 1096px);
   margin: 0 auto;
   padding: 112px 28px 48px;
-}
-
-.statusFeedback {
-  position: sticky;
-  top: 84px;
-  z-index: 40;
-  margin-bottom: 18px;
-  padding: 11px 13px;
-  border: 1px solid;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 700;
-  box-shadow: 0 8px 22px var(--theme-shadow);
-}
-
-.statusFeedback.success {
-  border-color: var(--theme-success);
-  background: var(--theme-success-soft);
-  color: var(--theme-success-text);
-}
-
-.statusFeedback.error {
-  border-color: var(--theme-error);
-  background: var(--theme-error-soft);
-  color: var(--theme-error-text);
 }
 
 .view {
@@ -715,7 +689,6 @@
   gap: 30px;
 }
 
-.feedback,
 .emptyState {
   min-height: 132px;
   display: flex;
@@ -729,11 +702,6 @@
   text-align: center;
 }
 
-.feedback {
-  flex-direction: column;
-}
-
-.feedback button,
 .emptyState button {
   min-height: 38px;
   padding: 0 14px;
@@ -1106,10 +1074,6 @@
 
   .content {
     padding: 132px 12px 32px;
-  }
-
-  .statusFeedback {
-    top: 128px;
   }
 
   .view {
