@@ -366,7 +366,6 @@ export default function ClienteFinalHome() {
     <div className={styles.container}>
       <header className={styles.topbar}>
         <div className={styles.topbarInner}>
-          <h1 className={styles.greeting}>Olá, {formatPersonName(cliente?.Nome) || "cliente"}</h1>
           <nav className={styles.navigation} aria-label={t("client.navigation")} role="tablist">
             {navigationItems.map(({ id, Icon }) => (
               <button
@@ -393,6 +392,9 @@ export default function ClienteFinalHome() {
       </header>
 
       <main className={styles.content}>
+        {activeSection === "home" && (
+          <h1 className={styles.greeting}>Olá, {formatPersonName(cliente?.Nome) || "cliente"}</h1>
+        )}
         {statusFeedback?.kind === "success" && (
           <div
             className={`${styles.statusFeedback} ${styles.success}`}
