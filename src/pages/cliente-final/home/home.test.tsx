@@ -55,6 +55,11 @@ function LocationProbe() {
 
 describe("ClienteFinalHome", () => {
   beforeEach(() => {
+    // O CI pode usar inglês como idioma do navegador: as asserções desta tela são pt-BR.
+    Object.defineProperty(navigator, "languages", {
+      configurable: true,
+      value: ["pt-BR"],
+    });
     vi.clearAllMocks();
     mocks.listarHistoricoAgendamentos.mockResolvedValue([
       {
