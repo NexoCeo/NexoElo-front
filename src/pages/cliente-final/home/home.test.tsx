@@ -399,6 +399,16 @@ describe("ClienteFinalHome", () => {
     expect(screen.getByRole("button", { name: "Exibir detalhes do agendamento de Corte" })).toHaveAttribute("aria-expanded", "false");
     expect(screen.getByRole("button", { name: "Exibir detalhes do agendamento de Barba" })).toHaveAttribute("aria-expanded", "false");
     expect(screen.getByRole("button", { name: "Exibir detalhes do agendamento de Hidratação" })).toHaveAttribute("aria-expanded", "false");
+    // O ícone do calendário deve sempre usar a mesma paleta do status do card.
+    for (const [servico, status] of [
+      ["Corte", "scheduled"],
+      ["Barba", "completed"],
+      ["Hidratação", "cancelled"],
+    ]) {
+      const cardButton = screen.getByRole("button", { name: `Exibir detalhes do agendamento de ${servico}` });
+      const icon = cardButton.querySelector('[class*="appointmentIcon"]');
+      expect(icon?.className).toContain(status);
+    }
     expect(screen.queryByText("Hidratação")).not.toBeInTheDocument();
 
     fireEvent.click(completedFilter);
