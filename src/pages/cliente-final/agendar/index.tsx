@@ -24,7 +24,7 @@ import {
 } from "@/services/agendamento-service";
 import { obterAgendaPublica } from "@/services/agenda-publica-service";
 import {
-  consultarPagamentoPublico, iniciarPagamentoOnline, registrarPagamentoPresencial,
+  calcularTotalOnline, consultarPagamentoPublico, iniciarPagamentoOnline, registrarPagamentoPresencial,
   type ConfiguracaoPagamento
 } from "@/services/pagamentos-agendamento-service";
 import { getClienteFinalUser } from "@/services/cliente-final-auth-token";
@@ -206,6 +206,7 @@ export default function ClienteFinalAgendar() {
   const atendimentos = selecoes.map(item => ({ ServicoId: item.servico.Id, ProfissionalId: item.profissionalId }));
   const multiplosProfissionais = new Set(atendimentos.map(item => item.ProfissionalId)).size > 1;
   const totalValor = selectedServicos.reduce((total, servico) => total + Number(servico.Valor || 0), 0);
+  const totalOnline = configPagamento ? calcularTotalOnline(totalValor, configPagamento) : null;
   const totalDuracao = selectedServicos.reduce((total, servico) => total + Number(servico.TempoEstimadoMinutos || 0), 0);
   const responsavelEhEmpresa = selectedResponsavel?.TipoUsuario === "EMPRESA";
   const minDate = useMemo(() => toDateInputValue(new Date()), []);
@@ -886,7 +887,14 @@ export default function ClienteFinalAgendar() {
                       {responsavelEhEmpresa && selecoes.length > 0 && <div><span>Atendimentos</span><strong>{selecoes.map(item => `${item.servico.NomeServico} — ${formatPersonName(profissionais.find(pro => pro.Id === item.profissionalId)?.Nome ?? "Profissional")}`).join(" · ")}</strong></div>}
                       <div><span>Duração total</span><strong>{totalDuracao} min</strong></div>
                       <div><span>Data e horário</span><strong>{dataFormatada} · {selectedHorario?.Horario}</strong></div>
-                      <div className={styles.reviewTotal}><span>Valor total</span><strong>{formatCurrency(totalValor)}</strong></div>
+                      <div className={styles.reviewTotal}><span>Valor dos serviços</span><strong>{formatCurrency(totalValor)}</strong></div>
+                      {metodoPagamento === "ONLINE" && totalOnline && (
+                        <>
+                          <div><span>Custo do pagamento online (cliente)</span><strong>{formatCurrency(totalOnline.tarifa)}</strong></div>
+                          <div className={styles.reviewTotal}><span>Total a pagar com cartão</span><strong>{formatCurrency(totalOnline.total)}</strong></div>
+                          <small>O estabelecimento recebe o valor integral dos serviços. O custo do processamento é acrescentado ao pagamento online.</small>
+                        </>
+                      )}
                     </div>
                     <fieldset className={styles.paymentChoice}>
                       <legend>Como deseja pagar?</legend>
@@ -903,7 +911,7 @@ export default function ClienteFinalAgendar() {
                           disabled={!configPagamento.OnlineDisponivel}
                           onChange={() => setMetodoPagamento("ONLINE")} />
                           <span><strong>Pagar agora pela Stripe</strong>
-                            <small>{configPagamento.OnlineDisponivel ? "Pagamento seguro, destinado ao estabelecimento." :
+                            <small>{configPagamento.OnlineDisponivel ? "Pagamento com cartão. O custo de processamento é acrescentado ao valor dos serviços." :
                               "O estabelecimento ainda não habilitou sua conta recebedora."}</small></span>
                         </label>
                       )}
