@@ -258,7 +258,7 @@ describe("ClienteFinalAgendar", () => {
     expect(screen.queryByTestId("service-selection-dock")).not.toBeInTheDocument();
   });
 
-  it("distribui as três etapas como botões e bloqueia a confirmação antes de escolher horário", async () => {
+  it("exibe as etapas como indicadores sem botões ou navegação por toque", async () => {
     render(
       <MemoryRouter initialEntries={["/cliente-final/agendar"]}>
         <LanguageProvider><ClienteFinalAgendar /></LanguageProvider>
@@ -266,39 +266,40 @@ describe("ClienteFinalAgendar", () => {
     );
     fireEvent.click(await screen.findByRole("button", { name: /Autonomo Teste/i }));
 
-    const steps = screen.getByRole("navigation", { name: "Etapas do agendamento" });
-    expect(steps.querySelectorAll("button")).toHaveLength(3);
-    const service = screen.getByRole("button", { name: "1. Serviço" });
-    const date = screen.getByRole("button", { name: "2. Data e horário" });
-    const confirm = screen.getByRole("button", { name: "3. Confirmar" });
+    const steps = screen.getByRole("list", { name: "Etapas do agendamento" });
+    const [service, date, confirm] = Array.from(steps.querySelectorAll("li"));
+    expect(steps.querySelectorAll("li")).toHaveLength(3);
+    expect(steps.querySelectorAll("button, a, [tabindex]")).toHaveLength(0);
+    expect(service).toHaveTextContent("1. Serviço");
+    expect(date).toHaveTextContent("2. Data e horário");
+    expect(confirm).toHaveTextContent("3. Confirmar");
     expect(service).toHaveAttribute("aria-current", "step");
-    expect(confirm).toBeDisabled();
 
     fireEvent.click(date);
+    fireEvent.click(confirm);
     expect(screen.getByRole("heading", { name: "Escolha os serviços" })).toBeInTheDocument();
+    expect(service).toHaveAttribute("aria-current", "step");
+
     fireEvent.click(await screen.findByRole("button", { name: /Corte/i }));
-    fireEvent.click(date);
-    expect(screen.getByRole("heading", { name: "Escolha a data e o horário" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Escolher horário/i }));
     expect(date).toHaveAttribute("aria-current", "step");
-    expect(confirm).toBeDisabled();
+    expect(screen.getByRole("heading", { name: "Escolha a data e o horário" })).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText(/^Data$/i, { selector: "input" }), {
       target: { value: "2099-08-20" },
     });
     fireEvent.click(await screen.findByRole("button", { name: "08:30" }));
-    expect(confirm).toBeEnabled();
-    fireEvent.click(confirm);
-    expect(screen.getByRole("heading", { name: "Confirme seu agendamento" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
     expect(confirm).toHaveAttribute("aria-current", "step");
+    expect(screen.getByRole("heading", { name: "Confirme seu agendamento" })).toBeInTheDocument();
 
-    fireEvent.click(date);
-    expect(screen.getByRole("heading", { name: "Escolha a data e o horário" })).toBeInTheDocument();
     fireEvent.click(service);
-    expect(screen.getByRole("heading", { name: "Escolha os serviços" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Serviços selecionados (1)" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Confirme seu agendamento" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Alterar data ou horário" }));
+    expect(date).toHaveAttribute("aria-current", "step");
   });
 
-  it("permite navegar do profissional aos serviços sem perder a seleção na empresa", async () => {
+  it("mantém as etapas somente visuais na seleção de profissionais da empresa", async () => {
     mocks.listarResponsaveisAgendamento.mockResolvedValue([
       { Id: 7, Nome: "Empresa Teste", TipoUsuario: "EMPRESA" },
     ]);
@@ -314,21 +315,26 @@ describe("ClienteFinalAgendar", () => {
       </MemoryRouter>,
     );
     fireEvent.click(await screen.findByRole("button", { name: /Empresa Teste/i }));
-    const professionalStep = screen.getByRole("button", { name: "1. Profissional" });
-    const servicesStep = screen.getByRole("button", { name: "2. Serviço e horário" });
-    const confirmStep = screen.getByRole("button", { name: "3. Confirmar" });
-    expect(servicesStep).toBeDisabled();
-    expect(confirmStep).toBeDisabled();
+    const steps = screen.getByRole("list", { name: "Etapas do agendamento" });
+    const [professionalStep, serviceStep, confirmationStep] = Array.from(steps.querySelectorAll("li"));
+    expect(steps.querySelectorAll("button, a, [tabindex]")).toHaveLength(0);
+    expect(professionalStep).toHaveTextContent("1. Profissional");
+    expect(serviceStep).toHaveTextContent("2. Serviço e horário");
+    expect(confirmationStep).toHaveTextContent("3. Confirmar");
+    expect(professionalStep).toHaveAttribute("aria-current", "step");
 
-    fireEvent.click(await screen.findByRole("button", { name: /Ana/i }));
-    expect(servicesStep).toBeEnabled();
-    expect(servicesStep).toHaveAttribute("aria-current", "step");
-    fireEvent.click(await screen.findByRole("button", { name: /Corte/i }));
-    fireEvent.click(professionalStep);
+    fireEvent.click(serviceStep);
     expect(screen.getByRole("heading", { name: "Com quem deseja agendar?" })).toBeInTheDocument();
-    fireEvent.click(servicesStep);
+    fireEvent.click(await screen.findByRole("button", { name: /Ana/i }));
+    expect(serviceStep).toHaveAttribute("aria-current", "step");
+    fireEvent.click(confirmationStep);
     expect(screen.getByRole("heading", { name: "Escolha os serviços" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Serviços selecionados (1)" })).toBeInTheDocument();
+
+    fireEvent.click(await screen.findByRole("button", { name: /Corte/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Trocar profissional" }));
+    expect(professionalStep).toHaveAttribute("aria-current", "step");
+    expect(screen.getByRole("heading", { name: "Com quem deseja agendar?" })).toBeInTheDocument();
+    expect(steps.querySelectorAll("button")).toHaveLength(0);
   });
 
   it("permite adicionar servicos de profissionais diferentes na mesma reserva", async () => {

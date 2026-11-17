@@ -321,8 +321,6 @@ export default function ClienteFinalAgendar() {
   const etapaAtual = expandedSection ?? "confirmacao";
   const activeProgressStep = etapaAtual === "confirmacao" ? 3
     : etapaAtual === "horario" || (responsavelEhEmpresa && etapaAtual === "servico") ? 2 : 1;
-  const secondStepEnabled = !responsavelEhEmpresa || Boolean(selectedProfissional);
-  const confirmationStepEnabled = selectedServicos.length > 0 && Boolean(selectedHorario) && !loadingHorarios;
   const serviceDockActive = etapaAtual === "servico" && selectedServicos.length > 0;
   const bookingActionActive = etapaAtual === "horario" || etapaAtual === "confirmacao";
 
@@ -705,28 +703,6 @@ export default function ClienteFinalAgendar() {
     setExpandedSection("horario");
   }
 
-  function handleBookingProgressStep(step: 1 | 2 | 3) {
-    if (step === 1) {
-      // Voltar à escolha do profissional não apaga os serviços selecionados.
-      setExpandedSection(responsavelEhEmpresa ? "profissional" : "servico");
-      return;
-    }
-    if (step === 2) {
-      if (!secondStepEnabled) return;
-      if (etapaAtual === "profissional" || selectedServicos.length === 0) {
-        setExpandedSection("servico");
-      } else if (etapaAtual === "servico") {
-        advanceToSchedule();
-      } else {
-        // Ao retornar da confirmação, preserva a data e o horário selecionados.
-        setExpandedSection("horario");
-      }
-      return;
-    }
-    // A confirmação só é acessível quando o horário continua disponível.
-    if (confirmationStepEnabled) setExpandedSection("confirmacao");
-  }
-
   function handleDataChange(nextDate: string) {
     if (nextDate && nextDate < minDate) return;
     setDataSelecionada(nextDate);
@@ -945,34 +921,20 @@ export default function ClienteFinalAgendar() {
             </div>
           </div>
 
-          <nav className={styles.bookingProgress} aria-label="Etapas do agendamento">
-            <button
-              type="button"
-              className={activeProgressStep === 1 ? styles.progressCurrent : ""}
-              aria-current={activeProgressStep === 1 ? "step" : undefined}
-              onClick={() => handleBookingProgressStep(1)}
-            >
+          <ol className={styles.bookingProgress} aria-label="Etapas do agendamento">
+            <li className={activeProgressStep === 1 ? styles.progressCurrent : ""}
+              aria-current={activeProgressStep === 1 ? "step" : undefined}>
               1. {responsavelEhEmpresa ? "Profissional" : "Serviço"}
-            </button>
-            <button
-              type="button"
-              className={activeProgressStep === 2 ? styles.progressCurrent : ""}
-              aria-current={activeProgressStep === 2 ? "step" : undefined}
-              disabled={!secondStepEnabled}
-              onClick={() => handleBookingProgressStep(2)}
-            >
+            </li>
+            <li className={activeProgressStep === 2 ? styles.progressCurrent : ""}
+              aria-current={activeProgressStep === 2 ? "step" : undefined}>
               2. {responsavelEhEmpresa ? "Serviço e horário" : "Data e horário"}
-            </button>
-            <button
-              type="button"
-              className={activeProgressStep === 3 ? styles.progressCurrent : ""}
-              aria-current={activeProgressStep === 3 ? "step" : undefined}
-              disabled={!confirmationStepEnabled}
-              onClick={() => handleBookingProgressStep(3)}
-            >
+            </li>
+            <li className={activeProgressStep === 3 ? styles.progressCurrent : ""}
+              aria-current={activeProgressStep === 3 ? "step" : undefined}>
               3. Confirmar
-            </button>
-          </nav>
+            </li>
+          </ol>
 
           <form className={styles.bookingForm} onSubmit={handleSubmit}>
             {responsavelEhEmpresa && etapaAtual === "profissional" && (

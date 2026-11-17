@@ -659,9 +659,12 @@
   width: 100%;
   min-width: 0;
   gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
   color: var(--theme-text-muted);
 }
-.bookingProgress button {
+.bookingProgress li {
   display: grid;
   place-items: center;
   width: 100%;
@@ -678,20 +681,7 @@
   line-height: 1.2;
   text-align: center;
   overflow-wrap: anywhere;
-  cursor: pointer;
-  transition: background-color 150ms ease, color 150ms ease;
-}
-.bookingProgress button:hover:not(:disabled):not(.progressCurrent) {
-  color: var(--theme-primary-text);
-  border-color: var(--theme-border-strong);
-}
-.bookingProgress button:focus-visible {
-  outline: 2px solid var(--theme-primary-text);
-  outline-offset: 2px;
-}
-.bookingProgress button:disabled {
-  opacity: .5;
-  cursor: not-allowed;
+  cursor: default;
 }
 .bookingProgress .progressCurrent {
   background: var(--theme-primary);
@@ -750,7 +740,7 @@
   .catalogService .servicePhoto { width:72px; height:72px; }
   .serviceAction { padding:8px; font-size:11px; }
   .bookingProgress { gap: 6px; }
-  .bookingProgress button { padding: 8px 4px; min-height: 43px; font-size: 10px; }
+  .bookingProgress li { padding: 8px 4px; min-height: 43px; font-size: 10px; }
 }
 @media (max-width:420px) {
   .marketHeader { flex-wrap:wrap; }
