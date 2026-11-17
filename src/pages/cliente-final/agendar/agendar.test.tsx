@@ -224,6 +224,38 @@ describe("ClienteFinalAgendar", () => {
     expect(mocks.criarAgendamento).toHaveBeenCalledTimes(1);
   });
 
+  it("remove serviços de outro profissional sem depender do catálogo atualmente carregado", async () => {
+    mocks.listarResponsaveisAgendamento.mockResolvedValue([
+      { Id: 7, Nome: "Empresa Teste", TipoUsuario: "EMPRESA" },
+    ]);
+    mocks.listarProfissionaisAgendamento.mockResolvedValue([
+      { Id: 9, Nome: "Ana", VinculoStatus: "APROVADO" },
+      { Id: 10, Nome: "Maria", VinculoStatus: "APROVADO" },
+    ]);
+    mocks.listarServicosPorProfissional.mockImplementation(async (id: number) => id === 9
+      ? [{ Id: 2, NomeServico: "Corte", Valor: 50, TempoEstimadoMinutos: 30 }]
+      : [{ Id: 3, NomeServico: "Escova", Valor: 70, TempoEstimadoMinutos: 45 }]);
+
+    render(
+      <MemoryRouter initialEntries={["/cliente-final/agendar"]}>
+        <LanguageProvider><ClienteFinalAgendar /></LanguageProvider>
+      </MemoryRouter>,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: /Empresa Teste/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Ana/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Corte/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Adicionar serviços de outro profissional/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Maria/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Escova/i }));
+    expect(screen.getByRole("heading", { name: "Serviços selecionados (2)" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Remover Corte" }));
+    expect(screen.getByRole("heading", { name: "Serviços selecionados (1)" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Resumo do agendamento" })).toHaveTextContent("45 min");
+    expect(screen.getByRole("region", { name: "Resumo do agendamento" })).toHaveTextContent(/70,00/);
+    expect(screen.queryByRole("button", { name: "Remover Corte" })).not.toBeInTheDocument();
+  });
+
   it("mostra profissionais de empresa e permite retornar ao catalogo", async () => {
     mocks.listarResponsaveisAgendamento.mockResolvedValue([
       { Id: 7, Nome: "Empresa Teste", TipoUsuario: "EMPRESA", FotoPerfil: "uploads/empresa.png" },

@@ -621,6 +621,20 @@ export default function ClienteFinalAgendar() {
     setSuccess("");
   }
 
+  function removeSelectedService(serviceId: number) {
+    // O serviço pode pertencer a outro profissional e não estar no catálogo atual.
+    if (responsavelEhEmpresa) {
+      const remaining = selecoes.filter(item => item.servico.Id !== serviceId);
+      setSelecoes(remaining);
+      setServicoIds(remaining.map(item => item.servico.Id));
+    } else {
+      setServicoIds(current => current.filter(id => id !== serviceId));
+    }
+    resetSchedule();
+    setError("");
+    setSuccess("");
+  }
+
   function advanceToSchedule() {
     if (servicoIds.length === 0) {
       showNotification({ type: "warning", title: "Selecione um serviço", message: "Escolha pelo menos um atendimento." });
@@ -931,7 +945,7 @@ export default function ClienteFinalAgendar() {
                               <strong className={styles.selectedServicePrice}>{formatCurrency(item.servico.Valor)}</strong>
                               <button type="button" className={styles.removeSelectedService}
                                 aria-label={"Remover " + item.servico.NomeServico}
-                                onClick={() => handleServicoChange(item.servico.Id)}>
+                                onClick={() => removeSelectedService(item.servico.Id)}>
                                 <FaTimes aria-hidden="true" />
                               </button>
                             </div>
@@ -949,7 +963,7 @@ export default function ClienteFinalAgendar() {
                               <strong className={styles.selectedServicePrice}>{formatCurrency(servico.Valor)}</strong>
                               <button type="button" className={styles.removeSelectedService}
                                 aria-label={"Remover " + servico.NomeServico}
-                                onClick={() => handleServicoChange(servico.Id)}>
+                                onClick={() => removeSelectedService(servico.Id)}>
                                 <FaTimes aria-hidden="true" />
                               </button>
                             </div>
