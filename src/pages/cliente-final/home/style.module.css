@@ -353,7 +353,12 @@
 .appointmentActions button:disabled { opacity: .48; cursor: wait; }
 .cancelAction { border-color: var(--theme-error) !important; color: var(--theme-error-text); }
 .cancelAction:hover:not(:disabled) { background: var(--theme-error-soft); }
-.completeAction { border-color: var(--theme-primary) !important; background: var(--theme-primary) !important; color: var(--theme-on-primary); }
+/* Concluir leva o agendamento para CONCLUIDO: mesma paleta verde do badge correspondente. */
+.completeAction {
+  border-color: var(--theme-success-text) !important;
+  background: var(--theme-success-soft) !important;
+  color: var(--theme-success-text) !important;
+}
 .completeAction:hover:not(:disabled) { filter: brightness(1.05); }
 
 .statusBadge {
