@@ -49,6 +49,8 @@ function renderDashboard() {
 
 describe("Dashboard", () => {
   beforeEach(() => {
+    // Determinístico em CI: o idioma do navegador de teste pode ser inglês.
+    vi.spyOn(window.navigator, "languages", "get").mockReturnValue(["pt-BR"]);
     sessionStorage.clear();
     agendaMocks.listarPorData.mockReset().mockResolvedValue([]);
     agendaMocks.listarPorPeriodo.mockReset().mockResolvedValue([]);
