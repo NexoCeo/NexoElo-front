@@ -233,7 +233,7 @@ describe("ClienteFinalHome", () => {
     expect(screen.getByText("Maria Eduarda")).toBeInTheDocument();
     expect(screen.getByText("Sobrancelha")).toBeInTheDocument();
     expect(screen.getByText("Ana Cláudia")).toBeInTheDocument();
-    expect(screen.getByText("R$ 240,00")).toBeInTheDocument();
+    expect(screen.getByText(/R\$\s*240,00/)).toBeInTheDocument();
 
     const collapseButton = screen.getByRole("button", {
       name: "Recolher detalhes do agendamento de Escova e prancha + Sobrancelha",
