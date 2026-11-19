@@ -30,14 +30,14 @@ async function renderPage(
   const context = canvas.getContext("2d", { alpha: false });
 
   if (!context) {
-    throw new Error("Canvas indisponivel para renderizar o PDF.");
+    throw new Error("Canvas indisponível para renderizar o PDF.");
   }
 
   canvas.width = Math.floor(viewport.width * pixelRatio);
   canvas.height = Math.floor(viewport.height * pixelRatio);
   canvas.style.width = `${Math.floor(viewport.width)}px`;
   canvas.style.height = `${Math.floor(viewport.height)}px`;
-  canvas.setAttribute("aria-label", `Pagina ${page.pageNumber}`);
+  canvas.setAttribute("aria-label", `Página ${page.pageNumber}`);
 
   await page.render({
     canvas,
@@ -110,10 +110,10 @@ export default function PdfPreview({ file, title }: PdfPreviewProps) {
       })
       .catch(() => {
         if (!disposed) {
-          const message = "Nao foi possivel exibir este PDF.";
+          const message = "Não foi possível exibir este PDF.";
           setLoading(false);
           setError(message);
-          showNotification({ type: "error", title: "Pre-visualizacao indisponivel", message });
+          showNotification({ type: "error", title: "Pré-visualização indisponível", message });
         }
       });
 
@@ -138,7 +138,7 @@ export default function PdfPreview({ file, title }: PdfPreviewProps) {
       {loading && (
         <div className={styles.feedback} role="status">
           <span className={styles.spinner} aria-hidden="true" />
-          <p>Preparando paginas...</p>
+          <p>Preparando páginas...</p>
         </div>
       )}
       {error && (
