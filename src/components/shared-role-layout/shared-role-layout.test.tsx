@@ -130,6 +130,42 @@ describe("SharedRoleLayout", () => {
     expect(reportsLink).toHaveClass(sidebarStyles.active);
   });
 
+  it("agrupa Funcionamento e Pagamentos no submenu Configurações sem alterar suas rotas", () => {
+    renderLayout("/empresa/dashboard");
+    fireEvent.click(screen.getByRole("button", { name: "Abrir menu" }));
+
+    const settingsButton = screen.getByRole("button", { name: "Configurações" });
+    expect(settingsButton).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("link", { name: "Funcionamento" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Pagamentos" })).not.toBeInTheDocument();
+
+    fireEvent.click(settingsButton);
+    expect(settingsButton).toHaveAttribute("aria-expanded", "true");
+    const submenu = document.getElementById("settings-submenu");
+    expect(submenu).not.toBeNull();
+    expect(within(submenu!).getByRole("link", { name: "Funcionamento" }))
+      .toHaveAttribute("href", "/empresa/funcionamento");
+    expect(within(submenu!).getByRole("link", { name: "Pagamentos" }))
+      .toHaveAttribute("href", "/empresa/pagamentos");
+
+    fireEvent.click(settingsButton);
+    expect(settingsButton).toHaveAttribute("aria-expanded", "false");
+    expect(document.getElementById("settings-submenu")).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ["/empresa/funcionamento", "Funcionamento"],
+    ["/empresa/pagamentos", "Pagamentos"],
+  ])("expande Configurações e destaca a rota ativa %s", (route, label) => {
+    renderLayout(route);
+    fireEvent.click(screen.getByRole("button", { name: "Abrir menu" }));
+
+    const settingsButton = screen.getByRole("button", { name: "Configurações" });
+    expect(settingsButton).toHaveAttribute("aria-expanded", "true");
+    expect(settingsButton).toHaveClass(sidebarStyles.groupActive);
+    expect(screen.getByRole("link", { name: label })).toHaveAttribute("aria-current", "page");
+  });
+
   it("fecha a sidebar ao tocar fora dela", () => {
     renderLayout();
     fireEvent.click(screen.getByRole("button", { name: "Abrir menu" }));

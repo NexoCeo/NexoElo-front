@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { FaCalendarAlt, FaChartBar, FaChartLine, FaClock, FaHome, FaTimes, FaTools, FaWhatsapp, FaCreditCard, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaCalendarAlt, FaChartBar, FaChartLine, FaClock, FaHome, FaTimes, FaTools, FaWhatsapp, FaCreditCard, FaCog, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { FaPerson } from "react-icons/fa6";
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
@@ -23,6 +23,7 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
   const navRef = useRef<HTMLElement>(null);
   const location = useLocation();
   const [analyticsExpanded, setAnalyticsExpanded] = useState(false);
+  const [settingsExpanded, setSettingsExpanded] = useState(false);
   const [relatoriosLiberados, setRelatoriosLiberados] = useState(false);
   const [analiseLiberada, setAnaliseLiberada] = useState(false);
   const [whatsAppLiberado, setWhatsAppLiberado] = useState(false);
@@ -48,7 +49,10 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
   }, [usuario?.Papel, usuario?.Id]);
   const basePath = getRoleBasePath(usuario?.Papel);
   const analyticsPath = `${basePath}/analise-dados`;
+  const settingsPaths = [`${basePath}/funcionamento`, `${basePath}/pagamentos`];
+  const settingsActive = settingsPaths.some(path => location.pathname === path || location.pathname.startsWith(`${path}/`));
   useEffect(() => { setAnalyticsExpanded(location.pathname === analyticsPath || location.pathname.startsWith(`${analyticsPath}/`)); }, [location.pathname, analyticsPath]);
+  useEffect(() => { setSettingsExpanded(settingsActive); }, [location.pathname, settingsActive]);
   const canManageSharedSettings = usuario?.Papel === "EMPRESA" || usuario?.Papel === "AUTONOMO";
   const sidebarStyle = {
     backgroundColor: theme.colors.background2,
@@ -127,29 +131,6 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
           </li>
         )}
 
-        {canManageSharedSettings && (
-          <li className={styles.navItem}>
-            <NavLink
-              to={`${basePath}/funcionamento`}
-              end
-              className={linkClassName}
-              onClick={closeMenu}
-            >
-              <FaClock className={styles.navIcon} aria-hidden="true" />
-              <span>{t("nav.hours")}</span>
-            </NavLink>
-          </li>
-        )}
-
-        {canManageSharedSettings && (
-          <li className={styles.navItem}>
-            <NavLink to={`${basePath}/pagamentos`} end className={linkClassName} onClick={closeMenu}>
-              <FaCreditCard className={styles.navIcon} aria-hidden="true" />
-              <span>Pagamentos</span>
-            </NavLink>
-          </li>
-        )}
-
         {canManageSharedSettings && relatoriosLiberados && (
           <li className={styles.navItem}>
             <NavLink to={`${basePath}/relatorios`} end className={linkClassName} onClick={closeMenu}>
@@ -177,6 +158,38 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
                   <span>WhatsApp Business</span>
                 </NavLink>}
               </div>}
+            </div>
+          </li>
+        )}
+
+        {canManageSharedSettings && (
+          <li className={styles.navItem}>
+            <div className={styles.analyticsGroup}>
+              <button
+                type="button"
+                className={`${styles.analyticsAnchor} ${settingsActive ? styles.groupActive : ""}`}
+                onClick={() => setSettingsExpanded(value => !value)}
+                aria-expanded={settingsExpanded}
+                aria-controls="settings-submenu"
+              >
+                <FaCog className={styles.navIcon} aria-hidden="true" />
+                <span>{t("nav.settings")}</span>
+                <span className={styles.expandChevron} aria-hidden="true">
+                  {settingsExpanded ? <FaChevronDown size={14} /> : <FaChevronUp size={14} />}
+                </span>
+              </button>
+              {settingsExpanded && (
+                <div id="settings-submenu" className={styles.analyticsChildren}>
+                  <NavLink to={`${basePath}/funcionamento`} end className={linkClassName} onClick={closeMenu}>
+                    <FaClock className={styles.navIcon} aria-hidden="true" />
+                    <span>{t("nav.hours")}</span>
+                  </NavLink>
+                  <NavLink to={`${basePath}/pagamentos`} end className={linkClassName} onClick={closeMenu}>
+                    <FaCreditCard className={styles.navIcon} aria-hidden="true" />
+                    <span>Pagamentos</span>
+                  </NavLink>
+                </div>
+              )}
             </div>
           </li>
         )}
