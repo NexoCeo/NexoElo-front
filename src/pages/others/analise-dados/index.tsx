@@ -86,11 +86,20 @@ export default function AnaliseDados() {
   // O filtro do painel usa registros reais; o restante das análises existentes permanece preservado.
   const metricsHistory = useMemo(() => historico.filter(item => {
     const date = new Date(item.DataAgendamento);
+    if (activeTab === "customers") {
+      const end = new Date();
+      const start = new Date(end);
+      const day = start.getDate();
+      start.setDate(1);
+      start.setMonth(start.getMonth() - recurrenceMonths);
+      start.setDate(Math.min(day, new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate()));
+      return Number.isFinite(date.getTime()) && date >= start && date < end;
+    }
     const [year, month] = periodFilter.split("-").map(Number);
     return Number.isFinite(date.getTime()) &&
       date.getFullYear() === year && date.getMonth() + 1 === month &&
       (professionalFilter === "TODOS" || (String(item.ProfissionalId ?? "") === professionalFilter || item.Profissionais?.some(person => String(person.Id) === professionalFilter)));
-  }), [historico, periodFilter, professionalFilter]);
+  }), [historico, periodFilter, professionalFilter, activeTab, recurrenceMonths]);
   const concludedHistory = useMemo(() =>
     metricsHistory.filter(item => item.Status?.toUpperCase() === "CONCLUIDO"), [metricsHistory]);
   const recordedRevenue = concludedHistory.reduce((sum, item) => sum + (Number(item.ValorServico ?? item.Valor ?? 0) || 0), 0);
@@ -258,7 +267,7 @@ export default function AnaliseDados() {
     let active = true;
     setRecurrence(null);
     setRecurrenceError(false);
-    api.get("/Agendamento/recorrencia-clientes", { params: { meses: recurrenceMonths, ...(professionalFilter !== "TODOS" ? { profissionalId: Number(professionalFilter) } : {}) } })
+    api.get("/Agendamento/recorrencia-clientes", { params: { meses: recurrenceMonths } })
       .then(({ data }) => {
         if (!active) return;
         const keys = ["recurring","fresh","inactive","total","recurringPercent","freshPercent","inactivePercent"] as const;
@@ -267,7 +276,7 @@ export default function AnaliseDados() {
         setRecurrence(result);
       }).catch(() => { if (active) setRecurrenceError(true); });
     return () => { active = false; };
-  }, [activeTab, permitido, usuario?.Id, recurrenceMonths, professionalFilter]);
+  }, [activeTab, permitido, usuario?.Id, recurrenceMonths]);
   const customerSegments = recurrence ?? { recurring:0, fresh:0, inactive:0, total:0, recurringPercent:0, freshPercent:0, inactivePercent:0 };
   const segmentRows = [
     { label: pt ? "Recorrentes" : "Returning", count: customerSegments.recurring, color: "#22c55e" },
@@ -301,6 +310,19 @@ export default function AnaliseDados() {
       {tabs.map(tab => <button key={tab.id} type="button" aria-pressed={activeTab === tab.id} onClick={() => { navigate(`${metricsBase}/${tabPaths[tab.id]}`); setOpenMetricsFilter(null); }} style={{flex:"0 0 auto",whiteSpace:"nowrap",padding:"11px 18px",font:"inherit",fontWeight:activeTab === tab.id ? 700 : 500,cursor:"pointer",border:0,borderBottom:activeTab === tab.id ? "3px solid var(--analysis-primary)" : "3px solid transparent",borderRadius:"9px 9px 5px 5px",background:activeTab === tab.id ? "var(--theme-primary-soft)" : "transparent",color:activeTab === tab.id ? "var(--theme-primary-text)" : "var(--analysis-muted)"}}>{tab.label}</button>)}
     </nav>
     <header className={styles.dashboardFilters} aria-label="Filtros das métricas" ref={metricsFiltersRef}>
+      {activeTab === "customers" ? <div className={styles.topFilter} style={{flex:"1 1 100%",maxWidth:"none"}}>
+        <span>{pt ? "Período de recorrência" : "Recurrence period"}</span>
+        <button type="button" className={styles.filterInput} aria-label={pt ? "Período de recorrência" : "Recurrence period"} aria-haspopup="listbox" aria-controls="metrics-recurrence-options" aria-expanded={openMetricsFilter === "periodo"} onClick={() => setOpenMetricsFilter(open => open === "periodo" ? null : "periodo")}>
+          <FaCalendarAlt aria-hidden="true" />
+          <span className={styles.filterValue}>{pt ? "Últimos" : "Last"} {recurrenceMonths} {pt ? "meses" : "months"}</span>
+          <FaChevronDown aria-hidden="true" />
+        </button>
+        {openMetricsFilter === "periodo" && <div id="metrics-recurrence-options" className={styles.filterOptions} role="listbox" aria-label={pt ? "Selecionar período de recorrência" : "Select recurrence period"}>
+          {[3,6,12,24].map(months => <button key={months} type="button" role="option" aria-selected={recurrenceMonths === months} className={recurrenceMonths === months ? styles.filterOptionSelected : ""} onClick={() => {if (months !== recurrenceMonths) {setRecurrence(null);setRecurrenceError(false);setRecurrenceMonths(months);}setOpenMetricsFilter(null);}}>
+            {pt ? "Últimos" : "Last"} {months} {pt ? "meses" : "months"}{recurrenceMonths === months && <span aria-hidden="true">✓</span>}
+          </button>)}
+        </div>}
+      </div> : <>
       <div className={styles.topFilter}>
         <span>Período</span>
         <button type="button" className={styles.filterInput}
@@ -354,6 +376,7 @@ export default function AnaliseDados() {
           </div>
         )}
       </div>
+      </>}
     </header>
     {erro && <p className={styles.error} role="alert">{erro}</p>}
     {activeTab === "finance" && <>
@@ -369,13 +392,9 @@ export default function AnaliseDados() {
       </div>
     </>}
     {activeTab === "customers" && <>
-      <section className={styles.dashboardMetrics}>{metric(pt ? "Clientes atendidos" : "Customers served", distinctCustomers, <FaUsers />)}{metric(pt ? "Clientes com retornos no mês" : "Repeat customers this month", [...customers.values()].filter(row => row.count > 1).length)}{metric(pt ? "Atendimentos concluídos" : "Completed appointments", concludedHistory.length)}{metric(pt ? "Valor por cliente" : "Value per customer", dashboardMoney(distinctCustomers ? recordedRevenue / distinctCustomers : 0))}</section>
+      <section className={styles.dashboardMetrics}>{metric(pt ? "Clientes atendidos" : "Customers served", distinctCustomers, <FaUsers />)}{metric(pt ? "Clientes recorrentes" : "Returning customers", recurrence ? recurrence.recurring : "—")}{metric(pt ? "Atendimentos concluídos" : "Completed appointments", concludedHistory.length)}{metric(pt ? "Valor por cliente" : "Value per customer", dashboardMoney(distinctCustomers ? recordedRevenue / distinctCustomers : 0))}</section>
       <section className={styles.dashboardPanel} style={{marginBottom:16}}>
         <h2><FaUsers aria-hidden="true"/>{pt ? "Perfil dos clientes" : "Customer profile"}</h2>
-        <label className={styles.yearControl} style={{marginBottom:12,display:"flex",flexDirection:"column",gap:5}}>
-          <span>{pt ? "Período de recorrência" : "Recurrence period"}</span>
-          <select value={recurrenceMonths} onChange={event => {setRecurrence(null);setRecurrenceError(false);setRecurrenceMonths(Number(event.target.value));}}>{[3,6,12,24].map(months => <option key={months} value={months}>{pt ? "Últimos" : "Last"} {months} {pt ? "meses" : "months"}</option>)}</select>
-        </label>
         {recurrenceError ? <p role="alert" className={styles.error}>{pt ? "Não foi possível consultar a recorrência." : "Could not load recurrence."}</p> : !recurrence ? <p className={styles.dashboardEmpty} role="status">{pt ? "Consultando recorrência..." : "Loading recurrence..."}</p> : <>
         <div style={{display:"grid",gridTemplateColumns:"minmax(0, 1fr) minmax(0, 1.2fr)",alignItems:"center",gap:"clamp(8px, 3vw, 28px)",maxWidth:560,margin:"12px auto 18px"}}>
           <div role="img" aria-label={segmentRows.map(row => row.label + ": " + row.count).join(", ")} style={{position:"relative",width:"100%",maxWidth:190,aspectRatio:"1",justifySelf:"center",borderRadius:"50%",background:segmentTotal ? `conic-gradient(${segmentRows[0].color} 0% ${recurringEnd}%, ${segmentRows[1].color} ${recurringEnd}% ${freshEnd}%, ${segmentRows[2].color} ${freshEnd}% 100%)` : "var(--analysis-border)"}}>
