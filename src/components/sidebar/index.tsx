@@ -49,9 +49,11 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
   }, [usuario?.Papel, usuario?.Id]);
   const basePath = getRoleBasePath(usuario?.Papel);
   const analyticsPath = `${basePath}/analise-dados`;
+  const reportsPath = `${basePath}/relatorios`;
+  const analyticsActive = [analyticsPath, reportsPath].some(path => location.pathname === path || location.pathname.startsWith(`${path}/`));
   const settingsPaths = [`${basePath}/funcionamento`, `${basePath}/pagamentos`];
   const settingsActive = settingsPaths.some(path => location.pathname === path || location.pathname.startsWith(`${path}/`));
-  useEffect(() => { setAnalyticsExpanded(location.pathname === analyticsPath || location.pathname.startsWith(`${analyticsPath}/`)); }, [location.pathname, analyticsPath]);
+  useEffect(() => { setAnalyticsExpanded(analyticsActive); }, [location.pathname, analyticsActive]);
   useEffect(() => { setSettingsExpanded(settingsActive); }, [location.pathname, settingsActive]);
   const canManageSharedSettings = usuario?.Papel === "EMPRESA" || usuario?.Papel === "AUTONOMO";
   const sidebarStyle = {
@@ -131,28 +133,23 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
           </li>
         )}
 
-        {canManageSharedSettings && relatoriosLiberados && (
-          <li className={styles.navItem}>
-            <NavLink to={`${basePath}/relatorios`} end className={linkClassName} onClick={closeMenu}>
-              <FaChartBar className={styles.navIcon} aria-hidden="true" />
-              <span>{t("nav.reports")}</span>
-            </NavLink>
-          </li>
-        )}
-
-        {canManageSharedSettings && analiseLiberada && (
+        {canManageSharedSettings && (analiseLiberada || relatoriosLiberados) && (
           <li className={styles.navItem}>
             <div className={styles.analyticsGroup}>
-              <button type="button" className={`${styles.analyticsAnchor} ${location.pathname.startsWith(analyticsPath) ? styles.groupActive : ""}`} onClick={() => setAnalyticsExpanded(v => !v)} aria-expanded={analyticsExpanded} aria-controls="analytics-submenu">
+              <button type="button" className={`${styles.analyticsAnchor} ${analyticsActive ? styles.groupActive : ""}`} onClick={() => setAnalyticsExpanded(v => !v)} aria-expanded={analyticsExpanded} aria-controls="analytics-submenu">
                 <FaChartLine className={styles.navIcon} aria-hidden="true" />
                 <span>{t("nav.analytics")}</span>
                 <span className={styles.expandChevron} aria-hidden="true">{analyticsExpanded ? <FaChevronDown size={14} /> : <FaChevronUp size={14} />}</span>
               </button>
               {analyticsExpanded && <div id="analytics-submenu" className={styles.analyticsChildren}>
-                <NavLink to={`${analyticsPath}/metricas`} end className={linkClassName} onClick={closeMenu}>
+                {analiseLiberada && <NavLink to={`${analyticsPath}/metricas`} end className={linkClassName} onClick={closeMenu}>
                   <FaChartBar className={styles.navIcon} aria-hidden="true" />
                   <span>{t("nav.metrics")}</span>
-                </NavLink>
+                </NavLink>}
+                {relatoriosLiberados && <NavLink to={reportsPath} end className={linkClassName} onClick={closeMenu}>
+                  <FaChartBar className={styles.navIcon} aria-hidden="true" />
+                  <span>{t("nav.reports")}</span>
+                </NavLink>}
                 {whatsAppLiberado && <NavLink to={`${analyticsPath}/whatsapp-business`} end className={linkClassName} onClick={closeMenu}>
                   <FaWhatsapp className={styles.navIcon} aria-hidden="true" />
                   <span>WhatsApp Business</span>
