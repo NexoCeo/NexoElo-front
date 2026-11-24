@@ -16,6 +16,7 @@ export default function AnaliseDados() {
   const { theme } = useTheme();
   const { t, lang } = useLanguage();
   const { usuario } = useUser();
+  const [activeTab, setActiveTab] = useState<"overview" | "finance" | "customers" | "team" | "occupancy">("overview");
   const [historico, setHistorico] = useState<Agendamento[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
@@ -78,7 +79,7 @@ export default function AnaliseDados() {
     const [year, month] = periodFilter.split("-").map(Number);
     return Number.isFinite(date.getTime()) &&
       date.getFullYear() === year && date.getMonth() + 1 === month &&
-      (professionalFilter === "TODOS" || String(item.ProfissionalId ?? "") === professionalFilter);
+      (professionalFilter === "TODOS" || (String(item.ProfissionalId ?? "") === professionalFilter || item.Profissionais?.some(person => String(person.Id) === professionalFilter)));
   }), [historico, periodFilter, professionalFilter]);
   const concludedHistory = useMemo(() =>
     metricsHistory.filter(item => item.Status?.toUpperCase() === "CONCLUIDO"), [metricsHistory]);
@@ -225,9 +226,46 @@ export default function AnaliseDados() {
     "--analysis-primary": theme.colors.primary,
   } as CSSProperties;
 
+  const pt = lang === "pt";
+  const tabs = [
+    { id: "overview", label: pt ? "Visão geral" : "Overview" },
+    { id: "finance", label: pt ? "Financeiro" : "Financial" },
+    { id: "customers", label: pt ? "Clientes" : "Customers" },
+    ...(usuario?.Papel === "EMPRESA" ? [{ id: "team", label: pt ? "Equipe" : "Team" }] : []),
+    { id: "occupancy", label: pt ? "Ocupação" : "Occupancy" },
+  ] as { id: typeof activeTab; label: string }[];
+  const amount = (item: Agendamento) => Number(item.ValorServico ?? item.Valor ?? 0) || 0;
+  const scheduled = metricsHistory.filter(item => item.Status?.toUpperCase() === "AGENDADO");
+  const cancelled = metricsHistory.filter(item => item.Status?.toUpperCase() === "CANCELADO");
+  const customers = new Map<number, { name: string; count: number; value: number }>();
+  for (const item of concludedHistory) {
+    if (!(item.ClienteId > 0)) continue;
+    const row = customers.get(item.ClienteId) ?? { name: formatPersonName(item.ClienteNome) || "#" + item.ClienteId, count: 0, value: 0 };
+    row.count++; row.value += amount(item); customers.set(item.ClienteId, row);
+  }
+  const team = new Map<number, { name: string; count: number; completed: number }>();
+  for (const item of metricsHistory) {
+    const assigned = item.Profissionais?.length ? item.Profissionais : item.ProfissionalId ? [{ Id: item.ProfissionalId, Nome: item.ProfissionalNome }] : [];
+    for (const person of new Map(assigned.map(person => [person.Id, person])).values()) {
+      if (professionalFilter !== "TODOS" && String(person.Id) !== professionalFilter) continue;
+      const row = team.get(person.Id) ?? { name: formatPersonName(person.Nome) || "#" + person.Id, count: 0, completed: 0 };
+      row.count++; if (item.Status?.toUpperCase() === "CONCLUIDO") row.completed++;
+      team.set(person.Id, row);
+    }
+  }
+  const occupied = metricsHistory.filter(item => ["AGENDADO", "CONCLUIDO"].includes(item.Status?.toUpperCase()));
+  const knownDuration = occupied.filter(item => Number(item.DuracaoMinutos) > 0);
+  const bookedMinutes = knownDuration.reduce((sum, item) => sum + Number(item.DuracaoMinutos), 0);
+  const hourly = Array.from({ length: 24 }, (_, hour) => ({ name: String(hour).padStart(2, "0") + ":00", count: occupied.filter(item => new Date(item.DataAgendamento).getHours() === hour).length })).filter(item => item.count > 0);
+  const metric = (label: string, value: string | number, icon = <FaChartLine />) => <div className={styles.dashboardMetric} key={label}><span className={styles.dashboardIcon}>{icon}</span><div><span>{label}</span><strong>{value}</strong></div></div>;
+  const ranking = (title: string, rows: { name: string; count: number; display?: string }[]) => <section className={styles.dashboardPanel}><h2><FaChartLine aria-hidden="true" />{title}</h2><div className={styles.popularList}>{rows.map((row, index) => <div className={styles.popularRow} key={index}><span title={row.name}>{row.name}</span><div className={styles.popularTrack}><span style={{ width: (100 * row.count / Math.max(1, ...rows.map(r => r.count))) + "%" }} /></div><strong>{row.display ?? row.count}</strong></div>)}{!rows.length && <p className={styles.dashboardEmpty}>{pt ? "Sem dados no período." : "No data for this period."}</p>}</div></section>;
+
   if (!permitido) return <main className={styles.container}>{t("analytics.notAllowed")}</main>;
   if (carregando) return <LoadingState label={t("analytics.loading")} variant="metrics" />;
   return <main className={styles.container} style={cssVars}>
+    <nav aria-label={pt ? "Categorias de métricas" : "Metric categories"} style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:5,marginBottom:16,borderBottom:"1px solid var(--analysis-border)"}}>
+      {tabs.map(tab => <button key={tab.id} type="button" aria-pressed={activeTab === tab.id} onClick={() => { setActiveTab(tab.id); setOpenMetricsFilter(null); }} style={{flex:"0 0 auto",whiteSpace:"nowrap",padding:"11px 18px",font:"inherit",fontWeight:activeTab === tab.id ? 700 : 500,cursor:"pointer",border:0,borderBottom:activeTab === tab.id ? "3px solid var(--analysis-primary)" : "3px solid transparent",borderRadius:"9px 9px 5px 5px",background:activeTab === tab.id ? "var(--theme-primary-soft)" : "transparent",color:activeTab === tab.id ? "var(--theme-primary-text)" : "var(--analysis-muted)"}}>{tab.label}</button>)}
+    </nav>
     <header className={styles.dashboardFilters} aria-label="Filtros das métricas" ref={metricsFiltersRef}>
       <div className={styles.topFilter}>
         <span>Período</span>
@@ -284,6 +322,32 @@ export default function AnaliseDados() {
       </div>
     </header>
     {erro && <p className={styles.error} role="alert">{erro}</p>}
+    {activeTab === "finance" && <>
+      <section className={styles.dashboardMetrics}>
+        {metric(pt ? "Valor concluído" : "Completed value", dashboardMoney(recordedRevenue), <FaDollarSign />)}
+        {metric(pt ? "Ticket médio" : "Average ticket", dashboardMoney(averageTicket))}
+        {metric(pt ? "Valor agendado" : "Scheduled value", dashboardMoney(scheduled.reduce((sum, item) => sum + amount(item), 0)))}
+        {metric(pt ? "Valor cancelado" : "Cancelled value", dashboardMoney(cancelled.reduce((sum, item) => sum + amount(item), 0)))}
+      </section>
+      <div className={styles.dashboardCharts}>
+        {ranking(pt ? "Valor concluído por semana (R$)" : "Completed value by week (BRL)", weeklyRevenue.map(w => ({name:w.label,count:w.value,display:dashboardMoney(w.value)})))}
+        <section className={styles.dashboardPanel}><h2><FaDollarSign />{pt ? "Situação dos pagamentos" : "Payment status"}</h2><div className={styles.popularList}>{[...new Set(concludedHistory.map(item => item.StatusPagamento || (pt ? "Não informado" : "Unknown")))].map(status => <div className={styles.detailService} key={status}><span>{status}</span><strong>{concludedHistory.filter(item => (item.StatusPagamento || (pt ? "Não informado" : "Unknown")) === status).length}</strong></div>)}</div><p className={styles.note}>{pt ? "Valores de serviços registrados não equivalem a pagamentos confirmados." : "Recorded service values are not confirmed payments."}</p></section>
+      </div>
+    </>}
+    {activeTab === "customers" && <>
+      <section className={styles.dashboardMetrics}>{metric(pt ? "Clientes atendidos" : "Customers served", distinctCustomers, <FaUsers />)}{metric(pt ? "Clientes recorrentes no mês" : "Repeat customers this month", [...customers.values()].filter(row => row.count > 1).length)}{metric(pt ? "Atendimentos concluídos" : "Completed appointments", concludedHistory.length)}{metric(pt ? "Valor por cliente" : "Value per customer", dashboardMoney(distinctCustomers ? recordedRevenue / distinctCustomers : 0))}</section>
+      <div className={styles.dashboardCharts}>{ranking(pt ? "Clientes por atendimentos" : "Customers by appointments", [...customers.values()].sort((a,b) => b.count-a.count))}{ranking(pt ? "Clientes por valor concluído" : "Customers by completed value", [...customers.values()].sort((a,b) => b.value-a.value).map(row => ({name:row.name,count:row.value,display:dashboardMoney(row.value)})))}</div>
+    </>}
+    {activeTab === "team" && <>
+      <section className={styles.dashboardMetrics}>{metric(pt ? "Profissionais com agendamentos" : "Professionals with bookings", team.size, <FaUsers />)}{metric(pt ? "Agendamentos com equipe" : "Team bookings", metricsHistory.filter(item => item.ProfissionalId || item.Profissionais?.length).length)}{metric(pt ? "Atendimentos concluídos" : "Completed appointments", concludedHistory.length)}</section>
+      <div className={styles.dashboardCharts}>{ranking(pt ? "Agendamentos por profissional" : "Bookings by professional", [...team.values()].sort((a,b) => b.count-a.count))}{ranking(pt ? "Conclusões por profissional" : "Completed by professional", [...team.values()].sort((a,b) => b.completed-a.completed).map(row => ({name:row.name,count:row.completed})))}</div>
+    </>}
+    {activeTab === "occupancy" && <>
+      <section className={styles.dashboardMetrics}>{metric(pt ? "Agendados e concluídos" : "Scheduled and completed", occupied.length)}{metric(pt ? "Horas reservadas conhecidas" : "Known booked hours", (bookedMinutes/60).toLocaleString(pt ? "pt-BR" : "en-US",{maximumFractionDigits:2})+" h")}{metric(pt ? "Dias com reservas" : "Days with bookings", new Set(occupied.map(item => new Date(item.DataAgendamento).getDate())).size)}{metric(pt ? "Cancelamentos" : "Cancellations", cancelled.length)}</section>
+      <div className={styles.dashboardCharts}>{ranking(pt ? "Reservas por horário de início" : "Bookings by start hour", hourly)}{ranking(pt ? "Reservas por dia" : "Bookings by day", dailyCounts.map(day => ({name:String(day.day).padStart(2,"0")+"/"+String(referenceMonth.month).padStart(2,"0"),count:occupied.filter(item => new Date(item.DataAgendamento).getDate() === day.day).length})).filter(day => day.count > 0))}</div>
+      <p className={styles.note}>{pt ? "Horas calculadas apenas para reservas com duração informada. A taxa de ocupação exige a capacidade disponível da agenda." : "Hours include bookings with known duration only. Occupancy rate requires available calendar capacity."} ({knownDuration.length}/{occupied.length})</p>
+    </>}
+    {activeTab === "overview" && <>
     <section className={styles.dashboardMetrics} aria-label="Indicadores do período">
       <div className={styles.dashboardMetric}><span className={styles.dashboardIcon}><FaCalendarAlt /></span><div><span>Agendamentos</span><strong>{metricsHistory.length}</strong></div></div>
       <div className={styles.dashboardMetric}><span className={styles.dashboardIcon}><FaDollarSign /></span><div><span>Valor concluído</span><strong>{dashboardMoney(recordedRevenue)}</strong></div></div>
@@ -452,5 +516,6 @@ export default function AnaliseDados() {
           <span>{t("analytics.reactivationDescription")}</span></div><span className={styles.disabled}>Indisponível</span></div>
         <p className={styles.note}>{t("analytics.noCharges")}</p>
     </section>
+    </>}
   </main>;
 }
