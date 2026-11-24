@@ -468,3 +468,33 @@
 .latestRow.latestCancelled > small { background: rgba(225,67,82,.18); color: #fa8290; }
 .latestRow.latestOther > em { color: var(--analysis-muted); }
 .latestRow.latestOther > small { background: var(--theme-primary-soft); color: var(--theme-primary-text); }
+
+/* Métricas: todas as categorias visíveis, sem rolagem horizontal. */
+.container{box-sizing:border-box;min-width:0}
+.container>nav[aria-label="Categorias de métricas"],
+.container>nav[aria-label="Metric categories"]{overflow:visible!important;gap:4px!important;max-width:100%}
+.container>nav[aria-label="Categorias de métricas"]>button,
+.container>nav[aria-label="Metric categories"]>button{min-width:0}
+.popularRow{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) max-content}
+.popularRow>strong{white-space:nowrap;font-variant-numeric:tabular-nums}
+.dashboardPanel h2{min-width:0;overflow-wrap:anywhere}
+.dashboardPanel h2 svg{flex-shrink:0}
+.dashboardMetric>div{flex:1;min-width:0}
+.dashboardMetric strong{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+@media(max-width:760px){
+ .container>nav[aria-label="Categorias de métricas"]>button,
+ .container>nav[aria-label="Metric categories"]>button{flex:1 1 0!important;padding:10px 2px!important;font-size:clamp(9px,2.8vw,13px)!important;white-space:normal!important;line-height:1.2;overflow-wrap:normal;text-align:center}
+ .popularRow{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) max-content;gap:7px}
+ .popularRow>strong{font-size:11px}
+ .dashboardMetric strong{font-size:clamp(13px,3.8vw,20px)}
+ .dashboardMetric>div>span{overflow-wrap:anywhere}
+ .dashboardPanel .detailService{min-width:0;box-sizing:border-box;cursor:default}
+ .dashboardPanel .detailService>span{min-width:0;overflow-wrap:anywhere}
+}
+@media(max-width:350px){
+ .container>nav[aria-label="Categorias de métricas"],
+ .container>nav[aria-label="Metric categories"]{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))}
+ .dashboardMetric{gap:6px;padding:8px}
+ .dashboardIcon{flex-basis:28px;width:28px;height:28px;font-size:14px}
+ .popularRow{gap:5px}
+}
