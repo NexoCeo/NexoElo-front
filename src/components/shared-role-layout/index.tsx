@@ -67,7 +67,7 @@ function MobileNavigation() {
     ...(manager && access.analytics ? [{ to: `${base}/analise-dados/metricas`, label: t("nav.metrics"), icon: <FaChartLine aria-hidden="true" /> }] : []),
     ...(manager && access.whatsapp ? [{ to: `${base}/analise-dados/whatsapp-business`, label: "WhatsApp Business", icon: <FaWhatsapp aria-hidden="true" /> }] : []),
   ];
-  const moreActive = secondary.some(item => location.pathname === item.to);
+  const moreActive = secondary.some(item => location.pathname === item.to || location.pathname.startsWith(`${item.to}/`));
   return (
     <div className={styles.mobileNavHost} ref={menuRef}>
       {moreOpen && <div className={styles.mobileMore} aria-label="Mais páginas">
