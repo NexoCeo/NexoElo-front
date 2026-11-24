@@ -1,3 +1,5 @@
+import { useLocation, useNavigate } from "react-router-dom";
+import api from "@/services/api";
 import { formatPersonName } from "@/context/UserContext";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { FaBullhorn, FaChartLine, FaEnvelope, FaUsers, FaTimes, FaCalendarAlt, FaDollarSign, FaLayerGroup, FaChevronDown } from "react-icons/fa";
@@ -16,7 +18,15 @@ export default function AnaliseDados() {
   const { theme } = useTheme();
   const { t, lang } = useLanguage();
   const { usuario } = useUser();
-  const [activeTab, setActiveTab] = useState<"overview" | "finance" | "customers" | "team" | "occupancy">("overview");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const tabPaths = { overview:"visao-geral", finance:"financeiro", customers:"clientes", team:"equipe", occupancy:"ocupacao" } as const;
+  type MetricTab = keyof typeof tabPaths;
+  const metricsBase = location.pathname.split("/metricas")[0] + "/metricas";
+  const activeTab: MetricTab = (Object.keys(tabPaths) as MetricTab[]).find(key => location.pathname === `${metricsBase}/${tabPaths[key]}`) ?? "overview";
+  const [recurrenceMonths, setRecurrenceMonths] = useState(6);
+  const [recurrence, setRecurrence] = useState<{ recurring:number; fresh:number; inactive:number; total:number; recurringPercent:number; freshPercent:number; inactivePercent:number } | null>(null);
+  const [recurrenceError, setRecurrenceError] = useState(false);
   const [historico, setHistorico] = useState<Agendamento[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
@@ -243,32 +253,22 @@ export default function AnaliseDados() {
     const row = customers.get(item.ClienteId) ?? { name: formatPersonName(item.ClienteNome) || "#" + item.ClienteId, count: 0, value: 0 };
     row.count++; row.value += amount(item); customers.set(item.ClienteId, row);
   }
-  // Classificação exclusiva da base de clientes até o mês selecionado.
-  // Novos: primeiro atendimento no mês; recorrentes: retornaram no mês
-  // (inclusive quando o primeiro atendimento também ocorreu no mês).
-  // Não recorrentes: clientes antigos sem atendimento concluído no mês.
-  const customerSegments = useMemo(() => {
-    const [year, month] = periodFilter.split("-").map(Number);
-    const start = new Date(year, month - 1, 1).getTime();
-    const end = new Date(year, month, 1).getTime();
-    const history = new Map<number, { previous: number; current: number }>();
-    for (const item of historico) {
-      if (!(item.ClienteId > 0) || item.Status?.toUpperCase() !== "CONCLUIDO") continue;
-      if (professionalFilter !== "TODOS" && String(item.ProfissionalId ?? "") !== professionalFilter && !item.Profissionais?.some(person => String(person.Id) === professionalFilter)) continue;
-      const date = new Date(item.DataAgendamento).getTime();
-      if (!Number.isFinite(date) || date >= end) continue;
-      const row = history.get(item.ClienteId) ?? { previous: 0, current: 0 };
-      if (date < start) row.previous++; else row.current++;
-      history.set(item.ClienteId, row);
-    }
-    let recurring = 0, fresh = 0, inactive = 0;
-    for (const row of history.values()) {
-      if (row.current === 0) inactive++;
-      else if (row.previous > 0 || row.current > 1) recurring++;
-      else fresh++;
-    }
-    return { recurring, fresh, inactive, total: history.size };
-  }, [historico, periodFilter, professionalFilter]);
+  useEffect(() => {
+    if (activeTab !== "customers" || !permitido || !usuario?.Id) return;
+    let active = true;
+    setRecurrence(null);
+    setRecurrenceError(false);
+    api.get("/Agendamento/recorrencia-clientes", { params: { meses: recurrenceMonths, ...(professionalFilter !== "TODOS" ? { profissionalId: Number(professionalFilter) } : {}) } })
+      .then(({ data }) => {
+        if (!active) return;
+        const keys = ["recurring","fresh","inactive","total","recurringPercent","freshPercent","inactivePercent"] as const;
+        const result = Object.fromEntries(keys.map(key => [key, data[key] ?? data[key[0].toUpperCase()+key.slice(1)]])) as NonNullable<typeof recurrence>;
+        if (!keys.every(key => typeof result[key] === "number" && Number.isFinite(result[key]))) { setRecurrenceError(true); return; }
+        setRecurrence(result);
+      }).catch(() => { if (active) setRecurrenceError(true); });
+    return () => { active = false; };
+  }, [activeTab, permitido, usuario?.Id, recurrenceMonths, professionalFilter]);
+  const customerSegments = recurrence ?? { recurring:0, fresh:0, inactive:0, total:0, recurringPercent:0, freshPercent:0, inactivePercent:0 };
   const segmentRows = [
     { label: pt ? "Recorrentes" : "Returning", count: customerSegments.recurring, color: "#22c55e" },
     { label: pt ? "Novos" : "New", count: customerSegments.fresh, color: "#3b82f6" },
@@ -298,7 +298,7 @@ export default function AnaliseDados() {
   if (carregando) return <LoadingState label={t("analytics.loading")} variant="metrics" />;
   return <main className={styles.container} style={cssVars}>
     <nav aria-label={pt ? "Categorias de métricas" : "Metric categories"} style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:5,marginBottom:16,borderBottom:"1px solid var(--analysis-border)"}}>
-      {tabs.map(tab => <button key={tab.id} type="button" aria-pressed={activeTab === tab.id} onClick={() => { setActiveTab(tab.id); setOpenMetricsFilter(null); }} style={{flex:"0 0 auto",whiteSpace:"nowrap",padding:"11px 18px",font:"inherit",fontWeight:activeTab === tab.id ? 700 : 500,cursor:"pointer",border:0,borderBottom:activeTab === tab.id ? "3px solid var(--analysis-primary)" : "3px solid transparent",borderRadius:"9px 9px 5px 5px",background:activeTab === tab.id ? "var(--theme-primary-soft)" : "transparent",color:activeTab === tab.id ? "var(--theme-primary-text)" : "var(--analysis-muted)"}}>{tab.label}</button>)}
+      {tabs.map(tab => <button key={tab.id} type="button" aria-pressed={activeTab === tab.id} onClick={() => { navigate(`${metricsBase}/${tabPaths[tab.id]}`); setOpenMetricsFilter(null); }} style={{flex:"0 0 auto",whiteSpace:"nowrap",padding:"11px 18px",font:"inherit",fontWeight:activeTab === tab.id ? 700 : 500,cursor:"pointer",border:0,borderBottom:activeTab === tab.id ? "3px solid var(--analysis-primary)" : "3px solid transparent",borderRadius:"9px 9px 5px 5px",background:activeTab === tab.id ? "var(--theme-primary-soft)" : "transparent",color:activeTab === tab.id ? "var(--theme-primary-text)" : "var(--analysis-muted)"}}>{tab.label}</button>)}
     </nav>
     <header className={styles.dashboardFilters} aria-label="Filtros das métricas" ref={metricsFiltersRef}>
       <div className={styles.topFilter}>
@@ -369,9 +369,14 @@ export default function AnaliseDados() {
       </div>
     </>}
     {activeTab === "customers" && <>
-      <section className={styles.dashboardMetrics}>{metric(pt ? "Clientes atendidos" : "Customers served", distinctCustomers, <FaUsers />)}{metric(pt ? "Clientes recorrentes no mês" : "Repeat customers this month", customerSegments.recurring)}{metric(pt ? "Atendimentos concluídos" : "Completed appointments", concludedHistory.length)}{metric(pt ? "Valor por cliente" : "Value per customer", dashboardMoney(distinctCustomers ? recordedRevenue / distinctCustomers : 0))}</section>
+      <section className={styles.dashboardMetrics}>{metric(pt ? "Clientes atendidos" : "Customers served", distinctCustomers, <FaUsers />)}{metric(pt ? "Clientes com retornos no mês" : "Repeat customers this month", [...customers.values()].filter(row => row.count > 1).length)}{metric(pt ? "Atendimentos concluídos" : "Completed appointments", concludedHistory.length)}{metric(pt ? "Valor por cliente" : "Value per customer", dashboardMoney(distinctCustomers ? recordedRevenue / distinctCustomers : 0))}</section>
       <section className={styles.dashboardPanel} style={{marginBottom:16}}>
         <h2><FaUsers aria-hidden="true"/>{pt ? "Perfil dos clientes" : "Customer profile"}</h2>
+        <label className={styles.yearControl} style={{marginBottom:12,display:"flex",flexDirection:"column",gap:5}}>
+          <span>{pt ? "Período de recorrência" : "Recurrence period"}</span>
+          <select value={recurrenceMonths} onChange={event => {setRecurrence(null);setRecurrenceError(false);setRecurrenceMonths(Number(event.target.value));}}>{[3,6,12,24].map(months => <option key={months} value={months}>{pt ? "Últimos" : "Last"} {months} {pt ? "meses" : "months"}</option>)}</select>
+        </label>
+        {recurrenceError ? <p role="alert" className={styles.error}>{pt ? "Não foi possível consultar a recorrência." : "Could not load recurrence."}</p> : !recurrence ? <p className={styles.dashboardEmpty} role="status">{pt ? "Consultando recorrência..." : "Loading recurrence..."}</p> : <>
         <div style={{display:"grid",gridTemplateColumns:"minmax(0, 1fr) minmax(0, 1.2fr)",alignItems:"center",gap:"clamp(8px, 3vw, 28px)",maxWidth:560,margin:"12px auto 18px"}}>
           <div role="img" aria-label={segmentRows.map(row => row.label + ": " + row.count).join(", ")} style={{position:"relative",width:"100%",maxWidth:190,aspectRatio:"1",justifySelf:"center",borderRadius:"50%",background:segmentTotal ? `conic-gradient(${segmentRows[0].color} 0% ${recurringEnd}%, ${segmentRows[1].color} ${recurringEnd}% ${freshEnd}%, ${segmentRows[2].color} ${freshEnd}% 100%)` : "var(--analysis-border)"}}>
             <div style={{position:"absolute",inset:"19%",borderRadius:"50%",background:"var(--analysis-panel)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center"}}>
@@ -383,11 +388,12 @@ export default function AnaliseDados() {
             {segmentRows.map(row => <div key={row.label} style={{display:"grid",gridTemplateColumns:"10px minmax(0,1fr) auto",alignItems:"center",gap:7,fontSize:"clamp(10px, 2.9vw, 13px)"}}>
               <span aria-hidden="true" style={{width:10,height:10,borderRadius:"50%",background:row.color}}/>
               <span style={{overflowWrap:"anywhere"}}>{row.label}</span>
-              <strong style={{textAlign:"right",fontVariantNumeric:"tabular-nums"}}>{row.count}<small style={{display:"block",color:"var(--analysis-muted)",fontWeight:400}}>{(segmentTotal ? 100 * row.count / segmentTotal : 0).toLocaleString(pt ? "pt-BR" : "en-US",{maximumFractionDigits:1})}%</small></strong>
+              <strong style={{textAlign:"right",fontVariantNumeric:"tabular-nums"}}>{row.count}<small style={{display:"block",color:"var(--analysis-muted)",fontWeight:400}}>{([customerSegments.recurringPercent,customerSegments.freshPercent,customerSegments.inactivePercent][segmentRows.indexOf(row)]).toLocaleString(pt ? "pt-BR" : "en-US",{maximumFractionDigits:1})}%</small></strong>
             </div>)}
           </div>
         </div>
-        <p className={styles.note}>{pt ? "Recorrentes: retornaram no período. Novos: primeiro e único atendimento no período. Não recorrentes: atendidos anteriormente, sem retorno no período. Considera apenas atendimentos concluídos até o fim do mês selecionado." : "Returning: returned during the period. New: first and only visit during the period. Non-returning: previously served, with no return during the period. Only completed appointments through the selected month are counted."}</p>
+        <p className={styles.note}>{pt ? "Recorrentes: retornaram no período. Novos: primeiro e único atendimento no período. Não recorrentes: atendidos anteriormente, sem retorno no período. Considera atendimentos concluídos até hoje, com o intervalo selecionado acima." : "Returning: returned during the period. New: first and only visit during the period. Non-returning: previously served, with no return during the period. Only completed appointments through today are counted."}</p>
+        </>}
       </section>
       <div className={styles.dashboardCharts}>{ranking(pt ? "Clientes por atendimentos" : "Customers by appointments", [...customers.values()].sort((a,b) => b.count-a.count))}{ranking(pt ? "Clientes por valor concluído" : "Customers by completed value", [...customers.values()].sort((a,b) => b.value-a.value).map(row => ({name:row.name,count:row.value,display:dashboardMoney(row.value)})))}</div>
     </>}
