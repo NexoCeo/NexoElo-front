@@ -270,9 +270,9 @@ export default function AnaliseDados() {
     return { recurring, fresh, inactive, total: history.size };
   }, [historico, periodFilter, professionalFilter]);
   const segmentRows = [
-    { label: pt ? "Recorrentes" : "Returning", count: customerSegments.recurring, color: "#35d59a" },
-    { label: pt ? "Novos" : "New", count: customerSegments.fresh, color: "#49c9db" },
-    { label: pt ? "Não recorrentes" : "Non-returning", count: customerSegments.inactive, color: "#f5b942" },
+    { label: pt ? "Recorrentes" : "Returning", count: customerSegments.recurring, color: "#22c55e" },
+    { label: pt ? "Novos" : "New", count: customerSegments.fresh, color: "#3b82f6" },
+    { label: pt ? "Não recorrentes" : "Non-returning", count: customerSegments.inactive, color: "#f59e0b" },
   ];
   const segmentTotal = customerSegments.total;
   const recurringEnd = segmentTotal ? 100 * customerSegments.recurring / segmentTotal : 0;
