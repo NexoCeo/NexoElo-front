@@ -83,11 +83,11 @@ function MobileNavigation() {
           const groupActive = group.children.some(item => isCurrent(item.to));
           const expanded = expandedGroups[group.id] ?? groupActive;
           return <div key={group.id}>
-            <button type="button" className={`${styles.mobileMoreLink} ${groupActive ? styles.mobileMoreActive : ""}`} style={{width:"100%",border:0,background:groupActive ? "var(--theme-primary-soft)" : "transparent",fontFamily:"inherit",textAlign:"left",cursor:"pointer"}} aria-expanded={expanded} aria-controls={`mobile-more-${group.id}`} onClick={() => setExpandedGroups(previous => ({...previous,[group.id]:!expanded}))}>
+            <button type="button" className={styles.mobileMoreLink} style={{width:"100%",boxSizing:"border-box",border:0,background:"transparent",fontFamily:"inherit",fontWeight:600,textAlign:"left",cursor:"pointer"}} aria-expanded={expanded} aria-controls={`mobile-more-${group.id}`} onClick={() => setExpandedGroups(previous => ({...previous,[group.id]:!expanded}))}>
               {group.icon}<span style={{flex:1}}>{group.label}</span>{expanded ? <FaChevronUp aria-hidden="true"/> : <FaChevronDown aria-hidden="true"/>}
             </button>
-            {expanded && <div id={`mobile-more-${group.id}`} style={{marginLeft:20,paddingLeft:8,borderLeft:"1px solid var(--theme-bottom)"}}>
-              {group.children.map(item => <NavLink key={item.to} to={item.to} className={({isActive}) => `${styles.mobileMoreLink} ${isActive ? styles.mobileMoreActive : ""}`} onClick={() => setMoreOpen(false)}>{item.icon}<span>{item.label}</span></NavLink>)}
+            {expanded && <div id={`mobile-more-${group.id}`} style={{margin:"2px 0 5px 19px",paddingLeft:8,borderLeft:"1px solid var(--theme-bottom)",display:"grid",gap:2}}>
+              {group.children.map(item => <NavLink key={item.to} to={item.to} className={({isActive}) => `${styles.mobileMoreLink} ${isActive ? styles.mobileMoreActive : ""}`} style={{minHeight:36,padding:"7px 10px",fontSize:12,boxSizing:"border-box"}} onClick={() => setMoreOpen(false)}>{item.icon}<span>{item.label}</span></NavLink>)}
             </div>}
           </div>;
         })}
