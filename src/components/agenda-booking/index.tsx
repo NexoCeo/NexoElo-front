@@ -191,7 +191,7 @@ export default function AgendaBooking({ date, professionalId, onClose, onCreated
                 }} />
               {sugestoesAbertas && !clienteId && buscaCliente.trim().length > 0 && (
                 <div id="booking-client-options" className={styles.clientOptions} role="listbox">
-                  {buscandoClientes && <div className={styles.clientHint}>Buscando clientes...</div>}
+                  {buscandoClientes && <div role="status" aria-label={"Buscando clientes"} aria-busy="true" style={{display:"grid",gap:10,minWidth:0}}>{Array.from({length:3},(_,index)=><div key={index} aria-hidden="true" style={{height:48,borderRadius:9,background:"var(--theme-surface-muted, var(--theme-background2))",border:"1px solid var(--theme-bottom)"}} />)}</div>}
                   {!buscandoClientes && (buscaCliente.trim().length >= 3 ? clientesBusca : clientes.filter(c => formatPersonName(c.Nome).toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(buscaCliente.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "")))).map((cliente, index) => (
                     <button type="button" role="option" id={`booking-client-option-${index}`}
                       aria-selected={index === indiceSugestao}
