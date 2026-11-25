@@ -21,13 +21,13 @@ function MobileNavigation() {
   const base = getRoleBasePath(usuario?.Papel);
   const manager = usuario?.Papel === "EMPRESA" || usuario?.Papel === "AUTONOMO";
   const [moreOpen, setMoreOpen] = useState(false);
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+  const [expandedGroup, setExpandedGroup] = useState<string | null | undefined>(undefined);
   const [access, setAccess] = useState({ reports: false, analytics: false, whatsapp: false });
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMoreOpen(false);
-    setExpandedGroups({});
+    setExpandedGroup(undefined);
   }, [location.pathname]);
   useEffect(() => {
     if (!manager) return;
@@ -81,9 +81,9 @@ function MobileNavigation() {
         <div className={styles.mobileMoreTitle}><strong>Mais opções</strong><button type="button" onClick={() => setMoreOpen(false)} aria-label="Fechar mais opções"><FaTimes /></button></div>
         {groups.map(group => {
           const groupActive = group.children.some(item => isCurrent(item.to));
-          const expanded = expandedGroups[group.id] ?? groupActive;
+          const expanded = expandedGroup === undefined ? groupActive : expandedGroup === group.id;
           return <div key={group.id}>
-            <button type="button" className={styles.mobileMoreLink} style={{width:"100%",boxSizing:"border-box",border:0,background:"transparent",fontFamily:"inherit",fontWeight:600,textAlign:"left",cursor:"pointer"}} aria-expanded={expanded} aria-controls={`mobile-more-${group.id}`} onClick={() => setExpandedGroups(previous => ({...previous,[group.id]:!expanded}))}>
+            <button type="button" className={styles.mobileMoreLink} style={{width:"100%",boxSizing:"border-box",border:0,background:"transparent",fontFamily:"inherit",fontWeight:600,textAlign:"left",cursor:"pointer"}} aria-expanded={expanded} aria-controls={`mobile-more-${group.id}`} onClick={() => setExpandedGroup(expanded ? null : group.id)}>
               {group.icon}<span style={{flex:1}}>{group.label}</span>{expanded ? <FaChevronUp aria-hidden="true"/> : <FaChevronDown aria-hidden="true"/>}
             </button>
             {expanded && <div id={`mobile-more-${group.id}`} style={{margin:"2px 0 5px 19px",paddingLeft:8,borderLeft:"1px solid var(--theme-bottom)",display:"grid",gap:2}}>
