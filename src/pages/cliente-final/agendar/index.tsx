@@ -1265,7 +1265,7 @@ export default function ClienteFinalAgendar() {
                     </section>
                     <fieldset className={styles.paymentChoice}>
                       <legend>Como deseja pagar?</legend>
-                      {loadingPagamento && <p>Carregando formas de pagamento...</p>}
+                      {loadingPagamento && <div role="status" aria-label={"Carregando formas de pagamento"} aria-busy="true" style={{display:"grid",gap:10,minWidth:0}}>{Array.from({length:2},(_,index)=><div key={index} aria-hidden="true" style={{height:48,borderRadius:9,background:"var(--theme-surface-muted, var(--theme-background2))",border:"1px solid var(--theme-bottom)"}} />)}</div>}
                       {!loadingPagamento && !configPagamento && <p>As opções de pagamento não estão disponíveis no momento.</p>}
                       {configPagamento && configPagamento.Modalidade !== "ONLINE" && (
                         <label><input type="radio" name="pagamento" checked={metodoPagamento === "PRESENCIAL"}
