@@ -498,3 +498,17 @@
  .dashboardIcon{flex-basis:28px;width:28px;height:28px;font-size:14px}
  .popularRow{gap:5px}
 }
+
+/* Clientes: painel de perfil e rankings lado a lado apenas no desktop. */
+.customerLayout{min-width:0}
+@media(min-width:1100px){
+ .customerLayout{display:grid;grid-template-columns:minmax(0, .9fr) minmax(0,1.1fr);gap:16px;align-items:start;margin-bottom:18px}
+ .customerLayout>.customerProfile{margin-bottom:0!important;display:flex;flex-direction:column;min-width:0}
+ .customerProfile>div[aria-live]{flex:1;display:flex;align-items:center;justify-content:center;min-width:0;width:100%;padding:16px 0 12px}
+ .customerProfile .customerProfileChart{width:100%;max-width:520px!important;gap:clamp(12px,1.5vw,24px)!important;margin:0 auto!important}
+ .customerProfileChart .customerDonut{max-width:210px!important}
+ .customerLayout>.customerRankings{grid-template-columns:minmax(0,1fr);margin-bottom:0;gap:16px;min-width:0}
+}
+@media(min-width:1100px) and (max-width:1350px){
+ .customerProfile .customerProfileChart{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)!important;gap:10px!important}
+}
