@@ -512,3 +512,23 @@
 @media(min-width:1100px) and (max-width:1350px){
  .customerProfile .customerProfileChart{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)!important;gap:10px!important}
 }
+
+/* Perfil dos clientes: distribuição compacta e legível em telas móveis. */
+@media(max-width:760px){
+ .customerLayout>.customerProfile{margin-bottom:12px!important;padding:13px;box-sizing:border-box}
+ .customerProfile h2{margin-bottom:12px}
+ .customerProfile .customerProfileChart{grid-template-columns:minmax(0, .8fr) minmax(0, 1.2fr)!important;gap:12px!important;margin:0!important;max-width:none!important;width:100%}
+ .customerProfileChart .customerDonut{max-width:152px!important;align-self:center}
+ .customerProfileChart .customerDonut strong{font-size:clamp(19px,5.5vw,25px)!important}
+ .customerProfileChart>div:last-child{gap:0!important;align-content:center}
+ .customerProfileChart>div:last-child>div{grid-template-columns:9px minmax(0,1fr) max-content!important;gap:6px!important;font-size:12px!important;min-height:43px;padding:5px 0;box-sizing:border-box;border-bottom:1px solid var(--analysis-border)}
+ .customerProfileChart>div:last-child>div:last-child{border-bottom:0}
+ .customerProfileChart>div:last-child>div>span:first-child{width:9px!important;height:9px!important}
+ .customerProfileChart>div:last-child>div>span:nth-child(2){overflow-wrap:normal!important;line-height:1.25}
+ .customerProfileChart>div:last-child>div>strong{font-size:13px;line-height:1.25;white-space:nowrap}
+ .customerProfileChart>div:last-child>div>strong>small{font-size:10px;margin-top:3px}
+}
+@media(max-width:350px){
+ .customerProfile .customerProfileChart{grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr)!important;gap:8px!important}
+ .customerProfileChart>div:last-child>div{font-size:11px!important;gap:4px!important}
+}
