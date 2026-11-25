@@ -24,6 +24,8 @@ export default function AnaliseDados() {
   type MetricTab = keyof typeof tabPaths;
   const metricsBase = location.pathname.split("/metricas")[0] + "/metricas";
   const activeTab: MetricTab = (Object.keys(tabPaths) as MetricTab[]).find(key => location.pathname === `${metricsBase}/${tabPaths[key]}`) ?? "overview";
+  const [chartDetail, setChartDetail] = useState<{ kind: "day" | "week"; index: number } | null>(null);
+  const interactiveChartsRef = useRef<HTMLDivElement>(null);
   const [recurrenceMonths, setRecurrenceMonths] = useState(6);
   const [recurrence, setRecurrence] = useState<{ recurring:number; fresh:number; inactive:number; total:number; recurringPercent:number; freshPercent:number; inactivePercent:number } | null>(null);
   const [recurrenceError, setRecurrenceError] = useState(false);
@@ -50,6 +52,17 @@ export default function AnaliseDados() {
     };
   }, [openMetricsFilter]);
   const [periodFilter, setPeriodFilter] = useState(() => { const today = new Date(); return `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}`; });
+  useEffect(() => { setChartDetail(null); }, [activeTab, periodFilter, professionalFilter]);
+  useEffect(() => {
+    if (!chartDetail) return;
+    const onOutside = (event: PointerEvent) => {
+      if (!interactiveChartsRef.current?.contains(event.target as Node)) setChartDetail(null);
+    };
+    const onEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setChartDetail(null); };
+    document.addEventListener("pointerdown", onOutside);
+    document.addEventListener("keydown", onEscape);
+    return () => { document.removeEventListener("pointerdown", onOutside); document.removeEventListener("keydown", onEscape); };
+  }, [chartDetail]);
   const permitido = usuario?.Papel === "EMPRESA" || usuario?.Papel === "AUTONOMO";
   useEffect(() => {
     if (!usuario?.Id || !permitido) { setCarregando(false); return; }
@@ -434,25 +447,52 @@ export default function AnaliseDados() {
       <div className={styles.dashboardMetric}><span className={styles.dashboardIcon}><FaUsers /></span><div><span>Clientes atendidos</span><strong>{distinctCustomers}</strong></div></div>
       <div className={styles.dashboardMetric}><span className={styles.dashboardIcon}><FaLayerGroup /></span><div><span>Ticket médio</span><strong>{dashboardMoney(averageTicket)}</strong></div></div>
     </section>
-    <div className={styles.dashboardCharts}>
+    <div className={styles.dashboardCharts} ref={interactiveChartsRef}>
       <section className={styles.dashboardPanel}>
         <h2><FaCalendarAlt aria-hidden="true" /> Agendamentos no período</h2>
-        <div className={styles.lineChart} role="img" aria-label={`Agendamentos diários: ${metricsHistory.length} no mês`}>
+        <div className={styles.lineChart} role="group" aria-label={`Agendamentos diários: ${metricsHistory.length} no mês`}>
           <div className={styles.lineGrid} />
           <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
             <polygon points={`0,100 ${chartPoints} 100,100`} fill="rgba(31,126,243,.18)" />
             <polyline points={chartPoints} fill="none" stroke="#2186ff" strokeWidth="2.2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
           </svg>
+          <div style={{position:"absolute",inset:"0 0 22px",display:"flex"}} onPointerLeave={event => {if(event.pointerType === "mouse") setChartDetail(null);}}>
+            {dailyCounts.map((day,index) => {
+              const selected = chartDetail?.kind === "day" && chartDetail.index === index;
+              const x = index / Math.max(1,dailyCounts.length-1) * 100;
+              const y = 100 - day.count / dayMaximum * 88;
+              const date = new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US",{day:"2-digit",month:"2-digit",year:"numeric"}).format(new Date(referenceMonth.year,referenceMonth.month-1,day.day));
+              return <button type="button" key={day.day} aria-label={`${date}: ${day.count} ${pt ? "agendamentos" : "appointments"}`} aria-pressed={selected} style={{position:"absolute",left:`calc(${x}% - ${50/Math.max(1,dailyCounts.length-1)}%)`,width:`${100/Math.max(1,dailyCounts.length-1)}%`,height:"100%",padding:0,border:0,background:"transparent",cursor:"pointer",touchAction:"pan-y",zIndex:selected?2:1}} onPointerEnter={event => {if(event.pointerType === "mouse") setChartDetail({kind:"day",index});}} onFocus={() => setChartDetail({kind:"day",index})} onBlur={() => setChartDetail(current => current?.kind === "day" && current.index === index ? null : current)} onClick={() => setChartDetail({kind:"day",index})}>
+                {selected && <span aria-hidden="true" style={{position:"absolute",left:"50%",top:`${y}%`,width:9,height:9,borderRadius:"50%",background:"#2186ff",border:"2px solid var(--analysis-panel)",transform:"translate(-50%,-50%)",pointerEvents:"none"}}/>}
+              </button>;
+            })}
+            {chartDetail?.kind === "day" && dailyCounts[chartDetail.index] && (() => {
+              const day = dailyCounts[chartDetail.index];
+              const x = chartDetail.index / Math.max(1,dailyCounts.length-1)*100;
+              const y = 100-day.count/dayMaximum*88;
+              return <div role="tooltip" style={{position:"absolute",left:`${x}%`,top:`${y}%`,transform:`translate(${x<24?"0":x>76?"-100%":"-50%"},${y<45?"12px":"calc(-100% - 12px)"})`,padding:"8px 11px",border:"1px solid var(--analysis-border)",borderRadius:8,background:"var(--analysis-panel)",color:"var(--analysis-text)",boxShadow:"0 4px 16px #0005",fontSize:11,whiteSpace:"nowrap",pointerEvents:"none",zIndex:4}}>
+                <strong>{String(day.day).padStart(2,"0")}/{String(referenceMonth.month).padStart(2,"0")}/{referenceMonth.year}</strong><div>{pt ? "Agendamentos" : "Appointments"}: {day.count}</div><div>{pt ? "Valor concluído" : "Completed value"}: {dashboardMoney(day.revenue)}</div>
+              </div>;
+            })()}
+          </div>
           <div className={styles.lineLabels}><span>01/{String(referenceMonth.month).padStart(2,"0")}</span><span>{String(Math.ceil(referenceMonth.count/2)).padStart(2,"0")}/{String(referenceMonth.month).padStart(2,"0")}</span><span>{referenceMonth.count}/{String(referenceMonth.month).padStart(2,"0")}</span></div>
         </div>
       </section>
       <section className={styles.dashboardPanel}>
         <div className={styles.revenueTitle}><h2><FaDollarSign aria-hidden="true" /> Valor concluído por semana</h2><strong>{dashboardMoney(recordedRevenue)}</strong></div>
-        <div className={styles.weekChart} role="img" aria-label={`Valores dos agendamentos concluídos por semana: ${dashboardMoney(recordedRevenue)} no mês`}>
-          {weeklyRevenue.map(week => <div className={styles.weekBarColumn} key={week.label}>
-            <div className={styles.weekBarTrack}><div className={styles.weekBar} style={{height:`${Math.max(week.value>0?2:0,(week.value/maxWeeklyRevenue)*100)}%`}} title={dashboardMoney(week.value)}/></div>
-            <span>{week.label}</span>
-          </div>)}
+        <div className={styles.weekChart} role="group" aria-label={`Valores dos agendamentos concluídos por semana: ${dashboardMoney(recordedRevenue)} no mês`}>
+          {weeklyRevenue.map((week,index) => {
+            const selected = chartDetail?.kind === "week" && chartDetail.index === index;
+            const first = index*7+1;
+            const last = Math.min(first+6, referenceMonth.count);
+            const month = String(referenceMonth.month).padStart(2,"0");
+            const range = `${String(first).padStart(2,"0")}/${month} – ${String(last).padStart(2,"0")}/${month}`;
+            return <div className={styles.weekBarColumn} key={week.label} style={{position:"relative"}} onPointerLeave={event => {if(event.pointerType === "mouse") setChartDetail(current => current?.kind === "week" ? null : current);}}>
+              <button type="button" className={styles.weekBarTrack} aria-label={`${range}: ${dashboardMoney(week.value)}`} aria-pressed={selected} style={{padding:0,borderTop:0,borderLeft:0,borderRight:0,cursor:"pointer",touchAction:"pan-y"}} onPointerEnter={event => {if(event.pointerType === "mouse") setChartDetail({kind:"week",index});}} onFocus={() => setChartDetail({kind:"week",index})} onBlur={() => setChartDetail(current => current?.kind === "week" && current.index === index ? null : current)} onClick={() => setChartDetail({kind:"week",index})}><span className={styles.weekBar} style={{display:"block",height:`${Math.max(week.value>0?2:0,(week.value/maxWeeklyRevenue)*100)}%`}}/></button>
+              <span>{week.label}</span>
+              {selected && <div role="tooltip" style={{position:"absolute",top:0,left:index===0?"0":index===weeklyRevenue.length-1?"auto":"50%",right:index===weeklyRevenue.length-1?0:"auto",transform:index===0||index===weeklyRevenue.length-1?"none":"translateX(-50%)",padding:"8px 11px",border:"1px solid var(--analysis-border)",borderRadius:8,background:"var(--analysis-panel)",color:"var(--analysis-text)",boxShadow:"0 4px 16px #0005",fontSize:11,whiteSpace:"nowrap",pointerEvents:"none",zIndex:4}}><strong>{range}</strong><div>{pt ? "Valor concluído" : "Completed value"}: {dashboardMoney(week.value)}</div></div>}
+            </div>;
+          })}
         </div>
       </section>
     </div>
