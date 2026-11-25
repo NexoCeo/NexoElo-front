@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { FaCalendarAlt, FaChartBar, FaChartLine, FaClock, FaHome, FaTimes, FaTools, FaWhatsapp, FaCreditCard, FaCog, FaChevronDown, FaChevronUp } from "react-icons/fa";
-import { FaPerson } from "react-icons/fa6";
+import { FaCalendarAlt, FaChartBar, FaChartLine, FaClock, FaHome, FaTimes, FaTools, FaWhatsapp, FaCreditCard, FaCog, FaChevronDown, FaChevronUp, FaUsers } from "react-icons/fa";
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
 import { useTheme } from "@/context/ThemeContext";
@@ -118,7 +117,7 @@ export default function Sidebar({ isMenuOpen, closeMenu }: SidebarProps) {
         {usuario?.Papel === "EMPRESA" && (
           <li className={styles.navItem}>
             <NavLink to="/empresa/profissionais" end className={linkClassName} onClick={closeMenu}>
-              <FaPerson className={styles.navIcon} aria-hidden="true" />
+              <FaUsers className={styles.navIcon} aria-hidden="true" />
               <span>{t("nav.professionals")}</span>
             </NavLink>
           </li>
