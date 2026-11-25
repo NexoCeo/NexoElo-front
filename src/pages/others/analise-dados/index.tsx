@@ -395,11 +395,11 @@ export default function AnaliseDados() {
       <section className={styles.dashboardMetrics}>{metric(pt ? "Clientes atendidos" : "Customers served", distinctCustomers, <FaUsers />)}{metric(pt ? "Clientes recorrentes" : "Returning customers", recurrence ? recurrence.recurring : "—")}{metric(pt ? "Atendimentos concluídos" : "Completed appointments", concludedHistory.length)}{metric(pt ? "Valor por cliente" : "Value per customer", dashboardMoney(distinctCustomers ? recordedRevenue / distinctCustomers : 0))}</section>
       <section className={styles.dashboardPanel} style={{marginBottom:16}}>
         <h2><FaUsers aria-hidden="true"/>{pt ? "Perfil dos clientes" : "Customer profile"}</h2>
-        {recurrenceError ? <p role="alert" className={styles.error}>{pt ? "Não foi possível consultar a recorrência." : "Could not load recurrence."}</p> : !recurrence ? <p className={styles.dashboardEmpty} role="status">{pt ? "Consultando recorrência..." : "Loading recurrence..."}</p> : <>
+        <div aria-busy={!recurrence && !recurrenceError} aria-live="polite">
         <div style={{display:"grid",gridTemplateColumns:"minmax(0, 1fr) minmax(0, 1.2fr)",alignItems:"center",gap:"clamp(8px, 3vw, 28px)",maxWidth:560,margin:"12px auto 18px"}}>
-          <div role="img" aria-label={segmentRows.map(row => row.label + ": " + row.count).join(", ")} style={{position:"relative",width:"100%",maxWidth:190,aspectRatio:"1",justifySelf:"center",borderRadius:"50%",background:segmentTotal ? `conic-gradient(${segmentRows[0].color} 0% ${recurringEnd}%, ${segmentRows[1].color} ${recurringEnd}% ${freshEnd}%, ${segmentRows[2].color} ${freshEnd}% 100%)` : "var(--analysis-border)"}}>
+          <div role="img" aria-label={recurrence ? segmentRows.map(row => row.label + ": " + row.count).join(", ") : (pt ? "Dados ainda indisponíveis" : "Data not available yet")} style={{position:"relative",width:"100%",maxWidth:190,aspectRatio:"1",justifySelf:"center",borderRadius:"50%",background:!recurrence ? "var(--analysis-border)" : segmentTotal ? `conic-gradient(${segmentRows[0].color} 0% ${recurringEnd}%, ${segmentRows[1].color} ${recurringEnd}% ${freshEnd}%, ${segmentRows[2].color} ${freshEnd}% 100%)` : "var(--analysis-border)"}}>
             <div style={{position:"absolute",inset:"19%",borderRadius:"50%",background:"var(--analysis-panel)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center"}}>
-              <strong style={{fontSize:"clamp(20px, 5vw, 32px)",lineHeight:1.1,fontVariantNumeric:"tabular-nums"}}>{segmentTotal}</strong>
+              <strong style={{fontSize:"clamp(20px, 5vw, 32px)",lineHeight:1.1,fontVariantNumeric:"tabular-nums"}}>{recurrence ? segmentTotal : "—"}</strong>
               <span style={{fontSize:11,color:"var(--analysis-muted)"}}>{pt ? "Clientes" : "Customers"}</span>
             </div>
           </div>
@@ -407,12 +407,13 @@ export default function AnaliseDados() {
             {segmentRows.map(row => <div key={row.label} style={{display:"grid",gridTemplateColumns:"10px minmax(0,1fr) auto",alignItems:"center",gap:7,fontSize:"clamp(10px, 2.9vw, 13px)"}}>
               <span aria-hidden="true" style={{width:10,height:10,borderRadius:"50%",background:row.color}}/>
               <span style={{overflowWrap:"anywhere"}}>{row.label}</span>
-              <strong style={{textAlign:"right",fontVariantNumeric:"tabular-nums"}}>{row.count}<small style={{display:"block",color:"var(--analysis-muted)",fontWeight:400}}>{([customerSegments.recurringPercent,customerSegments.freshPercent,customerSegments.inactivePercent][segmentRows.indexOf(row)]).toLocaleString(pt ? "pt-BR" : "en-US",{maximumFractionDigits:1})}%</small></strong>
+              <strong style={{textAlign:"right",fontVariantNumeric:"tabular-nums"}}>{recurrence ? row.count : "—"}<small style={{display:"block",color:"var(--analysis-muted)",fontWeight:400}}>{recurrence ? ([customerSegments.recurringPercent,customerSegments.freshPercent,customerSegments.inactivePercent][segmentRows.indexOf(row)]).toLocaleString(pt ? "pt-BR" : "en-US",{maximumFractionDigits:1})+"%" : "—"}</small></strong>
             </div>)}
           </div>
         </div>
         <p className={styles.note}>{pt ? "Recorrentes: retornaram no período. Novos: primeiro e único atendimento no período. Não recorrentes: atendidos anteriormente, sem retorno no período. Considera atendimentos concluídos até hoje, com o intervalo selecionado acima." : "Returning: returned during the period. New: first and only visit during the period. Non-returning: previously served, with no return during the period. Only completed appointments through today are counted."}</p>
-        </>}
+        </div>
+        <div style={{minHeight:18,fontSize:11,color:"var(--analysis-muted)"}}>{recurrenceError && <span role="alert">{pt ? "Não foi possível consultar a recorrência." : "Could not load recurrence."}</span>}</div>
       </section>
       <div className={styles.dashboardCharts}>{ranking(pt ? "Clientes por atendimentos" : "Customers by appointments", [...customers.values()].sort((a,b) => b.count-a.count))}{ranking(pt ? "Clientes por valor concluído" : "Customers by completed value", [...customers.values()].sort((a,b) => b.value-a.value).map(row => ({name:row.name,count:row.value,display:dashboardMoney(row.value)})))}</div>
     </>}
