@@ -411,7 +411,6 @@ export default function AnaliseDados() {
             </div>)}
           </div>
         </div>
-        <p className={styles.note}>{pt ? "Recorrentes: retornaram no período. Novos: primeiro e único atendimento no período. Não recorrentes: atendidos anteriormente, sem retorno no período. Considera atendimentos concluídos até hoje, com o intervalo selecionado acima." : "Returning: returned during the period. New: first and only visit during the period. Non-returning: previously served, with no return during the period. Only completed appointments through today are counted."}</p>
         </div>
         <div style={{minHeight:18,fontSize:11,color:"var(--analysis-muted)"}}>{recurrenceError && <span role="alert">{pt ? "Não foi possível consultar a recorrência." : "Could not load recurrence."}</span>}</div>
       </section>
