@@ -396,7 +396,7 @@ export default function AnaliseDados() {
       <section className={styles.dashboardPanel} style={{marginBottom:16}}>
         <h2><FaUsers aria-hidden="true"/>{pt ? "Perfil dos clientes" : "Customer profile"}</h2>
         <div aria-busy={!recurrence && !recurrenceError} aria-live="polite">
-        <div style={{display:"grid",gridTemplateColumns:"minmax(0, 1fr) minmax(0, 1.2fr)",alignItems:"center",gap:"clamp(8px, 3vw, 28px)",maxWidth:560,margin:"12px auto 18px"}}>
+        <div style={{display:"grid",gridTemplateColumns:"minmax(0, 1fr) minmax(0, 1.2fr)",alignItems:"center",gap:"clamp(8px, 3vw, 28px)",maxWidth:560,margin:"12px auto 0"}}>
           <div role="img" aria-label={recurrence ? segmentRows.map(row => row.label + ": " + row.count).join(", ") : (pt ? "Dados ainda indisponíveis" : "Data not available yet")} style={{position:"relative",width:"100%",maxWidth:190,aspectRatio:"1",justifySelf:"center",borderRadius:"50%",background:!recurrence ? "var(--analysis-border)" : segmentTotal ? `conic-gradient(${segmentRows[0].color} 0% ${recurringEnd}%, ${segmentRows[1].color} ${recurringEnd}% ${freshEnd}%, ${segmentRows[2].color} ${freshEnd}% 100%)` : "var(--analysis-border)"}}>
             <div style={{position:"absolute",inset:"19%",borderRadius:"50%",background:"var(--analysis-panel)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center"}}>
               <strong style={{fontSize:"clamp(20px, 5vw, 32px)",lineHeight:1.1,fontVariantNumeric:"tabular-nums"}}>{recurrence ? segmentTotal : "—"}</strong>
@@ -412,7 +412,7 @@ export default function AnaliseDados() {
           </div>
         </div>
         </div>
-        <div style={{minHeight:18,fontSize:11,color:"var(--analysis-muted)"}}>{recurrenceError && <span role="alert">{pt ? "Não foi possível consultar a recorrência." : "Could not load recurrence."}</span>}</div>
+        {recurrenceError && <span role="alert" style={{display:"block",fontSize:11,color:"var(--analysis-muted)",marginTop:8}}>{pt ? "Não foi possível consultar a recorrência." : "Could not load recurrence."}</span>}
       </section>
       <div className={styles.dashboardCharts}>{ranking(pt ? "Clientes por atendimentos" : "Customers by appointments", [...customers.values()].sort((a,b) => b.count-a.count))}{ranking(pt ? "Clientes por valor concluído" : "Customers by completed value", [...customers.values()].sort((a,b) => b.value-a.value).map(row => ({name:row.name,count:row.value,display:dashboardMoney(row.value)})))}</div>
     </>}
