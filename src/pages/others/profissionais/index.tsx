@@ -1146,7 +1146,7 @@ export default function Profissionais() {
               <div className={styles.requestsBody}>
                 {vinculosTab === "solicitacoes" ? (
                   loadingSolicitacoes ? (
-                    <p className={styles.servicesFeedback}>{t("pros.requestsLoading")}</p>
+                    <div role="status" aria-label={t("pros.requestsLoading")} aria-busy="true" style={{display:"grid",gap:10,minWidth:0}}>{Array.from({length:3},(_,index)=><div key={index} aria-hidden="true" style={{height:48,borderRadius:9,background:"var(--theme-surface-muted, var(--theme-background2))",border:"1px solid var(--theme-bottom)"}} />)}</div>
                   ) : solicitacoes.length === 0 ? (
                     <p className={styles.servicesFeedback}>{t("pros.requestsEmpty")}</p>
                   ) : (
@@ -1185,7 +1185,7 @@ export default function Profissionais() {
                   )
                 ) : (
                   loadingHistorico ? (
-                    <p className={styles.servicesFeedback}>{t("pros.historyLoading")}</p>
+                    <div role="status" aria-label={t("pros.historyLoading")} aria-busy="true" style={{display:"grid",gap:10,minWidth:0}}>{Array.from({length:3},(_,index)=><div key={index} aria-hidden="true" style={{height:48,borderRadius:9,background:"var(--theme-surface-muted, var(--theme-background2))",border:"1px solid var(--theme-bottom)"}} />)}</div>
                   ) : historicoError ? (
                     <p className={styles.servicesFeedback} role="alert">{historicoError}</p>
                   ) : historicoSolicitacoes.length === 0 ? (
@@ -1259,7 +1259,7 @@ export default function Profissionais() {
               </div>
 
               {loadingServicos ? (
-                <p className={styles.servicesFeedback}>{t("pros.servicesLoading")}</p>
+                <div role="status" aria-label={t("pros.servicesLoading")} aria-busy="true" style={{display:"grid",gap:10,minWidth:0}}>{Array.from({length:3},(_,index)=><div key={index} aria-hidden="true" style={{height:48,borderRadius:9,background:"var(--theme-surface-muted, var(--theme-background2))",border:"1px solid var(--theme-bottom)"}} />)}</div>
               ) : servicosEmpresa.length === 0 ? (
                 <p className={styles.servicesFeedback}>
                   {t("pros.servicesEmpty")}
