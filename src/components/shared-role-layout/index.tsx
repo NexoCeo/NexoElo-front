@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { FaHome, FaCalendarAlt, FaTools, FaUsers, FaThLarge, FaChartBar, FaClock, FaChartLine, FaWhatsapp, FaCreditCard, FaTimes } from "react-icons/fa";
+import { FaHome, FaCalendarAlt, FaTools, FaUsers, FaThLarge, FaChartBar, FaClock, FaChartLine, FaWhatsapp, FaCreditCard, FaTimes, FaCog, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { useUser } from "@/context/UserContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { getRoleBasePath } from "@/routes/role-paths";
@@ -21,11 +21,13 @@ function MobileNavigation() {
   const base = getRoleBasePath(usuario?.Papel);
   const manager = usuario?.Papel === "EMPRESA" || usuario?.Papel === "AUTONOMO";
   const [moreOpen, setMoreOpen] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [access, setAccess] = useState({ reports: false, analytics: false, whatsapp: false });
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMoreOpen(false);
+    setExpandedGroups({});
   }, [location.pathname]);
   useEffect(() => {
     if (!manager) return;
@@ -60,19 +62,35 @@ function MobileNavigation() {
     ...(manager ? [{ to: `${base}/servicos`, label: t("nav.services"), icon: <FaTools aria-hidden="true" /> }] : []),
     ...(usuario?.Papel === "EMPRESA" ? [{ to: "/empresa/profissionais", label: t("nav.professionals"), icon: <FaUsers aria-hidden="true" /> }] : []),
   ];
-  const secondary = [
-    ...(manager ? [{ to: `${base}/funcionamento`, label: t("nav.hours"), icon: <FaClock aria-hidden="true" /> }] : []),
-    ...(manager ? [{ to: `${base}/pagamentos`, label: "Pagamentos", icon: <FaCreditCard aria-hidden="true" /> }] : []),
-    ...(manager && access.reports ? [{ to: `${base}/relatorios`, label: t("nav.reports"), icon: <FaChartBar aria-hidden="true" /> }] : []),
-    ...(manager && access.analytics ? [{ to: `${base}/analise-dados/metricas`, label: t("nav.metrics"), icon: <FaChartLine aria-hidden="true" /> }] : []),
-    ...(manager && access.whatsapp ? [{ to: `${base}/analise-dados/whatsapp-business`, label: "WhatsApp Business", icon: <FaWhatsapp aria-hidden="true" /> }] : []),
-  ];
-  const moreActive = secondary.some(item => location.pathname === item.to || location.pathname.startsWith(`${item.to}/`));
+  const groups = [
+    { id: "analytics", label: t("nav.analytics"), icon: <FaChartLine aria-hidden="true" />, children: [
+      ...(manager && access.analytics ? [{ to: `${base}/analise-dados/metricas`, label: t("nav.metrics"), icon: <FaChartBar aria-hidden="true" /> }] : []),
+      ...(manager && access.reports ? [{ to: `${base}/relatorios`, label: t("nav.reports"), icon: <FaChartBar aria-hidden="true" /> }] : []),
+      ...(manager && access.whatsapp ? [{ to: `${base}/analise-dados/whatsapp-business`, label: "WhatsApp Business", icon: <FaWhatsapp aria-hidden="true" /> }] : []),
+    ] },
+    { id: "settings", label: t("nav.settings"), icon: <FaCog aria-hidden="true" />, children: [
+      ...(manager ? [{ to: `${base}/funcionamento`, label: t("nav.hours"), icon: <FaClock aria-hidden="true" /> }] : []),
+      ...(manager ? [{ to: `${base}/pagamentos`, label: "Pagamentos", icon: <FaCreditCard aria-hidden="true" /> }] : []),
+    ] },
+  ].filter(group => group.children.length > 0);
+  const isCurrent = (path: string) => location.pathname === path || location.pathname.startsWith(`${path}/`);
+  const moreActive = groups.some(group => group.children.some(item => isCurrent(item.to)));
   return (
     <div className={styles.mobileNavHost} ref={menuRef}>
       {moreOpen && <div className={styles.mobileMore} aria-label="Mais páginas">
         <div className={styles.mobileMoreTitle}><strong>Mais opções</strong><button type="button" onClick={() => setMoreOpen(false)} aria-label="Fechar mais opções"><FaTimes /></button></div>
-        {secondary.map(item => <NavLink key={item.to} to={item.to} className={({isActive}) => `${styles.mobileMoreLink} ${isActive ? styles.mobileMoreActive : ""}`} onClick={() => setMoreOpen(false)}>{item.icon}<span>{item.label}</span></NavLink>)}
+        {groups.map(group => {
+          const groupActive = group.children.some(item => isCurrent(item.to));
+          const expanded = expandedGroups[group.id] ?? groupActive;
+          return <div key={group.id}>
+            <button type="button" className={`${styles.mobileMoreLink} ${groupActive ? styles.mobileMoreActive : ""}`} style={{width:"100%",border:0,background:groupActive ? "var(--theme-primary-soft)" : "transparent",fontFamily:"inherit",textAlign:"left",cursor:"pointer"}} aria-expanded={expanded} aria-controls={`mobile-more-${group.id}`} onClick={() => setExpandedGroups(previous => ({...previous,[group.id]:!expanded}))}>
+              {group.icon}<span style={{flex:1}}>{group.label}</span>{expanded ? <FaChevronUp aria-hidden="true"/> : <FaChevronDown aria-hidden="true"/>}
+            </button>
+            {expanded && <div id={`mobile-more-${group.id}`} style={{marginLeft:20,paddingLeft:8,borderLeft:"1px solid var(--theme-bottom)"}}>
+              {group.children.map(item => <NavLink key={item.to} to={item.to} className={({isActive}) => `${styles.mobileMoreLink} ${isActive ? styles.mobileMoreActive : ""}`} onClick={() => setMoreOpen(false)}>{item.icon}<span>{item.label}</span></NavLink>)}
+            </div>}
+          </div>;
+        })}
       </div>}
       <div className={styles.mobileNav} aria-label="Navegação móvel">
         {primary.map(item => <NavLink key={item.to} to={item.to} end className={({isActive}) => `${styles.mobileNavItem} ${isActive ? styles.mobileNavActive : ""}`}>{item.icon}<span>{item.label}</span></NavLink>)}
