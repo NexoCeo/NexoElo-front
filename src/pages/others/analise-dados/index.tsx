@@ -319,7 +319,7 @@ export default function AnaliseDados() {
   if (!permitido) return <main className={styles.container}>{t("analytics.notAllowed")}</main>;
   if (carregando) return <LoadingState label={t("analytics.loading")} variant="metrics" />;
   return <main className={styles.container} style={cssVars}>
-    <nav aria-label={pt ? "Categorias de métricas" : "Metric categories"} style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:5,marginBottom:16,borderBottom:"1px solid var(--analysis-border)"}}>
+    <nav aria-label={pt ? "Categorias de métricas" : "Metric categories"} style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:5,marginBottom:16}}>
       {tabs.map(tab => <button key={tab.id} type="button" aria-pressed={activeTab === tab.id} onClick={() => { navigate(`${metricsBase}/${tabPaths[tab.id]}`); setOpenMetricsFilter(null); }} style={{flex:"0 0 auto",whiteSpace:"nowrap",padding:"11px 18px",font:"inherit",fontWeight:activeTab === tab.id ? 700 : 500,cursor:"pointer",border:0,borderBottom:activeTab === tab.id ? "3px solid var(--analysis-primary)" : "3px solid transparent",borderRadius:"9px 9px 5px 5px",background:activeTab === tab.id ? "var(--theme-primary-soft)" : "transparent",color:activeTab === tab.id ? "var(--theme-primary-text)" : "var(--analysis-muted)"}}>{tab.label}</button>)}
     </nav>
     <header className={styles.dashboardFilters} aria-label="Filtros das métricas" ref={metricsFiltersRef}>
