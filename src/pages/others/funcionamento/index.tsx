@@ -206,7 +206,7 @@ export default function Funcionamento() {
   const [savedSnapshot,setSavedSnapshot] = useState<FuncionamentoConfig|null>(null);
   const [customOwner,setCustomOwner] = useState<"availability"|"custom">("custom");
   const [availabilityMode, setAvailabilityMode] = useState<"padrao" | "personalizado">("padrao");
-  const personalizedBackup = useRef<FuncionamentoConfig["HorariosPorDia"]>({});
+  const customCardRef = useRef<HTMLDetailsElement>(null);
   const lastSavedConfig = useRef("");
 
   const usuarioId = usuario?.Id ?? 0;
@@ -233,7 +233,7 @@ export default function Funcionamento() {
         setConfig(data);
         lastSavedConfig.current = JSON.stringify(data);
         setSavedSnapshot(data);
-        personalizedBackup.current = { ...data.HorariosPorDia };
+
         setAvailabilityMode(Object.keys(data.HorariosPorDia ?? {}).length > 0 ? "personalizado" : "padrao");
       } catch {
         const message = t("hours.loadError");
@@ -242,7 +242,7 @@ export default function Funcionamento() {
         setConfig(defaults);
         lastSavedConfig.current = JSON.stringify(defaults);
         setSavedSnapshot(null);
-        personalizedBackup.current = {};
+
         setAvailabilityMode("padrao");
       } finally {
         setLoading(false);
@@ -259,7 +259,7 @@ export default function Funcionamento() {
       setConfig(data);
       lastSavedConfig.current = JSON.stringify(data);
         setSavedSnapshot(data);
-      personalizedBackup.current = { ...data.HorariosPorDia };
+
       setAvailabilityMode(Object.keys(data.HorariosPorDia ?? {}).length > 0 ? "personalizado" : "padrao");
     } catch { /* preserve settings while offline */ }
   }, {
@@ -272,69 +272,34 @@ export default function Funcionamento() {
   }
 
   function chooseAvailabilityMode(mode: "padrao" | "personalizado") {
-    if (!config || mode === availabilityMode) return;
-    setCustomOwner("availability");
+    if (!config || saving) return;
     if (mode === "padrao") {
-      personalizedBackup.current = { ...config.HorariosPorDia };
+      setCustomOwner("availability");
       updateConfig({ HorariosPorDia: {} });
     } else {
-      const restored = { ...personalizedBackup.current, ...config.HorariosPorDia };
-      DIAS.filter(dia => config[dia.key]).forEach(dia => {
-        restored[dia.key] ??= {
-          Inicio: config.HorarioAbertura,
-          Fim: config.HorarioFechamento,
-          Intervalos: config.Intervalos.map(intervalo => ({ ...intervalo })),
-        };
-      });
-      updateConfig({ HorariosPorDia: restored });
+      setCustomOwner("custom");
+      if(customCardRef.current) customCardRef.current.open=true;
     }
     setAvailabilityMode(mode);
   }
 
   function toggleDia(dia: DiaFuncionamentoKey) {
-    if (!config) return;
-    const selected = !config[dia];
-    if (selected && availabilityMode === "personalizado") {
-      updateConfig({
-        [dia]: true,
-        HorariosPorDia: {
-          ...config.HorariosPorDia,
-          [dia]: config.HorariosPorDia?.[dia] ?? personalizedBackup.current?.[dia] ?? {
-            Inicio: config.HorarioAbertura,
-            Fim: config.HorarioFechamento,
-            Intervalos: config.Intervalos.map(intervalo => ({ ...intervalo })),
-          },
-        },
-      });
-    } else {
-      updateConfig({ [dia]: selected });
-    }
+    if (!config || saving) return;
+    setDiasSelecionados(new Set(DIAS.filter(d=>d.key===dia?!config[dia]:config[d.key]).map(d=>d.key)));
   }
 
   function setDiasSelecionados(dias: Set<DiaFuncionamentoKey>) {
-    if (!config) return;
+    if (!config || saving) return;
     const selection = DIAS.reduce((result, dia) => {
       result[dia.key] = dias.has(dia.key);
       return result;
     }, {} as Record<DiaFuncionamentoKey, boolean>);
-    if (availabilityMode === "personalizado") {
-      const next = { ...config.HorariosPorDia };
-      DIAS.filter(dia => dias.has(dia.key)).forEach(dia => {
-        next[dia.key] ??= personalizedBackup.current?.[dia.key] ?? {
-          Inicio: config.HorarioAbertura,
-          Fim: config.HorarioFechamento,
-          Intervalos: config.Intervalos.map(intervalo => ({ ...intervalo })),
-        };
-      });
-      updateConfig({ ...selection, HorariosPorDia: next });
-    } else {
-      updateConfig(selection);
-    }
+    updateConfig(selection);
   }
 
   function personalizarDia(dia: DiaFuncionamentoKey) {
     setCustomOwner("custom");
-    if (!config) return;
+    if (!config || saving || !config[dia]) return;
     const next = { ...config.HorariosPorDia };
     if (next[dia]) {
       delete next[dia];
@@ -346,7 +311,7 @@ export default function Funcionamento() {
       };
     }
     updateConfig({ HorariosPorDia: next });
-    if (next[dia]) setAvailabilityMode("personalizado");
+    setAvailabilityMode(Object.keys(next).length ? "personalizado" : "padrao");
   }
 
   function alterarHorarioDia(dia: DiaFuncionamentoKey, campo: "Inicio" | "Fim", valor: string) {
@@ -442,6 +407,13 @@ export default function Funcionamento() {
     const draft = config;
     const baseline = savedSnapshot ?? criarFuncionamentoPadrao(usuarioId);
     const candidate = { ...baseline, ...blockPatch(block,draft), ...(block==="breaks" && nextBreaks ? {Intervalos:nextBreaks} : {}) };
+    if(block==="custom" || block==="availability") {
+      // A new exception cannot be persisted for a day that is not yet enabled.
+      if(DIAS.some(d=>candidate.HorariosPorDia?.[d.key] && !baseline[d.key] && draft[d.key])) {
+        showNotification({type:"warning",title:"Dias de atendimento",message:"Salve os dias de atendimento antes de salvar os horários personalizados."});
+        return false;
+      }
+    }
     const diasSelecionados = DIAS.filter(dia=>candidate[dia.key]);
     const pausaTotal = getPausaTotal(candidate);
     const expedienteTotal = timeToMinutes(candidate.HorarioFechamento)-timeToMinutes(candidate.HorarioAbertura);
@@ -523,7 +495,7 @@ export default function Funcionamento() {
         return next;
       });
       lastSavedConfig.current = JSON.stringify(savedConfig);
-      personalizedBackup.current = { ...savedConfig.HorariosPorDia };
+
       showNotification({
         type: "success",
         title: t("hours.saved"),
@@ -569,14 +541,14 @@ export default function Funcionamento() {
                     onClick={() => chooseAvailabilityMode("padrao")}
                     className={`${styles.availabilityOption} ${!temHorariosPersonalizados ? styles.availabilitySelected : ""}`}>
                     <FaCalendarAlt aria-hidden="true" />
-                    <span><strong>Horário padrão</strong><small>Mesmo horário para os dias selecionados</small></span>
+                    <span><strong>Horário padrão</strong><small>Mesmo horário para todos os dias selecionados</small></span>
                     {!temHorariosPersonalizados && <FaCheckCircle aria-label="Selecionado" />}
                   </button>
                   <button type="button" disabled={loading || saving || !config} aria-pressed={temHorariosPersonalizados}
                     onClick={() => chooseAvailabilityMode("personalizado")}
                     className={`${styles.availabilityOption} ${temHorariosPersonalizados ? styles.availabilitySelected : ""}`}>
                     <FaSlidersH aria-hidden="true" />
-                    <span><strong>Horários personalizados</strong><small>Defina horários diferentes para cada dia abaixo</small></span>
+                    <span><strong>Horários personalizados</strong><small>Personalize apenas os dias com horários diferentes</small></span>
                     {temHorariosPersonalizados && <FaCheckCircle aria-label="Selecionado" />}
                   </button>
                 </div>
@@ -617,6 +589,9 @@ export default function Funcionamento() {
                     );
                   })}
                 </div>
+                  <div className={styles.schedulePreview}>
+                    {diasSelecionados.map(dia => <div key={dia.key}><span>{t("hours.day"+DIAS.findIndex(d=>d.key===dia.key))}</span><strong>{horariosPorDia[dia.key]?.Inicio ?? config.HorarioAbertura} – {horariosPorDia[dia.key]?.Fim ?? config.HorarioFechamento}</strong></div>)}
+                  </div>
                   {saveAction("days")}
 
                 </div>
@@ -630,6 +605,7 @@ export default function Funcionamento() {
                   </span>
                 </div>
 
+                <p className={styles.scheduleHint}>Horário padrão dos dias selecionados. Os dias personalizados mantêm seus próprios horários.</p>
                 <div className={styles.timeRange}>
                   <label style={{ color: theme.colors.text }}>
                     {t("hours.open")}
@@ -658,9 +634,10 @@ export default function Funcionamento() {
                 </div>
               </details>
 
-              <details className={styles.configCard}>
+              <details ref={customCardRef} className={styles.configCard}>
                 <summary className={styles.configToggle}><FaPencilAlt aria-hidden="true"/><span>{t("hours.customTitle")}</span><FaChevronDown aria-hidden="true"/></summary>
                 <div className={styles.configBody}>
+                  <p className={styles.scheduleHint}>Personalize somente os dias que fogem do horário padrão. Ex.: sábado até 12:00.</p>
                   <div className={styles.dayHoursList}>
                   {diasSelecionados.map(dia => {
                     const horario = horariosPorDia[dia.key];
