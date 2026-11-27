@@ -1,8 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "@/services/api";
 import { formatPersonName } from "@/context/UserContext";
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { FaBullhorn, FaChartLine, FaEnvelope, FaUsers, FaTimes, FaCalendarAlt, FaDollarSign, FaLayerGroup, FaChevronDown } from "react-icons/fa";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { FaBullhorn, FaChartLine, FaEnvelope, FaUsers, FaTimes, FaCalendarAlt, FaDollarSign, FaLayerGroup, FaChevronDown, FaChevronRight, FaRegCalendarTimes, FaWallet, FaStar, FaCheckCircle } from "react-icons/fa";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
 import { listarHistoricoAgendamentos } from "@/services/agendamento-service";
@@ -28,6 +28,7 @@ export default function AnaliseDados() {
   const activeTab: MetricTab = (Object.keys(tabPaths) as MetricTab[]).find(key => location.pathname === `${metricsBase}/${tabPaths[key]}`) ?? "overview";
   const [chartDetail, setChartDetail] = useState<{ kind: "day" | "week"; index: number } | null>(null);
   const interactiveChartsRef = useRef<HTMLDivElement>(null);
+  const [insightDetail, setInsightDetail] = useState(false);
   const [teamDetail, setTeamDetail] = useState<{ id:number; completedOnly:boolean } | null>(null);
   const [recurrenceMonths, setRecurrenceMonths] = useState(6);
   const [recurrence, setRecurrence] = useState<{ recurring:number; fresh:number; inactive:number; total:number; recurringPercent:number; freshPercent:number; inactivePercent:number } | null>(null);
@@ -272,6 +273,20 @@ export default function AnaliseDados() {
   const amount = (item: Agendamento) => Number(item.ValorServico ?? item.Valor ?? 0) || 0;
   const scheduled = metricsHistory.filter(item => item.Status?.toUpperCase() === "AGENDADO");
   const cancelled = metricsHistory.filter(item => item.Status?.toUpperCase() === "CANCELADO");
+  // Insights are deterministic and use the same filtered records as the overview.
+  const insightBookings = [...new Map(metricsHistory.map(item => [item.Id,item])).values()];
+  const insightCancelled = insightBookings.filter(item => item.Status?.trim().toUpperCase() === "CANCELADO");
+  const insightCancelledValue = insightCancelled.reduce((sum,item) => sum + amount(item),0);
+  const insightCustomers = new Set(insightBookings.filter(item => item.Status?.trim().toUpperCase() === "CONCLUIDO" && item.ClienteId > 0).map(item => item.ClienteId));
+  const monthStart = new Date(referenceMonth.year,referenceMonth.month-1,1).getTime();
+  const previousCustomers = new Set(historico.filter(item => item.Status?.trim().toUpperCase() === "CONCLUIDO" && item.ClienteId > 0 && new Date(item.DataAgendamento).getTime() < monthStart).map(item => item.ClienteId));
+  const newCustomerCount = [...insightCustomers].filter(id => !previousCustomers.has(id)).length;
+  const insights: { id:string; title:string; description:string; action:string; color:string; icon:ReactNode; onClick:()=>void }[] = [];
+  if(insightCancelled.length) insights.push({id:"cancelled",title:pt?"Atenção aos cancelamentos":"Cancellation review",description:pt?`${insightCancelled.length} dos ${insightBookings.length} agendamentos foram cancelados neste período (${Math.round(100*insightCancelled.length/insightBookings.length)}%).`:`${insightCancelled.length} of ${insightBookings.length} bookings were cancelled (${Math.round(100*insightCancelled.length/insightBookings.length)}%).`,action:pt?"Analisar cancelamentos":"Review cancellations",color:"#fb7185",icon:<FaRegCalendarTimes/>,onClick:()=>setInsightDetail(true)});
+  if(insightCancelledValue>0) insights.push({id:"financial",title:pt?"Oportunidade financeira":"Financial opportunity",description:pt?`${dashboardMoney(insightCancelledValue)} em serviços cancelados. Verifique se os horários foram preenchidos novamente.`:`${dashboardMoney(insightCancelledValue)} in cancelled services. Check whether the slots were booked again.`,action:pt?"Consultar financeiro":"View financials",color:"#f59e0b",icon:<FaWallet/>,onClick:()=>navigate(`${metricsBase}/financeiro`)});
+  if(newCustomerCount>0) insights.push({id:"customers",title:pt?"Novos clientes":"New customers",description:pt?`${newCustomerCount} de ${insightCustomers.size} clientes atendidos tiveram seu primeiro atendimento no período. Acompanhe seus próximos retornos.`:`${newCustomerCount} of ${insightCustomers.size} customers had their first completed appointment this period. Follow their future visits.`,action:pt?"Consultar clientes":"View customers",color:"#38bdf8",icon:<FaUsers/>,onClick:()=>navigate(`${metricsBase}/clientes`)});
+  if(insightBookings.length && !insightCancelled.length) insights.push({id:"no-cancellations",title:pt?"Sem cancelamentos":"No cancellations",description:pt?"Nenhum agendamento foi cancelado no período selecionado.":"No appointments were cancelled in the selected period.",action:pt?"Consultar ocupação":"View occupancy",color:"#22c55e",icon:<FaCheckCircle/>,onClick:()=>navigate(`${metricsBase}/ocupacao`)});
+  useEffect(()=>{setInsightDetail(false);},[activeTab,periodFilter,professionalFilter,usuario?.Id]);
   const customers = new Map<number, { name: string; count: number; value: number }>();
   for (const item of concludedHistory) {
     if (!(item.ClienteId > 0)) continue;
@@ -546,6 +561,22 @@ export default function AnaliseDados() {
         </div>
       </section>
     </div>
+    <section className={styles.dashboardPanel} style={{marginBottom:18}} aria-label="Nexo Insights">
+      <h2><FaStar aria-hidden="true" style={{color:"#2dd4bf"}}/> Nexo Insights</h2>
+      <p style={{color:"var(--analysis-muted)",fontSize:12,margin:"-2px 0 14px"}}>{pt?"Entenda melhor o seu negócio.":"Understand your business better."}</p>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%, 260px),1fr))",gap:12}}>
+        {insights.map(insight=><article key={insight.id} style={{display:"flex",flexDirection:"column",minWidth:0,border:"1px solid var(--analysis-border)",borderRadius:12,padding:14,background:"var(--analysis-panel)"}}>
+          <div style={{display:"flex",alignItems:"center",gap:9,fontWeight:600,fontSize:13}}><span aria-hidden="true" style={{color:insight.color,display:"inline-flex",flexShrink:0}}>{insight.icon}</span>{insight.title}</div>
+          <p style={{fontSize:12,lineHeight:1.55,color:"var(--analysis-muted)",margin:"9px 0 14px",flex:1}}>{insight.description}</p>
+          <button type="button" onClick={insight.onClick} style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,border:0,borderTop:"1px solid var(--analysis-border)",padding:"11px 0 0",background:"transparent",color:"var(--theme-primary-text,#60a5fa)",font:"inherit",fontSize:12,textAlign:"left",cursor:"pointer"}}>{insight.action}<FaChevronRight aria-hidden="true"/></button>
+        </article>)}
+        {!insights.length && <p className={styles.dashboardEmpty}>{pt?"Ainda não há dados suficientes para gerar insights neste período.":"There is not enough data to generate insights for this period."}</p>}
+      </div>
+    </section>
+    {insightDetail && createPortal(<Modal open={true} title={pt?"Agendamentos cancelados":"Cancelled appointments"} onClose={()=>setInsightDetail(false)}>
+      <p>{insightCancelled.length} {pt?"agendamentos":"appointments"} · {dashboardMoney(insightCancelledValue)} · {new Intl.DateTimeFormat(pt?"pt-BR":"en-US",{month:"long",year:"numeric"}).format(new Date(referenceMonth.year,referenceMonth.month-1,1))}</p>
+      <div style={{display:"grid",gap:10}}>{[...insightCancelled].sort((a,b)=>new Date(b.DataAgendamento).getTime()-new Date(a.DataAgendamento).getTime()).map(item=><article key={item.Id} style={{border:"1px solid var(--theme-bottom)",borderRadius:10,padding:12,display:"grid",gap:5,overflowWrap:"anywhere"}}><strong>{formatPersonName(item.ClienteNome)||"#"+item.ClienteId}</strong><span>{formatarHorario(item.DataAgendamento)}</span><span>{item.ServicoNome}</span><strong style={{color:"var(--theme-error,#ef4444)"}}>{dashboardMoney(amount(item))}</strong>{item.MotivoCancelamento&&<small>{pt?"Motivo":"Reason"}: {item.MotivoCancelamento}</small>}</article>)}</div>
+    </Modal>,document.body)}
     <div className={styles.dashboardBottom}>
       <section className={styles.dashboardPanel}>
         <h2><FaLayerGroup aria-hidden="true"/> Serviços mais procurados</h2>
