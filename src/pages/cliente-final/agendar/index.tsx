@@ -272,7 +272,7 @@ export default function ClienteFinalAgendar() {
   const [loadingProfissionais, setLoadingProfissionais] = useState(false);
   const [loadingServicos, setLoadingServicos] = useState(false);
   const [loadingHorarios, setLoadingHorarios] = useState(false);
-  const [error, setError] = useState("");
+  const [, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [expandedSection, setExpandedSection] = useState<BookingSection | null>(draft?.expandedSection ?? "responsavel");
   const [buscaPrestador, setBuscaPrestador] = useState("");
@@ -1298,8 +1298,8 @@ export default function ClienteFinalAgendar() {
               </section>
             )}
 
-            {error && <p role="alert" className={styles.error}>{error}</p>}
-            {success && etapaAtual !== "confirmacao" && <p className={styles.success}>{success}</p>}
+            
+            
 
             {(etapaAtual === "horario" || etapaAtual === "confirmacao") && !success && (
               <div className={styles.bookingFooter} data-testid="booking-action-dock">
