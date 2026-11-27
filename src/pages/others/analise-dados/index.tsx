@@ -10,6 +10,8 @@ import { listarProfissionaisEmpresa } from "@/services/profissional-service";
 import type { Profissional } from "@/types/profissional";
 import type { Agendamento } from "@/types/agendamento";
 import LoadingState from "@/components/loading-state";
+import Modal from "@/components/modal";
+import { createPortal } from "react-dom";
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
 import { usePageRevalidation } from "@/hooks/usePageRevalidation";
@@ -26,6 +28,7 @@ export default function AnaliseDados() {
   const activeTab: MetricTab = (Object.keys(tabPaths) as MetricTab[]).find(key => location.pathname === `${metricsBase}/${tabPaths[key]}`) ?? "overview";
   const [chartDetail, setChartDetail] = useState<{ kind: "day" | "week"; index: number } | null>(null);
   const interactiveChartsRef = useRef<HTMLDivElement>(null);
+  const [teamDetail, setTeamDetail] = useState<{ id:number; completedOnly:boolean } | null>(null);
   const [recurrenceMonths, setRecurrenceMonths] = useState(6);
   const [recurrence, setRecurrence] = useState<{ recurring:number; fresh:number; inactive:number; total:number; recurringPercent:number; freshPercent:number; inactivePercent:number } | null>(null);
   const [recurrenceError, setRecurrenceError] = useState(false);
@@ -301,7 +304,7 @@ export default function AnaliseDados() {
   const freshEnd = segmentTotal ? 100 * (customerSegments.recurring + customerSegments.fresh) / segmentTotal : 0;
   // Um agendamento pode envolver varios profissionais. Os totais de agendamentos
   // contam IDs unicos; os rankings contam uma participacao por profissional e ID.
-  const team = new Map<number, { name: string; count: number; completed: number }>();
+  const team = new Map<number, { name: string; count: number; completed: number; appointments: Agendamento[] }>();
   const teamBookings = new Set<number>();
   const teamCompletedBookings = new Set<number>();
   const participationKeys = new Set<string>();
@@ -317,11 +320,15 @@ export default function AnaliseDados() {
       participationKeys.add(key);
       teamBookings.add(item.Id);
       if (completed) teamCompletedBookings.add(item.Id);
-      const row = team.get(person.Id) ?? { name: formatPersonName(person.Nome) || "#" + person.Id, count: 0, completed: 0 };
+      const row = team.get(person.Id) ?? { name: formatPersonName(person.Nome) || "#" + person.Id, count: 0, completed: 0, appointments: [] };
       row.count++; if (completed) row.completed++;
+      row.appointments.push(item);
       team.set(person.Id, row);
     }
   }
+  const selectedTeamMember = teamDetail ? team.get(teamDetail.id) : undefined;
+  const selectedTeamAppointments = selectedTeamMember?.appointments.filter(item => !teamDetail?.completedOnly || item.Status?.trim().toUpperCase() === "CONCLUIDO").sort((a,b) => new Date(b.DataAgendamento).getTime() - new Date(a.DataAgendamento).getTime()) ?? [];
+  useEffect(() => { setTeamDetail(null); }, [activeTab, periodFilter, professionalFilter, usuario?.Id]);
   const teamParticipationTotal = [...team.values()].reduce((sum, row) => sum + row.count, 0);
   const teamCompletedParticipationTotal = [...team.values()].reduce((sum, row) => sum + row.completed, 0);
   const occupied = metricsHistory.filter(item => ["AGENDADO", "CONCLUIDO"].includes(item.Status?.toUpperCase()));
@@ -329,7 +336,10 @@ export default function AnaliseDados() {
   const bookedMinutes = knownDuration.reduce((sum, item) => sum + Number(item.DuracaoMinutos), 0);
   const hourly = Array.from({ length: 24 }, (_, hour) => ({ name: String(hour).padStart(2, "0") + ":00", count: occupied.filter(item => new Date(item.DataAgendamento).getHours() === hour).length })).filter(item => item.count > 0);
   const metric = (label: string, value: string | number, icon = <FaChartLine />) => <div className={styles.dashboardMetric} key={label}><span className={styles.dashboardIcon}>{icon}</span><div><span>{label}</span><strong>{value}</strong></div></div>;
-  const ranking = (title: string, rows: { name: string; count: number; display?: string }[]) => <section className={styles.dashboardPanel}><h2><FaChartLine aria-hidden="true" />{title}</h2><div className={styles.popularList}>{rows.map((row, index) => <div className={styles.popularRow} key={index}><span title={row.name}>{row.name}</span><div className={styles.popularTrack}><span style={{ width: (100 * row.count / Math.max(1, ...rows.map(r => r.count))) + "%" }} /></div><strong>{row.display ?? row.count}</strong></div>)}{!rows.length && <p className={styles.dashboardEmpty}>{pt ? "Sem dados no período." : "No data for this period."}</p>}</div></section>;
+  const ranking = (title: string, rows: { name: string; count: number; display?: string; onSelect?: () => void }[]) => <section className={styles.dashboardPanel}><h2><FaChartLine aria-hidden="true" />{title}</h2><div className={styles.popularList}>{rows.map((row, index) => {
+    const content = <><span title={row.name}>{row.name}</span><div className={styles.popularTrack}><span style={{ width: (100 * row.count / Math.max(1, ...rows.map(r => r.count))) + "%" }} /></div><strong>{row.display ?? row.count}</strong></>;
+    return row.onSelect ? <button type="button" key={index} className={styles.popularRow} style={{width:"100%",background:"transparent",borderTop:0,borderLeft:0,borderRight:0,color:"inherit",fontFamily:"inherit",textAlign:"left",padding:"0",cursor:"pointer",boxSizing:"border-box"}} aria-label={(pt ? "Ver agendamentos de " : "View appointments for ") + row.name} onClick={row.onSelect}>{content}</button> : <div className={styles.popularRow} key={index}>{content}</div>;
+  })}{!rows.length && <p className={styles.dashboardEmpty}>{pt ? "Sem dados no período." : "No data for this period."}</p>}</div></section>;
 
   if (!permitido) return <main className={styles.container}>{t("analytics.notAllowed")}</main>;
   if (carregando) return <LoadingState label={t("analytics.loading")} variant="metrics" />;
@@ -453,9 +463,26 @@ export default function AnaliseDados() {
         {metric(pt ? "Agendamentos únicos concluídos" : "Unique completed bookings", teamCompletedBookings.size)}
       </section>
       <div className={styles.dashboardCharts}>
-        {ranking(pt ? "Participações por profissional" : "Bookings per professional", [...team.values()].sort((a,b) => b.count-a.count))}
-        {ranking(pt ? "Participações em agendamentos concluídos" : "Completed bookings per professional", [...team.values()].sort((a,b) => b.completed-a.completed).map(row => ({name:row.name,count:row.completed})))}
+        {ranking(pt ? "Participações por profissional" : "Bookings per professional", [...team.entries()].sort((a,b) => b[1].count-a[1].count).map(([id,row]) => ({name:row.name,count:row.count,onSelect:()=>setTeamDetail({id,completedOnly:false})})))}
+        {ranking(pt ? "Participações em agendamentos concluídos" : "Completed bookings per professional", [...team.entries()].sort((a,b) => b[1].completed-a[1].completed).map(([id,row]) => ({name:row.name,count:row.completed,onSelect:()=>setTeamDetail({id,completedOnly:true})})))}
       </div>
+      {teamDetail && selectedTeamMember && createPortal(
+        <Modal open={true} title={selectedTeamMember.name} onClose={() => setTeamDetail(null)}>
+          <p style={{color:"var(--theme-text-muted)"}}>{teamDetail.completedOnly ? (pt ? "Agendamentos concluídos" : "Completed appointments") : (pt ? "Todos os agendamentos" : "All appointments")} · {new Intl.DateTimeFormat(pt ? "pt-BR" : "en-US",{month:"long",year:"numeric"}).format(new Date(referenceMonth.year,referenceMonth.month-1,1))} · {selectedTeamAppointments.length}</p>
+          <div style={{display:"grid",gap:10}}>
+            {selectedTeamAppointments.map(item => {
+              const services = item.ServicosDetalhados?.filter(service => service.ProfissionalId === teamDetail.id).map(service => service.Nome).filter(Boolean);
+              const status = item.Status?.trim().toUpperCase();
+              const color = status === "CONCLUIDO" ? "var(--theme-success,#22c55e)" : status === "CANCELADO" ? "var(--theme-error,#ef4444)" : "var(--theme-primary,#3b82f6)";
+              return <article key={item.Id} style={{border:"1px solid var(--theme-bottom)",borderRadius:10,padding:12,display:"grid",gap:5,minWidth:0,overflowWrap:"anywhere"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"start",gap:8,flexWrap:"wrap"}}><strong>{formatPersonName(item.ClienteNome) || "Cliente #" + item.ClienteId}</strong><strong style={{color}}>{nomeStatus(item.Status)}</strong></div>
+                <span>{formatarHorario(item.DataAgendamento)}</span>
+                <span style={{color:"var(--theme-text-muted)"}}>{services?.length ? services.join(" + ") : item.ServicoNome}</span>
+              </article>;
+            })}
+            {!selectedTeamAppointments.length && <p>{pt ? "Nenhum agendamento neste período." : "No appointments in this period."}</p>}
+          </div>
+        </Modal>, document.body)}
       <p className={styles.note}>{pt ? `Participações: ${teamParticipationTotal} no total, ${teamCompletedParticipationTotal} em agendamentos concluídos. Um agendamento com mais de um profissional é contado uma vez nos indicadores e uma vez para cada profissional no ranking.` : `Participations: ${teamParticipationTotal} total, ${teamCompletedParticipationTotal} in completed bookings. A booking with multiple professionals counts once in the indicators and once per professional in the rankings.`}</p>
     </>}
     {activeTab === "occupancy" && <>
