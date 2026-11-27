@@ -23,7 +23,7 @@ import {
   obterFuncionamento,
   salvarFuncionamento,
 } from "@/services/funcionamento-service";
-import type { DiaFuncionamentoKey, FuncionamentoConfig, FuncionamentoIntervalo } from "@/types/funcionamento";
+import type { DiaFuncionamentoKey, FuncionamentoConfig, FuncionamentoIntervalo, TipoPausa } from "@/types/funcionamento";
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
 import LoadingState from "@/components/loading-state";
@@ -171,9 +171,12 @@ function blockPatch(block: ConfigBlock, draft: FuncionamentoConfig): Partial<Fun
     case "breaks": return { Intervalos:draft.Intervalos };
   }
 }
+const BREAK_TYPES: {value:TipoPausa;label:string}[] = [
+  {value:"CAFE",label:"Café"}, {value:"ALMOCO",label:"Almoço"}, {value:"LANCHE",label:"Lanche"}, {value:"JANTAR",label:"Jantar"}, {value:"DESCANSO",label:"Descanso"}, {value:"COMPROMISSO",label:"Compromisso pessoal"}, {value:"LIMPEZA",label:"Limpeza e organização"}, {value:"MANUTENCAO",label:"Manutenção"}, {value:"OUTRO",label:"Outro"},
+];
 function BreakCard({interval,index,title,startLabel,endLabel,min,max,onChange,onRemove}:{interval:FuncionamentoIntervalo;index:number;title:string;startLabel:string;endLabel:string;min:string;max:string;onChange:(field:"Inicio"|"Fim",value:string)=>void;onRemove:()=>void}) {
   return <article className={styles.breakCard}>
-    <div className={styles.breakHeading}><FaCoffee aria-hidden="true"/><strong>{title} {index+1}</strong><button type="button" className={styles.removeButton} onClick={onRemove} aria-label={`Remover pausa ${index+1}`}><FaTrash aria-hidden="true"/></button></div>
+    <div className={styles.breakHeading}><FaCoffee aria-hidden="true"/><strong>{title} {index+1} · {BREAK_TYPES.find(option=>option.value===(interval.Tipo??"OUTRO"))?.label}</strong><button type="button" className={styles.removeButton} onClick={onRemove} aria-label={`Remover pausa ${index+1}`}><FaTrash aria-hidden="true"/></button></div>
     <div className={styles.breakFields}>
       <label>{startLabel}<input type="time" value={interval.Inicio} min={min} max={max} step="900" onChange={e=>onChange("Inicio",e.target.value)}/></label>
       <label>{endLabel}<input type="time" value={interval.Fim} min={min} max={max} step="900" onChange={e=>onChange("Fim",e.target.value)}/></label>
@@ -394,7 +397,7 @@ export default function Funcionamento() {
       return;
     }
 
-    setBreakDraft(novoIntervalo);
+    setBreakDraft({...novoIntervalo,Tipo:"OUTRO"});
   }
 
   function confirmBreak() {
@@ -744,6 +747,11 @@ export default function Funcionamento() {
         
       </div>
       {breakDraft && config && createPortal(<Modal open title={t("hours.breakAdd")} onClose={()=>setBreakDraft(null)} actions={<><button type="button" className={styles.addButton} onClick={()=>setBreakDraft(null)}>{t("common.cancel")}</button><button type="button" className={styles.saveButton} style={{backgroundColor:theme.colors.primary,color:theme.colors.onPrimary,minWidth:0}} onClick={confirmBreak}><FaPlus aria-hidden="true"/>{t("hours.breakAdd")}</button></>}>
+        <label className={styles.breakTypeField}>Tipo de intervalo
+          <select value={breakDraft.Tipo??"OUTRO"} onChange={event=>setBreakDraft(previous=>previous?{...previous,Tipo:event.target.value as TipoPausa}:null)}>
+            {BREAK_TYPES.map(option=><option key={option.value} value={option.value}>{option.label}</option>)}
+          </select>
+        </label>
         <div className={styles.breakFields}>
           <label>{t("hours.start")}<input type="time" value={breakDraft.Inicio} min={config.HorarioAbertura} max={config.HorarioFechamento} step="900" onChange={e=>setBreakDraft(previous=>previous?{...previous,Inicio:e.target.value}:null)}/></label>
           <label>{t("hours.finish")}<input type="time" value={breakDraft.Fim} min={config.HorarioAbertura} max={config.HorarioFechamento} step="900" onChange={e=>setBreakDraft(previous=>previous?{...previous,Fim:e.target.value}:null)}/></label>
