@@ -1,3 +1,4 @@
+import { useNotification } from "@/context/NotificationContext";
 import { useEffect, useState, type CSSProperties } from "react";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -29,11 +30,12 @@ async function carregarFacebookSdk(appId: string, language: "pt" | "en"): Promis
 export default function WhatsAppBusiness() {
   const { theme } = useTheme();
   const { t, lang } = useLanguage();
+  const { showNotification } = useNotification();
   const vars = { "--wh-text": theme.colors.text, "--wh-muted": theme.colors.inactive, "--wh-panel": theme.colors.background2, "--wh-border": theme.colors.bottom, "--wh-primary": theme.colors.primary } as CSSProperties;
   const [status, setStatus] = useState<WhatsAppStatus | null>(null);
   const [preferences, setPreferences] = useState<WhatsAppPreferencias>(defaults);
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
+
   const [available, setAvailable] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
@@ -50,7 +52,7 @@ export default function WhatsAppBusiness() {
   usePageRevalidation(refresh, { enabled: !busy });
 
   async function connect() {
-    setBusy(true); setMessage("");
+    setBusy(true); 
     try {
       const config = await obterConfiguracaoCadastro();
       if (!config.appId || !config.configurationId) throw new Error(t("wh.missingConfig"));
@@ -74,23 +76,23 @@ export default function WhatsAppBusiness() {
         });
         if (!wabaId || !phoneNumberId) throw new Error(t("wh.missingIds"));
         await concluirCadastro(authCode, wabaId, phoneNumberId);
-        setMessage(t("wh.connectionRequested"));
+        showNotification({type:"success",title:"WhatsApp Business",message:t("wh.connectionRequested")});
         await refresh();
       } finally { window.removeEventListener("message", handleMessage); }
-    } catch (error) { setMessage(error instanceof Error ? error.message : t("wh.connectFailed")); }
+    } catch (error) { showNotification({type:"error",title:"WhatsApp Business",message:error instanceof Error ? error.message : t("wh.connectFailed")}); }
     finally { setBusy(false); }
   }
   async function save() {
-    setBusy(true); setMessage("");
-    try { await salvarPreferenciasWhatsApp(preferences); setMessage(t("wh.saved")); await refresh(); }
-    catch { setMessage(t("wh.saveFailed")); }
+    setBusy(true); 
+    try { await salvarPreferenciasWhatsApp(preferences); showNotification({type:"success",title:"WhatsApp Business",message:t("wh.saved")}); await refresh(); }
+    catch { showNotification({type:"error",title:"WhatsApp Business",message:t("wh.saveFailed")}); }
     finally { setBusy(false); }
   }
   async function disconnect() {
     if (!window.confirm(t("wh.disconnectConfirm"))) return;
     setBusy(true);
-    try { await desconectarWhatsApp(); await refresh(); setMessage(t("wh.disconnected")); }
-    catch { setMessage(t("wh.disconnectFailed")); }
+    try { await desconectarWhatsApp(); await refresh(); showNotification({type:"success",title:"WhatsApp Business",message:t("wh.disconnected")}); }
+    catch { showNotification({type:"error",title:"WhatsApp Business",message:t("wh.disconnectFailed")}); }
     finally { setBusy(false); }
   }
   const connected = Boolean(status?.conectado);
@@ -119,7 +121,7 @@ export default function WhatsAppBusiness() {
       <div className={styles.heroAside}><span className={connected ? styles.connected : styles.disconnected}><span className={styles.statusDot} /> {connected ? t("wh.connected") : t("wh.notConnected")}</span></div>
     </header>
     {!available && <div role="status" className={styles.notice}><FaExclamationTriangle aria-hidden="true" /><span><strong>{t("wh.preparing")}</strong> {t("wh.preparingDesc")}</span></div>}
-    {message && <div role="status" className={styles.feedback}><FaCheckCircle aria-hidden="true" /><span>{message}</span></div>}
+    
     <section className={styles.connectCard} aria-label={t("wh.connectionAria")}>
       <div className={styles.connectCopy}>
         <span className={styles.sectionKicker}>{t("wh.official")}</span>
