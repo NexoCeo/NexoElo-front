@@ -267,6 +267,7 @@ function reconstruirExpediente(
 export function criarFuncionamentoPadrao(usuarioId: number): FuncionamentoConfig {
   return {
     UsuarioFk: usuarioId,
+    ModoFuncionamento: "padrao",
     Domingo: false,
     Segunda: true,
     Terca: true,
@@ -331,7 +332,9 @@ export function normalizeFuncionamento(data: ApiRecord, usuarioId: number): Func
       JSON.stringify(pausas) === JSON.stringify(expediente.pausas);
     if (!iguaisAoPadrao) horariosPorDia[dia] = { Inicio: inicio, Fim: fim, Intervalos: pausas };
   }
+  const rawMode = data.ModoFuncionamento ?? data.modoFuncionamento;
   return {
+    ModoFuncionamento: rawMode === "padrao" || rawMode === "personalizado" ? rawMode : Object.keys(horariosPorDia).length ? "personalizado" : "padrao",
     UsuarioFk: pickNumber(data, ["UsuarioFk", "usuarioFk", "UsuarioId", "usuarioId"]) || usuarioId,
     ...normalizedDays,
     HorarioAbertura: expediente.abertura,
@@ -390,6 +393,7 @@ export function buildFuncionamentoPayload(config: FuncionamentoConfig): Funciona
 
   return {
     UsuarioFk: config.UsuarioFk,
+    ModoFuncionamento: config.ModoFuncionamento,
     DiasFuncionamento: diasFuncionamento,
     HoraInicio: horarioAbertura,
     HoraFim: horarioFechamento,
@@ -403,7 +407,7 @@ export async function obterFuncionamento(usuarioId: number) {
     const response = await api.get<ApiRecord>(`/Funcionamento/${usuarioId}`);
     return normalizeFuncionamento(response.data, usuarioId);
   } catch (error) {
-    if (isAxiosError(error) && (error.response?.status === 404 || (error.response?.status ?? 0) >= 500)) {
+    if (isAxiosError(error) && error.response?.status === 404) {
       return criarFuncionamentoPadrao(usuarioId);
     }
 
@@ -424,7 +428,7 @@ export async function salvarFuncionamento(usuarioId: number, config: Funcionamen
   } catch (error) {
     const status = isAxiosError(error) ? error.response?.status ?? 0 : 0;
 
-    if (![404, 405, 500].includes(status)) {
+    if (![404, 405].includes(status)) {
       throw error;
     }
 
