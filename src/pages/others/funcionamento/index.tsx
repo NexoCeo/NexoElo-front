@@ -206,7 +206,8 @@ export default function Funcionamento() {
   const [customOwner,setCustomOwner] = useState<"availability"|"custom">("custom");
   const [savedMode,setSavedMode] = useState<"padrao"|"personalizado">("padrao");
   const [availabilityMode, setAvailabilityMode] = useState<"padrao" | "personalizado">("padrao");
-  const customCardRef = useRef<HTMLDetailsElement>(null);
+  const [customModalOpen,setCustomModalOpen] = useState(false);
+  const customModalSnapshot = useRef<{ horarios:FuncionamentoConfig["HorariosPorDia"]; mode:"padrao"|"personalizado"; owner:"availability"|"custom" }|null>(null);
   const lastSavedConfig = useRef("");
 
   const usuarioId = usuario?.Id ?? 0;
@@ -268,7 +269,7 @@ export default function Funcionamento() {
         setSavedMode(mode);
     } catch { /* preserve settings while offline */ }
   }, {
-    enabled: Boolean(usuarioId) && !saving &&
+    enabled: Boolean(usuarioId) && !saving && !customModalOpen &&
       (config === null || (JSON.stringify(config) === lastSavedConfig.current && availabilityMode === savedMode)),
   });
 
@@ -282,10 +283,31 @@ export default function Funcionamento() {
       setCustomOwner("availability");
       updateConfig({ HorariosPorDia: {} });
     } else {
+      customModalSnapshot.current = {horarios:config.HorariosPorDia,mode:availabilityMode,owner:customOwner};
       setCustomOwner("availability");
-      if(customCardRef.current) customCardRef.current.open=true;
+      setCustomModalOpen(true);
     }
     setAvailabilityMode(mode);
+  }
+
+  function closeCustomModal() {
+    if(saving) return;
+    const snapshot=customModalSnapshot.current;
+    if(snapshot) {
+      updateConfig({HorariosPorDia:snapshot.horarios});
+      setAvailabilityMode(snapshot.mode);
+      setCustomOwner(snapshot.owner);
+    }
+    customModalSnapshot.current=null;
+    setCustomModalOpen(false);
+  }
+
+  function confirmCustomModal() {
+    if(saving || !config) return;
+    setAvailabilityMode(Object.keys(config.HorariosPorDia ?? {}).length ? "personalizado" : "padrao");
+    setCustomOwner("availability");
+    customModalSnapshot.current=null;
+    setCustomModalOpen(false);
   }
 
   function toggleDia(dia: DiaFuncionamentoKey) {
@@ -303,7 +325,7 @@ export default function Funcionamento() {
   }
 
   function personalizarDia(dia: DiaFuncionamentoKey) {
-    setCustomOwner("custom");
+    setCustomOwner("availability");
     if (!config || saving || !config[dia]) return;
     const next = { ...config.HorariosPorDia };
     if (next[dia]) {
@@ -639,10 +661,48 @@ export default function Funcionamento() {
                 </div>
               </details>
 
-              <details ref={customCardRef} className={styles.configCard}>
-                <summary className={styles.configToggle}><FaPencilAlt aria-hidden="true"/><span>{t("hours.customTitle")}</span><FaChevronDown aria-hidden="true"/></summary>
+              
+
+              <details className={styles.configCard}>
+                <summary className={styles.configToggle}><FaCoffee aria-hidden="true"/><span>{t("hours.breaksTitle")}</span><FaChevronDown aria-hidden="true"/></summary>
                 <div className={styles.configBody}>
-                  <p className={styles.scheduleHint}>Personalize somente os dias que fogem do horário padrão. Ex.: sábado até 12:00.</p>
+                  <div className={styles.cardHeader}><button type="button" className={styles.addButton} disabled={saving} onClick={addIntervalo}>
+                    <FaPlus aria-hidden="true" /> {t("hours.breakAdd")}
+                  </button>
+                </div>
+
+                {config.Intervalos.length === 0 ? (
+                  <div className={styles.emptyState} style={{ borderColor: theme.colors.bottom }}>
+                    <FaCoffee aria-hidden="true" />
+                    <div>
+                      <strong style={{ color: theme.colors.text }}>{t("hours.noBreaks")}</strong>
+                      <span style={{ color: theme.colors.inactive }}>{t("hours.continuous")}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className={styles.intervalList}>
+                    {config.Intervalos.map((intervalo, index) => (
+                      <BreakCard key={index} interval={intervalo} index={index} onEdit={()=>{setEditingBreakIndex(index);setBreakDraft({...intervalo});}} startLabel={t("hours.start")} endLabel={t("hours.finish")} min={config.HorarioAbertura} max={config.HorarioFechamento} busy={saving} onRemove={()=>removeIntervalo(index)}/>
+                    ))}
+                  </div>
+                )}
+
+
+                </div>
+              </details>
+            </>
+          )}
+        </form>
+
+        
+      </div>
+      {customModalOpen && config && createPortal(
+        <Modal open busy={saving} title="Horários personalizados" onClose={closeCustomModal} actions={<>
+          <button type="button" className={styles.addButton} disabled={saving} onClick={closeCustomModal}>{t("common.cancel")}</button>
+          <button type="button" className={styles.saveButton} style={{backgroundColor:theme.colors.primary,color:theme.colors.onPrimary,minWidth:0}} disabled={saving} onClick={confirmCustomModal}><FaSave aria-hidden="true"/> Aplicar alterações</button>
+        </>}>
+          <div className={styles.customModalContent}>
+            <p className={styles.scheduleHint}>Personalize somente os dias que fogem do horário padrão. Ex.: sábado até 12:00.</p>
                   <div className={styles.dayHoursList}>
                   {diasSelecionados.map(dia => {
                     const horario = horariosPorDia[dia.key];
@@ -692,44 +752,8 @@ export default function Funcionamento() {
                   })}
                   {!diasSelecionados.length && <p>{t("hours.selectDays")}</p>}
                 </div>
-                  {saveAction("custom")}
-
-                </div>
-              </details>
-
-              <details className={styles.configCard}>
-                <summary className={styles.configToggle}><FaCoffee aria-hidden="true"/><span>{t("hours.breaksTitle")}</span><FaChevronDown aria-hidden="true"/></summary>
-                <div className={styles.configBody}>
-                  <div className={styles.cardHeader}><button type="button" className={styles.addButton} disabled={saving} onClick={addIntervalo}>
-                    <FaPlus aria-hidden="true" /> {t("hours.breakAdd")}
-                  </button>
-                </div>
-
-                {config.Intervalos.length === 0 ? (
-                  <div className={styles.emptyState} style={{ borderColor: theme.colors.bottom }}>
-                    <FaCoffee aria-hidden="true" />
-                    <div>
-                      <strong style={{ color: theme.colors.text }}>{t("hours.noBreaks")}</strong>
-                      <span style={{ color: theme.colors.inactive }}>{t("hours.continuous")}</span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className={styles.intervalList}>
-                    {config.Intervalos.map((intervalo, index) => (
-                      <BreakCard key={index} interval={intervalo} index={index} onEdit={()=>{setEditingBreakIndex(index);setBreakDraft({...intervalo});}} startLabel={t("hours.start")} endLabel={t("hours.finish")} min={config.HorarioAbertura} max={config.HorarioFechamento} busy={saving} onRemove={()=>removeIntervalo(index)}/>
-                    ))}
-                  </div>
-                )}
-
-
-                </div>
-              </details>
-            </>
-          )}
-        </form>
-
-        
-      </div>
+          </div>
+        </Modal>,document.body)}
       {breakDraft && config && createPortal(<Modal open busy={saving} title={editingBreakIndex===null?t("hours.breakAdd"):"Editar pausa"} onClose={()=>setBreakDraft(null)} actions={<><button type="button" className={styles.addButton} disabled={saving} onClick={()=>setBreakDraft(null)}>{t("common.cancel")}</button><button type="button" className={styles.saveButton} style={{backgroundColor:theme.colors.primary,color:theme.colors.onPrimary,minWidth:0}} disabled={saving} onClick={confirmBreak}>{editingBreakIndex===null?<FaPlus aria-hidden="true"/>:<FaSave aria-hidden="true"/>}{editingBreakIndex===null?t("hours.breakAdd"):"Salvar alterações"}</button></>}>
         <label className={styles.breakTypeField}>Tipo de intervalo
           <select value={breakDraft.Tipo??"OUTRO"} onChange={event=>setBreakDraft(previous=>previous?{...previous,Tipo:event.target.value as TipoPausa}:null)}>
