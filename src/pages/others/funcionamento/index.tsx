@@ -352,8 +352,9 @@ export default function Funcionamento() {
     setCustomModalOpen(false);
   }
 
-  function confirmCustomModal() {
+  async function confirmCustomModal() {
     if(saving || !config) return;
+    if (!(await handleSubmit("availability", undefined, true))) return;
     setAvailabilityMode("personalizado");
     setCustomOwner("availability");
     customModalSnapshot.current=null;
@@ -493,15 +494,15 @@ export default function Funcionamento() {
     await handleSubmit("breaks",config.Intervalos.filter((_,currentIndex)=>currentIndex!==index));
   }
 
-  async function handleSubmit(block:ConfigBlock, nextBreaks?:FuncionamentoIntervalo[]):Promise<boolean> {
+  async function handleSubmit(block:ConfigBlock, nextBreaks?:FuncionamentoIntervalo[], fromCustomModal=false):Promise<boolean> {
     if(saving || !config) return false;
     // Merge only this card into the last confirmed server state.
     const draft = config;
     const baseline = savedSnapshot ?? criarFuncionamentoPadrao(usuarioId);
-    const candidate = { ...baseline, ...blockPatch(block,draft), ...((block==="availability" || block==="custom") ? {ModoFuncionamento:availabilityMode} : {}), ...(block==="breaks" && nextBreaks ? {Intervalos:nextBreaks} : {}) };
+    const candidate = { ...baseline, ...blockPatch(block,draft), ...(fromCustomModal ? {...blockPatch("days",draft), ModoFuncionamento:"personalizado" as const} : {}), ...((block==="availability" || block==="custom") ? {ModoFuncionamento:fromCustomModal ? "personalizado" as const : availabilityMode} : {}), ...(block==="breaks" && nextBreaks ? {Intervalos:nextBreaks} : {}) };
     if(block==="custom" || block==="availability") {
       // A new exception cannot be persisted for a day that is not yet enabled.
-      if(DIAS.some(d=>candidate.HorariosPorDia?.[d.key] && !baseline[d.key] && draft[d.key])) {
+      if(DIAS.some(d=>candidate.HorariosPorDia?.[d.key] && !candidate[d.key] && draft[d.key])) {
         showNotification({type:"warning",title:"Dias de atendimento",message:"Salve os dias de atendimento antes de salvar os horários personalizados."});
         return false;
       }
@@ -572,6 +573,8 @@ export default function Funcionamento() {
       setSaving(true);
       setSavingBlock(block);
       const savedConfig = await salvarFuncionamento(usuarioId, candidate);
+      if ((block==="availability" || block==="custom") && savedConfig.ModoFuncionamento !== candidate.ModoFuncionamento) throw new Error("O servidor não confirmou o modo de funcionamento.");
+      if ((block==="availability" || block==="custom") && DIAS.some(d=>candidate[d.key] && candidate.HorariosPorDia?.[d.key] && ((savedConfig.HorariosPorDia?.[d.key]?.Inicio ?? savedConfig.HorarioAbertura) !== candidate.HorariosPorDia[d.key]?.Inicio || (savedConfig.HorariosPorDia?.[d.key]?.Fim ?? savedConfig.HorarioFechamento) !== candidate.HorariosPorDia[d.key]?.Fim))) throw new Error("O servidor não confirmou os horários personalizados.");
       setSavedSnapshot(savedConfig);
       if(block==="availability" || block==="custom") setSavedMode(savedConfig.ModoFuncionamento ?? availabilityMode);
       setConfig(current => {
@@ -598,7 +601,7 @@ export default function Funcionamento() {
     } catch (err) {
       const message = isAxiosError<ApiError>(err)
         ? getApiErrorMessage(err.response?.data, t("hours.saveError"))
-        : t("hours.saveError");
+        : err instanceof Error ? err.message : t("hours.saveError");
       showNotification({ type: "error", title: t("hours.saveFailedTitle"), message });
       return false;
     } finally {
