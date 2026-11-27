@@ -52,7 +52,7 @@ export default function Servicos() {
   const [imagemPreviewUrl, setImagemPreviewUrl] = useState("");
   const [cropSource, setCropSource] = useState("");
   const [cropFilename, setCropFilename] = useState("servico");
-  const [error, setError] = useState("");
+  const [, setError] = useState("");
   const [formError, setFormError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [durationFilter, setDurationFilter] = useState<"TODOS" | "ATE30" | "ATE60" | "ACIMA60">("TODOS");
@@ -381,7 +381,7 @@ export default function Servicos() {
 
   return (
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
-      {error && <p className={styles.error}>{error}</p>}
+      
 
       <section className={styles.floatingActions}>
         <button
