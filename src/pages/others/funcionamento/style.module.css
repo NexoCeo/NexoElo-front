@@ -771,21 +771,13 @@ input:focus-visible {
 .breakTypeField{display:grid;gap:6px;margin-bottom:14px;font-size:12px;font-weight:600;color:var(--theme-text-muted)}
 .breakTypeField select{box-sizing:border-box;width:100%;min-width:0;height:42px;padding:0 10px;border:1px solid var(--theme-border-strong);border-radius:8px;background:var(--theme-surface-muted);color:var(--theme-text);font:inherit;color-scheme:dark;cursor:pointer}
 
-/* Pausas: resumo compacto, com ações alinhadas e sem campos de edição simulados. */
-.breakCard{display:flex;flex-direction:column;justify-content:space-between;gap:14px;padding:14px;min-height:114px}
-.breakHeading{gap:10px;font-size:13px}
-.breakHeading>.breakTypeIcon{display:grid;place-items:center;width:32px;height:32px;flex:0 0 32px;border-radius:9px;background:var(--theme-primary-soft);color:var(--theme-primary-text)}
-.breakTypeIcon svg{font-size:15px}
-.breakHeading>strong{font-size:13px;font-weight:700}
-.breakActions{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.breakActions .breakEdit,.breakActions .breakDelete{height:32px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;font:inherit;font-size:11px;font-weight:650;border:1px solid transparent;padding:0 9px}
-.breakActions .breakEdit{color:var(--theme-primary-text);background:var(--theme-primary-soft)}
-.breakActions .breakDelete{width:32px;padding:0;color:var(--theme-error-text);background:var(--theme-error-soft)}
-.breakActions button:disabled{opacity:.5;cursor:not-allowed}
-.breakInfo{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;padding:0 2px}
-.breakTime{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;white-space:nowrap;color:var(--theme-text);font-variant-numeric:tabular-nums}
-.breakTime>svg{font-size:11px;color:var(--theme-text-muted)}
-.breakTime>span{color:var(--theme-text-muted);font-weight:400}
-.breakInfo .breakDuration{flex-shrink:0;min-height:26px;padding:0 8px;border:1px solid var(--theme-bottom);border-radius:6px;font-size:11px}
-@media(max-width:760px){.breakCard{padding:12px;min-height:104px;gap:12px}.breakHeading{gap:8px}.breakHeading>.breakTypeIcon{width:30px;height:30px;flex-basis:30px}.breakActions{gap:5px}.breakTime{font-size:14px}}
-@media(max-width:350px){.breakActions .breakEdit{padding:0 6px}.breakHeading{gap:6px}.breakTime{gap:5px;font-size:13px}}
+/* Pausas: preserva a disposição original e reserva altura real para o rodapé. */
+.configBody .intervalList{min-width:0;width:100%;box-sizing:border-box}
+.breakCard{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:34px auto minmax(30px,auto);gap:10px;width:100%;max-width:100%;min-width:0;box-sizing:border-box;padding:12px}
+.breakHeading,.breakFields,.breakFooter{min-width:0;max-width:100%;box-sizing:border-box}
+.breakFields{grid-template-columns:repeat(2,minmax(0,1fr))}
+.breakFields label,.breakFields input{min-width:0;max-width:100%;box-sizing:border-box}
+.breakFooter{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:30px}
+.breakFooter .breakDuration{flex:1;min-width:0}
+.breakFooter .customizeButton{flex:0 0 auto;max-width:100%;box-sizing:border-box;margin:0;white-space:nowrap}
+@media(max-width:760px){.breakCard{padding:10px;gap:8px}.breakFields{gap:7px}}
