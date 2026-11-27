@@ -308,7 +308,7 @@ export default function Dashboard({ initialAgenda }: { initialAgenda?: Dashboard
           {!hasLoaded ? (
             <LoadingState variant={loadingVariant} embedded label={t("common.loading")} />
           ) : error ? (
-            <div className={styles.mobileEmpty} role="alert">{error}</div>
+            <div className={styles.mobileEmpty} aria-hidden="true" />
           ) : appointments.length === 0 ? (
             <div className={styles.mobileEmpty}>
               <FaCalendarDay aria-hidden="true" />
