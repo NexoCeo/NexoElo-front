@@ -282,11 +282,21 @@ export default function Funcionamento() {
       setCustomOwner("availability");
       updateConfig({ HorariosPorDia: {} });
     } else {
-      customModalSnapshot.current = {horarios:config.HorariosPorDia,mode:availabilityMode,owner:customOwner};
       setCustomOwner("availability");
-      setCustomModalOpen(true);
     }
     setAvailabilityMode(mode);
+  }
+
+  function openCustomModalFromDays() {
+    if (!config || saving) return;
+    if (!DIAS.some(dia => config[dia.key])) {
+      showNotification({type:"warning",title:t("hours.noDays"),message:t("hours.daysRequired")});
+      return;
+    }
+    customModalSnapshot.current = {horarios:config.HorariosPorDia,mode:availabilityMode,owner:customOwner};
+    setCustomOwner("availability");
+    setAvailabilityMode("personalizado");
+    setCustomModalOpen(true);
   }
 
   function closeCustomModal() {
@@ -585,11 +595,12 @@ export default function Funcionamento() {
               <details className={styles.configCard}>
                 <summary className={styles.configToggle}><FaCalendarAlt aria-hidden="true"/><span>{t("hours.daysTitle")}</span><FaChevronDown aria-hidden="true"/></summary>
                 <div className={styles.configBody}>
-                  <div className={styles.cardHeader}><div className={styles.presets} aria-label={t("hours.quickSelect")}>
+                  <div className={`${styles.cardHeader} ${styles.daysQuickActions}`}><div className={styles.presets} aria-label={t("hours.quickSelect")}>
                     <button type="button" onClick={() => setDiasSelecionados(DIAS_UTEIS)}>{t("hours.weekdays")}</button>
                     <button type="button" onClick={() => setDiasSelecionados(new Set(DIAS.map((dia) => dia.key)))}>{t("hours.allDays")}</button>
                     <button type="button" onClick={() => setDiasSelecionados(new Set())}>{t("hours.none")}</button>
                   </div>
+                    <button type="button" className={`${styles.customizeButton} ${styles.daysCustomize}`} disabled={saving} onClick={openCustomModalFromDays}>Personalizar</button>
                 </div>
 
                 <div className={styles.daysGrid}>
