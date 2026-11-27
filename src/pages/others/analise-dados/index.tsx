@@ -11,6 +11,7 @@ import type { Profissional } from "@/types/profissional";
 import type { Agendamento } from "@/types/agendamento";
 import LoadingState from "@/components/loading-state";
 import Modal from "@/components/modal";
+import { useNotification } from "@/context/NotificationContext";
 import { createPortal } from "react-dom";
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
@@ -21,6 +22,7 @@ type SegmentClient = { clienteId:number; nome:string; atendimentosPeriodo:number
 export default function AnaliseDados() {
   const { theme } = useTheme();
   const { t, lang } = useLanguage();
+  const { showNotification } = useNotification();
   const { usuario } = useUser();
   const location = useLocation();
   const navigate = useNavigate();
@@ -36,9 +38,11 @@ export default function AnaliseDados() {
   const [recurrenceMonths, setRecurrenceMonths] = useState(6);
   const [recurrence, setRecurrence] = useState<{ recurring:number; fresh:number; inactive:number; total:number; recurringPercent:number; freshPercent:number; inactivePercent:number; clients?: Record<SegmentKey,SegmentClient[]> } | null>(null);
   const [recurrenceError, setRecurrenceError] = useState(false);
+  useEffect(() => { if (recurrenceError) showNotification({type:"error",title:lang === "pt" ? "Recorrência indisponível" : "Recurrence unavailable",message:lang === "pt" ? "Não foi possível consultar a recorrência." : "Could not load recurrence."}); }, [recurrenceError, showNotification, lang]);
   const [historico, setHistorico] = useState<Agendamento[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+  useEffect(() => { if (erro) showNotification({type:"error",title:t("analytics.error"),message:erro}); }, [erro, showNotification, t]);
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [professionalFilter, setProfessionalFilter] = useState("TODOS");
   const [openMetricsFilter, setOpenMetricsFilter] = useState<"periodo" | "profissional" | null>(null);
@@ -438,7 +442,6 @@ export default function AnaliseDados() {
       </div>
       </>}
     </header>
-    {erro && <p className={styles.error} role="alert">{erro}</p>}
     {activeTab === "finance" && <>
       <section className={styles.dashboardMetrics}>
         {metric(pt ? "Valor concluído" : "Completed value", dashboardMoney(recordedRevenue), <FaDollarSign />)}
@@ -481,7 +484,6 @@ export default function AnaliseDados() {
           </div>
         </div>
         </div>
-        {recurrenceError && <span role="alert" style={{display:"block",fontSize:11,color:"var(--analysis-muted)",marginTop:8}}>{pt ? "Não foi possível consultar a recorrência." : "Could not load recurrence."}</span>}
       </section>
       {selectedSegment && recurrence?.clients && createPortal(<Modal open={true} title={selectedSegment.label} onClose={()=>setSegmentDetail(null)}>
         <p style={{color:"var(--theme-text-muted)"}}>{selectedSegment.count} {pt?"clientes":"customers"} · {pt?"Últimos":"Last"} {recurrenceMonths} {pt?"meses":"months"}</p>
@@ -654,7 +656,7 @@ export default function AnaliseDados() {
         <strong>{lang === "pt" ? "Total" : "Total"}: {totalGrafico}</strong>
       </div>
       {carregando ? <LoadingState compact label={t("analytics.loading")} /> : erro
-        ? <p className={styles.error} role="alert">{erro}</p>
+        ? null
         : <div className={styles.chartPlot}>
           <div className={styles.chartScale} aria-hidden="true">
             {[1,.75,.5,.25,0].map(p => <span key={p}>{Math.ceil(maxGrafico * p)}</span>)}
