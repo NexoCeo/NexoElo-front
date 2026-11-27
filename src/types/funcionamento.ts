@@ -16,7 +16,9 @@ export type DiaFuncionamentoApi =
   | "SEXTA"
   | "SABADO";
 
+export type TipoPausa = "CAFE" | "ALMOCO" | "LANCHE" | "JANTAR" | "DESCANSO" | "COMPROMISSO" | "LIMPEZA" | "MANUTENCAO" | "OUTRO";
 export type FuncionamentoIntervalo = {
+  Tipo?: TipoPausa;
   Id?: number;
   Inicio: string;
   Fim: string;
@@ -41,6 +43,7 @@ export type FuncionamentoConfig = {
 };
 
 export type FuncionamentoPayload = {
+  TiposPausas?: Array<{DiaFuncionamento:DiaFuncionamentoApi;HoraInicio:string;HoraFim:string;Tipo:TipoPausa}>;
   UsuarioFk: number;
   DiasFuncionamento: DiaFuncionamentoApi[];
   HoraInicio: string;
