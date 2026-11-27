@@ -239,6 +239,7 @@ export default function Funcionamento() {
   const [editingBreakIndex,setEditingBreakIndex] = useState<number|null>(null);
   const [breakDraft,setBreakDraft] = useState<FuncionamentoIntervalo|null>(null);
   const [savingBlock,setSavingBlock] = useState<ConfigBlock|null>(null);
+  const [expandedBlock,setExpandedBlock] = useState<ConfigBlock|null>(null);
   const [savedSnapshot,setSavedSnapshot] = useState<FuncionamentoConfig|null>(null);
   const [customOwner,setCustomOwner] = useState<"availability"|"custom">("custom");
   const [savedMode,setSavedMode] = useState<"padrao"|"personalizado">("padrao");
@@ -597,6 +598,7 @@ export default function Funcionamento() {
         title: t("hours.saved"),
         message: t("hours.savedDesc"),
       });
+      setExpandedBlock(current => current === (fromCustomModal ? "days" : block) ? null : current);
       return true;
     } catch (err) {
       const message = isAxiosError<ApiError>(err)
@@ -630,8 +632,8 @@ export default function Funcionamento() {
             <LoadingState label={t("hours.loading")} variant="hours" embedded />
           ) : (
             <>
-              <details className={styles.configCard}>
-                <summary className={styles.configToggle}><FaSlidersH aria-hidden="true"/><span>{"Disponibilidade de atendimento"}</span><FaChevronDown aria-hidden="true"/></summary>
+              <details className={styles.configCard} open={expandedBlock==="availability"}>
+                <summary className={styles.configToggle} onClick={event=>{event.preventDefault();if(!saving)setExpandedBlock(current=>current==="availability"?null:"availability");}}><FaSlidersH aria-hidden="true"/><span>{"Disponibilidade de atendimento"}</span><FaChevronDown aria-hidden="true"/></summary>
                 <div className={styles.configBody}>
                   <div className={styles.availabilityOptions}>
                   <button type="button" disabled={loading || saving || !config} aria-pressed={!temHorariosPersonalizados}
@@ -651,8 +653,8 @@ export default function Funcionamento() {
 
                 </div>
               </details>
-              <details className={styles.configCard}>
-                <summary className={styles.configToggle}><FaCalendarAlt aria-hidden="true"/><span>{t("hours.daysTitle")}</span><FaChevronDown aria-hidden="true"/></summary>
+              <details className={styles.configCard} open={expandedBlock==="days"}>
+                <summary className={styles.configToggle} onClick={event=>{event.preventDefault();if(!saving)setExpandedBlock(current=>current==="days"?null:"days");}}><FaCalendarAlt aria-hidden="true"/><span>{t("hours.daysTitle")}</span><FaChevronDown aria-hidden="true"/></summary>
                 <div className={styles.configBody}>
                   <div className={`${styles.cardHeader} ${styles.daysQuickActions}`}><div className={styles.presets} aria-label={t("hours.quickSelect")}>
                     <button type="button" onClick={() => setDiasSelecionados(DIAS_UTEIS)}>{t("hours.weekdays")}</button>
@@ -693,8 +695,8 @@ export default function Funcionamento() {
                 </div>
               </details>
 
-              <details className={styles.configCard}>
-                <summary className={styles.configToggle}><FaClock aria-hidden="true"/><span>{t("hours.timeTitle")}</span><FaChevronDown aria-hidden="true"/></summary>
+              <details className={styles.configCard} open={expandedBlock==="times"}>
+                <summary className={styles.configToggle} onClick={event=>{event.preventDefault();if(!saving)setExpandedBlock(current=>current==="times"?null:"times");}}><FaClock aria-hidden="true"/><span>{t("hours.timeTitle")}</span><FaChevronDown aria-hidden="true"/></summary>
                 <div className={styles.configBody}>
                   <div className={styles.cardHeader}><span className={styles.duration} style={{ color: theme.colors.primary }}>
                     <FaClock aria-hidden="true" /> {formatDuration(expedienteTotal)}
@@ -720,8 +722,8 @@ export default function Funcionamento() {
 
               
 
-              <details className={styles.configCard}>
-                <summary className={styles.configToggle}><FaCoffee aria-hidden="true"/><span>{t("hours.breaksTitle")}</span><FaChevronDown aria-hidden="true"/></summary>
+              <details className={styles.configCard} open={expandedBlock==="breaks"}>
+                <summary className={styles.configToggle} onClick={event=>{event.preventDefault();if(!saving)setExpandedBlock(current=>current==="breaks"?null:"breaks");}}><FaCoffee aria-hidden="true"/><span>{t("hours.breaksTitle")}</span><FaChevronDown aria-hidden="true"/></summary>
                 <div className={styles.configBody}>
                   <div className={styles.cardHeader}><button type="button" className={styles.addButton} disabled={saving} onClick={addIntervalo}>
                     <FaPlus aria-hidden="true" /> {t("hours.breakAdd")}
