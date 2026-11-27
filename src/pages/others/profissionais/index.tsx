@@ -167,7 +167,7 @@ export default function Profissionais() {
   const [servicoIdsSelecionados, setServicoIdsSelecionados] = useState<number[]>([]);
   const [loadingServicos, setLoadingServicos] = useState(false);
   const [savingServicos, setSavingServicos] = useState(false);
-  const [, setServicosError] = useState("");
+  const [servicosError, setServicosError] = useState("");
   const [solicitacoesOpen, setSolicitacoesOpen] = useState(false);
   const [vinculosTab, setVinculosTab] = useState<"solicitacoes" | "historico">("solicitacoes");
   const [solicitacoes, setSolicitacoes] = useState<SolicitacaoVinculo[]>([]);
