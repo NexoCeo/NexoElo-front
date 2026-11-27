@@ -781,3 +781,10 @@ input:focus-visible {
 .breakFooter .breakDuration{flex:1;min-width:0}
 .breakFooter .customizeButton{flex:0 0 auto;max-width:100%;box-sizing:border-box;margin:0;white-space:nowrap}
 @media(max-width:760px){.breakCard{padding:10px;gap:8px}.breakFields{gap:7px}}
+
+.scheduleHint{font-size:12px;line-height:1.45;color:var(--theme-text-muted);margin:0 0 12px}
+.schedulePreview{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:6px 14px;margin-top:14px;padding:10px 12px;border:1px solid var(--theme-bottom);border-radius:9px;background:var(--theme-surface-muted)}
+.schedulePreview:empty{display:none}
+.schedulePreview>div{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;font-size:11px;color:var(--theme-text-muted)}
+.schedulePreview strong{font-size:11px;color:var(--theme-text);white-space:nowrap;font-variant-numeric:tabular-nums}
+@media(max-width:760px){.schedulePreview{grid-template-columns:minmax(0,1fr)}}
