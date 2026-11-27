@@ -299,16 +299,31 @@ export default function AnaliseDados() {
   const segmentTotal = customerSegments.total;
   const recurringEnd = segmentTotal ? 100 * customerSegments.recurring / segmentTotal : 0;
   const freshEnd = segmentTotal ? 100 * (customerSegments.recurring + customerSegments.fresh) / segmentTotal : 0;
+  // Um agendamento pode envolver varios profissionais. Os totais de agendamentos
+  // contam IDs unicos; os rankings contam uma participacao por profissional e ID.
   const team = new Map<number, { name: string; count: number; completed: number }>();
+  const teamBookings = new Set<number>();
+  const teamCompletedBookings = new Set<number>();
+  const participationKeys = new Set<string>();
   for (const item of metricsHistory) {
+    if (!Number.isInteger(item.Id) || item.Id <= 0) continue;
     const assigned = item.Profissionais?.length ? item.Profissionais : item.ProfissionalId ? [{ Id: item.ProfissionalId, Nome: item.ProfissionalNome }] : [];
+    const completed = item.Status?.trim().toUpperCase() === "CONCLUIDO";
     for (const person of new Map(assigned.map(person => [person.Id, person])).values()) {
+      if (!Number.isInteger(person.Id) || person.Id <= 0) continue;
       if (professionalFilter !== "TODOS" && String(person.Id) !== professionalFilter) continue;
+      const key = `${item.Id}:${person.Id}`;
+      if (participationKeys.has(key)) continue;
+      participationKeys.add(key);
+      teamBookings.add(item.Id);
+      if (completed) teamCompletedBookings.add(item.Id);
       const row = team.get(person.Id) ?? { name: formatPersonName(person.Nome) || "#" + person.Id, count: 0, completed: 0 };
-      row.count++; if (item.Status?.toUpperCase() === "CONCLUIDO") row.completed++;
+      row.count++; if (completed) row.completed++;
       team.set(person.Id, row);
     }
   }
+  const teamParticipationTotal = [...team.values()].reduce((sum, row) => sum + row.count, 0);
+  const teamCompletedParticipationTotal = [...team.values()].reduce((sum, row) => sum + row.completed, 0);
   const occupied = metricsHistory.filter(item => ["AGENDADO", "CONCLUIDO"].includes(item.Status?.toUpperCase()));
   const knownDuration = occupied.filter(item => Number(item.DuracaoMinutos) > 0);
   const bookedMinutes = knownDuration.reduce((sum, item) => sum + Number(item.DuracaoMinutos), 0);
@@ -432,8 +447,16 @@ export default function AnaliseDados() {
       </div>
     </>}
     {activeTab === "team" && <>
-      <section className={styles.dashboardMetrics}>{metric(pt ? "Profissionais com agendamentos" : "Professionals with bookings", team.size, <FaUsers />)}{metric(pt ? "Agendamentos com equipe" : "Team bookings", metricsHistory.filter(item => item.ProfissionalId || item.Profissionais?.length).length)}{metric(pt ? "Atendimentos concluídos" : "Completed appointments", concludedHistory.length)}</section>
-      <div className={styles.dashboardCharts}>{ranking(pt ? "Agendamentos por profissional" : "Bookings by professional", [...team.values()].sort((a,b) => b.count-a.count))}{ranking(pt ? "Conclusões por profissional" : "Completed by professional", [...team.values()].sort((a,b) => b.completed-a.completed).map(row => ({name:row.name,count:row.completed})))}</div>
+      <section className={styles.dashboardMetrics}>
+        {metric(pt ? "Profissionais com agendamentos" : "Professionals with bookings", team.size, <FaUsers />)}
+        {metric(pt ? "Agendamentos únicos da equipe" : "Unique team bookings", teamBookings.size)}
+        {metric(pt ? "Agendamentos únicos concluídos" : "Unique completed bookings", teamCompletedBookings.size)}
+      </section>
+      <div className={styles.dashboardCharts}>
+        {ranking(pt ? "Participações por profissional" : "Bookings per professional", [...team.values()].sort((a,b) => b.count-a.count))}
+        {ranking(pt ? "Participações em agendamentos concluídos" : "Completed bookings per professional", [...team.values()].sort((a,b) => b.completed-a.completed).map(row => ({name:row.name,count:row.completed})))}
+      </div>
+      <p className={styles.note}>{pt ? `Participações: ${teamParticipationTotal} no total, ${teamCompletedParticipationTotal} em agendamentos concluídos. Um agendamento com mais de um profissional é contado uma vez nos indicadores e uma vez para cada profissional no ranking.` : `Participations: ${teamParticipationTotal} total, ${teamCompletedParticipationTotal} in completed bookings. A booking with multiple professionals counts once in the indicators and once per professional in the rankings.`}</p>
     </>}
     {activeTab === "occupancy" && <>
       <section className={styles.dashboardMetrics}>{metric(pt ? "Agendados e concluídos" : "Scheduled and completed", occupied.length)}{metric(pt ? "Horas reservadas conhecidas" : "Known booked hours", (bookedMinutes/60).toLocaleString(pt ? "pt-BR" : "en-US",{maximumFractionDigits:2})+" h")}{metric(pt ? "Dias com reservas" : "Days with bookings", new Set(occupied.map(item => new Date(item.DataAgendamento).getDate())).size)}{metric(pt ? "Cancelamentos" : "Cancellations", cancelled.length)}</section>
