@@ -18,7 +18,6 @@ import {
   FaPencilAlt,
   FaChevronDown,
   FaSlidersH,
-  FaCheckCircle,
 } from "react-icons/fa";
 import { useTheme } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
@@ -205,6 +204,7 @@ export default function Funcionamento() {
   const [savingBlock,setSavingBlock] = useState<ConfigBlock|null>(null);
   const [savedSnapshot,setSavedSnapshot] = useState<FuncionamentoConfig|null>(null);
   const [customOwner,setCustomOwner] = useState<"availability"|"custom">("custom");
+  const [savedMode,setSavedMode] = useState<"padrao"|"personalizado">("padrao");
   const [availabilityMode, setAvailabilityMode] = useState<"padrao" | "personalizado">("padrao");
   const customCardRef = useRef<HTMLDetailsElement>(null);
   const lastSavedConfig = useRef("");
@@ -234,7 +234,9 @@ export default function Funcionamento() {
         lastSavedConfig.current = JSON.stringify(data);
         setSavedSnapshot(data);
 
-        setAvailabilityMode(Object.keys(data.HorariosPorDia ?? {}).length > 0 ? "personalizado" : "padrao");
+        const mode = Object.keys(data.HorariosPorDia ?? {}).length > 0 ? "personalizado" : "padrao";
+        setAvailabilityMode(mode);
+        setSavedMode(mode);
       } catch {
         const message = t("hours.loadError");
         showNotification({ type: "error", title: t("hours.unavailable"), message });
@@ -244,6 +246,7 @@ export default function Funcionamento() {
         setSavedSnapshot(null);
 
         setAvailabilityMode("padrao");
+        setSavedMode("padrao");
       } finally {
         setLoading(false);
       }
@@ -260,11 +263,13 @@ export default function Funcionamento() {
       lastSavedConfig.current = JSON.stringify(data);
         setSavedSnapshot(data);
 
-      setAvailabilityMode(Object.keys(data.HorariosPorDia ?? {}).length > 0 ? "personalizado" : "padrao");
+      const mode = Object.keys(data.HorariosPorDia ?? {}).length > 0 ? "personalizado" : "padrao";
+        setAvailabilityMode(mode);
+        setSavedMode(mode);
     } catch { /* preserve settings while offline */ }
   }, {
     enabled: Boolean(usuarioId) && !saving &&
-      (config === null || JSON.stringify(config) === lastSavedConfig.current),
+      (config === null || (JSON.stringify(config) === lastSavedConfig.current && availabilityMode === savedMode)),
   });
 
   function updateConfig(nextConfig: Partial<FuncionamentoConfig>) {
@@ -277,7 +282,7 @@ export default function Funcionamento() {
       setCustomOwner("availability");
       updateConfig({ HorariosPorDia: {} });
     } else {
-      setCustomOwner("custom");
+      setCustomOwner("availability");
       if(customCardRef.current) customCardRef.current.open=true;
     }
     setAvailabilityMode(mode);
@@ -481,6 +486,7 @@ export default function Funcionamento() {
       setSavingBlock(block);
       const savedConfig = await salvarFuncionamento(usuarioId, candidate);
       setSavedSnapshot(savedConfig);
+      if(block==="availability" || block==="custom") setSavedMode(availabilityMode);
       setConfig(current => {
         if(!current)return savedConfig;
         // Preserve pending changes in other cards, including changes made during the request.
@@ -516,6 +522,7 @@ export default function Funcionamento() {
 
   const isDirty = (block:ConfigBlock) => {
     if(!config)return false;
+    if(block==="availability" && availabilityMode!==savedMode)return true;
     if((block==="availability"||block==="custom") && block!==customOwner)return false;
     return JSON.stringify(blockPatch(block,config))!==JSON.stringify(blockPatch(block,savedSnapshot??criarFuncionamentoPadrao(usuarioId)));
   };
@@ -542,14 +549,12 @@ export default function Funcionamento() {
                     className={`${styles.availabilityOption} ${!temHorariosPersonalizados ? styles.availabilitySelected : ""}`}>
                     <FaCalendarAlt aria-hidden="true" />
                     <span><strong>Horário padrão</strong><small>Mesmo horário para todos os dias selecionados</small></span>
-                    {!temHorariosPersonalizados && <FaCheckCircle aria-label="Selecionado" />}
                   </button>
                   <button type="button" disabled={loading || saving || !config} aria-pressed={temHorariosPersonalizados}
                     onClick={() => chooseAvailabilityMode("personalizado")}
                     className={`${styles.availabilityOption} ${temHorariosPersonalizados ? styles.availabilitySelected : ""}`}>
                     <FaSlidersH aria-hidden="true" />
                     <span><strong>Horários personalizados</strong><small>Personalize apenas os dias com horários diferentes</small></span>
-                    {temHorariosPersonalizados && <FaCheckCircle aria-label="Selecionado" />}
                   </button>
                 </div>
                   {saveAction("availability")}
