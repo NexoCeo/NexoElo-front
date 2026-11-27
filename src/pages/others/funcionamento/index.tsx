@@ -7,6 +7,11 @@ import {
   FaCalendarAlt,
   FaClock,
   FaCoffee,
+  FaUtensils,
+  FaHamburger,
+  FaBed,
+  FaBroom,
+  FaTools,
   FaPlus,
   FaSave,
   FaTrash,
@@ -174,14 +179,17 @@ function blockPatch(block: ConfigBlock, draft: FuncionamentoConfig): Partial<Fun
 const BREAK_TYPES: {value:TipoPausa;label:string}[] = [
   {value:"CAFE",label:"Café"}, {value:"ALMOCO",label:"Almoço"}, {value:"LANCHE",label:"Lanche"}, {value:"JANTAR",label:"Jantar"}, {value:"DESCANSO",label:"Descanso"}, {value:"COMPROMISSO",label:"Compromisso pessoal"}, {value:"LIMPEZA",label:"Limpeza e organização"}, {value:"MANUTENCAO",label:"Manutenção"}, {value:"OUTRO",label:"Outro"},
 ];
-function BreakCard({interval,index,title,startLabel,endLabel,min,max,onChange,onRemove}:{interval:FuncionamentoIntervalo;index:number;title:string;startLabel:string;endLabel:string;min:string;max:string;onChange:(field:"Inicio"|"Fim",value:string)=>void;onRemove:()=>void}) {
+const BREAK_ICONS = {CAFE:FaCoffee,ALMOCO:FaUtensils,LANCHE:FaHamburger,JANTAR:FaUtensils,DESCANSO:FaBed,COMPROMISSO:FaCalendarAlt,LIMPEZA:FaBroom,MANUTENCAO:FaTools,OUTRO:FaClock};
+function BreakCard({interval,index,startLabel,endLabel,min,max,onChange,onRemove,onEdit}:{interval:FuncionamentoIntervalo;index:number;startLabel:string;endLabel:string;min:string;max:string;onChange:(field:"Inicio"|"Fim",value:string)=>void;onRemove:()=>void;onEdit:()=>void}) {
+  const type = interval.Tipo ?? "OUTRO";
+  const BreakIcon = BREAK_ICONS[type] ?? FaClock;
   return <article className={styles.breakCard}>
-    <div className={styles.breakHeading}><FaCoffee aria-hidden="true"/><strong>{title} {index+1} · {BREAK_TYPES.find(option=>option.value===(interval.Tipo??"OUTRO"))?.label}</strong><button type="button" className={styles.removeButton} onClick={onRemove} aria-label={`Remover pausa ${index+1}`}><FaTrash aria-hidden="true"/></button></div>
+    <div className={styles.breakHeading}><BreakIcon aria-hidden="true"/><strong>{BREAK_TYPES.find(option=>option.value===type)?.label ?? "Outro"}</strong><button type="button" className={styles.removeButton} onClick={onRemove} aria-label={`Remover pausa ${index+1}`}><FaTrash aria-hidden="true"/></button></div>
     <div className={styles.breakFields}>
       <label>{startLabel}<input type="time" value={interval.Inicio} min={min} max={max} step="900" onChange={e=>onChange("Inicio",e.target.value)}/></label>
       <label>{endLabel}<input type="time" value={interval.Fim} min={min} max={max} step="900" onChange={e=>onChange("Fim",e.target.value)}/></label>
     </div>
-    <span className={styles.breakDuration}>{formatDuration(timeToMinutes(interval.Fim)-timeToMinutes(interval.Inicio))}</span>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,minHeight:30}}><span className={styles.breakDuration}>{formatDuration(timeToMinutes(interval.Fim)-timeToMinutes(interval.Inicio))}</span><button type="button" className={styles.customizeButton} style={{minHeight:28,padding:"4px 12px",background:"#2563eb",color:"#fff",border:0}} onClick={onEdit}>Editar</button></div>
   </article>;
 }
 export default function Funcionamento() {
@@ -192,6 +200,7 @@ export default function Funcionamento() {
   const [config, setConfig] = useState<FuncionamentoConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [editingBreakIndex,setEditingBreakIndex] = useState<number|null>(null);
   const [breakDraft,setBreakDraft] = useState<FuncionamentoIntervalo|null>(null);
   const [savingBlock,setSavingBlock] = useState<ConfigBlock|null>(null);
   const [savedSnapshot,setSavedSnapshot] = useState<FuncionamentoConfig|null>(null);
@@ -397,12 +406,14 @@ export default function Funcionamento() {
       return;
     }
 
+    setEditingBreakIndex(null);
     setBreakDraft({...novoIntervalo,Tipo:"OUTRO"});
   }
 
   function confirmBreak() {
     if (!config || !breakDraft || saving) return;
-    const candidate = {...config, Intervalos:[...config.Intervalos,breakDraft]};
+    if (editingBreakIndex !== null && !config.Intervalos[editingBreakIndex]) return;
+    const candidate = {...config, Intervalos:editingBreakIndex === null ? [...config.Intervalos,breakDraft] : config.Intervalos.map((item,index)=>index===editingBreakIndex?breakDraft:item)};
     const start = timeToMinutes(breakDraft.Inicio);
     const end = timeToMinutes(breakDraft.Fim);
     if (!breakDraft.Inicio || !breakDraft.Fim || !Number.isFinite(start) || !Number.isFinite(end) || start >= end || hasIntervaloInvalido(candidate)) {
@@ -732,7 +743,7 @@ export default function Funcionamento() {
                 ) : (
                   <div className={styles.intervalList}>
                     {config.Intervalos.map((intervalo, index) => (
-                      <BreakCard key={index} interval={intervalo} index={index} title={t("hours.break")} startLabel={t("hours.start")} endLabel={t("hours.finish")} min={config.HorarioAbertura} max={config.HorarioFechamento} onChange={(field,value)=>updateIntervalo(index,field,value)} onRemove={()=>removeIntervalo(index)}/>
+                      <BreakCard key={index} interval={intervalo} index={index} onEdit={()=>{setEditingBreakIndex(index);setBreakDraft({...intervalo});}} startLabel={t("hours.start")} endLabel={t("hours.finish")} min={config.HorarioAbertura} max={config.HorarioFechamento} onChange={(field,value)=>updateIntervalo(index,field,value)} onRemove={()=>removeIntervalo(index)}/>
                     ))}
                   </div>
                 )}
@@ -746,7 +757,7 @@ export default function Funcionamento() {
 
         
       </div>
-      {breakDraft && config && createPortal(<Modal open title={t("hours.breakAdd")} onClose={()=>setBreakDraft(null)} actions={<><button type="button" className={styles.addButton} onClick={()=>setBreakDraft(null)}>{t("common.cancel")}</button><button type="button" className={styles.saveButton} style={{backgroundColor:theme.colors.primary,color:theme.colors.onPrimary,minWidth:0}} onClick={confirmBreak}><FaPlus aria-hidden="true"/>{t("hours.breakAdd")}</button></>}>
+      {breakDraft && config && createPortal(<Modal open title={editingBreakIndex===null?t("hours.breakAdd"):"Editar pausa"} onClose={()=>setBreakDraft(null)} actions={<><button type="button" className={styles.addButton} onClick={()=>setBreakDraft(null)}>{t("common.cancel")}</button><button type="button" className={styles.saveButton} style={{backgroundColor:theme.colors.primary,color:theme.colors.onPrimary,minWidth:0}} onClick={confirmBreak}>{editingBreakIndex===null?<FaPlus aria-hidden="true"/>:<FaSave aria-hidden="true"/>}{editingBreakIndex===null?t("hours.breakAdd"):"Salvar alterações"}</button></>}>
         <label className={styles.breakTypeField}>Tipo de intervalo
           <select value={breakDraft.Tipo??"OUTRO"} onChange={event=>setBreakDraft(previous=>previous?{...previous,Tipo:event.target.value as TipoPausa}:null)}>
             {BREAK_TYPES.map(option=><option key={option.value} value={option.value}>{option.label}</option>)}
