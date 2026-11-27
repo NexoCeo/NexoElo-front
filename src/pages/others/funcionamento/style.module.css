@@ -723,3 +723,28 @@ input:focus-visible {
  .summary{position:static;width:100%;max-width:100%}
  .summary>.saveButton{min-height:48px}
 }
+
+/* Configurações independentes, sem a estrutura de assistente. */
+.content{align-items:start}
+.editor{padding:0;border:0;background:transparent;gap:12px}
+.editor>.configCard{min-width:0;border:1px solid var(--theme-bottom);border-radius:13px;background:var(--theme-surface);overflow:hidden}
+.configToggle{list-style:none;display:flex;align-items:center;gap:12px;padding:16px 18px;cursor:pointer;color:var(--theme-text);min-height:60px;box-sizing:border-box}
+.configToggle::-webkit-details-marker{display:none}
+.configToggle>svg:first-child{flex:0 0 18px;color:var(--theme-primary-text)}
+.configToggle>span{flex:1;min-width:0;font-size:14px;font-weight:700}
+.configToggle>svg:last-child{flex:0 0 13px;color:var(--theme-text-muted);transition:transform .18s}
+.configCard[open]>.configToggle>svg:last-child{transform:rotate(180deg)}
+.configToggle:focus-visible{outline:2px solid var(--theme-primary);outline-offset:-3px}
+.configBody{padding:15px 18px 18px;border-top:1px solid var(--theme-bottom);min-width:0}
+.configBody>.cardHeader{margin-bottom:12px;justify-content:flex-start}
+.configBody .availabilityOptions{margin:0}
+.configBody .daysGrid,.configBody .dayHoursList{padding-left:0}
+.configBody .timeRange,.configBody .intervalList,.configBody .emptyState{margin-left:0}
+.configBody .dayHoursList,.configBody .intervalList{max-height:none;overflow:visible}
+@media(max-width:760px){
+ .editor{padding:0;gap:10px}
+ .configToggle{padding:14px;min-height:56px}
+ .configBody{padding:12px}
+ .configBody .daysGrid{gap:4px}
+ .configBody .presets{justify-content:flex-start}
+}
