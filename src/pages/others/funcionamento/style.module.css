@@ -767,3 +767,6 @@ input:focus-visible {
 .breakFields input{box-sizing:border-box;width:100%;min-width:0;height:40px;border:1px solid var(--theme-border-strong);border-radius:8px;padding:0 9px;background:var(--theme-surface-muted);color:var(--theme-text);font:inherit;color-scheme:dark}
 .breakDuration{display:flex;align-items:center;font-size:11px;line-height:18px;color:var(--theme-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media(max-width:760px){.configBody .intervalList{grid-template-columns:minmax(0,1fr)}.breakCard{width:100%;padding:10px;gap:8px}.breakFields{gap:7px}}
+
+.breakTypeField{display:grid;gap:6px;margin-bottom:14px;font-size:12px;font-weight:600;color:var(--theme-text-muted)}
+.breakTypeField select{box-sizing:border-box;width:100%;min-width:0;height:42px;padding:0 10px;border:1px solid var(--theme-border-strong);border-radius:8px;background:var(--theme-surface-muted);color:var(--theme-text);font:inherit;color-scheme:dark;cursor:pointer}
