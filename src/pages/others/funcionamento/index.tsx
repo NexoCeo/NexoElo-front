@@ -180,16 +180,16 @@ const BREAK_TYPES: {value:TipoPausa;label:string}[] = [
   {value:"CAFE",label:"Café"}, {value:"ALMOCO",label:"Almoço"}, {value:"LANCHE",label:"Lanche"}, {value:"JANTAR",label:"Jantar"}, {value:"DESCANSO",label:"Descanso"}, {value:"COMPROMISSO",label:"Compromisso pessoal"}, {value:"LIMPEZA",label:"Limpeza e organização"}, {value:"MANUTENCAO",label:"Manutenção"}, {value:"OUTRO",label:"Outro"},
 ];
 const BREAK_ICONS = {CAFE:FaCoffee,ALMOCO:FaUtensils,LANCHE:FaHamburger,JANTAR:FaUtensils,DESCANSO:FaBed,COMPROMISSO:FaCalendarAlt,LIMPEZA:FaBroom,MANUTENCAO:FaTools,OUTRO:FaClock};
-function BreakCard({interval,index,startLabel,endLabel,min,max,onChange,onRemove,onEdit}:{interval:FuncionamentoIntervalo;index:number;startLabel:string;endLabel:string;min:string;max:string;onChange:(field:"Inicio"|"Fim",value:string)=>void;onRemove:()=>void;onEdit:()=>void}) {
+function BreakCard({interval,index,startLabel,endLabel,min,max,busy,onRemove,onEdit}:{interval:FuncionamentoIntervalo;index:number;startLabel:string;endLabel:string;min:string;max:string;busy:boolean;onRemove:()=>void;onEdit:()=>void}) {
   const type = interval.Tipo ?? "OUTRO";
   const BreakIcon = BREAK_ICONS[type] ?? FaClock;
   return <article className={styles.breakCard}>
-    <div className={styles.breakHeading}><BreakIcon aria-hidden="true"/><strong>{BREAK_TYPES.find(option=>option.value===type)?.label ?? "Outro"}</strong><button type="button" className={styles.removeButton} onClick={onRemove} aria-label={`Remover pausa ${index+1}`}><FaTrash aria-hidden="true"/></button></div>
+    <div className={styles.breakHeading}><BreakIcon aria-hidden="true"/><strong>{BREAK_TYPES.find(option=>option.value===type)?.label ?? "Outro"}</strong><button type="button" className={styles.removeButton} disabled={busy} onClick={onRemove} aria-label={`Remover pausa ${index+1}`}><FaTrash aria-hidden="true"/></button></div>
     <div className={styles.breakFields}>
-      <label>{startLabel}<input type="time" value={interval.Inicio} min={min} max={max} step="900" onChange={e=>onChange("Inicio",e.target.value)}/></label>
-      <label>{endLabel}<input type="time" value={interval.Fim} min={min} max={max} step="900" onChange={e=>onChange("Fim",e.target.value)}/></label>
+      <label>{startLabel}<input type="time" value={interval.Inicio} min={min} max={max} step="900" readOnly/></label>
+      <label>{endLabel}<input type="time" value={interval.Fim} min={min} max={max} step="900" readOnly/></label>
     </div>
-    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,minHeight:30}}><span className={styles.breakDuration}>{formatDuration(timeToMinutes(interval.Fim)-timeToMinutes(interval.Inicio))}</span><button type="button" className={styles.customizeButton} style={{minHeight:28,padding:"4px 12px",background:"#2563eb",color:"#fff",border:0}} onClick={onEdit}>Editar</button></div>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,minHeight:30}}><span className={styles.breakDuration}>{formatDuration(timeToMinutes(interval.Fim)-timeToMinutes(interval.Inicio))}</span><button type="button" className={styles.customizeButton} style={{minHeight:28,padding:"4px 12px",background:"#2563eb",color:"#fff",border:0}} disabled={busy} onClick={onEdit}>Editar</button></div>
   </article>;
 }
 export default function Funcionamento() {
@@ -410,7 +410,7 @@ export default function Funcionamento() {
     setBreakDraft({...novoIntervalo,Tipo:"OUTRO"});
   }
 
-  function confirmBreak() {
+  async function confirmBreak() {
     if (!config || !breakDraft || saving) return;
     if (editingBreakIndex !== null && !config.Intervalos[editingBreakIndex]) return;
     const candidate = {...config, Intervalos:editingBreakIndex === null ? [...config.Intervalos,breakDraft] : config.Intervalos.map((item,index)=>index===editingBreakIndex?breakDraft:item)};
@@ -428,32 +428,20 @@ export default function Funcionamento() {
       showNotification({type:"warning",title:t("hours.noAvailabilityTitle"),message:t("hours.noAvailability")});
       return;
     }
-    updateConfig({Intervalos:candidate.Intervalos});
-    setBreakDraft(null);
+    if(await handleSubmit("breaks",candidate.Intervalos)) setBreakDraft(null);
   }
 
-  function updateIntervalo(index: number, field: "Inicio" | "Fim", value: string) {
-    if (!config) return;
-    updateConfig({
-      Intervalos: config.Intervalos.map((intervalo, currentIndex) =>
-        currentIndex === index ? { ...intervalo, [field]: value } : intervalo,
-      ),
-    });
+  async function removeIntervalo(index:number) {
+    if (!config || saving) return;
+    await handleSubmit("breaks",config.Intervalos.filter((_,currentIndex)=>currentIndex!==index));
   }
 
-  function removeIntervalo(index: number) {
-    if (!config) return;
-    updateConfig({
-      Intervalos: config.Intervalos.filter((_, currentIndex) => currentIndex !== index),
-    });
-  }
-
-  async function handleSubmit(block:ConfigBlock) {
-    if(saving || !config) return;
+  async function handleSubmit(block:ConfigBlock, nextBreaks?:FuncionamentoIntervalo[]):Promise<boolean> {
+    if(saving || !config) return false;
     // Merge only this card into the last confirmed server state.
     const draft = config;
     const baseline = savedSnapshot ?? criarFuncionamentoPadrao(usuarioId);
-    const candidate = { ...baseline, ...blockPatch(block,draft) };
+    const candidate = { ...baseline, ...blockPatch(block,draft), ...(block==="breaks" && nextBreaks ? {Intervalos:nextBreaks} : {}) };
     const diasSelecionados = DIAS.filter(dia=>candidate[dia.key]);
     const pausaTotal = getPausaTotal(candidate);
     const expedienteTotal = timeToMinutes(candidate.HorarioFechamento)-timeToMinutes(candidate.HorarioAbertura);
@@ -461,43 +449,43 @@ export default function Funcionamento() {
     if (!candidate || !usuarioId) {
       const message = t("hours.userMissing");
       showNotification({ type: "error", title: t("hours.notSaved"), message });
-      return;
+      return false;
     }
 
     if (diasSelecionados.length === 0) {
       const message = t("hours.daysRequired");
       showNotification({ type: "warning", title: t("hours.noDays"), message });
-      return;
+      return false;
     }
 
     if (!candidate.HorarioAbertura || !candidate.HorarioFechamento) {
       const message = t("hours.timeRequired");
       showNotification({ type: "warning", title: t("hours.timeIncomplete"), message });
-      return;
+      return false;
     }
 
     if (timeToMinutes(candidate.HorarioAbertura) >= timeToMinutes(candidate.HorarioFechamento)) {
       const message = t("hours.timeInvalidDesc");
       showNotification({ type: "warning", title: t("hours.timeInvalid"), message });
-      return;
+      return false;
     }
 
     if (hasIntervaloInvalido(candidate)) {
       const message = t("hours.breakOutside");
       showNotification({ type: "warning", title: t("hours.breakInvalid"), message });
-      return;
+      return false;
     }
 
     if (hasIntervaloSobreposto(candidate)) {
       const message = t("hours.overlap");
       showNotification({ type: "warning", title: t("hours.overlapTitle"), message });
-      return;
+      return false;
     }
 
     if (pausaTotal >= expedienteTotal) {
       const message = t("hours.noAvailability");
       showNotification({ type: "warning", title: t("hours.noAvailabilityTitle"), message });
-      return;
+      return false;
     }
 
     for (const dia of diasSelecionados) {
@@ -512,7 +500,7 @@ export default function Funcionamento() {
           getPausaTotal(diario) >= fechamento - abertura) {
         const message = `${t("hours.reviewDay")} ${[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(d => d.key === dia.key)]}.`;
         showNotification({ type: "warning", title: t("hours.specificInvalid"), message });
-        return;
+        return false;
       }
     }
 
@@ -526,6 +514,7 @@ export default function Funcionamento() {
         // Preserve pending changes in other cards, including changes made during the request.
         const next = {...savedConfig};
         for(const other of ["days","times","breaks","custom"] as const) {
+          if(other==="breaks" && block==="breaks" && nextBreaks) continue;
           const previous = blockPatch(other,baseline);
           const local = blockPatch(other,current);
           const submitted = blockPatch(other,candidate);
@@ -540,11 +529,13 @@ export default function Funcionamento() {
         title: t("hours.saved"),
         message: t("hours.savedDesc"),
       });
+      return true;
     } catch (err) {
       const message = isAxiosError<ApiError>(err)
         ? getApiErrorMessage(err.response?.data, t("hours.saveError"))
         : t("hours.saveError");
       showNotification({ type: "error", title: t("hours.saveFailedTitle"), message });
+      return false;
     } finally {
       setSaving(false);
       setSavingBlock(null);
@@ -727,7 +718,7 @@ export default function Funcionamento() {
               <details className={styles.configCard}>
                 <summary className={styles.configToggle}><FaCoffee aria-hidden="true"/><span>{t("hours.breaksTitle")}</span><FaChevronDown aria-hidden="true"/></summary>
                 <div className={styles.configBody}>
-                  <div className={styles.cardHeader}><button type="button" className={styles.addButton} onClick={addIntervalo}>
+                  <div className={styles.cardHeader}><button type="button" className={styles.addButton} disabled={saving} onClick={addIntervalo}>
                     <FaPlus aria-hidden="true" /> {t("hours.breakAdd")}
                   </button>
                 </div>
@@ -743,11 +734,11 @@ export default function Funcionamento() {
                 ) : (
                   <div className={styles.intervalList}>
                     {config.Intervalos.map((intervalo, index) => (
-                      <BreakCard key={index} interval={intervalo} index={index} onEdit={()=>{setEditingBreakIndex(index);setBreakDraft({...intervalo});}} startLabel={t("hours.start")} endLabel={t("hours.finish")} min={config.HorarioAbertura} max={config.HorarioFechamento} onChange={(field,value)=>updateIntervalo(index,field,value)} onRemove={()=>removeIntervalo(index)}/>
+                      <BreakCard key={index} interval={intervalo} index={index} onEdit={()=>{setEditingBreakIndex(index);setBreakDraft({...intervalo});}} startLabel={t("hours.start")} endLabel={t("hours.finish")} min={config.HorarioAbertura} max={config.HorarioFechamento} busy={saving} onRemove={()=>removeIntervalo(index)}/>
                     ))}
                   </div>
                 )}
-                  {saveAction("breaks")}
+
 
                 </div>
               </details>
@@ -757,7 +748,7 @@ export default function Funcionamento() {
 
         
       </div>
-      {breakDraft && config && createPortal(<Modal open title={editingBreakIndex===null?t("hours.breakAdd"):"Editar pausa"} onClose={()=>setBreakDraft(null)} actions={<><button type="button" className={styles.addButton} onClick={()=>setBreakDraft(null)}>{t("common.cancel")}</button><button type="button" className={styles.saveButton} style={{backgroundColor:theme.colors.primary,color:theme.colors.onPrimary,minWidth:0}} onClick={confirmBreak}>{editingBreakIndex===null?<FaPlus aria-hidden="true"/>:<FaSave aria-hidden="true"/>}{editingBreakIndex===null?t("hours.breakAdd"):"Salvar alterações"}</button></>}>
+      {breakDraft && config && createPortal(<Modal open busy={saving} title={editingBreakIndex===null?t("hours.breakAdd"):"Editar pausa"} onClose={()=>setBreakDraft(null)} actions={<><button type="button" className={styles.addButton} disabled={saving} onClick={()=>setBreakDraft(null)}>{t("common.cancel")}</button><button type="button" className={styles.saveButton} style={{backgroundColor:theme.colors.primary,color:theme.colors.onPrimary,minWidth:0}} disabled={saving} onClick={confirmBreak}>{editingBreakIndex===null?<FaPlus aria-hidden="true"/>:<FaSave aria-hidden="true"/>}{editingBreakIndex===null?t("hours.breakAdd"):"Salvar alterações"}</button></>}>
         <label className={styles.breakTypeField}>Tipo de intervalo
           <select value={breakDraft.Tipo??"OUTRO"} onChange={event=>setBreakDraft(previous=>previous?{...previous,Tipo:event.target.value as TipoPausa}:null)}>
             {BREAK_TYPES.map(option=><option key={option.value} value={option.value}>{option.label}</option>)}
