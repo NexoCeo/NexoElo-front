@@ -180,16 +180,23 @@ const BREAK_TYPES: {value:TipoPausa;label:string}[] = [
   {value:"CAFE",label:"Café"}, {value:"ALMOCO",label:"Almoço"}, {value:"LANCHE",label:"Lanche"}, {value:"JANTAR",label:"Jantar"}, {value:"DESCANSO",label:"Descanso"}, {value:"COMPROMISSO",label:"Compromisso pessoal"}, {value:"LIMPEZA",label:"Limpeza e organização"}, {value:"MANUTENCAO",label:"Manutenção"}, {value:"OUTRO",label:"Outro"},
 ];
 const BREAK_ICONS = {CAFE:FaCoffee,ALMOCO:FaUtensils,LANCHE:FaHamburger,JANTAR:FaUtensils,DESCANSO:FaBed,COMPROMISSO:FaCalendarAlt,LIMPEZA:FaBroom,MANUTENCAO:FaTools,OUTRO:FaClock};
-function BreakCard({interval,index,startLabel,endLabel,min,max,busy,onRemove,onEdit}:{interval:FuncionamentoIntervalo;index:number;startLabel:string;endLabel:string;min:string;max:string;busy:boolean;onRemove:()=>void;onEdit:()=>void}) {
+function BreakCard({interval,index,busy,onRemove,onEdit}:{interval:FuncionamentoIntervalo;index:number;busy:boolean;onRemove:()=>void;onEdit:()=>void}) {
   const type = interval.Tipo ?? "OUTRO";
   const BreakIcon = BREAK_ICONS[type] ?? FaClock;
+  const name = BREAK_TYPES.find(option=>option.value===type)?.label ?? "Outro";
   return <article className={styles.breakCard}>
-    <div className={styles.breakHeading}><BreakIcon aria-hidden="true"/><strong>{BREAK_TYPES.find(option=>option.value===type)?.label ?? "Outro"}</strong><button type="button" className={styles.removeButton} disabled={busy} onClick={onRemove} aria-label={`Remover pausa ${index+1}`}><FaTrash aria-hidden="true"/></button></div>
-    <div className={styles.breakFields}>
-      <label>{startLabel}<input type="time" value={interval.Inicio} min={min} max={max} step="900" readOnly/></label>
-      <label>{endLabel}<input type="time" value={interval.Fim} min={min} max={max} step="900" readOnly/></label>
+    <div className={styles.breakHeading}>
+      <span className={styles.breakTypeIcon}><BreakIcon aria-hidden="true"/></span>
+      <strong title={name}>{name}</strong>
+      <div className={styles.breakActions}>
+        <button type="button" className={styles.breakEdit} disabled={busy} onClick={onEdit} aria-label={`Editar intervalo ${name}`}><FaPencilAlt aria-hidden="true"/>Editar</button>
+        <button type="button" className={styles.breakDelete} disabled={busy} onClick={onRemove} aria-label={`Remover intervalo ${index+1}: ${name}`}><FaTrash aria-hidden="true"/></button>
+      </div>
     </div>
-    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,minHeight:30}}><span className={styles.breakDuration}>{formatDuration(timeToMinutes(interval.Fim)-timeToMinutes(interval.Inicio))}</span><button type="button" className={styles.customizeButton} style={{minHeight:28,padding:"4px 12px",background:"#2563eb",color:"#fff",border:0}} disabled={busy} onClick={onEdit}>Editar</button></div>
+    <div className={styles.breakInfo}>
+      <div className={styles.breakTime}><FaClock aria-hidden="true"/><time>{interval.Inicio}</time><span aria-hidden="true">–</span><time>{interval.Fim}</time></div>
+      <span className={styles.breakDuration}>{formatDuration(timeToMinutes(interval.Fim)-timeToMinutes(interval.Inicio))}</span>
+    </div>
   </article>;
 }
 export default function Funcionamento() {
@@ -734,7 +741,7 @@ export default function Funcionamento() {
                 ) : (
                   <div className={styles.intervalList}>
                     {config.Intervalos.map((intervalo, index) => (
-                      <BreakCard key={index} interval={intervalo} index={index} onEdit={()=>{setEditingBreakIndex(index);setBreakDraft({...intervalo});}} startLabel={t("hours.start")} endLabel={t("hours.finish")} min={config.HorarioAbertura} max={config.HorarioFechamento} busy={saving} onRemove={()=>removeIntervalo(index)}/>
+                      <BreakCard key={index} interval={intervalo} index={index} onEdit={()=>{setEditingBreakIndex(index);setBreakDraft({...intervalo});}} busy={saving} onRemove={()=>removeIntervalo(index)}/>
                     ))}
                   </div>
                 )}
