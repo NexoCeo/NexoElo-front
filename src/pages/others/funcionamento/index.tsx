@@ -206,6 +206,7 @@ export default function Funcionamento() {
   const [savedMode,setSavedMode] = useState<"padrao"|"personalizado">("padrao");
   const [availabilityMode, setAvailabilityMode] = useState<"padrao" | "personalizado">("padrao");
   const [customModalOpen,setCustomModalOpen] = useState(false);
+  const [expandedCustomDay,setExpandedCustomDay] = useState<DiaFuncionamentoKey|null>(null);
   const customModalSnapshot = useRef<{ horarios:FuncionamentoConfig["HorariosPorDia"]; mode:"padrao"|"personalizado"; owner:"availability"|"custom" }|null>(null);
   const lastSavedConfig = useRef("");
 
@@ -296,6 +297,7 @@ export default function Funcionamento() {
     customModalSnapshot.current = {horarios:config.HorariosPorDia,mode:availabilityMode,owner:customOwner};
     setCustomOwner("availability");
     setAvailabilityMode("personalizado");
+    setExpandedCustomDay(null);
     setCustomModalOpen(true);
   }
 
@@ -308,6 +310,7 @@ export default function Funcionamento() {
       setCustomOwner(snapshot.owner);
     }
     customModalSnapshot.current=null;
+    setExpandedCustomDay(null);
     setCustomModalOpen(false);
   }
 
@@ -316,6 +319,7 @@ export default function Funcionamento() {
     setAvailabilityMode(Object.keys(config.HorariosPorDia ?? {}).length ? "personalizado" : "padrao");
     setCustomOwner("availability");
     customModalSnapshot.current=null;
+    setExpandedCustomDay(null);
     setCustomModalOpen(false);
   }
 
@@ -339,7 +343,9 @@ export default function Funcionamento() {
     const next = { ...config.HorariosPorDia };
     if (next[dia]) {
       delete next[dia];
+      if(expandedCustomDay===dia)setExpandedCustomDay(null);
     } else {
+      setExpandedCustomDay(dia);
       next[dia] = {
         Inicio: config.HorarioAbertura,
         Fim: config.HorarioFechamento,
@@ -348,6 +354,18 @@ export default function Funcionamento() {
     }
     updateConfig({ HorariosPorDia: next });
     setAvailabilityMode(Object.keys(next).length ? "personalizado" : "padrao");
+  }
+
+  function finishCustomDay(dia:DiaFuncionamentoKey) {
+    const horario=config?.HorariosPorDia?.[dia];
+    if(!config || !horario)return;
+    const duration=timeToMinutes(horario.Fim)-timeToMinutes(horario.Inicio);
+    const daily={...config,HorarioAbertura:horario.Inicio,HorarioFechamento:horario.Fim,Intervalos:horario.Intervalos};
+    if(!horario.Inicio || !horario.Fim || !Number.isFinite(duration) || duration<=0 || hasIntervaloInvalido(daily) || hasIntervaloSobreposto(daily) || getPausaTotal(daily)>=duration){
+      showNotification({type:"warning",title:t("hours.specificInvalid"),message:t("hours.breakOutside")});
+      return;
+    }
+    setExpandedCustomDay(null);
   }
 
   function alterarHorarioDia(dia: DiaFuncionamentoKey, campo: "Inicio" | "Fim", valor: string) {
@@ -719,16 +737,16 @@ export default function Funcionamento() {
                     const inicio = horario?.Inicio ?? config.HorarioAbertura;
                     const fim = horario?.Fim ?? config.HorarioFechamento;
                     return <div key={dia.key} className={styles.dayHoursRow}>
-                      <div className={styles.dayHoursIdentity}>
+                      <div className={styles.dayHoursIdentity} onClick={horario ? ()=>setExpandedCustomDay(expandedCustomDay===dia.key?null:dia.key):undefined} style={{cursor:horario?"pointer":undefined}} role={horario?"button":undefined} tabIndex={horario?0:undefined} aria-expanded={horario?expandedCustomDay===dia.key:undefined} onKeyDown={event=>{if(horario&&(event.key==="Enter"||event.key===" ")){event.preventDefault();setExpandedCustomDay(expandedCustomDay===dia.key?null:dia.key);}}}>
                         <strong>{[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)]}</strong>
                         <span>{inicio} – {fim}{horario ? ` · ${t("hours.custom")}` : ` · ${t("hours.default")}`}</span>
                       </div>
                       <button type="button" className={styles.customizeButton}
                         onClick={() => personalizarDia(dia.key)}
-                        aria-expanded={Boolean(horario)}>
+                        aria-label={horario ? t("hours.useDefault") : t("hours.customize")}>
                         {horario ? t("hours.useDefault") : t("hours.customize")}
                       </button>
-                      {horario && <div className={styles.dayHoursEditor}>
+                      {horario && expandedCustomDay===dia.key && <div className={styles.dayHoursEditor}>
                         <label>{t("hours.open")}
                           <input type="time" value={horario.Inicio} step="900"
                             onChange={event => alterarHorarioDia(dia.key, "Inicio", event.target.value)} />
@@ -757,6 +775,7 @@ export default function Funcionamento() {
                           )}
                           {!horario.Intervalos.length && <small>{t("hours.noBreaksDay")}</small>}
                         </div>
+                        <button type="button" className={styles.customizeButton} style={{gridColumn:"1 / -1",justifySelf:"end",background:"#2563eb",color:"#fff",border:0}} onClick={()=>finishCustomDay(dia.key)}>Concluir</button>
                       </div>}
                     </div>;
                   })}
