@@ -6,6 +6,7 @@ import type {
   FuncionamentoConfig,
   FuncionamentoIntervalo,
   FuncionamentoPayload,
+  TipoPausa,
 } from "@/types/funcionamento";
 
 type ApiRecord = Record<string, unknown>;
@@ -299,6 +300,20 @@ export function normalizeFuncionamento(data: ApiRecord, usuarioId: number): Func
     DIAS.filter((dia) => normalizedDays[dia]),
   );
   const expediente = reconstruirExpediente(data, blocosDisponiveis, diasSelecionados);
+  const rawTypes = data.TiposPausas ?? data.tiposPausas;
+  const allowedTypes = new Set(["CAFE","ALMOCO","LANCHE","JANTAR","DESCANSO","COMPROMISSO","LIMPEZA","MANUTENCAO","OUTRO"]);
+  const types = new Map<string,TipoPausa>();
+  if(Array.isArray(rawTypes)) for(const raw of rawTypes) {
+    if(!raw || typeof raw !== "object") continue;
+    const dia = normalizeDia(raw.DiaFuncionamento ?? raw.diaFuncionamento);
+    const inicio = normalizeTime(raw.HoraInicio ?? raw.horaInicio ?? "");
+    const fim = normalizeTime(raw.HoraFim ?? raw.horaFim ?? "");
+    const tipo = raw.Tipo ?? raw.tipo;
+    if(dia && allowedTypes.has(tipo)) types.set(dia+":"+inicio+":"+fim,tipo as TipoPausa);
+  }
+  const referenceDay = DIAS.find(dia=>diasSelecionados.has(dia)&&blocosDisponiveis.some(bloco=>bloco.Dia===dia));
+  const withType = (dia:DiaFuncionamentoKey|undefined, pausa:FuncionamentoIntervalo):FuncionamentoIntervalo=>({...pausa,Tipo:types.get(dia+":"+pausa.Inicio+":"+pausa.Fim)??"OUTRO"});
+  expediente.pausas = expediente.pausas.map(pausa=>withType(referenceDay,pausa));
   const primeiraPausa = expediente.pausas[0];
 
   const horariosPorDia: FuncionamentoConfig["HorariosPorDia"] = {};
@@ -308,7 +323,7 @@ export function normalizeFuncionamento(data: ApiRecord, usuarioId: number): Func
     if (!blocosDoDia.length) continue;
     const inicio = blocosDoDia[0].Inicio;
     const fim = blocosDoDia[blocosDoDia.length - 1].Fim;
-    const pausas = blocosDoDia.slice(0, -1).map((bloco, index) => ({
+    const pausas = blocosDoDia.slice(0, -1).map((bloco, index) => withType(dia,{
       Inicio: bloco.Fim,
       Fim: blocosDoDia[index + 1].Inicio,
     }));
@@ -379,6 +394,7 @@ export function buildFuncionamentoPayload(config: FuncionamentoConfig): Funciona
     HoraInicio: horarioAbertura,
     HoraFim: horarioFechamento,
     Intervalos: intervalos,
+    TiposPausas: DIAS.filter(dia=>config[dia]).flatMap(dia=>(config.HorariosPorDia?.[dia]?.Intervalos??config.Intervalos).map(pausa=>({DiaFuncionamento:DIA_API_POR_UI[dia],HoraInicio:pausa.Inicio,HoraFim:pausa.Fim,Tipo:pausa.Tipo??"OUTRO"}))),
   };
 }
 
