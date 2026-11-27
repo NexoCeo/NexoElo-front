@@ -235,7 +235,7 @@ export default function Funcionamento() {
         lastSavedConfig.current = JSON.stringify(data);
         setSavedSnapshot(data);
 
-        const mode = Object.keys(data.HorariosPorDia ?? {}).length > 0 ? "personalizado" : "padrao";
+        const mode = data.ModoFuncionamento ?? (Object.keys(data.HorariosPorDia ?? {}).length > 0 ? "personalizado" : "padrao");
         setAvailabilityMode(mode);
         setSavedMode(mode);
       } catch {
@@ -264,7 +264,7 @@ export default function Funcionamento() {
       lastSavedConfig.current = JSON.stringify(data);
         setSavedSnapshot(data);
 
-      const mode = Object.keys(data.HorariosPorDia ?? {}).length > 0 ? "personalizado" : "padrao";
+      const mode = data.ModoFuncionamento ?? (Object.keys(data.HorariosPorDia ?? {}).length > 0 ? "personalizado" : "padrao");
         setAvailabilityMode(mode);
         setSavedMode(mode);
     } catch { /* preserve settings while offline */ }
@@ -316,7 +316,7 @@ export default function Funcionamento() {
 
   function confirmCustomModal() {
     if(saving || !config) return;
-    setAvailabilityMode(Object.keys(config.HorariosPorDia ?? {}).length ? "personalizado" : "padrao");
+    setAvailabilityMode("personalizado");
     setCustomOwner("availability");
     customModalSnapshot.current=null;
     setExpandedCustomDay(null);
@@ -353,7 +353,7 @@ export default function Funcionamento() {
       };
     }
     updateConfig({ HorariosPorDia: next });
-    setAvailabilityMode(Object.keys(next).length ? "personalizado" : "padrao");
+    setAvailabilityMode("personalizado");
   }
 
   function finishCustomDay(dia:DiaFuncionamentoKey) {
@@ -460,7 +460,7 @@ export default function Funcionamento() {
     // Merge only this card into the last confirmed server state.
     const draft = config;
     const baseline = savedSnapshot ?? criarFuncionamentoPadrao(usuarioId);
-    const candidate = { ...baseline, ...blockPatch(block,draft), ...(block==="breaks" && nextBreaks ? {Intervalos:nextBreaks} : {}) };
+    const candidate = { ...baseline, ...blockPatch(block,draft), ...((block==="availability" || block==="custom") ? {ModoFuncionamento:availabilityMode} : {}), ...(block==="breaks" && nextBreaks ? {Intervalos:nextBreaks} : {}) };
     if(block==="custom" || block==="availability") {
       // A new exception cannot be persisted for a day that is not yet enabled.
       if(DIAS.some(d=>candidate.HorariosPorDia?.[d.key] && !baseline[d.key] && draft[d.key])) {
@@ -535,7 +535,7 @@ export default function Funcionamento() {
       setSavingBlock(block);
       const savedConfig = await salvarFuncionamento(usuarioId, candidate);
       setSavedSnapshot(savedConfig);
-      if(block==="availability" || block==="custom") setSavedMode(availabilityMode);
+      if(block==="availability" || block==="custom") setSavedMode(savedConfig.ModoFuncionamento ?? availabilityMode);
       setConfig(current => {
         if(!current)return savedConfig;
         // Preserve pending changes in other cards, including changes made during the request.
