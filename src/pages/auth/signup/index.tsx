@@ -1,3 +1,4 @@
+import { useNotification } from "@/context/NotificationContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -17,6 +18,7 @@ import { useRegisterForm } from "@/hooks/useRegisterForm";
 
 function Register() {
   const { t } = useLanguage();
+  const { showNotification } = useNotification();
   const location = useLocation();
   const plan = new URLSearchParams(location.search).get("plano");
   const selectedPlan = plan && ["BASICO","INTERMEDIARIO","AVANCADO"].includes(plan) ? plan : null;
@@ -119,7 +121,7 @@ function Register() {
                   const selected = event.target.files?.[0] ?? null;
                   setFotoPerfil(selected && ["image/jpeg", "image/png", "image/webp"].includes(selected.type) && selected.size <= 20 * 1024 * 1024 ? selected : null);
                   if (selected && (!["image/jpeg", "image/png", "image/webp"].includes(selected.type) || selected.size > 20 * 1024 * 1024)) {
-                    window.alert("A foto deve ser JPG, PNG ou WEBP e ter no máximo 20 MB.");
+                    showNotification({type:"warning",title:"Foto inválida",message:"A foto deve ser JPG, PNG ou WEBP e ter no máximo 20 MB."});
                     event.target.value = "";
                   }
                 }}
