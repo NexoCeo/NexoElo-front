@@ -754,3 +754,16 @@ input:focus-visible {
 .configBody .dayButton{box-sizing:border-box;width:100%;max-width:54px;height:auto;min-height:0;min-width:0;aspect-ratio:1/1;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;text-align:center;gap:0}
 .configBody .dayButton strong{display:block;line-height:1;margin:0;padding:0;text-align:center}
 @media(max-width:760px){.configBody .dayButton{max-width:44px}.configBody .dayButton strong{font-size:clamp(9px,2.7vw,12px)}}
+
+/* Todos os intervalos utilizam a mesma estrutura, inclusive em telas estreitas. */
+.configBody .intervalList{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px;align-items:stretch}
+.breakCard{display:grid;grid-template-rows:34px auto 18px;gap:10px;min-width:0;box-sizing:border-box;padding:12px;border:1px solid var(--theme-bottom);border-radius:10px;background:var(--theme-surface-muted)}
+.breakHeading{display:flex;align-items:center;gap:8px;min-width:0;font-size:12px;color:var(--theme-text)}
+.breakHeading>svg{color:var(--theme-warning);flex-shrink:0}
+.breakHeading>strong{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.breakHeading .removeButton{flex:0 0 34px;margin:0}
+.breakFields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;min-width:0}
+.breakFields label{display:grid;gap:5px;font-size:12px;font-weight:600;color:var(--theme-text-muted);min-width:0}
+.breakFields input{box-sizing:border-box;width:100%;min-width:0;height:40px;border:1px solid var(--theme-border-strong);border-radius:8px;padding:0 9px;background:var(--theme-surface-muted);color:var(--theme-text);font:inherit;color-scheme:dark}
+.breakDuration{display:flex;align-items:center;font-size:11px;line-height:18px;color:var(--theme-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:760px){.configBody .intervalList{grid-template-columns:minmax(0,1fr)}.breakCard{width:100%;padding:10px;gap:8px}.breakFields{gap:7px}}
