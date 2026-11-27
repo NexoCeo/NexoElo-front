@@ -178,6 +178,44 @@ const BREAK_TYPES: {value:TipoPausa;label:string}[] = [
   {value:"CAFE",label:"Café"}, {value:"ALMOCO",label:"Almoço"}, {value:"LANCHE",label:"Lanche"}, {value:"JANTAR",label:"Jantar"}, {value:"DESCANSO",label:"Descanso"}, {value:"COMPROMISSO",label:"Compromisso pessoal"}, {value:"LIMPEZA",label:"Limpeza e organização"}, {value:"MANUTENCAO",label:"Manutenção"}, {value:"OUTRO",label:"Outro"},
 ];
 const BREAK_ICONS = {CAFE:FaCoffee,ALMOCO:FaUtensils,LANCHE:FaHamburger,JANTAR:FaUtensils,DESCANSO:FaBed,COMPROMISSO:FaCalendarAlt,LIMPEZA:FaBroom,MANUTENCAO:FaTools,OUTRO:FaClock};
+// Seletor reutilizável, sem o popup nativo de input type=time.
+function TimeDropdown({value,onChange,min,max,label}:{value:string;onChange:(value:string)=>void;min?:string;max?:string;label:string}) {
+  const [open,setOpen]=useState(false);
+  const host=useRef<HTMLDivElement>(null);
+  const trigger=useRef<HTMLButtonElement>(null);
+  const [position,setPosition]=useState({top:0,left:0,width:0,height:220});
+  const popup=useRef<HTMLDivElement>(null);
+  const options=Array.from(new Set([...Array.from({length:96},(_,i)=>minutesToTime(i*15)),value])).filter(v=>v&&(!min||v>=min)&&(!max||v<=max)).sort();
+  function toggle() {
+    if(open){setOpen(false);return;}
+    const rect=trigger.current?.getBoundingClientRect();
+    if(!rect)return;
+    const below=window.innerHeight-rect.bottom-8;
+    const above=rect.top-8;
+    const height=Math.min(220,Math.max(below,above));
+    const width=Math.min(Math.max(rect.width,112),window.innerWidth-16);
+    setPosition({left:Math.max(8,Math.min(rect.left,window.innerWidth-width-8)),top:below>=height?rect.bottom+4:Math.max(8,rect.top-height-4),width,height});
+    setOpen(true);
+  }
+  useEffect(()=>{
+    if(!open)return;
+    popup.current?.querySelector<HTMLElement>('[aria-selected="true"]')?.scrollIntoView({block:"nearest"});
+    const outside=(event:PointerEvent)=>{if(!host.current?.contains(event.target as Node)&&!popup.current?.contains(event.target as Node))setOpen(false);};
+    const escape=(event:KeyboardEvent)=>{if(event.key==="Escape"){event.stopPropagation();setOpen(false);trigger.current?.focus();}};
+    const resize=()=>setOpen(false);
+    const scroll=(event:Event)=>{if(!popup.current?.contains(event.target as Node))setOpen(false);};
+    document.addEventListener("pointerdown",outside);
+    window.addEventListener("keydown",escape,true);
+    window.addEventListener("resize",resize);
+    window.addEventListener("scroll",scroll,true);
+    return()=>{document.removeEventListener("pointerdown",outside);window.removeEventListener("keydown",escape,true);window.removeEventListener("resize",resize);window.removeEventListener("scroll",scroll,true);};
+  },[open]);
+  return <div className={styles.timeDropdown} ref={host}>
+    <button ref={trigger} type="button" className={styles.timeTrigger} aria-label={label+": "+value} aria-haspopup="listbox" aria-expanded={open} onClick={toggle}><span>{value||"--:--"}</span><FaChevronDown aria-hidden="true"/></button>
+    {open&&createPortal(<div ref={popup} className={styles.timeOptions} role="listbox" aria-label={label} style={{top:position.top,left:position.left,width:position.width,maxHeight:position.height}}>{options.map(option=><button type="button" role="option" aria-selected={value===option} key={option} onClick={()=>{onChange(option);setOpen(false);trigger.current?.focus();}}>{option}</button>)}</div>,document.body)}
+  </div>;
+}
+
 function BreakCard({interval,index,startLabel,endLabel,min,max,busy,onRemove,onEdit}:{interval:FuncionamentoIntervalo;index:number;startLabel:string;endLabel:string;min:string;max:string;busy:boolean;onRemove:()=>void;onEdit:()=>void}) {
   const type = interval.Tipo ?? "OUTRO";
   const BreakIcon = BREAK_ICONS[type] ?? FaClock;
@@ -664,24 +702,12 @@ export default function Funcionamento() {
                 <div className={styles.timeRange}>
                   <label style={{ color: theme.colors.text }}>
                     {t("hours.open")}
-                    <input
-                      type="time"
-                      value={config.HorarioAbertura}
-                      onChange={(event) => updateConfig({ HorarioAbertura: event.target.value })}
-                      step="900"
-                      required
-                    />
+                    <TimeDropdown label={t("hours.open")} value={config.HorarioAbertura} onChange={value=>updateConfig({HorarioAbertura:value})}/>
                   </label>
                   <FaArrowRight className={styles.timeArrow} aria-hidden="true" />
                   <label style={{ color: theme.colors.text }}>
                     {t("hours.end")}
-                    <input
-                      type="time"
-                      value={config.HorarioFechamento}
-                      onChange={(event) => updateConfig({ HorarioFechamento: event.target.value })}
-                      step="900"
-                      required
-                    />
+                    <TimeDropdown label={t("hours.end")} value={config.HorarioFechamento} onChange={value=>updateConfig({HorarioFechamento:value})}/>
                   </label>
                 </div>
                   {saveAction("times")}
@@ -748,12 +774,10 @@ export default function Funcionamento() {
                       </button>
                       {horario && expandedCustomDay===dia.key && <div className={styles.dayHoursEditor}>
                         <label>{t("hours.open")}
-                          <input type="time" value={horario.Inicio} step="900"
-                            onChange={event => alterarHorarioDia(dia.key, "Inicio", event.target.value)} />
+                          <TimeDropdown label={t("hours.open")} value={horario.Inicio} onChange={value=>alterarHorarioDia(dia.key,"Inicio",value)}/>
                         </label>
                         <label>{t("hours.end")}
-                          <input type="time" value={horario.Fim} step="900"
-                            onChange={event => alterarHorarioDia(dia.key, "Fim", event.target.value)} />
+                          <TimeDropdown label={t("hours.end")} value={horario.Fim} onChange={value=>alterarHorarioDia(dia.key,"Fim",value)}/>
                         </label>
                         <div className={styles.dayPauses}>
                           <div className={styles.dayPausesHeader}>
@@ -762,13 +786,9 @@ export default function Funcionamento() {
                           </div>
                           {horario.Intervalos.map((pausa, index) =>
                             <div className={styles.dayPauseRow} key={index}>
-                              <input aria-label={`Início da pausa ${index + 1} de ${[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)]}`}
-                                type="time" value={pausa.Inicio} step="900"
-                                onChange={event => alterarPausaDia(dia.key, index, "Inicio", event.target.value)} />
+                              <TimeDropdown label={`Início da pausa ${index + 1} de ${[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)]}`} value={pausa.Inicio} onChange={value=>alterarPausaDia(dia.key,index,"Inicio",value)}/>
                               <span>{t("hours.until")}</span>
-                              <input aria-label={`Fim da pausa ${index + 1} de ${[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)]}`}
-                                type="time" value={pausa.Fim} step="900"
-                                onChange={event => alterarPausaDia(dia.key, index, "Fim", event.target.value)} />
+                              <TimeDropdown label={`Fim da pausa ${index + 1} de ${[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)]}`} value={pausa.Fim} onChange={value=>alterarPausaDia(dia.key,index,"Fim",value)}/>
                               <button type="button" onClick={() => removerPausaDia(dia.key, index)}
                                 aria-label={`Remover pausa ${index + 1} de ${[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)]}`}><FaTrash aria-hidden="true" /></button>
                             </div>
@@ -790,8 +810,8 @@ export default function Funcionamento() {
           </select>
         </label>
         <div className={styles.breakFields}>
-          <label>{t("hours.start")}<input type="time" value={breakDraft.Inicio} min={config.HorarioAbertura} max={config.HorarioFechamento} step="900" onChange={e=>setBreakDraft(previous=>previous?{...previous,Inicio:e.target.value}:null)}/></label>
-          <label>{t("hours.finish")}<input type="time" value={breakDraft.Fim} min={config.HorarioAbertura} max={config.HorarioFechamento} step="900" onChange={e=>setBreakDraft(previous=>previous?{...previous,Fim:e.target.value}:null)}/></label>
+          <label>{t("hours.start")}<TimeDropdown label={t("hours.start")} value={breakDraft.Inicio} min={config.HorarioAbertura} max={config.HorarioFechamento} onChange={value=>setBreakDraft(previous=>previous?{...previous,Inicio:value}:null)}/></label>
+          <label>{t("hours.finish")}<TimeDropdown label={t("hours.finish")} value={breakDraft.Fim} min={config.HorarioAbertura} max={config.HorarioFechamento} onChange={value=>setBreakDraft(previous=>previous?{...previous,Fim:value}:null)}/></label>
         </div>
       </Modal>,document.body)}
     </main>
