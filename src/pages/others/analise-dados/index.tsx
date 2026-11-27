@@ -19,6 +19,46 @@ import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
 type SegmentKey = "recurring" | "fresh" | "inactive";
 type SegmentClient = { clienteId:number; nome:string; atendimentosPeriodo:number; atendimentosAnteriores:number; ultimoAtendimento:string };
+type MetricsLinePoint = { label:string; title:string; value:number; details:string[] };
+function MetricsLineChart({label,points,resetKey,showAllLabels=false}:{label:string;points:MetricsLinePoint[];resetKey:string;showAllLabels?:boolean}) {
+  const [selected,setSelected] = useState<number|null>(null);
+  const host = useRef<HTMLDivElement>(null);
+  useEffect(()=>{setSelected(null);},[resetKey]);
+  useEffect(()=>{
+    if(selected===null)return;
+    const outside=(event:PointerEvent)=>{if(!host.current?.contains(event.target as Node))setSelected(null);};
+    const escape=(event:KeyboardEvent)=>{if(event.key==="Escape")setSelected(null);};
+    document.addEventListener("pointerdown",outside);
+    document.addEventListener("keydown",escape);
+    return ()=>{document.removeEventListener("pointerdown",outside);document.removeEventListener("keydown",escape);};
+  },[selected]);
+  const max=Math.max(1,...points.map(p=>p.value));
+  const x=(i:number)=>points.length===1?50:i/Math.max(1,points.length-1)*100;
+  const y=(i:number)=>100-points[i].value/max*88;
+  const coordinates=points.map((_,i)=>`${x(i)},${y(i)}`).join(" ");
+  const active=selected===null?null:points[selected];
+  const labelIndices=showAllLabels?points.map((_,i)=>i):[...new Set([0,Math.max(0,Math.ceil(points.length/2)-1),points.length-1])];
+  return <div ref={host} className={styles.lineChart} role="group" aria-label={label}>
+    <div className={styles.lineGrid}/>
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <polygon points={`0,100 ${coordinates} 100,100`} fill="rgba(31,126,243,.18)"/>
+      <polyline points={coordinates} fill="none" stroke="#2186ff" strokeWidth="2.2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round"/>
+    </svg>
+    <div style={{position:"absolute",inset:"0 0 22px"}} onPointerLeave={event=>{if(event.pointerType==="mouse")setSelected(null);}}>
+      {points.map((point,i)=>{
+        const left=i===0?0:(x(i-1)+x(i))/2;
+        const right=i===points.length-1?100:(x(i)+x(i+1))/2;
+        return <button key={i} type="button" aria-label={point.title+": "+point.details.join(", ")} aria-pressed={selected===i} style={{position:"absolute",left:left+"%",width:(right-left)+"%",height:"100%",padding:0,border:0,background:"transparent",cursor:"pointer",touchAction:"pan-y"}} onPointerEnter={event=>{if(event.pointerType==="mouse")setSelected(i);}} onFocus={()=>setSelected(i)} onBlur={()=>setSelected(current=>current===i?null:current)} onClick={()=>setSelected(i)}/>;
+      })}
+      {active && selected!==null && <>
+        <span aria-hidden="true" style={{position:"absolute",left:x(selected)+"%",top:y(selected)+"%",width:9,height:9,borderRadius:"50%",background:"#2186ff",border:"2px solid var(--analysis-panel)",transform:"translate(-50%,-50%)",pointerEvents:"none"}}/>
+        <div role="tooltip" style={{position:"absolute",left:x(selected)+"%",top:y(selected)+"%",transform:`translate(${x(selected)<25?"0":x(selected)>75?"-100%":"-50%"},${y(selected)<45?"12px":"calc(-100% - 12px)"})`,padding:"8px 11px",border:"1px solid var(--analysis-border)",borderRadius:8,background:"var(--analysis-panel)",color:"var(--analysis-text)",boxShadow:"0 4px 16px #0005",fontSize:11,whiteSpace:"nowrap",pointerEvents:"none",zIndex:4}}><strong>{active.title}</strong>{active.details.map((detail,i)=><div key={i}>{detail}</div>)}</div>
+      </>}
+    </div>
+    <div className={styles.lineLabels}>{labelIndices.map(i=>points[i]&&<span key={i}>{points[i].label}</span>)}</div>
+  </div>;
+}
+
 export default function AnaliseDados() {
   const { theme } = useTheme();
   const { t, lang } = useLanguage();
@@ -160,9 +200,6 @@ export default function AnaliseDados() {
   const latestBookings = useMemo(() => [...metricsHistory]
     .sort((a,b)=>new Date(b.DataAgendamento).getTime()-new Date(a.DataAgendamento).getTime())
     .slice(0,4),[metricsHistory]);
-  const dayMaximum = Math.max(1,...dailyCounts.map(item=>item.count));
-  const chartPoints = dailyCounts.map((item,index) =>
-    `${(index/(Math.max(1,dailyCounts.length-1))*100).toFixed(2)},${(100-(item.count/dayMaximum)*88).toFixed(2)}`).join(" ");
   const maxWeeklyRevenue = Math.max(1,...weeklyRevenue.map(item=>item.value));
   const dashboardMoney = (value:number) => new Intl.NumberFormat(lang === "pt" ? "pt-BR" : "en-US",{style:"currency",currency:"BRL"}).format(value);
   const monthOptions = useMemo(() => {
@@ -272,9 +309,9 @@ export default function AnaliseDados() {
   const pt = lang === "pt";
   const tabs = [
     { id: "overview", label: pt ? "Visão geral" : "Overview" },
-    { id: "finance", label: pt ? "Financeiro" : "Financial" },
     { id: "customers", label: pt ? "Clientes" : "Customers" },
     ...(usuario?.Papel === "EMPRESA" ? [{ id: "team", label: pt ? "Equipe" : "Team" }] : []),
+    { id: "finance", label: pt ? "Financeiro" : "Financial" },
     { id: "occupancy", label: pt ? "Ocupação" : "Occupancy" },
   ] as { id: typeof activeTab; label: string }[];
   const amount = (item: Agendamento) => Number(item.ValorServico ?? item.Valor ?? 0) || 0;
@@ -450,7 +487,10 @@ export default function AnaliseDados() {
         {metric(pt ? "Valor cancelado" : "Cancelled value", dashboardMoney(cancelled.reduce((sum, item) => sum + amount(item), 0)))}
       </section>
       <div className={styles.dashboardCharts}>
-        {ranking(pt ? "Valor concluído por semana (R$)" : "Completed value by week (BRL)", weeklyRevenue.map(w => ({name:w.label,count:w.value,display:dashboardMoney(w.value)})))}
+        <section className={styles.dashboardPanel}>
+          <div className={styles.revenueTitle}><h2><FaDollarSign aria-hidden="true"/>{pt?"Valor concluído por semana":"Completed value by week"}</h2><strong>{dashboardMoney(recordedRevenue)}</strong></div>
+          <MetricsLineChart label={pt?"Valor concluído por semana":"Completed value by week"} showAllLabels points={weeklyRevenue.map((week,index) => ({label:week.label,title: `${String(index*7+1).padStart(2,"0")}/${String(referenceMonth.month).padStart(2,"0")} – ${String(Math.min(index*7+7,referenceMonth.count)).padStart(2,"0")}/${String(referenceMonth.month).padStart(2,"0")}`,value:week.value,details:[(pt?"Valor concluído":"Completed value")+": "+dashboardMoney(week.value)]}))} resetKey={periodFilter+":"+professionalFilter}/>
+        </section>
         <section className={styles.dashboardPanel}><h2><FaDollarSign />{pt ? "Situação dos pagamentos" : "Payment status"}</h2><div className={styles.popularList}>{[...new Set(concludedHistory.map(item => item.StatusPagamento || (pt ? "Não informado" : "Unknown")))].map(status => <div className={styles.detailService} key={status}><span>{status}</span><strong>{concludedHistory.filter(item => (item.StatusPagamento || (pt ? "Não informado" : "Unknown")) === status).length}</strong></div>)}</div><p className={styles.note}>{pt ? "Valores de serviços registrados não equivalem a pagamentos confirmados." : "Recorded service values are not confirmed payments."}</p></section>
       </div>
     </>}
@@ -544,33 +584,7 @@ export default function AnaliseDados() {
     <div className={styles.dashboardCharts} ref={interactiveChartsRef}>
       <section className={styles.dashboardPanel}>
         <h2><FaCalendarAlt aria-hidden="true" /> Agendamentos no período</h2>
-        <div className={styles.lineChart} role="group" aria-label={`Agendamentos diários: ${metricsHistory.length} no mês`}>
-          <div className={styles.lineGrid} />
-          <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            <polygon points={`0,100 ${chartPoints} 100,100`} fill="rgba(31,126,243,.18)" />
-            <polyline points={chartPoints} fill="none" stroke="#2186ff" strokeWidth="2.2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
-          </svg>
-          <div style={{position:"absolute",inset:"0 0 22px",display:"flex"}} onPointerLeave={event => {if(event.pointerType === "mouse") setChartDetail(null);}}>
-            {dailyCounts.map((day,index) => {
-              const selected = chartDetail?.kind === "day" && chartDetail.index === index;
-              const x = index / Math.max(1,dailyCounts.length-1) * 100;
-              const y = 100 - day.count / dayMaximum * 88;
-              const date = new Intl.DateTimeFormat(lang === "pt" ? "pt-BR" : "en-US",{day:"2-digit",month:"2-digit",year:"numeric"}).format(new Date(referenceMonth.year,referenceMonth.month-1,day.day));
-              return <button type="button" key={day.day} aria-label={`${date}: ${day.count} ${pt ? "agendamentos" : "appointments"}`} aria-pressed={selected} style={{position:"absolute",left:`calc(${x}% - ${50/Math.max(1,dailyCounts.length-1)}%)`,width:`${100/Math.max(1,dailyCounts.length-1)}%`,height:"100%",padding:0,border:0,background:"transparent",cursor:"pointer",touchAction:"pan-y",zIndex:selected?2:1}} onPointerEnter={event => {if(event.pointerType === "mouse") setChartDetail({kind:"day",index});}} onFocus={() => setChartDetail({kind:"day",index})} onBlur={() => setChartDetail(current => current?.kind === "day" && current.index === index ? null : current)} onClick={() => setChartDetail({kind:"day",index})}>
-                {selected && <span aria-hidden="true" style={{position:"absolute",left:"50%",top:`${y}%`,width:9,height:9,borderRadius:"50%",background:"#2186ff",border:"2px solid var(--analysis-panel)",transform:"translate(-50%,-50%)",pointerEvents:"none"}}/>}
-              </button>;
-            })}
-            {chartDetail?.kind === "day" && dailyCounts[chartDetail.index] && (() => {
-              const day = dailyCounts[chartDetail.index];
-              const x = chartDetail.index / Math.max(1,dailyCounts.length-1)*100;
-              const y = 100-day.count/dayMaximum*88;
-              return <div role="tooltip" style={{position:"absolute",left:`${x}%`,top:`${y}%`,transform:`translate(${x<24?"0":x>76?"-100%":"-50%"},${y<45?"12px":"calc(-100% - 12px)"})`,padding:"8px 11px",border:"1px solid var(--analysis-border)",borderRadius:8,background:"var(--analysis-panel)",color:"var(--analysis-text)",boxShadow:"0 4px 16px #0005",fontSize:11,whiteSpace:"nowrap",pointerEvents:"none",zIndex:4}}>
-                <strong>{String(day.day).padStart(2,"0")}/{String(referenceMonth.month).padStart(2,"0")}/{referenceMonth.year}</strong><div>{pt ? "Agendamentos" : "Appointments"}: {day.count}</div><div>{pt ? "Valor concluído" : "Completed value"}: {dashboardMoney(day.revenue)}</div>
-              </div>;
-            })()}
-          </div>
-          <div className={styles.lineLabels}><span>01/{String(referenceMonth.month).padStart(2,"0")}</span><span>{String(Math.ceil(referenceMonth.count/2)).padStart(2,"0")}/{String(referenceMonth.month).padStart(2,"0")}</span><span>{referenceMonth.count}/{String(referenceMonth.month).padStart(2,"0")}</span></div>
-        </div>
+        <MetricsLineChart label={pt?"Agendamentos no período":"Appointments in period"} points={dailyCounts.map(day => ({ label: String(day.day).padStart(2,"0")+"/"+String(referenceMonth.month).padStart(2,"0"), title: new Intl.DateTimeFormat(pt?"pt-BR":"en-US",{day:"2-digit",month:"2-digit",year:"numeric"}).format(new Date(referenceMonth.year,referenceMonth.month-1,day.day)), value:day.count, details:[(pt?"Agendamentos":"Appointments")+": "+day.count,(pt?"Valor concluído":"Completed value")+": "+dashboardMoney(day.revenue)] }))} resetKey={periodFilter+":"+professionalFilter}/>
       </section>
       <section className={styles.dashboardPanel}>
         <div className={styles.revenueTitle}><h2><FaDollarSign aria-hidden="true" /> Valor concluído por semana</h2><strong>{dashboardMoney(recordedRevenue)}</strong></div>
