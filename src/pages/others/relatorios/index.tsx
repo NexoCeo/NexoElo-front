@@ -279,11 +279,7 @@ export default function Relatorios() {
         </div>
       </section>
 
-      {error && !modalOpen && (
-        <p className={styles.pageError} role="alert">
-          {error}
-        </p>
-      )}
+      
 
       <section className={styles.reportGrid} aria-label={t("reports.available")}>
         {relatoriosTraduzidos.map((relatorio) => {
@@ -381,8 +377,7 @@ export default function Relatorios() {
                   <p>{t("reports.generatingPdf")}</p>
                 </div>
               ) : error ? (
-                <div className={styles.previewFeedback} role="alert">
-                  <p>{error}</p>
+                <div className={styles.previewFeedback}>
                   <button type="button" onClick={() => visualizarRelatorio(relatorioAtivo)}>
                     {t("reports.retry")}
                   </button>
