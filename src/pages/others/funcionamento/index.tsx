@@ -167,8 +167,6 @@ export default function Funcionamento() {
   const [config, setConfig] = useState<FuncionamentoConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [availabilityMode, setAvailabilityMode] = useState<"padrao" | "personalizado">("padrao");
   const personalizedBackup = useRef<FuncionamentoConfig["HorariosPorDia"]>({});
   const lastSavedConfig = useRef("");
@@ -194,7 +192,6 @@ export default function Funcionamento() {
 
       try {
         setLoading(true);
-        setError("");
         const data = await obterFuncionamento(usuarioId);
         setConfig(data);
         lastSavedConfig.current = JSON.stringify(data);
@@ -202,7 +199,6 @@ export default function Funcionamento() {
         setAvailabilityMode(Object.keys(data.HorariosPorDia ?? {}).length > 0 ? "personalizado" : "padrao");
       } catch {
         const message = t("hours.loadError");
-        setError(message);
         showNotification({ type: "error", title: t("hours.unavailable"), message });
         const defaults = criarFuncionamentoPadrao(usuarioId);
         setConfig(defaults);
@@ -232,8 +228,6 @@ export default function Funcionamento() {
   });
 
   function updateConfig(nextConfig: Partial<FuncionamentoConfig>) {
-    setError("");
-    setSuccess("");
     setConfig((currentConfig) => currentConfig ? { ...currentConfig, ...nextConfig } : currentConfig);
   }
 
@@ -362,7 +356,6 @@ export default function Funcionamento() {
 
     if (!novoIntervalo) {
       const message = t("hours.shortDay");
-      setError(message);
       showNotification({ type: "warning", title: t("hours.breakNotAdded"), message });
       return;
     }
@@ -388,54 +381,45 @@ export default function Funcionamento() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError("");
-    setSuccess("");
 
     if (!config || !usuarioId) {
       const message = t("hours.userMissing");
-      setError(message);
       showNotification({ type: "error", title: t("hours.notSaved"), message });
       return;
     }
 
     if (diasSelecionados.length === 0) {
       const message = t("hours.daysRequired");
-      setError(message);
       showNotification({ type: "warning", title: t("hours.noDays"), message });
       return;
     }
 
     if (!config.HorarioAbertura || !config.HorarioFechamento) {
       const message = t("hours.timeRequired");
-      setError(message);
       showNotification({ type: "warning", title: t("hours.timeIncomplete"), message });
       return;
     }
 
     if (timeToMinutes(config.HorarioAbertura) >= timeToMinutes(config.HorarioFechamento)) {
       const message = t("hours.timeInvalidDesc");
-      setError(message);
       showNotification({ type: "warning", title: t("hours.timeInvalid"), message });
       return;
     }
 
     if (hasIntervaloInvalido(config)) {
       const message = t("hours.breakOutside");
-      setError(message);
       showNotification({ type: "warning", title: t("hours.breakInvalid"), message });
       return;
     }
 
     if (hasIntervaloSobreposto(config)) {
       const message = t("hours.overlap");
-      setError(message);
       showNotification({ type: "warning", title: t("hours.overlapTitle"), message });
       return;
     }
 
     if (pausaTotal >= expedienteTotal) {
       const message = t("hours.noAvailability");
-      setError(message);
       showNotification({ type: "warning", title: t("hours.noAvailabilityTitle"), message });
       return;
     }
@@ -451,7 +435,6 @@ export default function Funcionamento() {
           hasIntervaloInvalido(diario) || hasIntervaloSobreposto(diario) ||
           getPausaTotal(diario) >= fechamento - abertura) {
         const message = `${t("hours.reviewDay")} ${[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(d => d.key === dia.key)]}.`;
-        setError(message);
         showNotification({ type: "warning", title: t("hours.specificInvalid"), message });
         return;
       }
@@ -463,7 +446,6 @@ export default function Funcionamento() {
       setConfig(savedConfig);
       lastSavedConfig.current = JSON.stringify(savedConfig);
       personalizedBackup.current = { ...savedConfig.HorariosPorDia };
-      setSuccess(t("hours.saved"));
       showNotification({
         type: "success",
         title: t("hours.saved"),
@@ -473,7 +455,6 @@ export default function Funcionamento() {
       const message = isAxiosError<ApiError>(err)
         ? getApiErrorMessage(err.response?.data, t("hours.saveError"))
         : t("hours.saveError");
-      setError(message);
       showNotification({ type: "error", title: t("hours.saveFailedTitle"), message });
     } finally {
       setSaving(false);
@@ -739,10 +720,6 @@ export default function Funcionamento() {
               </section>
 
               <div className={styles.actions}>
-                <div className={styles.messages} aria-live="polite">
-                  {error && <p className={styles.error} role="alert">{error}</p>}
-                  {success && <p className={styles.success}>{success}</p>}
-                </div>
 
               </div>
             </>
