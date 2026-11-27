@@ -794,3 +794,9 @@ input:focus-visible {
 .customModalContent .dayHoursList{padding:0;margin:0;max-height:none;overflow:visible;min-width:0}
 .customModalContent .dayHoursRow,.customModalContent .dayHoursEditor,.customModalContent .dayPauses{min-width:0;max-width:100%;box-sizing:border-box}
 .customModalContent .dayHoursEditor input,.customModalContent .dayPauseRow input{min-width:0;max-width:100%;box-sizing:border-box}
+
+/* Ação de personalização junto aos atalhos de seleção de dias. */
+.configBody .daysQuickActions{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;width:100%;min-width:0}
+.daysQuickActions .presets{flex:1 1 auto;min-width:0;flex-wrap:wrap}
+.daysQuickActions .daysCustomize{flex:0 0 auto;margin-left:auto;white-space:nowrap;box-sizing:border-box;min-width:0;font-size:11px;padding:5px 9px;min-height:28px}
+@media(max-width:760px){.daysQuickActions{gap:4px!important}.daysQuickActions .presets{gap:4px}.daysQuickActions .daysCustomize{font-size:10px;padding:4px 7px;min-height:26px}}
