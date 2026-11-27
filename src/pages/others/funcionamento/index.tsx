@@ -10,6 +10,7 @@ import {
   FaSave,
   FaTrash,
   FaPencilAlt,
+  FaChevronDown,
   FaSlidersH,
   FaCheckCircle,
 } from "react-icons/fa";
@@ -468,27 +469,16 @@ export default function Funcionamento() {
 
   return (
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
-      <div className={styles.intro}><strong>{t("hours.intro")}</strong><span>{t("hours.introDesc")}</span></div>
-      <nav className={styles.stepper} aria-label="Etapas da configuração">
-        {["Disponibilidade", "Dias da semana", "Horários", "Intervalos", "Confirmação"].map((label,index) => (
-          <div className={styles.stepperItem} key={label}>
-            <span className={styles.stepperNumber}>{index + 1}</span>
-            <span>{label}</span>
-          </div>
-        ))}
-      </nav>
       <div className={styles.content}>
         <form id="funcionamento-form" className={styles.editor} onSubmit={handleSubmit} noValidate>
           {loading || !config ? (
             <LoadingState label={t("hours.loading")} variant="hours" embedded />
           ) : (
             <>
-              <section className={styles.availabilitySection} aria-label="Tipo de disponibilidade">
-                <div className={styles.titleGroup}>
-                  <span className={styles.step} style={{ backgroundColor: theme.colors.primary }}>1</span>
-                  <div><h2>Disponibilidade de atendimento</h2><p>Defina horários iguais ou personalizados para cada dia.</p></div>
-                </div>
-                <div className={styles.availabilityOptions}>
+              <details className={styles.configCard}>
+                <summary className={styles.configToggle}><FaSlidersH aria-hidden="true"/><span>{"Disponibilidade de atendimento"}</span><FaChevronDown aria-hidden="true"/></summary>
+                <div className={styles.configBody}>
+                  <div className={styles.availabilityOptions}>
                   <button type="button" disabled={loading || saving || !config} aria-pressed={!temHorariosPersonalizados}
                     onClick={() => chooseAvailabilityMode("padrao")}
                     className={`${styles.availabilityOption} ${!temHorariosPersonalizados ? styles.availabilitySelected : ""}`}>
@@ -504,17 +494,12 @@ export default function Funcionamento() {
                     {temHorariosPersonalizados && <FaCheckCircle aria-label="Selecionado" />}
                   </button>
                 </div>
-              </section>
-              <section className={styles.card} style={cardStyle}>
-                <div className={styles.cardHeader}>
-                  <div className={styles.titleGroup}>
-                    <span className={styles.step} style={{ backgroundColor: theme.colors.primary }}>2</span>
-                    <div>
-                      <h2 style={{ color: theme.colors.text }}>{t("hours.daysTitle")}</h2>
-                      <p style={{ color: theme.colors.inactive }}>{t("hours.daysDesc")}</p>
-                    </div>
-                  </div>
-                  <div className={styles.presets} aria-label={t("hours.quickSelect")}>
+                </div>
+              </details>
+              <details className={styles.configCard}>
+                <summary className={styles.configToggle}><FaCalendarAlt aria-hidden="true"/><span>{t("hours.daysTitle")}</span><FaChevronDown aria-hidden="true"/></summary>
+                <div className={styles.configBody}>
+                  <div className={styles.cardHeader}><div className={styles.presets} aria-label={t("hours.quickSelect")}>
                     <button type="button" onClick={() => setDiasSelecionados(DIAS_UTEIS)}>{t("hours.weekdays")}</button>
                     <button type="button" onClick={() => setDiasSelecionados(new Set(DIAS.map((dia) => dia.key)))}>{t("hours.allDays")}</button>
                     <button type="button" onClick={() => setDiasSelecionados(new Set())}>{t("hours.none")}</button>
@@ -545,18 +530,13 @@ export default function Funcionamento() {
                     );
                   })}
                 </div>
-              </section>
+                </div>
+              </details>
 
-              <section className={styles.card} style={cardStyle}>
-                <div className={styles.cardHeader}>
-                  <div className={styles.titleGroup}>
-                    <span className={styles.step} style={{ backgroundColor: theme.colors.primary }}>3</span>
-                    <div>
-                      <h2 style={{ color: theme.colors.text }}>{t("hours.timeTitle")}</h2>
-                      <p style={{ color: theme.colors.inactive }}>{t("hours.timeDesc")}</p>
-                    </div>
-                  </div>
-                  <span className={styles.duration} style={{ color: theme.colors.primary }}>
+              <details className={styles.configCard}>
+                <summary className={styles.configToggle}><FaClock aria-hidden="true"/><span>{t("hours.timeTitle")}</span><FaChevronDown aria-hidden="true"/></summary>
+                <div className={styles.configBody}>
+                  <div className={styles.cardHeader}><span className={styles.duration} style={{ color: theme.colors.primary }}>
                     <FaClock aria-hidden="true" /> {formatDuration(expedienteTotal)}
                   </span>
                 </div>
@@ -584,19 +564,13 @@ export default function Funcionamento() {
                     />
                   </label>
                 </div>
-              </section>
-
-              <section className={styles.card} style={cardStyle}>
-                <div className={styles.cardHeader}>
-                  <div className={styles.titleGroup}>
-                    <FaPencilAlt className={styles.editSymbol} aria-hidden="true" />
-                    <div>
-                      <h2 style={{ color: theme.colors.text }}>{t("hours.customTitle")}</h2>
-                      <p style={{ color: theme.colors.inactive }}>{t("hours.customDesc")}</p>
-                    </div>
-                  </div>
                 </div>
-                <div className={styles.dayHoursList}>
+              </details>
+
+              <details className={styles.configCard}>
+                <summary className={styles.configToggle}><FaPencilAlt aria-hidden="true"/><span>{t("hours.customTitle")}</span><FaChevronDown aria-hidden="true"/></summary>
+                <div className={styles.configBody}>
+                  <div className={styles.dayHoursList}>
                   {diasSelecionados.map(dia => {
                     const horario = horariosPorDia[dia.key];
                     const inicio = horario?.Inicio ?? config.HorarioAbertura;
@@ -645,18 +619,13 @@ export default function Funcionamento() {
                   })}
                   {!diasSelecionados.length && <p>{t("hours.selectDays")}</p>}
                 </div>
-              </section>
+                </div>
+              </details>
 
-              <section className={styles.card} style={cardStyle}>
-                <div className={styles.cardHeader}>
-                  <div className={styles.titleGroup}>
-                    <span className={styles.step} style={{ backgroundColor: theme.colors.primary }}>4</span>
-                    <div>
-                      <h2 style={{ color: theme.colors.text }}>{t("hours.breaksTitle")}</h2>
-                      <p style={{ color: theme.colors.inactive }}>{t("hours.breaksDesc")}</p>
-                    </div>
-                  </div>
-                  <button type="button" className={styles.addButton} onClick={addIntervalo}>
+              <details className={styles.configCard}>
+                <summary className={styles.configToggle}><FaCoffee aria-hidden="true"/><span>{t("hours.breaksTitle")}</span><FaChevronDown aria-hidden="true"/></summary>
+                <div className={styles.configBody}>
+                  <div className={styles.cardHeader}><button type="button" className={styles.addButton} onClick={addIntervalo}>
                     <FaPlus aria-hidden="true" /> {t("hours.breakAdd")}
                   </button>
                 </div>
@@ -717,11 +686,8 @@ export default function Funcionamento() {
                     ))}
                   </div>
                 )}
-              </section>
-
-              <div className={styles.actions}>
-
-              </div>
+                </div>
+              </details>
             </>
           )}
         </form>
