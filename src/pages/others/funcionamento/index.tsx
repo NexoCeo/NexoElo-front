@@ -15,7 +15,6 @@ import {
   FaPlus,
   FaSave,
   FaTrash,
-  FaPencilAlt,
   FaChevronDown,
   FaSlidersH,
 } from "react-icons/fa";
