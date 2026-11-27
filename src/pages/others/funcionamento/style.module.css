@@ -788,3 +788,9 @@ input:focus-visible {
 .schedulePreview>div{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;font-size:11px;color:var(--theme-text-muted)}
 .schedulePreview strong{font-size:11px;color:var(--theme-text);white-space:nowrap;font-variant-numeric:tabular-nums}
 @media(max-width:760px){.schedulePreview{grid-template-columns:minmax(0,1fr)}}
+
+/* O editor por dia mantém a estrutura original dentro do modal global. */
+.customModalContent{min-width:0;width:100%;box-sizing:border-box}
+.customModalContent .dayHoursList{padding:0;margin:0;max-height:none;overflow:visible;min-width:0}
+.customModalContent .dayHoursRow,.customModalContent .dayHoursEditor,.customModalContent .dayPauses{min-width:0;max-width:100%;box-sizing:border-box}
+.customModalContent .dayHoursEditor input,.customModalContent .dayPauseRow input{min-width:0;max-width:100%;box-sizing:border-box}
