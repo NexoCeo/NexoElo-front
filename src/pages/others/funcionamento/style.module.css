@@ -748,3 +748,9 @@ input:focus-visible {
  .configBody .daysGrid{gap:4px}
  .configBody .presets{justify-content:flex-start}
 }
+
+/* Dias de atendimento: círculos responsivos com rótulo centralizado. */
+.configBody .daysGrid{grid-template-columns:repeat(7,minmax(0,1fr));justify-items:center;align-items:center}
+.configBody .dayButton{box-sizing:border-box;width:100%;max-width:54px;height:auto;min-height:0;min-width:0;aspect-ratio:1/1;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;text-align:center;gap:0}
+.configBody .dayButton strong{display:block;line-height:1;margin:0;padding:0;text-align:center}
+@media(max-width:760px){.configBody .dayButton{max-width:44px}.configBody .dayButton strong{font-size:clamp(9px,2.7vw,12px)}}
