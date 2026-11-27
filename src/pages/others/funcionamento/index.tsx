@@ -590,7 +590,7 @@ export default function Funcionamento() {
                   })}
                 </div>
                   <div className={styles.schedulePreview}>
-                    {diasSelecionados.map(dia => <div key={dia.key}><span>{t("hours.day"+DIAS.findIndex(d=>d.key===dia.key))}</span><strong>{horariosPorDia[dia.key]?.Inicio ?? config.HorarioAbertura} – {horariosPorDia[dia.key]?.Fim ?? config.HorarioFechamento}</strong></div>)}
+                    {diasSelecionados.map(dia => <div key={dia.key}><span>{[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(d=>d.key===dia.key)]}</span><strong>{horariosPorDia[dia.key]?.Inicio ?? config.HorarioAbertura} – {horariosPorDia[dia.key]?.Fim ?? config.HorarioFechamento}</strong></div>)}
                   </div>
                   {saveAction("days")}
 
