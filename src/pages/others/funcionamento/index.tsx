@@ -3,7 +3,6 @@ import { isAxiosError } from "axios";
 import {
   FaArrowRight,
   FaCalendarAlt,
-  FaCheck,
   FaClock,
   FaCoffee,
   FaPlus,
@@ -573,7 +572,6 @@ export default function Funcionamento() {
                           backgroundColor: active ? theme.colors.primary : "transparent",
                         }}
                       >
-                        <span className={styles.dayCheck}>{active && <FaCheck aria-hidden="true" />}</span>
                         <strong>{[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)].slice(0,3)}</strong>
                         <span className={styles.dayFullName}>{[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)]}</span>
                       </button>
