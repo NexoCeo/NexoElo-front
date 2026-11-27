@@ -160,6 +160,16 @@ function getNovoIntervalo(config: FuncionamentoConfig) {
   return null;
 }
 
+type ConfigBlock = "availability" | "days" | "times" | "custom" | "breaks";
+function blockPatch(block: ConfigBlock, draft: FuncionamentoConfig): Partial<FuncionamentoConfig> {
+  switch(block) {
+    case "availability": return { HorariosPorDia: draft.HorariosPorDia };
+    case "days": return Object.fromEntries(DIAS.map(d => [d.key,draft[d.key]])) as Partial<FuncionamentoConfig>;
+    case "times": return { HorarioAbertura:draft.HorarioAbertura,HorarioFechamento:draft.HorarioFechamento };
+    case "custom": return { HorariosPorDia:draft.HorariosPorDia };
+    case "breaks": return { Intervalos:draft.Intervalos };
+  }
+}
 export default function Funcionamento() {
   const { theme } = useTheme();
   const { t } = useLanguage();
@@ -168,6 +178,9 @@ export default function Funcionamento() {
   const [config, setConfig] = useState<FuncionamentoConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingBlock,setSavingBlock] = useState<ConfigBlock|null>(null);
+  const [savedSnapshot,setSavedSnapshot] = useState<FuncionamentoConfig|null>(null);
+  const [customOwner,setCustomOwner] = useState<"availability"|"custom">("custom");
   const [availabilityMode, setAvailabilityMode] = useState<"padrao" | "personalizado">("padrao");
   const personalizedBackup = useRef<FuncionamentoConfig["HorariosPorDia"]>({});
   const lastSavedConfig = useRef("");
@@ -177,7 +190,6 @@ export default function Funcionamento() {
     () => (config ? DIAS.filter((dia) => config[dia.key]) : []),
     [config],
   );
-  const pausaTotal = config ? getPausaTotal(config) : 0;
   const expedienteTotal = config
     ? timeToMinutes(config.HorarioFechamento) - timeToMinutes(config.HorarioAbertura)
     : 0;
@@ -196,6 +208,7 @@ export default function Funcionamento() {
         const data = await obterFuncionamento(usuarioId);
         setConfig(data);
         lastSavedConfig.current = JSON.stringify(data);
+        setSavedSnapshot(data);
         personalizedBackup.current = { ...data.HorariosPorDia };
         setAvailabilityMode(Object.keys(data.HorariosPorDia ?? {}).length > 0 ? "personalizado" : "padrao");
       } catch {
@@ -204,6 +217,7 @@ export default function Funcionamento() {
         const defaults = criarFuncionamentoPadrao(usuarioId);
         setConfig(defaults);
         lastSavedConfig.current = JSON.stringify(defaults);
+        setSavedSnapshot(null);
         personalizedBackup.current = {};
         setAvailabilityMode("padrao");
       } finally {
@@ -220,6 +234,7 @@ export default function Funcionamento() {
       const data = await obterFuncionamento(usuarioId);
       setConfig(data);
       lastSavedConfig.current = JSON.stringify(data);
+        setSavedSnapshot(data);
       personalizedBackup.current = { ...data.HorariosPorDia };
       setAvailabilityMode(Object.keys(data.HorariosPorDia ?? {}).length > 0 ? "personalizado" : "padrao");
     } catch { /* preserve settings while offline */ }
@@ -234,6 +249,7 @@ export default function Funcionamento() {
 
   function chooseAvailabilityMode(mode: "padrao" | "personalizado") {
     if (!config || mode === availabilityMode) return;
+    setCustomOwner("availability");
     if (mode === "padrao") {
       personalizedBackup.current = { ...config.HorariosPorDia };
       updateConfig({ HorariosPorDia: {} });
@@ -293,6 +309,7 @@ export default function Funcionamento() {
   }
 
   function personalizarDia(dia: DiaFuncionamentoKey) {
+    setCustomOwner("custom");
     if (!config) return;
     const next = { ...config.HorariosPorDia };
     if (next[dia]) {
@@ -309,6 +326,7 @@ export default function Funcionamento() {
   }
 
   function alterarHorarioDia(dia: DiaFuncionamentoKey, campo: "Inicio" | "Fim", valor: string) {
+    setCustomOwner("custom");
     const current = config?.HorariosPorDia?.[dia];
     if (!current) return;
     updateConfig({
@@ -317,6 +335,7 @@ export default function Funcionamento() {
   }
 
   function removerPausaDia(dia: DiaFuncionamentoKey, index: number) {
+    setCustomOwner("custom");
     const current = config?.HorariosPorDia?.[dia];
     if (!current) return;
     updateConfig({
@@ -326,6 +345,7 @@ export default function Funcionamento() {
   }
 
   function adicionarPausaDia(dia: DiaFuncionamentoKey) {
+    setCustomOwner("custom");
     const current = config?.HorariosPorDia?.[dia];
     if (!current) return;
     const nova = getNovoIntervalo({
@@ -343,6 +363,7 @@ export default function Funcionamento() {
   }
 
   function alterarPausaDia(dia: DiaFuncionamentoKey, index: number, campo: "Inicio" | "Fim", valor: string) {
+    setCustomOwner("custom");
     const current = config?.HorariosPorDia?.[dia];
     if (!current) return;
     updateConfig({ HorariosPorDia: { ...config?.HorariosPorDia, [dia]: {
@@ -380,10 +401,17 @@ export default function Funcionamento() {
     });
   }
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function handleSubmit(block:ConfigBlock) {
+    if(saving || !config) return;
+    // Merge only this card into the last confirmed server state.
+    const draft = config;
+    const baseline = savedSnapshot ?? criarFuncionamentoPadrao(usuarioId);
+    const candidate = { ...baseline, ...blockPatch(block,draft) };
+    const diasSelecionados = DIAS.filter(dia=>candidate[dia.key]);
+    const pausaTotal = getPausaTotal(candidate);
+    const expedienteTotal = timeToMinutes(candidate.HorarioFechamento)-timeToMinutes(candidate.HorarioAbertura);
 
-    if (!config || !usuarioId) {
+    if (!candidate || !usuarioId) {
       const message = t("hours.userMissing");
       showNotification({ type: "error", title: t("hours.notSaved"), message });
       return;
@@ -395,25 +423,25 @@ export default function Funcionamento() {
       return;
     }
 
-    if (!config.HorarioAbertura || !config.HorarioFechamento) {
+    if (!candidate.HorarioAbertura || !candidate.HorarioFechamento) {
       const message = t("hours.timeRequired");
       showNotification({ type: "warning", title: t("hours.timeIncomplete"), message });
       return;
     }
 
-    if (timeToMinutes(config.HorarioAbertura) >= timeToMinutes(config.HorarioFechamento)) {
+    if (timeToMinutes(candidate.HorarioAbertura) >= timeToMinutes(candidate.HorarioFechamento)) {
       const message = t("hours.timeInvalidDesc");
       showNotification({ type: "warning", title: t("hours.timeInvalid"), message });
       return;
     }
 
-    if (hasIntervaloInvalido(config)) {
+    if (hasIntervaloInvalido(candidate)) {
       const message = t("hours.breakOutside");
       showNotification({ type: "warning", title: t("hours.breakInvalid"), message });
       return;
     }
 
-    if (hasIntervaloSobreposto(config)) {
+    if (hasIntervaloSobreposto(candidate)) {
       const message = t("hours.overlap");
       showNotification({ type: "warning", title: t("hours.overlapTitle"), message });
       return;
@@ -426,11 +454,11 @@ export default function Funcionamento() {
     }
 
     for (const dia of diasSelecionados) {
-      const especial = config.HorariosPorDia?.[dia.key];
+      const especial = candidate.HorariosPorDia?.[dia.key];
       if (!especial) continue;
       const abertura = timeToMinutes(especial.Inicio);
       const fechamento = timeToMinutes(especial.Fim);
-      const diario = { ...config, HorarioAbertura: especial.Inicio,
+      const diario = { ...candidate, HorarioAbertura: especial.Inicio,
         HorarioFechamento: especial.Fim, Intervalos: especial.Intervalos };
       if (!especial.Inicio || !especial.Fim || abertura >= fechamento ||
           hasIntervaloInvalido(diario) || hasIntervaloSobreposto(diario) ||
@@ -443,8 +471,21 @@ export default function Funcionamento() {
 
     try {
       setSaving(true);
-      const savedConfig = await salvarFuncionamento(usuarioId, config);
-      setConfig(savedConfig);
+      setSavingBlock(block);
+      const savedConfig = await salvarFuncionamento(usuarioId, candidate);
+      setSavedSnapshot(savedConfig);
+      setConfig(current => {
+        if(!current)return savedConfig;
+        // Preserve pending changes in other cards, including changes made during the request.
+        const next = {...savedConfig};
+        for(const other of ["days","times","breaks","custom"] as const) {
+          const previous = blockPatch(other,baseline);
+          const local = blockPatch(other,current);
+          const submitted = blockPatch(other,candidate);
+          if(JSON.stringify(local)!==JSON.stringify(previous) && JSON.stringify(local)!==JSON.stringify(submitted)) Object.assign(next,local);
+        }
+        return next;
+      });
       lastSavedConfig.current = JSON.stringify(savedConfig);
       personalizedBackup.current = { ...savedConfig.HorariosPorDia };
       showNotification({
@@ -459,18 +500,25 @@ export default function Funcionamento() {
       showNotification({ type: "error", title: t("hours.saveFailedTitle"), message });
     } finally {
       setSaving(false);
+      setSavingBlock(null);
     }
   }
 
-  const cardStyle = {
-    backgroundColor: theme.colors.background2,
-    borderColor: theme.colors.bottom,
+  const isDirty = (block:ConfigBlock) => {
+    if(!config)return false;
+    if((block==="availability"||block==="custom") && block!==customOwner)return false;
+    return JSON.stringify(blockPatch(block,config))!==JSON.stringify(blockPatch(block,savedSnapshot??criarFuncionamentoPadrao(usuarioId)));
   };
+  const saveAction = (block:ConfigBlock) => <div style={{minHeight:48,marginTop:14,display:"flex",justifyContent:"flex-end"}}>
+    <button type="button" className={styles.saveButton} onClick={()=>void handleSubmit(block)} disabled={saving||!isDirty(block)} style={{visibility:isDirty(block)||savingBlock===block?"visible":"hidden",backgroundColor:theme.colors.primary,color:theme.colors.onPrimary,minWidth:0,width:"100%"}}>
+      <FaSave aria-hidden="true"/> {savingBlock===block?t("profile.saving"):t("hours.save")}
+    </button>
+  </div>;
 
   return (
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
-      <div className={styles.content}>
-        <form id="funcionamento-form" className={styles.editor} onSubmit={handleSubmit} noValidate>
+      <div className={styles.content} style={{gridTemplateColumns:"minmax(0,1fr)"}}>
+        <form id="funcionamento-form" className={styles.editor} onSubmit={event=>event.preventDefault()} noValidate>
           {loading || !config ? (
             <LoadingState label={t("hours.loading")} variant="hours" embedded />
           ) : (
@@ -494,6 +542,8 @@ export default function Funcionamento() {
                     {temHorariosPersonalizados && <FaCheckCircle aria-label="Selecionado" />}
                   </button>
                 </div>
+                  {saveAction("availability")}
+
                 </div>
               </details>
               <details className={styles.configCard}>
@@ -530,6 +580,8 @@ export default function Funcionamento() {
                     );
                   })}
                 </div>
+                  {saveAction("days")}
+
                 </div>
               </details>
 
@@ -564,6 +616,8 @@ export default function Funcionamento() {
                     />
                   </label>
                 </div>
+                  {saveAction("times")}
+
                 </div>
               </details>
 
@@ -619,6 +673,8 @@ export default function Funcionamento() {
                   })}
                   {!diasSelecionados.length && <p>{t("hours.selectDays")}</p>}
                 </div>
+                  {saveAction("custom")}
+
                 </div>
               </details>
 
@@ -686,70 +742,15 @@ export default function Funcionamento() {
                     ))}
                   </div>
                 )}
+                  {saveAction("breaks")}
+
                 </div>
               </details>
             </>
           )}
         </form>
 
-        <aside className={styles.summary} style={cardStyle}>
-          <div className={styles.summaryTitle}>
-            <FaCalendarAlt aria-hidden="true" style={{ color: theme.colors.primary }} />
-            <h2 style={{ color: theme.colors.text }}>{t("hours.summary")}</h2>
-          </div>
-
-          <div className={styles.summaryBlock}>
-            <span style={{ color: theme.colors.inactive }}>Tipo de horário</span>
-            <strong style={{ color: theme.colors.text }}>{temHorariosPersonalizados ? "Personalizado" : "Padrão"}</strong>
-          </div>
-          <div className={styles.summaryBlock}>
-            <span style={{ color: theme.colors.inactive }}>{t("hours.summaryDays")}</span>
-            <strong style={{ color: theme.colors.text }}>
-              {diasSelecionados.length > 0
-                ? diasSelecionados.map(dia => [t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item => item.key===dia.key)].slice(0,3)).join(", ")
-                : t("hours.emptyDays")}
-            </strong>
-          </div>
-
-          <div className={styles.summaryBlock}>
-            <span style={{ color: theme.colors.inactive }}>{t("hours.summaryHours")}</span>
-            <div className={styles.summaryIntervals}>
-              {diasSelecionados.map(dia => {
-                const horario = horariosPorDia[dia.key];
-                const inicio = horario?.Inicio ?? config?.HorarioAbertura ?? "--:--";
-                const fim = horario?.Fim ?? config?.HorarioFechamento ?? "--:--";
-                return <small key={dia.key} style={{ color: theme.colors.text }}>
-                  {[t("hours.day0"),t("hours.day1"),t("hours.day2"),t("hours.day3"),t("hours.day4"),t("hours.day5"),t("hours.day6")][DIAS.findIndex(item=>item.key===dia.key)].slice(0,3)}<span style={{ color: theme.colors.inactive }}>{inicio} – {fim}</span>
-                </small>;
-              })}
-              {!diasSelecionados.length && <small>{t("hours.selectDays")}</small>}
-            </div>
-          </div>
-
-          <div className={styles.summaryBlock}>
-            <span style={{ color: theme.colors.inactive }}>{t("hours.summaryBreaks")}</span>
-            {config?.Intervalos.length ? (
-              <div className={styles.summaryIntervals}>
-                {config.Intervalos.map((intervalo, index) => (
-                  <small key={index} style={{ color: theme.colors.text }}>
-                    {t("hours.break")} {index + 1}<span style={{ color: theme.colors.inactive }}>{intervalo.Inicio} - {intervalo.Fim}</span>
-                  </small>
-                ))}
-              </div>
-            ) : (
-              <small style={{ color: theme.colors.inactive }}>{t("hours.continuous")}</small>
-            )}
-          </div>
-          <div className={styles.readyNotice}>
-            <FaCheckCircle aria-hidden="true" />
-            <div><strong>Revise sua configuração</strong><span>Confira os dias, horários e intervalos antes de salvar.</span></div>
-          </div>
-          <button type="submit" form="funcionamento-form" className={styles.saveButton}
-            disabled={saving || loading || !config}
-            style={{ backgroundColor: theme.colors.primary, color: theme.colors.onPrimary }}>
-            <FaSave aria-hidden="true" /> {saving ? t("profile.saving") : t("hours.save")}
-          </button>
-        </aside>
+        
       </div>
     </main>
   );
