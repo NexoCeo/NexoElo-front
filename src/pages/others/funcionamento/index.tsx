@@ -600,7 +600,7 @@ export default function Funcionamento() {
                     <button type="button" onClick={() => setDiasSelecionados(new Set(DIAS.map((dia) => dia.key)))}>{t("hours.allDays")}</button>
                     <button type="button" onClick={() => setDiasSelecionados(new Set())}>{t("hours.none")}</button>
                   </div>
-                    <button type="button" className={`${styles.customizeButton} ${styles.daysCustomize}`} disabled={saving} onClick={openCustomModalFromDays}>Personalizar</button>
+                    {temHorariosPersonalizados && <button type="button" className={`${styles.customizeButton} ${styles.daysCustomize}`} style={{minHeight:28,padding:"4px 12px",background:"#2563eb",color:"#fff",border:0}} disabled={saving} onClick={openCustomModalFromDays}>Personalizar</button>}
                 </div>
 
                 <div className={styles.daysGrid}>
