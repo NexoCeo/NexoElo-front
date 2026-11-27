@@ -148,7 +148,7 @@ export default function Profissionais() {
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
   const [editingProfessional, setEditingProfessional] = useState<Profissional | null>(null);
   const [upgradePlan, setUpgradePlan] = useState<{ plan: "BASICO" | "INTERMEDIARIO"; limit: number } | null>(null);
-  const [error, setError] = useState("");
+  const [, setError] = useState("");
   const [formError, setFormError] = useState("");
   const [whatsAppShare, setWhatsAppShare] = useState<WhatsAppShare | null>(null);
 
@@ -167,7 +167,7 @@ export default function Profissionais() {
   const [servicoIdsSelecionados, setServicoIdsSelecionados] = useState<number[]>([]);
   const [loadingServicos, setLoadingServicos] = useState(false);
   const [savingServicos, setSavingServicos] = useState(false);
-  const [servicosError, setServicosError] = useState("");
+  const [, setServicosError] = useState("");
   const [solicitacoesOpen, setSolicitacoesOpen] = useState(false);
   const [vinculosTab, setVinculosTab] = useState<"solicitacoes" | "historico">("solicitacoes");
   const [solicitacoes, setSolicitacoes] = useState<SolicitacaoVinculo[]>([]);
@@ -176,7 +176,7 @@ export default function Profissionais() {
   const [loadingHistorico, setLoadingHistorico] = useState(false);
   const [historicoError, setHistoricoError] = useState("");
   const [respondendoId, setRespondendoId] = useState(0);
-  const [solicitacoesError, setSolicitacoesError] = useState("");
+  const [, setSolicitacoesError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"TODOS" | "APROVADO" | "PENDENTE" | "RECUSADO">("TODOS");
 
@@ -564,6 +564,7 @@ export default function Profissionais() {
         setHistoricoSolicitacoes(data);
       } catch {
         setHistoricoError(t("pros.historyError"));
+        showNotification({type:"error",title:t("pros.historyTab"),message:t("pros.historyError")});
       } finally {
         setLoadingHistorico(false);
       }
@@ -769,7 +770,6 @@ export default function Profissionais() {
 
   return (
     <main className={styles.container} style={{ backgroundColor: theme.colors.background }}>
-      {error && <p className={styles.error}>{error}</p>}
 
       <section className={styles.floatingActions}>
         <div className={styles.headerActions}>
@@ -1187,7 +1187,7 @@ export default function Profissionais() {
                   loadingHistorico ? (
                     <div role="status" aria-label={t("pros.historyLoading")} aria-busy="true" style={{display:"grid",gap:10,minWidth:0}}>{Array.from({length:3},(_,index)=><div key={index} aria-hidden="true" style={{height:48,borderRadius:9,background:"var(--theme-surface-muted, var(--theme-background2))",border:"1px solid var(--theme-bottom)"}} />)}</div>
                   ) : historicoError ? (
-                    <p className={styles.servicesFeedback} role="alert">{historicoError}</p>
+                    <div className={styles.servicesFeedback} aria-hidden="true" />
                   ) : historicoSolicitacoes.length === 0 ? (
                     <p className={styles.servicesFeedback}>{t("pros.historyEmpty")}</p>
                   ) : (
@@ -1215,9 +1215,7 @@ export default function Profissionais() {
                     </div>
                   )
                 )}
-                {vinculosTab === "solicitacoes" && solicitacoesError && (
-                  <p className={styles.error} role="alert">{solicitacoesError}</p>
-                )}
+                
               </div>
             </div>
           </section>
@@ -1290,8 +1288,6 @@ export default function Profissionais() {
                   })}
                 </div>
               )}
-
-              {servicosError && <p className={styles.error}>{servicosError}</p>}
 
               <footer className={styles.modalActions}>
                 <button
