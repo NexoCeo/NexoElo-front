@@ -16,6 +16,8 @@ import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
 import { usePageRevalidation } from "@/hooks/usePageRevalidation";
 
+type SegmentKey = "recurring" | "fresh" | "inactive";
+type SegmentClient = { clienteId:number; nome:string; atendimentosPeriodo:number; atendimentosAnteriores:number; ultimoAtendimento:string };
 export default function AnaliseDados() {
   const { theme } = useTheme();
   const { t, lang } = useLanguage();
@@ -30,8 +32,9 @@ export default function AnaliseDados() {
   const interactiveChartsRef = useRef<HTMLDivElement>(null);
   const [insightDetail, setInsightDetail] = useState(false);
   const [teamDetail, setTeamDetail] = useState<{ id:number; completedOnly:boolean } | null>(null);
+  const [segmentDetail, setSegmentDetail] = useState<SegmentKey | null>(null);
   const [recurrenceMonths, setRecurrenceMonths] = useState(6);
-  const [recurrence, setRecurrence] = useState<{ recurring:number; fresh:number; inactive:number; total:number; recurringPercent:number; freshPercent:number; inactivePercent:number } | null>(null);
+  const [recurrence, setRecurrence] = useState<{ recurring:number; fresh:number; inactive:number; total:number; recurringPercent:number; freshPercent:number; inactivePercent:number; clients?: Record<SegmentKey,SegmentClient[]> } | null>(null);
   const [recurrenceError, setRecurrenceError] = useState(false);
   const [historico, setHistorico] = useState<Agendamento[]>([]);
   const [carregando, setCarregando] = useState(true);
@@ -304,16 +307,20 @@ export default function AnaliseDados() {
         const keys = ["recurring","fresh","inactive","total","recurringPercent","freshPercent","inactivePercent"] as const;
         const result = Object.fromEntries(keys.map(key => [key, data[key] ?? data[key[0].toUpperCase()+key.slice(1)]])) as NonNullable<typeof recurrence>;
         if (!keys.every(key => typeof result[key] === "number" && Number.isFinite(result[key]))) { setRecurrenceError(true); return; }
+        const groups = data.clients ?? data.Clients;
+        if (groups && ["recurring","fresh","inactive"].every(key => Array.isArray(groups[key]) && groups[key].length === result[key as SegmentKey])) result.clients = groups;
         setRecurrence(result);
       }).catch(() => { if (active) setRecurrenceError(true); });
     return () => { active = false; };
   }, [activeTab, permitido, usuario?.Id, recurrenceMonths]);
   const customerSegments = recurrence ?? { recurring:0, fresh:0, inactive:0, total:0, recurringPercent:0, freshPercent:0, inactivePercent:0 };
+  useEffect(() => { setSegmentDetail(null); }, [activeTab, recurrenceMonths, usuario?.Id]);
   const segmentRows = [
-    { label: pt ? "Recorrentes" : "Returning", count: customerSegments.recurring, color: "#22c55e" },
-    { label: pt ? "Novos" : "New", count: customerSegments.fresh, color: "#3b82f6" },
-    { label: pt ? "Não recorrentes" : "Non-returning", count: customerSegments.inactive, color: "#f59e0b" },
+    { key:"recurring" as const, label: pt ? "Recorrentes" : "Returning", count: customerSegments.recurring, color: "#22c55e" },
+    { key:"fresh" as const, label: pt ? "Novos" : "New", count: customerSegments.fresh, color: "#3b82f6" },
+    { key:"inactive" as const, label: pt ? "Não recorrentes" : "Non-returning", count: customerSegments.inactive, color: "#f59e0b" },
   ];
+  const selectedSegment = segmentRows.find(row => row.key === segmentDetail);
   const segmentTotal = customerSegments.total;
   const recurringEnd = segmentTotal ? 100 * customerSegments.recurring / segmentTotal : 0;
   const freshEnd = segmentTotal ? 100 * (customerSegments.recurring + customerSegments.fresh) / segmentTotal : 0;
@@ -451,14 +458,22 @@ export default function AnaliseDados() {
         <h2><FaUsers aria-hidden="true"/>{pt ? "Perfil dos clientes" : "Customer profile"}</h2>
         <div aria-busy={!recurrence && !recurrenceError} aria-live="polite">
         <div className={styles.customerProfileChart} style={{display:"grid",gridTemplateColumns:"minmax(0, 1fr) minmax(0, 1.2fr)",alignItems:"center",gap:"clamp(8px, 3vw, 28px)",maxWidth:560,margin:"12px auto 0"}}>
-          <div className={styles.customerDonut} role="img" aria-label={recurrence ? segmentRows.map(row => row.label + ": " + row.count).join(", ") : (pt ? "Dados ainda indisponíveis" : "Data not available yet")} style={{position:"relative",width:"100%",maxWidth:190,aspectRatio:"1",justifySelf:"center",borderRadius:"50%",background:!recurrence ? "var(--analysis-border)" : segmentTotal ? `conic-gradient(${segmentRows[0].color} 0% ${recurringEnd}%, ${segmentRows[1].color} ${recurringEnd}% ${freshEnd}%, ${segmentRows[2].color} ${freshEnd}% 100%)` : "var(--analysis-border)"}}>
-            <div style={{position:"absolute",inset:"19%",borderRadius:"50%",background:"var(--analysis-panel)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center"}}>
+          <div className={styles.customerDonut} role="group" aria-label={recurrence ? segmentRows.map(row => row.label + ": " + row.count).join(", ") : (pt ? "Dados ainda indisponíveis" : "Data not available yet")} style={{position:"relative",width:"100%",maxWidth:190,aspectRatio:"1",justifySelf:"center",borderRadius:"50%",background:!recurrence ? "var(--analysis-border)" : segmentTotal ? `conic-gradient(${segmentRows[0].color} 0% ${recurringEnd}%, ${segmentRows[1].color} ${recurringEnd}% ${freshEnd}%, ${segmentRows[2].color} ${freshEnd}% 100%)` : "var(--analysis-border)"}}>
+            {recurrence?.clients && segmentTotal > 0 && <svg viewBox="0 0 100 100" style={{position:"absolute",inset:0,width:"100%",height:"100%",overflow:"visible"}} aria-label={pt?"Categorias de clientes":"Customer segments"}>
+              {segmentRows.map((row,index) => {
+                const fraction = row.count / segmentTotal;
+                const offset = [0,recurringEnd,freshEnd][index];
+                if (!fraction) return null;
+                return <circle key={row.key} cx="50" cy="50" r="40.5" fill="none" stroke={row.color} strokeWidth="19" pathLength="100" strokeDasharray={fraction === 1 ? "100 0" : `${fraction*100} ${100-fraction*100}`} strokeDashoffset={-offset} transform="rotate(-90 50 50)" role="button" tabIndex={0} aria-label={row.label + ": " + row.count} style={{cursor:"pointer",pointerEvents:"stroke"}} onClick={()=>setSegmentDetail(row.key)} onKeyDown={event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();setSegmentDetail(row.key);}}}/>;
+              })}
+            </svg>}
+            <div style={{position:"absolute",pointerEvents:"none",inset:"19%",borderRadius:"50%",background:"var(--analysis-panel)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center"}}>
               <strong style={{fontSize:"clamp(20px, 5vw, 32px)",lineHeight:1.1,fontVariantNumeric:"tabular-nums"}}>{recurrence ? segmentTotal : "—"}</strong>
               <span style={{fontSize:11,color:"var(--analysis-muted)"}}>{pt ? "Clientes" : "Customers"}</span>
             </div>
           </div>
           <div style={{display:"grid",gap:12,minWidth:0}}>
-            {segmentRows.map(row => <div key={row.label} style={{display:"grid",gridTemplateColumns:"10px minmax(0,1fr) auto",alignItems:"center",gap:7,fontSize:"clamp(10px, 2.9vw, 13px)"}}>
+            {segmentRows.map(row => <div key={row.label} role={recurrence?.clients?"button":undefined} tabIndex={recurrence?.clients?0:undefined} onClick={()=>{if(recurrence?.clients)setSegmentDetail(row.key);}} onKeyDown={event=>{if(recurrence?.clients&&(event.key==="Enter"||event.key===" ")){event.preventDefault();setSegmentDetail(row.key);}}} style={{display:"grid",gridTemplateColumns:"10px minmax(0,1fr) auto",alignItems:"center",gap:7,fontSize:"clamp(10px, 2.9vw, 13px)",cursor:recurrence?.clients?"pointer":"default"}}>
               <span aria-hidden="true" style={{width:10,height:10,borderRadius:"50%",background:row.color}}/>
               <span style={{overflowWrap:"anywhere"}}>{row.label}</span>
               <strong style={{textAlign:"right",fontVariantNumeric:"tabular-nums"}}>{recurrence ? row.count : "—"}<small style={{display:"block",color:"var(--analysis-muted)",fontWeight:400}}>{recurrence ? ([customerSegments.recurringPercent,customerSegments.freshPercent,customerSegments.inactivePercent][segmentRows.indexOf(row)]).toLocaleString(pt ? "pt-BR" : "en-US",{maximumFractionDigits:1})+"%" : "—"}</small></strong>
@@ -468,6 +483,18 @@ export default function AnaliseDados() {
         </div>
         {recurrenceError && <span role="alert" style={{display:"block",fontSize:11,color:"var(--analysis-muted)",marginTop:8}}>{pt ? "Não foi possível consultar a recorrência." : "Could not load recurrence."}</span>}
       </section>
+      {selectedSegment && recurrence?.clients && createPortal(<Modal open={true} title={selectedSegment.label} onClose={()=>setSegmentDetail(null)}>
+        <p style={{color:"var(--theme-text-muted)"}}>{selectedSegment.count} {pt?"clientes":"customers"} · {pt?"Últimos":"Last"} {recurrenceMonths} {pt?"meses":"months"}</p>
+        <div style={{display:"grid",gap:10}}>
+          {recurrence.clients[selectedSegment.key].map(client=><article key={client.clienteId} style={{border:"1px solid var(--theme-bottom)",borderRadius:10,padding:12,display:"grid",gap:5,overflowWrap:"anywhere"}}>
+            <strong>{formatPersonName(client.nome) || "#"+client.clienteId}</strong>
+            <span>{pt?"Atendimentos concluídos no período":"Completed appointments in period"}: {client.atendimentosPeriodo}</span>
+            <span>{pt?"Atendimentos anteriores":"Previous appointments"}: {client.atendimentosAnteriores}</span>
+            <span>{pt?"Último atendimento":"Last appointment"}: {formatarHorario(client.ultimoAtendimento)}</span>
+          </article>)}
+          {!recurrence.clients[selectedSegment.key].length && <p>{pt?"Nenhum cliente nesta categoria.":"No customers in this category."}</p>}
+        </div>
+      </Modal>,document.body)}
       <div className={`${styles.dashboardCharts} ${styles.customerRankings}`}>{ranking(pt ? "Clientes por atendimentos" : "Customers by appointments", [...customers.values()].sort((a,b) => b.count-a.count))}{ranking(pt ? "Clientes por valor concluído" : "Customers by completed value", [...customers.values()].sort((a,b) => b.value-a.value).map(row => ({name:row.name,count:row.value,display:dashboardMoney(row.value)})))}</div>
       </div>
     </>}
