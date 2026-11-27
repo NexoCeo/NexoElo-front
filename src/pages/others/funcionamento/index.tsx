@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import Modal from "@/components/modal";
+import { createPortal } from "react-dom";
 import { isAxiosError } from "axios";
 import {
   FaArrowRight,
@@ -21,7 +23,7 @@ import {
   obterFuncionamento,
   salvarFuncionamento,
 } from "@/services/funcionamento-service";
-import type { DiaFuncionamentoKey, FuncionamentoConfig } from "@/types/funcionamento";
+import type { DiaFuncionamentoKey, FuncionamentoConfig, FuncionamentoIntervalo } from "@/types/funcionamento";
 import styles from "./style.module.css";
 import { useLanguage } from "@/context/LanguageContext";
 import LoadingState from "@/components/loading-state";
@@ -169,6 +171,16 @@ function blockPatch(block: ConfigBlock, draft: FuncionamentoConfig): Partial<Fun
     case "breaks": return { Intervalos:draft.Intervalos };
   }
 }
+function BreakCard({interval,index,title,startLabel,endLabel,min,max,onChange,onRemove}:{interval:FuncionamentoIntervalo;index:number;title:string;startLabel:string;endLabel:string;min:string;max:string;onChange:(field:"Inicio"|"Fim",value:string)=>void;onRemove:()=>void}) {
+  return <article className={styles.breakCard}>
+    <div className={styles.breakHeading}><FaCoffee aria-hidden="true"/><strong>{title} {index+1}</strong><button type="button" className={styles.removeButton} onClick={onRemove} aria-label={`Remover pausa ${index+1}`}><FaTrash aria-hidden="true"/></button></div>
+    <div className={styles.breakFields}>
+      <label>{startLabel}<input type="time" value={interval.Inicio} min={min} max={max} step="900" onChange={e=>onChange("Inicio",e.target.value)}/></label>
+      <label>{endLabel}<input type="time" value={interval.Fim} min={min} max={max} step="900" onChange={e=>onChange("Fim",e.target.value)}/></label>
+    </div>
+    <span className={styles.breakDuration}>{formatDuration(timeToMinutes(interval.Fim)-timeToMinutes(interval.Inicio))}</span>
+  </article>;
+}
 export default function Funcionamento() {
   const { theme } = useTheme();
   const { t } = useLanguage();
@@ -177,6 +189,7 @@ export default function Funcionamento() {
   const [config, setConfig] = useState<FuncionamentoConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [breakDraft,setBreakDraft] = useState<FuncionamentoIntervalo|null>(null);
   const [savingBlock,setSavingBlock] = useState<ConfigBlock|null>(null);
   const [savedSnapshot,setSavedSnapshot] = useState<FuncionamentoConfig|null>(null);
   const [customOwner,setCustomOwner] = useState<"availability"|"custom">("custom");
@@ -381,7 +394,28 @@ export default function Funcionamento() {
       return;
     }
 
-    updateConfig({ Intervalos: [...config.Intervalos, novoIntervalo] });
+    setBreakDraft(novoIntervalo);
+  }
+
+  function confirmBreak() {
+    if (!config || !breakDraft || saving) return;
+    const candidate = {...config, Intervalos:[...config.Intervalos,breakDraft]};
+    const start = timeToMinutes(breakDraft.Inicio);
+    const end = timeToMinutes(breakDraft.Fim);
+    if (!breakDraft.Inicio || !breakDraft.Fim || !Number.isFinite(start) || !Number.isFinite(end) || start >= end || hasIntervaloInvalido(candidate)) {
+      showNotification({type:"warning",title:t("hours.breakInvalid"),message:t("hours.breakOutside")});
+      return;
+    }
+    if (hasIntervaloSobreposto(candidate)) {
+      showNotification({type:"warning",title:t("hours.overlapTitle"),message:t("hours.overlap")});
+      return;
+    }
+    if (getPausaTotal(candidate) >= timeToMinutes(candidate.HorarioFechamento)-timeToMinutes(candidate.HorarioAbertura)) {
+      showNotification({type:"warning",title:t("hours.noAvailabilityTitle"),message:t("hours.noAvailability")});
+      return;
+    }
+    updateConfig({Intervalos:candidate.Intervalos});
+    setBreakDraft(null);
   }
 
   function updateIntervalo(index: number, field: "Inicio" | "Fim", value: string) {
@@ -695,48 +729,7 @@ export default function Funcionamento() {
                 ) : (
                   <div className={styles.intervalList}>
                     {config.Intervalos.map((intervalo, index) => (
-                      <div key={index} className={styles.intervalRow} style={{ borderColor: theme.colors.bottom }}>
-                        <div className={styles.intervalName}>
-                          <FaCoffee aria-hidden="true" />
-                          <span style={{ color: theme.colors.text }}>{t("hours.break")} {index + 1}</span>
-                        </div>
-                        <label style={{ color: theme.colors.inactive }}>
-                          {t("hours.start")}
-                          <input
-                            aria-label={`Inicio da pausa ${index + 1}`}
-                            type="time"
-                            value={intervalo.Inicio}
-                            min={config.HorarioAbertura}
-                            max={config.HorarioFechamento}
-                            step="900"
-                            onChange={(event) => updateIntervalo(index, "Inicio", event.target.value)}
-                          />
-                        </label>
-                        <label style={{ color: theme.colors.inactive }}>
-                          {t("hours.finish")}
-                          <input
-                            aria-label={`Fim da pausa ${index + 1}`}
-                            type="time"
-                            value={intervalo.Fim}
-                            min={config.HorarioAbertura}
-                            max={config.HorarioFechamento}
-                            step="900"
-                            onChange={(event) => updateIntervalo(index, "Fim", event.target.value)}
-                          />
-                        </label>
-                        <span className={styles.intervalDuration} style={{ color: theme.colors.inactive }}>
-                          {formatDuration(timeToMinutes(intervalo.Fim) - timeToMinutes(intervalo.Inicio))}
-                        </span>
-                        <button
-                          type="button"
-                          className={styles.removeButton}
-                          onClick={() => removeIntervalo(index)}
-                          aria-label={`Remover pausa ${index + 1}`}
-                          title="Remover pausa"
-                        >
-                          <FaTrash aria-hidden="true" />
-                        </button>
-                      </div>
+                      <BreakCard key={index} interval={intervalo} index={index} title={t("hours.break")} startLabel={t("hours.start")} endLabel={t("hours.finish")} min={config.HorarioAbertura} max={config.HorarioFechamento} onChange={(field,value)=>updateIntervalo(index,field,value)} onRemove={()=>removeIntervalo(index)}/>
                     ))}
                   </div>
                 )}
@@ -750,6 +743,12 @@ export default function Funcionamento() {
 
         
       </div>
+      {breakDraft && config && createPortal(<Modal open title={t("hours.breakAdd")} onClose={()=>setBreakDraft(null)} actions={<><button type="button" className={styles.addButton} onClick={()=>setBreakDraft(null)}>{t("common.cancel")}</button><button type="button" className={styles.saveButton} style={{backgroundColor:theme.colors.primary,color:theme.colors.onPrimary,minWidth:0}} onClick={confirmBreak}><FaPlus aria-hidden="true"/>{t("hours.breakAdd")}</button></>}>
+        <div className={styles.breakFields}>
+          <label>{t("hours.start")}<input type="time" value={breakDraft.Inicio} min={config.HorarioAbertura} max={config.HorarioFechamento} step="900" onChange={e=>setBreakDraft(previous=>previous?{...previous,Inicio:e.target.value}:null)}/></label>
+          <label>{t("hours.finish")}<input type="time" value={breakDraft.Fim} min={config.HorarioAbertura} max={config.HorarioFechamento} step="900" onChange={e=>setBreakDraft(previous=>previous?{...previous,Fim:e.target.value}:null)}/></label>
+        </div>
+      </Modal>,document.body)}
     </main>
   );
 }
