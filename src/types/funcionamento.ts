@@ -25,6 +25,7 @@ export type FuncionamentoIntervalo = {
 };
 
 export type FuncionamentoConfig = {
+  ModoFuncionamento?: "padrao" | "personalizado";
   Id?: number;
   UsuarioFk: number;
   Domingo: boolean;
@@ -43,6 +44,7 @@ export type FuncionamentoConfig = {
 };
 
 export type FuncionamentoPayload = {
+  ModoFuncionamento?: "padrao" | "personalizado";
   TiposPausas?: Array<{DiaFuncionamento:DiaFuncionamentoApi;HoraInicio:string;HoraFim:string;Tipo:TipoPausa}>;
   UsuarioFk: number;
   DiasFuncionamento: DiaFuncionamentoApi[];
