@@ -1,3 +1,4 @@
+import { useNotification } from "@/context/NotificationContext";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "@/services/api";
@@ -13,6 +14,7 @@ type Disponibilidade = {
 
 export default function Agendar() {
   const { t, lang } = useLanguage();
+  const { showNotification } = useNotification();
   const { username } = useParams();
 
   const [horarios, setHorarios] = useState<Date[]>([]);
@@ -96,7 +98,7 @@ export default function Agendar() {
       !nomeCliente.trim() ||
       !telefone.trim()
     ) {
-      window.alert(t("booking.complete"));
+      showNotification({type:"warning",title:lang === "pt" ? "Dados incompletos" : "Incomplete details",message:t("booking.complete")});
       return;
     }
 
